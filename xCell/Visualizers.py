@@ -10,6 +10,41 @@ import mpl_toolkits.mplot3d as p3d
 import matplotlib as mpl
 import numpy as np
 
+import pandas
+
+def importRunset(fname):
+    df=pandas.read_csv(fname)
+    cats=df.keys()
+    
+    return df,cats
+
+def importAndPlot(fname,onlyType=None,xCat='Number of elements'):
+    df, cats = importRunset(fname)
+    if onlyType is not None:
+        df=df[df['Element type']==onlyType]
+    
+    
+    xvals=df[xCat].to_numpy()
+    
+    def getTimes(df,cats):
+        cols=cats[4:-1]
+        return df[cols].to_numpy().transpose()
+    
+    stepTimes=getTimes(df,cats)
+    stepNames=cats[4:-1]
+    
+    ax=plt.figure().add_subplot()
+    
+    stackedTimePlot(ax, xvals, stepTimes, stepNames)
+    ax.set_xlabel(xCat)
+    ax.set_ylabel("Execution time [s]")
+    ax.figure.tight_layout()
+
+def stackedTimePlot(axis,xvals,stepTimes,stepNames):
+    axis.stackplot(xvals,stepTimes,baseline='zero',labels=stepNames)
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+    # axis.figure.tight_layout()
+    axis.xaxis.set_major_formatter(mpl.ticker.EngFormatter())
 
 def showEdges(axis,coords, edgeIndices, edgeVals=None,colorbar=True):
     edgePts=[[coords[a,:],coords[b,:]] for a,b in edgeIndices]
@@ -86,6 +121,26 @@ def equalizeScale(ax):
     for xb, yb, zb in zip(Xb, Yb, Zb):
        ax.plot([xb], [yb], [zb], color=[1,1,1,0])
 
+def showRawSlice(valList,ndiv):
+    nX=ndiv+1
+    nslice=nX//2
+    
+    
+    vMat=valList.reshape((nX,nX,nX))
+    
+    vSelection=vMat[:,:,nslice].squeeze()
+    
+    (cMap, cNorm) = getCmap(vSelection.ravel())
+    
+    
+    plt.imshow(vSelection, cmap=cMap, norm=cNorm)
+    plt.colorbar()
+    
+
+
 # def showNodeValues(axis,coords, nodeVals):
+    
+# fname='Results/cube/table0-5.csv'
+# importAndPlot(fname,'Admittance')
     
     

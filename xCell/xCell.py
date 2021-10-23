@@ -354,17 +354,21 @@ class Simulation:
             else: 
                 if numfixed==1:
                     # one node fixed; adjust RHS for other node
+                    if np.any(edge==62):
+                        print('hi')
+                    
                     nVGlobal=edge[isFixed]
                     nFreeGlobal=edge[~isFixed]
                     
                     nthV=nodeSubset[nVGlobal]
                     nthDoF=nodeSubset[nFreeGlobal]
                     
+                    
                     # nthV=global2subset(nVGlobal, self.vSourceNodes)
                     # nthDoF=global2subset(nFreeGlobal, dofNodes)
                     
                     # b[nthDoF]-=self.vSourceVals[nthV.ravel()[0]]*g
-                    b[nthDoF]-=self.vSourceVals[nthV[0]]*g
+                    b[nthDoF]+=self.vSourceVals[nthV[0]]*g
                     
                 else:
                     # both nodes are DoF
@@ -405,40 +409,45 @@ class Simulation:
         return voltages
     
     def getNodeTypes(self):
+        
         nNodes=self.mesh.nodeCoords.shape[0]        
         nFixedV=len(self.vSourceNodes)
         nFixedI=len(self.iSourceNodes)
+        
+        nDoF=nNodes-nFixedV+nFixedI
         
         dof2Global=[]
         vFix2Global=[]
         iFix2Global=[]
         
-        nodeType=np.empty(nNodes,dtype=np.int64)
+        nodeType=np.zeros(nNodes,dtype=np.int64)
         global2Subset=np.empty(nNodes,dtype=np.int64)
 
+        nodeType[self.vSourceNodes]=1
+        nodeType[self.iSourceNodes]=2
+
+        for sub,n in enumerate(self.vSourceNodes):
+            global2Subset[n]=sub
+            
+        # for sub,n in enumerate(self.iSourceNodes):
+        #     global2Subset[n]=sub
+            
+        
+        
         
         for n in nb.prange(nNodes):
-            if np.isin(n,self.vSourceNodes):
-                global2Subset[n]=len(vFix2Global)
-                vFix2Global.append(n)
-                nodeType[n]=1
-                
-            elif np.isin(n,self.iSourceNodes):
-                    global2Subset[n]=len(iFix2Global)
-                    iFix2Global.append(n)
-                    nodeType[n]=2
-                
-            else:
+            typ=nodeType[n]
+            if typ==0:
                 global2Subset[n]=len(dof2Global)
                 dof2Global.append(n)
-                nodeType[n]=0
-                
-        nFree=len(dof2Global)
-        dof2Global.extend(iFix2Global)
-        for n in self.iSourceNodes:
-            global2Subset[n]+=nFree
         
-        return np.array(nodeType), np.array(global2Subset), np.array(vFix2Global), np.array(iFix2Global), np.array(dof2Global)
+        #add current sources to list of DoFs
+        nFree=len(dof2Global)
+        dof2Global.extend(self.iSourceNodes)
+        for nthI,glob in enumerate(self.iSourceNodes):
+            global2Subset[glob]=nFree+nthI
+        
+        return nodeType, global2Subset, np.array(vFix2Global), np.array(iFix2Global), np.array(dof2Global)
         
     
 def getMappingArrays(generalArray,subsetArray):
