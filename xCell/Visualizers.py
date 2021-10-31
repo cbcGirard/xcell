@@ -5,6 +5,7 @@ Created on Fri Oct 15 17:15:04 2021
 Visualization routines for meshes
 @author: benoit
 """
+
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d as p3d
 import matplotlib as mpl
@@ -45,6 +46,12 @@ def stackedTimePlot(axis,xvals,stepTimes,stepNames):
     plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
     # axis.figure.tight_layout()
     axis.xaxis.set_major_formatter(mpl.ticker.EngFormatter())
+
+
+
+def outsideLegend(**kwargs):
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.,**kwargs)
+    
 
 def showEdges(axis,coords, edgeIndices, edgeVals=None,colorbar=True):
     edgePts=[[coords[a,:],coords[b,:]] for a,b in edgeIndices]
@@ -136,7 +143,18 @@ def showRawSlice(valList,ndiv):
     plt.imshow(vSelection, cmap=cMap, norm=cNorm)
     plt.colorbar()
     
-
+def showCurrentVecs(axis, pts,vecs):
+    X,Y,Z=np.hsplit(pts,3)
+    dx,dy,dz=np.hsplit(vecs,3)
+    
+    iMag=np.linalg.norm(vecs,axis=1)
+    
+    cMap,cNorm=getCmap(iMag)
+    
+    colors=cMap(iMag)
+    
+    axis.quiver3D(X,Y,Z,dx,dy,dz, colors=colors)
+    
 
 # def showNodeValues(axis,coords, nodeVals):
     

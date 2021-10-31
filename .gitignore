@@ -6,7 +6,7 @@
 getdpFiles/
 xCell/__pycache__
 xCell/Results
-
+xCell/examples
 
 # Node artifact files
 node_modules/

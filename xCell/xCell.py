@@ -14,6 +14,8 @@ import scipy
 from scipy.sparse.linalg import spsolve
 from Visualizers import *
 import time
+from os.path import exists
+import resource 
 
 
 nb.config.DISABLE_JIT=0
@@ -27,7 +29,73 @@ nb.config.DEBUG_TYPEINFER=0
     
 #     return np.array([(val>>ii)&1 for ii in range(3)])
 
-@nb.njit
+def uniformResample(origin,span,nPts):
+    vx,vy,vz=[np.linspace(o,o+s,nPts) for o,s in zip(origin,span)]
+    
+    XX,YY,ZZ=np.meshgrid(vx,vy,vz)
+
+
+    coords=np.vstack((XX.ravel(),YY.ravel(), ZZ.ravel())).transpose()
+
+    
+    return coords
+
+def getElementInterpolant(element,nodeVals):    
+    coords=element.getCoordsRecursively()
+    coefs=np.array([coord2InterpVals(xyz) for xyz in coords])
+
+        
+    interpCoefs=np.linalg.solve(coefs, nodeVals)
+    return interpCoefs
+    
+def evalulateInterpolant(interp,location):
+    
+    # coeffs of a, bx, cy, dz, exy, fxz, gyz, hxyz
+    varList=coord2InterpVals(location)
+    
+    interpVal=np.matmul(interp,varList)
+    
+    return interpVal
+    
+def coord2InterpVals(coord):
+    x,y,z=coord
+    return np.array([1,
+                     x,
+                     y,
+                     z,
+                     x*y,
+                     x*z,
+                     y*z,
+                     x*y*z]).transpose()
+
+def getCurrentVector(interpolant,location):
+    #coeffs are 
+    #0  1   2   3    4    5    6    7
+    #a, bx, cy, dz, exy, fxz, gyz, hxyz
+    #gradient is [
+    #   [b + ey + fz + hyz],
+    #   [c + ex + gz + hxz],
+    #   [d + fx + gy + hxy]
+    
+    varList=coord2InterpVals(location)
+    
+    varSets=np.array([[0,2,3,6],
+                      [0,1,3,5],
+                      [0,1,2,4]])
+    coefSets=np.array([[1,4,5,7],
+                       [2,4,6,7],
+                       [3,5,6,7]])
+    
+    varVals=np.array([varList[n] for n in varSets])
+    coefVals=np.array([interpolant[n] for n in coefSets])
+    
+    vecVals=np.array([-np.dot(v,c) for v,c in zip(varVals,coefVals)])
+
+    return vecVals
+
+
+@nb.njit()
+# @nb.njit(['int64[:](int64, int64)', 'int64[:](int64, Omitted(int64))'])
 def toBitArray(val,nBits=3):
     return np.array([(val>>n)&1 for n in range(nBits)])
 
@@ -53,7 +121,7 @@ class Element:
         self.sigma=sigma
         self.globalNodeIndices=np.empty(8,dtype=np.int64)
         
-    def getCoords(self):
+    def getCoordsRecursively(self):
         coords=np.empty((8,3))
         for ii in range(8):
             weights=np.array([(ii>>n)&1 for n in range(3)],dtype=np.float64)
@@ -87,7 +155,7 @@ class FEMHex():
         self.sigma=sigma
         self.globalNodeIndices=np.empty(8,dtype=np.int64)
         
-    def getCoords(self):
+    def getCoordsRecursively(self):
         coords=np.empty((8,3))
         for ii in range(8):
             weights=np.array([(ii>>n)&1 for n in range(3)],dtype=np.float64)
@@ -162,7 +230,7 @@ class AdmittanceHex():
         self.sigma=sigma
         self.globalNodeIndices=np.empty(8,dtype=np.int64)
         
-    def getCoords(self):
+    def getCoordsRecursively(self):
         coords=np.empty((8,3))
         for ii in range(8):
             weights=np.array([(ii>>n)&1 for n in range(3)],dtype=np.float64)
@@ -170,6 +238,9 @@ class AdmittanceHex():
             coords[ii]=offset
 
         return coords
+    
+    def getMidpoint(self):
+        return self.origin+self.extents/2
         
     def getCharLength(self):
         return math.pow(np.prod(self.extents),1.0/3)
@@ -255,6 +326,7 @@ class Simulation:
     
     def makeTableHeader(self):
         cols=[
+            "Domain size",
             "Element type",
             "Number of nodes",
             "Number of elements",
@@ -267,11 +339,19 @@ class Simulation:
             "Assemble system",
             "Solve system",
             "Total time"]
-        return ','.join(cols)
+        return ','.join(cols)+'\n'
     
     def logAsTableEntry(self,csvFile,RMSerror):
+        oldfile=exists(csvFile)
         f=open(csvFile,'a')
+        
+        if not oldfile:
+            f.write(self.makeTableHeader())
+        
+        
+        
         data=[
+            np.mean(self.mesh.extents),
             self.mesh.elementType,
             self.mesh.nodeCoords.shape[0],
             len(self.mesh.elements),
@@ -354,8 +434,6 @@ class Simulation:
             else: 
                 if numfixed==1:
                     # one node fixed; adjust RHS for other node
-                    if np.any(edge==62):
-                        print('hi')
                     
                     nVGlobal=edge[isFixed]
                     nFreeGlobal=edge[~isFixed]
@@ -532,3 +610,315 @@ def distMetric(evalLocation,srcLocation,iVal,sigma):
     dist=np.linalg.norm(delta/sigma)
     return iVal/(4*np.pi*dist)
         
+
+class Octree():
+    def __init__(self,boundingBox,maxDepth=10):
+        self.center=np.mean(boundingBox.reshape(2,3),axis=0)
+        self.span=(boundingBox[3:]-boundingBox[:3])
+        self.maxDepth=maxDepth
+        
+        coord0=self.center-self.span/2
+        
+        self.tree=Octant(coord0,self.span)
+        
+        
+    def refineByMetric(self,l0Function):
+        self.tree.refineByMetric(l0Function, self.maxDepth)
+
+            
+#TODO: fix and vectorize
+    def coord2Index(self,coord):
+        x0=self.center-self.span/2
+        nE=2**(self.maxDepth)
+        dX=self.span/(nE)
+        
+        ndxOffsets=np.array([(nE+1)**n for n in range(3)])
+        
+        idxArray=(coord-x0)/dX
+        newInd=np.dot(idxArray,ndxOffsets)
+        
+        # if np.rint(newInd)==183:
+        #     print('wait')
+        return np.rint(newInd).astype(np.int64)
+        
+    def printStructure(self):
+        self.tree.printStructure()
+        
+    def octantByList(self,indexList,octant=None):
+        head=indexList.pop(0)
+        if octant is None:
+            octant=self.tree
+        oc=octant.children[head]
+        if len(oc.children)==0:
+            return oc
+        else:
+            return self.octantByList(indexList,oc)
+        
+    def countElements(self):
+        return self.tree.countElements()
+    
+    def getCoordsRecursively(self):
+        coords=self.tree.getCoordsRecursively()
+        return np.unique(coords,axis=0)
+    
+        
+        
+class Octant():
+    def __init__(self,origin, span,depth=0,index=0):
+        self.origin=origin
+        self.span=span
+        self.center=origin+span/2
+        self.l0=np.prod(span)**(1/3)
+        self.children=[]
+        self.depth=depth
+        self.globalNodes=np.empty(8,dtype=np.int64)
+        self.nX=2
+        self.index=index
+        self.nodeIndices=-np.ones(27,dtype=np.int64)
+        
+        self.surfaceNodes=[]
+        self.innerNodes=[]
+        
+    def calcGlobalIndices(self,globalBbox,maxdepth):
+        x0=globalBbox[:3]
+        nX=2**maxdepth
+        dX=(globalBbox[3:]-x0)/(nX)
+        coords=self.getOwnCoords()
+        
+        ndxOffsets=np.array([(nX+1)**n for n in range(3)])
+        
+        for N,c in enumerate(coords):
+            idxArray=(c-x0)/dX
+            ndx=np.dot(ndxOffsets,idxArray)
+            self.globalNodes[N]=ndx
+            
+        
+    def countElements(self):
+        if len(self.children)==0:
+            return 1
+        else:
+            return sum([ch.countElements() for ch in self.children])
+        
+    def makeChildren(self,division=np.array([0.5,0.5,0.5])):
+        newSpan=self.span*division
+        
+        
+        for ii in range(8):
+            offset=toBitArray(ii)*newSpan
+            newOrigin=self.origin+offset
+            self.children.append(Octant(newOrigin,newSpan,self.depth+1,ii))
+            
+        # return self.children
+    def getOwnCoords(self):
+        return [self.origin+self.span*toBitArray(n) for n in range(8)]
+    
+    def getCoordsRecursively(self):
+        if len(self.children)==0:
+            # coords=[self.origin+self.span*toBitArray(n) for n in range(8)]
+            coords=self.getOwnCoords()
+            # indices=self.globalNodes
+            indices=np.arange(8)
+        else:
+            coords=[]
+            indices=[]
+            
+            chCoords=[]
+            chInds=[]
+            chNxs=[]
+
+            for ch in self.children:
+                childCoord,childNdx=ch.getCoordsRecursively()
+                chNxs.append(ch.nX)
+                chCoords.append(childCoord)
+                chInds.append(childNdx)
+
+                
+            
+            ownNx=2*max(chNxs)-1
+            self.nX=ownNx
+            # self.globalNodes=-np.ones(ownNx,dtype=np.int64)
+            
+            for N,ch in enumerate(zip(chCoords,chInds,chNxs)):
+                chCoord,chInd,chNx=ch
+                
+                childArr=self.index2pos(N, 2)*(ownNx//2)
+
+                # parentNdx=[toParentIndex(nn, N) for nn in chNdx]
+                parentNdx=[]
+                for nn in chInd:
+                    nodeArr=self.index2pos(nn,chNx)
+                    netArr=nodeArr+childArr
+                    
+                    offset=self.pos2index(netArr, ownNx)
+                    # offset=N+pos2index(nodeArr,self.nX)
+                    parentNdx.append(offset)                  
+                    
+                
+                
+                coords.extend(chCoord)
+                indices.extend(parentNdx)
+            
+        uniqueNdx,sel=np.unique(indices,return_index=True)
+            
+        return np.array(coords)[sel], uniqueNdx
+    
+    def index2pos(self,ndx,dX):
+        arr=[]
+        for ii in range(3):
+            arr.append(ndx%dX)
+            ndx=ndx//dX
+        return np.array(arr)
+    
+    def pos2index(self,pos,dX):
+        vals=np.array([dX**n for n in range(3)])
+        newNdx=np.dot(vals,pos)
+        return np.rint(newNdx)
+    
+    
+    def refineByMetric(self,l0Function,maxDepth):
+        l0Target=l0Function(self.center)
+        # print("target\t%g"%l0Target)
+        # print("l0\t\t%g"%self.l0)
+        # print(self.center)
+        if (self.l0>l0Target) and (self.depth<maxDepth):
+            # print('\n\n')
+            # print('depth '+str(self.depth)+', child'+str(self.index))
+
+            self.makeChildren()
+            for ii in range(8):
+                self.children[ii].refineByMetric(l0Function,maxDepth)
+                
+    def printStructure(self):
+        base='> '*self.depth
+        print(base+str(self.l0))
+        
+        for ch in self.children:
+            ch.printStructure()
+            
+    
+    def isTerminal(self):
+        return len(self.children)==0
+        
+    def containsPoint(self,coord):
+        gt=np.greater_equal(coord,self.origin)
+        lt=np.less_equal(coord-self.origin,self.span)
+        return np.all(gt&lt)
+    
+    
+    def distributeNodes(self,nodeCoords,nodeIndices):
+        if self.isTerminal():
+            return [], []
+        else:
+            for N in len(nodeIndices):
+                if self.containsPoint(nodeCoords[N]):
+                    self.innerNodes
+                    
+            
+            
+            
+            return nodeCoords,nodeIndices
+        
+        
+        
+    def getAllChildren(self):
+        if len(self.children)==0:
+            return [self]
+        else:
+            
+            descendants=[]
+            for ch in self.children:
+            # if len(ch.children)==0:
+                grandkids=ch.getAllChildren()
+                
+                if grandkids is not None:
+                    descendants.extend(grandkids)
+        return descendants
+    
+        
+    # def getConductances(self,sigma):
+    #     adm=AdmittanceHex(self.origin,self.span,sigma)
+    #     adm.setGlobalIndices(self.globalNodes)
+    #     conds=adm.getConductanceVals()
+    #     inds=adm.getConductanceIndices()
+    #     # globalInds=[self.globalNodes[l] for l in localInds]
+        
+    #     for ch in self.children:
+    #         chConds,chInds=ch.getConductances(sigma)
+    #         conds.extend(chConds)
+    #         inds.extend(chInds)
+            
+    #     return conds,inds
+        
+        
+def arrXor(arr):
+    val=False
+    for a in arr:
+        val=val^a
+        
+    return a
+
+# def toParentIndex(nthChild,nthNode,nXparent,nXchild):
+    
+#     def ndx2arr(ndx,nX):
+#         arr=[]
+#         for ii in range(3):
+#             arr.append(ndx%nX)
+#             ndx=ndx//nX
+#         return np.array(arr)
+    
+#     def arr2ndx(arr,nX):
+#         mask=np.array([nX**n for n in range(3)])
+#         return np.dot(arr,mask)
+    
+#     childArr=toBitArray(nthChild)
+#     nodeArr=
+    
+#     childOffset=arr2ndx(childArr, nX)
+    
+    
+#     maskCh=toBitArray(nthChild)
+#     maskN=toBitArray(nthNode)
+#     trips=np.array([3**n for n in range(3)])
+#     return np.dot(trips,maskCh)+np.dot(trips,maskN)
+
+
+def analyticVsrc(srcCoord,srcAmplitude,rVec,srcType='Current',sigma=1, srcRadius=1e-6):
+    # r=np.linalg.norm(srcCoord-sampleCoords,axis=1)
+    
+    rVec[rVec<srcRadius]=srcRadius
+    # if r<srcRadius:
+    #     r=srcRadius
+        
+    if srcType=='Current':
+        v0=srcAmplitude/(4*np.pi*sigma*srcRadius)
+    else:
+        v0=srcAmplitude
+        
+    return v0*srcRadius/rVec
+    
+# orig=np.random.rand(3)
+# span=np.random.uniform(size=3)
+# el=Element(orig,span,np.ones(3,dtype=np.float64))
+# v=np.random.rand(8)
+# interpC=getElementInterpolant(el,v)
+# bbox=np.concatenate((orig,orig+span))
+# ax=new3dPlot(bbox)
+# coords=el.getCoordsRecursively()
+
+
+# ivecs=[getCurrentVector(interpC,pt) for pt in coords]
+# X,Y,Z=np.hsplit(coords,3)
+
+
+# dx,dy,dz=np.hsplit(np.array(ivecs),3)
+
+# showNodes(ax, coords, v)
+# ax.quiver3D(X,Y,Z,dx,dy,dz)
+
+# mid=orig+span/2
+
+# iMid=getCurrentVector(interpC, mid)
+# dx,dy,dz=np.hsplit(np.array(iMid),3)
+# X,Y,Z=mid
+
+# ax.quiver3D(X,Y,Z,dx,dy,dz)
