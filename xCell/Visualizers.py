@@ -11,7 +11,39 @@ import mpl_toolkits.mplot3d as p3d
 import matplotlib as mpl
 import numpy as np
 
+import matplotlib.tri as tri
+
 import pandas
+
+def plotBoundEffect(fname):
+    dframe,_=importRunset(fname)
+    dX=dframe['Domain size']
+    dEl=dframe['Number of elements']
+    rms=dframe['RMS error']
+    l0=np.array([x/(n**(1/3)) for x,n in zip(dX,dEl)])
+    
+    sizes=np.unique(dEl)
+    nSizes=len(sizes)
+    labs=['%d elements'%n for n in sizes]
+    
+    
+    def makePlot(xvals,xlabel):
+        plt.figure()
+        ax=plt.gca()
+        ax.set_title('Simulation accuracy, uniform mesh')
+        ax.grid(True)
+        ax.set_ylabel('RMS error [V]')
+        ax.set_xlabel(xlabel)
+        outsideLegend()
+        for ii in range(nSizes):
+            sel=dEl==sizes[ii]
+            plt.loglog(xvals[sel],rms[sel],marker='.',label=labs[ii])
+        
+        outsideLegend()
+        plt.tight_layout()
+        
+    makePlot(dX,'Domain size [m]')
+    makePlot(l0,'Element $l_0$ [m]')
 
 def importRunset(fname):
     df=pandas.read_csv(fname)
@@ -84,7 +116,10 @@ def showNodes(axis, coords, nodeVals):
 
 
 def getCmap(vals):
-    if min(vals) < 0:
+    mn=min(vals)
+    mx=max(vals)
+    
+    if (mn < 0) and (abs(mn)/mx>0.01):
         cMap = mpl.cm.seismic
         cNorm = mpl.colors.CenteredNorm()
     else:
@@ -155,6 +190,51 @@ def showCurrentVecs(axis, pts,vecs):
     
     axis.quiver3D(X,Y,Z,dx,dy,dz, colors=colors)
     
+    
+def showSlice(coords,vals,nX,sliceCoord=0,axis=2,edges=None,edgeColors=None):
+    axNames=[c for c in 'XYZ' if c!=axis]
+    
+    sel=coords[:,axis]==sliceCoord
+    selAx=np.array([n for n in range(3) if n!=axis])
+    
+    planeCoords=coords[:,selAx]
+    sliceCoords=planeCoords[sel]
+    sliceVals=vals[sel]
+    
+    xx0,yy0=np.hsplit(sliceCoords,2)
+    bnds=np.array([min(xx0), max(xx0), min(yy0), max(yy0)]).squeeze()
+    
+    
+    
+    xx=np.linspace(bnds[0],bnds[1],nX)
+    yy=np.linspace(bnds[2],bnds[3],nX)
+    XX,YY=np.meshgrid(xx,yy)
+    
+    
+
+    triang = tri.Triangulation(xx0.squeeze(), yy0.squeeze())
+    interpolator = tri.LinearTriInterpolator(triang, sliceVals)
+    vImg= interpolator(XX, YY)
+    
+    (cMap, cNorm) = getCmap(vImg.ravel())
+    
+    
+    plt.imshow(vImg, origin='lower', extent=bnds,
+               cmap=cMap, norm=cNorm)
+    plt.colorbar()
+    plt.xlabel(axNames[0]+ ' [M]')
+    plt.ylabel(axNames[1]+' [M]')
+    
+    if edges is not None:
+        if edgeColors is None:
+            edgeColors=(0.,0.,0.,)
+            alpha=0.5
+            
+        edgePts=[[planeCoords[a,:],planeCoords[b,:]] for a,b in edges]
+        
+        edgeCol=mpl.collections.LineCollection(edgePts, colors=edgeColors,alpha=alpha,
+                                               linewidths=0.5)
+        plt.gca().add_collection(edgeCol)
 
 # def showNodeValues(axis,coords, nodeVals):
     

@@ -11,7 +11,7 @@ import numba as nb
 from numba import int64, float64
 import math
 import scipy
-from scipy.sparse.linalg import spsolve
+from scipy.sparse.linalg import spsolve, cg
 from Visualizers import *
 import time
 from os.path import exists
@@ -338,15 +338,21 @@ class Simulation:
             "Filter conductances",
             "Assemble system",
             "Solve system",
-            "Total time"]
-        return ','.join(cols)+'\n'
+            "Total time",
+            "Max memory"]
+        return ','.join(cols)
     
-    def logAsTableEntry(self,csvFile,RMSerror):
+    def logAsTableEntry(self,csvFile,RMSerror,extraCols=None, extraVals=None):
         oldfile=exists(csvFile)
         f=open(csvFile,'a')
         
         if not oldfile:
             f.write(self.makeTableHeader())
+            
+            if extraCols is not None:
+                f.write(','+','.join(extraCols))
+                
+            f.write('\n')
         
         
         
@@ -358,13 +364,20 @@ class Simulation:
             RMSerror
             ]
         dt=0
+        memory=0
         for log in self.stepLogs:
             dt+=log.duration
             data.append(log.duration)
+            memory=max(memory,log.memory)
             
         data.append(dt)
         
-        f.write(','.join(map(str,data))+'\n')
+        f.write(','.join(map(str,data)))
+        f.write(','+str(memory))
+        if extraVals is not None:
+            f.write(','+','.join(map(str,extraVals)))
+        
+        f.write('\n')
         f.close()
         
         
@@ -381,7 +394,7 @@ class Simulation:
         
     
     def solve(self):
-        self.startTiming("calculate conductances")
+        self.startTiming("Calculate conductances")
         edges,conductances=self.mesh.getConductances()
         self.logTime()
         
@@ -399,15 +412,57 @@ class Simulation:
         # dofNodes=np.setdiff1d(range(nNodes), self.vSourceNodes)
         nDoF=len(dof2Global)
         #TODO: handle non-nodal sources
+        
+        b = self.setRHS(nDoF,nodeSubset)
+        
+        M=self.getMatrix(nNodes,edges,conductances,nodeType,nodeSubset,b,dof2Global)
+        
+        self.startTiming('Solving')
+        vDoF=spsolve(M.tocsc(), b)
+        self.logTime()
+        
+        voltages[dof2Global]=vDoF
+        
+        return voltages
 
+
+    def iterativeSolve(self,vGuess,tol=1e-5):
+        self.startTiming("Calculate conductances")
+        edges,conductances=self.mesh.getConductances()
+        self.logTime()
+        
+        self.startTiming("Sort node types")
+        nodeType,nodeSubset, vFix2Global, iFix2Global, dof2Global = self.getNodeTypes()
+        self.logTime()
         
         
+        nNodes=self.mesh.nodeCoords.shape[0]
+        voltages=np.empty(nNodes,dtype=np.float64)
+
+        nFixedV=len(vFix2Global)
+        voltages[self.vSourceNodes]=self.vSourceVals
+        
+        # dofNodes=np.setdiff1d(range(nNodes), self.vSourceNodes)
+        nDoF=len(dof2Global)
+        #TODO: handle non-nodal sources
+        
+        b = self.setRHS(nDoF,nodeSubset)
+        
+        M=self.getMatrix(nNodes,edges,conductances,nodeType,nodeSubset,b,dof2Global)
+        
+        self.startTiming('Solving')
+        vDoF,_=cg(M.tocsc(),b,vGuess,tol)
+        self.logTime()
+        
+        voltages[dof2Global]=vDoF
+        
+        return voltages
+        
+        
+    def setRHS(self,nDoF,nodeSubset):
         #set right-hand side
         self.startTiming('Setting RHS')
         b=np.zeros(nDoF,dtype=np.float64)
-        
-        gDoF=[]
-        gDofNodes=[]
         
         for n,val in zip(self.iSourceNodes,self.iSourceVals):
             # b[global2subset(n,nDoF)]=val
@@ -416,10 +471,21 @@ class Simulation:
             
         self.logTime()
         
+        return b
+    
+    
+    def getMatrix(self,nNodes,edges,conductances,nodeType,nodeSubset, b,dof2Global):
         #TODO: parallelize it
         self.startTiming("Filtering conductances")
         #diagonal elements are -sum of row
+        
+        nNodes=self.mesh.nodeCoords.shape[0]
+        nDoF=len(dof2Global)
+
         diags=np.zeros(nNodes,dtype=np.float64)
+        
+        gDoF=[]
+        gDofNodes=[]
         for edge,g in zip(edges,conductances):     
             #adjust diagonals
             diags[edge[0]]+=g
@@ -454,37 +520,30 @@ class Simulation:
                     dofEdge=np.array([nodeSubset[e] for e in edge])
                     gDofNodes.append(dofEdge)
         
-        diagIndex=np.arange(nDoF)
+        
         diagVals=diags[dof2Global]
         
         self.logTime()
         
         gDofNodes=np.array(gDofNodes)
-        
         nodeA=gDofNodes[:,0]
         nodeB=gDofNodes[:,1]  
+        diagIndex=np.arange(nDoF)
         
-
-        self.startTiming("assembling system")
-        # double up for matrix symmetry
         nA=np.concatenate((nodeA, nodeB,diagIndex))
         nB=np.concatenate((nodeB,nodeA,diagIndex))
-        cond2=np.concatenate((gDoF,gDoF,diagVals))
+        cond2=np.concatenate((gDoF,gDoF,diagVals))       
+    
+        self.startTiming("assembling system")
+        # double up for matrix symmetry
+
         
         M = scipy.sparse.coo_matrix((cond2, (nA,nB)), shape=(nDoF, nDoF))
         M.sum_duplicates()
         
         self.logTime()
-        
-        # compress
+        return M
 
-        self.startTiming('Solving')
-        vDoF=spsolve(M.tocsc(), b)
-        self.logTime()
-        
-        voltages[dof2Global]=vDoF
-        
-        return voltages
     
     def getNodeTypes(self):
         
@@ -595,6 +654,7 @@ class Logger():
         print(stepName+" starting")
         self.start=time.process_time()
         self.duration=0
+        self.memory=0
 
         
     def logCompletion(self):
@@ -602,7 +662,8 @@ class Logger():
         duration=tend-self.start
         engFormat=mpl.ticker.EngFormatter()
         print(self.name+": "+engFormat(duration)+ " seconds")
-        self.duration=duration            
+        self.duration=duration       
+        self.memory=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         
 @nb.njit
 def distMetric(evalLocation,srcLocation,iVal,sigma):
@@ -616,6 +677,8 @@ class Octree():
         self.center=np.mean(boundingBox.reshape(2,3),axis=0)
         self.span=(boundingBox[3:]-boundingBox[:3])
         self.maxDepth=maxDepth
+        self.bbox=boundingBox
+        self.indexMap=np.empty(0,dtype=np.int64)
         
         coord0=self.center-self.span/2
         
@@ -626,7 +689,7 @@ class Octree():
         self.tree.refineByMetric(l0Function, self.maxDepth)
 
             
-#TODO: fix and vectorize
+#TODO: vectorize
     def coord2Index(self,coord):
         x0=self.center-self.span/2
         nE=2**(self.maxDepth)
@@ -637,9 +700,10 @@ class Octree():
         idxArray=(coord-x0)/dX
         newInd=np.dot(idxArray,ndxOffsets)
         
-        # if np.rint(newInd)==183:
-        #     print('wait')
-        return np.rint(newInd).astype(np.int64)
+        idx=np.rint(newInd).astype(np.int64)
+        if len(self.indexMap)!=0:
+            idx=sparse2denseIndex(idx,self.indexMap)
+        return idx
         
     def printStructure(self):
         self.tree.printStructure()
@@ -658,10 +722,25 @@ class Octree():
         return self.tree.countElements()
     
     def getCoordsRecursively(self):
-        coords=self.tree.getCoordsRecursively()
-        return np.unique(coords,axis=0)
-    
+        coords,i=self.tree.getCoordsRecursively(self.bbox,self.maxDepth)
+        indices=np.array(i)
+        self.indexMap=indices
         
+        for o in self.tree.getTerminalOctants():
+            tstNodes=o.globalNodes
+            # newNodes=[np.argwhere(indices==n).squeeze() for n in tstNodes]
+            newNodes=[sparse2denseIndex(n,np.array(indices)) for n in tstNodes]
+            o.globalNodes=np.array(newNodes)
+        return np.array(coords)
+  
+@nb.njit()
+def sparse2denseIndex(sparseVal,denseList):
+    
+    for n,val in np.ndenumerate(denseList):
+        if val==sparseVal:
+            return n[0]
+        
+    # return None
         
 class Octant():
     def __init__(self,origin, span,depth=0,index=0):
@@ -692,6 +771,8 @@ class Octant():
             ndx=np.dot(ndxOffsets,idxArray)
             self.globalNodes[N]=ndx
             
+        return self.globalNodes
+            
         
     def countElements(self):
         if len(self.children)==0:
@@ -712,55 +793,35 @@ class Octant():
     def getOwnCoords(self):
         return [self.origin+self.span*toBitArray(n) for n in range(8)]
     
-    def getCoordsRecursively(self):
+    
+    def getCoordsRecursively(self,bbox,maxdepth):
         if len(self.children)==0:
             # coords=[self.origin+self.span*toBitArray(n) for n in range(8)]
             coords=self.getOwnCoords()
             # indices=self.globalNodes
-            indices=np.arange(8)
+            indices=self.calcGlobalIndices(bbox, maxdepth)
         else:
-            coords=[]
-            indices=[]
+            coordList=[]
+            indexList=[]
             
-            chCoords=[]
-            chInds=[]
-            chNxs=[]
-
             for ch in self.children:
-                childCoord,childNdx=ch.getCoordsRecursively()
-                chNxs.append(ch.nX)
-                chCoords.append(childCoord)
-                chInds.append(childNdx)
-
+                c,i = ch.getCoordsRecursively(bbox,maxdepth)
                 
+                if len(coordList)==0:
+                    coordList=c
+                    indexList=i
+                else:
+                    coordList.extend(c)
+                    indexList.extend(i)
             
-            ownNx=2*max(chNxs)-1
-            self.nX=ownNx
-            # self.globalNodes=-np.ones(ownNx,dtype=np.int64)
+            indices,sel=np.unique(indexList,return_index=True)
             
-            for N,ch in enumerate(zip(chCoords,chInds,chNxs)):
-                chCoord,chInd,chNx=ch
+            self.globalNodes=indices
+            
+            coords=np.array(coordList)[sel]
+            coords=coords.tolist()
                 
-                childArr=self.index2pos(N, 2)*(ownNx//2)
-
-                # parentNdx=[toParentIndex(nn, N) for nn in chNdx]
-                parentNdx=[]
-                for nn in chInd:
-                    nodeArr=self.index2pos(nn,chNx)
-                    netArr=nodeArr+childArr
-                    
-                    offset=self.pos2index(netArr, ownNx)
-                    # offset=N+pos2index(nodeArr,self.nX)
-                    parentNdx.append(offset)                  
-                    
-                
-                
-                coords.extend(chCoord)
-                indices.extend(parentNdx)
-            
-        uniqueNdx,sel=np.unique(indices,return_index=True)
-            
-        return np.array(coords)[sel], uniqueNdx
+        return coords, indices.tolist()
     
     def index2pos(self,ndx,dX):
         arr=[]
@@ -774,6 +835,17 @@ class Octant():
         newNdx=np.dot(vals,pos)
         return np.rint(newNdx)
     
+    def getIndicesRecursively(self):
+        
+        if self.isTerminal():
+            return np.arange(8,dtype=np.int64)
+        
+        else:
+            indices=[]
+            for ch in self.children:
+                indices.append(ch.getIndicesRecursively())
+    
+            return indices
     
     def refineByMetric(self,l0Function,maxDepth):
         l0Target=l0Function(self.center)
@@ -820,7 +892,7 @@ class Octant():
         
         
         
-    def getAllChildren(self):
+    def getTerminalOctants(self):
         if len(self.children)==0:
             return [self]
         else:
@@ -828,11 +900,12 @@ class Octant():
             descendants=[]
             for ch in self.children:
             # if len(ch.children)==0:
-                grandkids=ch.getAllChildren()
+                grandkids=ch.getTerminalOctants()
                 
                 if grandkids is not None:
                     descendants.extend(grandkids)
         return descendants
+
     
         
     # def getConductances(self,sigma):
