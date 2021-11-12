@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 
 showGraphs=True
 # fname="Results/cube/currentMode.csv"
-fname="Results/cube/cg_currentMode.csv"
+fname="Results/cube/vpoly.csv"
 
 xmax=1e-5
 #must be even
@@ -97,14 +97,10 @@ def runUniformGrid(nDiv,elType,xmax,showGraphs,vMode=False,logTimes=False):
     # ax=xCell.new3dPlot(boundingBox)
     # xCell.showEdges(ax, coords, edges, conductances)
     
-    # v=setup.solve()
+    v=setup.solve()
+
     
-    # _,_,_,_,dof2global=setup.getNodeTypes()
-    # rdof=np.array([np.linalg.norm(coords[n]) for n in dof2global])
-    # vguess=xCell.analyticVsrc(np.zeros(3), srcMag, rdof,srcType=srcType)
-    
-    
-    v=setup.iterativeSolve(None)
+    # v=setup.iterativeSolve(None)
     r=np.linalg.norm(coords,axis=1)
     
     #redact singularity
@@ -115,15 +111,16 @@ def runUniformGrid(nDiv,elType,xmax,showGraphs,vMode=False,logTimes=False):
     edgeFilt=[eg-(eg>sourceIndex) for eg in edges]
 
     analytic=xCell.analyticVsrc(np.zeros(3), srcMag,r,srcType=srcType)
+    # analytic=1/(4*np.pi*r)
+    
     
     fit=np.polyfit(analytic[rest], v[rest], 1)
 
     
     rDense=np.linspace(min(r[r>0]),max(r),100)
-    # rDense=r[r>0]
     analyticDense=xCell.analyticVsrc(np.zeros(3), srcMag, rDense,srcType=srcType)
     # analytic=np.array([srcMag/(4*np.pi*d) for d in r])
-    
+    # analyticDense=1/(4*np.pi*rDense)
     
     err=v-analytic
     err[sourceIndex]=0
@@ -224,13 +221,13 @@ def runUniformGrid(nDiv,elType,xmax,showGraphs,vMode=False,logTimes=False):
 
 
 # runUniformGrid(nDiv, elType, xmax, showGraphs=True,vMode=True,logTimes=False)
-# runUniformGrid(40, elType, 1e-4, showGraphs=True,vMode=True,logTimes=False)
+runUniformGrid(10, elType, 1e-4, showGraphs=True,vMode=False,logTimes=False)
 
 
-for nd in range(2,7):
-    for xx in np.logspace(-4,0,20):
-        runUniformGrid(2**nd, elType, xx,showGraphs=False,vMode=False,logTimes=True)
+# for nd in range(2,5):
+#     for xx in np.logspace(-4,0,20):
+#         runUniformGrid(2**nd, elType, xx,showGraphs=False,vMode=False,logTimes=True)
         
 
-# for nd in range(64,200,4):
-    # runUniformGrid(nd, elType, 1e-4, showGraphs=False,vMode=False,logTimes=True)
+# for nd in range(4,48,2):
+#     runUniformGrid(nd, elType, 1e-4, showGraphs=False,vMode=True,logTimes=True)

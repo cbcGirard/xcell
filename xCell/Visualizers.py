@@ -15,11 +15,11 @@ import matplotlib.tri as tri
 
 import pandas
 
-def plotBoundEffect(fname):
+def plotBoundEffect(fname,ycat='RMS error'):
     dframe,_=importRunset(fname)
     dX=dframe['Domain size']
     dEl=dframe['Number of elements']
-    rms=dframe['RMS error']
+    yval=dframe[ycat]
     l0=np.array([x/(n**(1/3)) for x,n in zip(dX,dEl)])
     
     sizes=np.unique(dEl)
@@ -37,7 +37,7 @@ def plotBoundEffect(fname):
         outsideLegend()
         for ii in range(nSizes):
             sel=dEl==sizes[ii]
-            plt.loglog(xvals[sel],rms[sel],marker='.',label=labs[ii])
+            plt.loglog(xvals[sel],yval[sel],marker='.',label=labs[ii])
         
         outsideLegend()
         plt.tight_layout()
@@ -51,20 +51,21 @@ def importRunset(fname):
     
     return df,cats
 
-def importAndPlot(fname,onlyType=None,xCat='Number of elements'):
+def importAndPlotTimes(fname,onlyType=None,xCat='Number of elements',numExtraFields=0):
     df, cats = importRunset(fname)
     if onlyType is not None:
         df=df[df['Element type']==onlyType]
     
     
     xvals=df[xCat].to_numpy()
+    nSkip=-1-numExtraFields
     
     def getTimes(df,cats):
-        cols=cats[4:-1]
+        cols=cats[5:nSkip]
         return df[cols].to_numpy().transpose()
     
     stepTimes=getTimes(df,cats)
-    stepNames=cats[4:-1]
+    stepNames=cats[5:nSkip]
     
     ax=plt.figure().add_subplot()
     

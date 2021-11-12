@@ -332,7 +332,7 @@ class Simulation:
             "Number of elements",
             "RMS error",
             "MakeElements",
-            "Calc Cunductances",
+            "Calc Conductances",
             "Sort Nodes",
             "Set RHS",
             "Filter conductances",
