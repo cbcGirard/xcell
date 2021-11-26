@@ -101,6 +101,22 @@ def toBitArray(val,nBits=3):
 
 @nb.njit
 def anyMatch(searchArray,searchVals):
+    """
+    Rapid search if any matches occur (returns immediately at first match)
+
+    Parameters
+    ----------
+    searchArray : array
+        Array to seach.
+    searchVals : array
+        Values to search array for.
+
+    Returns
+    -------
+    bool
+        DESCRIPTION.
+
+    """
     for el in searchArray.ravel():
         if any(np.isin(searchVals,el)):
             return True
@@ -283,7 +299,7 @@ class AdmittanceHex():
 #     ('iSourceVals',float64[:]),
 #     ])
 class Simulation:
-    def __init__(self):
+    def __init__(self,resultPath):
         self.iSourceCoords=[]
         self.iSourceNodes=[]
         self.iSourceVals=[]
@@ -296,33 +312,62 @@ class Simulation:
         
         self.stepLogs=[]
         self.stepTime=[]
+        self.memUsage=0
+        
+        self.nodeVoltages=np.empty(0)
+        self.edges=[[]]
+        
+        self.resultPath=resultPath
+        
+        self.iteration=0
         
     def startTiming(self,stepName):
+        """
+        General call to start timing an execution step
+
+        Parameters
+        ----------
+        stepName : string
+            Label for the step
+
+        Returns
+        -------
+        None.
+
+        """
         self.stepLogs.append(Logger(stepName))
         
     def logTime(self):
+        """
+        Signals completion of step
+
+        Returns
+        -------
+        None.
+
+        """
         self.stepLogs[-1].logCompletion()
         
+    def getMemUsage(self, printVal=False):
+        """
+        Gets memory usage of simulation
+
+        Returns
+        -------
+        mem : int
+            Platform-dependent, often kb used.
+
+        """
+        mem=0
+        for log in self.stepLogs:
+            mem=max(mem,log.memory)
+
         
-    # def logParams(self,fileName):
-    #     f=open(fileName,'a')
-    #     f.write('#Mesh params')
-    #     f.write('Bounds, '+','.join(map(str,self.mesh.extents)))
-    #     meshCats=["Element Type","Elements","Nodes"]
-    #     meshVals=[self.mesh.elementType,len(self.mesh.elements),]
-    #     f.write('Element Type, %s\nElements, %d\nNodes, %d'% self.mesh.elementType)
+        if printVal:
+            engFormat=mpl.ticker.EngFormatter(unit='b')
+            print(engFormat(mem*1024)+" used")
         
-    #     f.write()
-        
-    #     f.write("#Step Times")
-    #     tAll=0
-    #     for name,dt in zip(self.stepName,self.stepTime):
-    #         f.write('%s, %g\n'%(name,dt))
-    #         tAll+=dt
-    #     f.write('Total,%g\n'%tAll)
-    #     f.write('## Step Times')
-        
-    #     f.close()
+        return mem
     
     def makeTableHeader(self):
         cols=[
@@ -330,7 +375,7 @@ class Simulation:
             "Element type",
             "Number of nodes",
             "Number of elements",
-            "RMS error",
+            "FVU",
             "MakeElements",
             "Calc Conductances",
             "Sort Nodes",
@@ -342,7 +387,7 @@ class Simulation:
             "Max memory"]
         return ','.join(cols)
     
-    def logAsTableEntry(self,csvFile,RMSerror,extraCols=None, extraVals=None):
+    def logAsTableEntry(self,csvFile,FVU,extraCols=None, extraVals=None):
         oldfile=exists(csvFile)
         f=open(csvFile,'a')
         
@@ -361,8 +406,7 @@ class Simulation:
             self.mesh.elementType,
             self.mesh.nodeCoords.shape[0],
             len(self.mesh.elements),
-            RMSerror
-            ]
+            FVU]
         dt=0
         memory=0
         for log in self.stepLogs:
@@ -383,6 +427,23 @@ class Simulation:
         
         
     def addCurrentSource(self,value,coords=None,index=None):
+        """
+        Attaches a current source to the 
+
+        Parameters
+        ----------
+        value : float
+            Magnitude of current in amperes.
+        coords : TYPE, optional
+            DESCRIPTION. The default is None.
+        index : TYPE, optional
+            DESCRIPTION. The default is None.
+
+        Returns
+        -------
+        None.
+
+        """
         if index is not None:
             self.iSourceNodes.append(index)
             self.iSourceVals.append(value)
@@ -394,6 +455,17 @@ class Simulation:
         
     
     def solve(self):
+        """
+        Directly solves for nodal voltages, given current mesh and distribution
+        of sources. Computational time grows significantly with simulation size;
+        try iterativeSolve() for faster convergence
+        
+        Returns
+        -------
+        voltages : float[:]
+            Nodal voltages.
+
+        """
         self.startTiming("Calculate conductances")
         edges,conductances=self.mesh.getConductances()
         self.logTime()
@@ -423,10 +495,29 @@ class Simulation:
         
         voltages[dof2Global]=vDoF
         
+        self.nodeVoltages=voltages
         return voltages
 
 
-    def iterativeSolve(self,vGuess,tol=1e-5):
+    def iterativeSolve(self,vGuess=None,tol=1e-5):
+        """
+        Solves nodal voltages using conjgate gradient method. Likely to achieve
+        similar accuracy to direct solution at much greater speed for element
+        counts above a few thousand
+
+        Parameters
+        ----------
+        vGuess : TYPE
+            DESCRIPTION. Default None.
+        tol : TYPE, optional
+            DESCRIPTION. The default is 1e-5.
+
+        Returns
+        -------
+        voltages : TYPE
+            DESCRIPTION.
+
+        """
         self.startTiming("Calculate conductances")
         edges,conductances=self.mesh.getConductances()
         self.logTime()
@@ -456,10 +547,88 @@ class Simulation:
         
         voltages[dof2Global]=vDoF
         
+        self.nodeVoltages=voltages
         return voltages
+    
+    def calculateErrors(self,srcAmplitude,srcType,nX=100,showPlots=False,savePlots=False):
+        
+        nTypes,_,_,_,_=self.getNodeTypes()
+        v=self.nodeVoltages
+        rest=nTypes==0
+        
+        coords=self.mesh.nodeCoords
+        edges=self.mesh.edges
+        
+        nNodes=coords.shape[0]
+        nElems=len(self.mesh.elements)
+        
+        r=np.linalg.norm(self.mesh.nodeCoords,axis=1)
+        rDense=np.linspace(min(r[rest]),max(r[rest]),100)
         
         
+        
+        #TODO: extend to multiple sources
+        analytic=analyticVsrc(np.zeros(3), srcAmplitude, r,srcType=srcType)
+        analyticDense=analyticVsrc(np.zeros(3), srcAmplitude, rDense,srcType=srcType)
+        
+        FVU,err=getFVU(v, analytic, rest)
+        errAll=np.zeros(coords.shape[0])
+        errAll[rest]=err
+
+        if showPlots:
+            
+            figResult=plt.figure()
+            showSlice(coords,v, nX,plotWhich=rest,edges=edges)
+            plt.title('Simulated solution [V]')
+            plt.tight_layout()
+            
+        
+            figImage=plt.figure()
+            showSlice(coords,errAll, nX,plotWhich=rest,edges=edges,forceBipolar=True)
+            plt.title('Absolute error [V]')
+            plt.tight_layout()
+            
+            fig2d, axes=plt.subplots(2,1)
+            ax2dA,ax2dB=axes
+            ax2dA.xaxis.set_major_formatter(mpl.ticker.EngFormatter())
+            ax2dA.plot(rDense,analyticDense, label='Analytical')
+            ax2dA.scatter(r[rest],v[rest],c='r',label='Simulation')
+            ax2dA.legend()
+            ax2dA.set_title('%d nodes, %d elements\nFVU= %g'%(nNodes,nElems,FVU))
+            ax2dA.set_xlabel('Distance from source [m]')
+            ax2dA.set_ylabel('Voltage [V]')
+            
+            ax2dB.scatter(r[rest],err,c='r',label='Absolute')
+            ax2dB.set_ylabel('Absolute error [V]')
+            ax2dB.sharex(ax2dA)
+            plt.tight_layout()
+            
+            if savePlots:
+                figResult.savefig(self.resultPath+'result_'+self.iteration)
+                figImage.savefig(self.resultPath+'errorImage_'+self.iteration)
+                fig2d.savefig(self.resultPath+'errorPlot_'+self.iteration)
+        
+        return FVU
+    
+    
     def setRHS(self,nDoF,nodeSubset):
+        """
+        Set right-hand-side of system of equations (as determined by simulation's boundary conditions)
+
+        Parameters
+        ----------
+        nDoF : int64
+            Number of degrees of freedom. Equal to number of nodes with unknown voltages plus number of nodes
+            with a fixed injected current
+        nodeSubset : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        b : float[:]
+            RHS of system Gv=b.
+
+        """
         #set right-hand side
         self.startTiming('Setting RHS')
         b=np.zeros(nDoF,dtype=np.float64)
@@ -475,6 +644,32 @@ class Simulation:
     
     
     def getMatrix(self,nNodes,edges,conductances,nodeType,nodeSubset, b,dof2Global):
+        """
+        Calculates conductivity matrix G for the current mesh.
+
+        Parameters
+        ----------
+        nNodes : int
+            Total number of nodes.
+        edges : [[]]
+            Pairs of node indices indicating conductive mesh edge.
+        conductances : float[:]
+            Conductance [in s] of edge.
+        nodeType : int[:]
+            Indicates node characteristics (0=unknown, 1=fixed voltage, 2= fixed current).
+        nodeSubset : TYPE
+            DESCRIPTION.
+        b : float[:]
+            RHS of equations.
+        dof2Global : int[:]
+            Array mapping degree of freedom numbering to global node numbering.
+
+        Returns
+        -------
+        G: sparse matrix
+            Conductance matrix G in system Gv=b.
+
+        """
         #TODO: parallelize it
         self.startTiming("Filtering conductances")
         #diagonal elements are -sum of row
@@ -538,11 +733,11 @@ class Simulation:
         # double up for matrix symmetry
 
         
-        M = scipy.sparse.coo_matrix((cond2, (nA,nB)), shape=(nDoF, nDoF))
-        M.sum_duplicates()
+        G = scipy.sparse.coo_matrix((cond2, (nA,nB)), shape=(nDoF, nDoF))
+        G.sum_duplicates()
         
         self.logTime()
-        return M
+        return G
 
     
     def getNodeTypes(self):
@@ -565,12 +760,7 @@ class Simulation:
 
         for sub,n in enumerate(self.vSourceNodes):
             global2Subset[n]=sub
-            
-        # for sub,n in enumerate(self.iSourceNodes):
-        #     global2Subset[n]=sub
-            
-        
-        
+
         
         for n in nb.prange(nNodes):
             typ=nodeType[n]
@@ -601,7 +791,7 @@ class Mesh:
         self.elementType=elementType
         self.nodeCoords=np.empty((0,3),dtype=np.float64)
         
-        
+        self.edges=[]
     def getContainingElement(coords):
         nElements=len(elements)
         
@@ -644,6 +834,7 @@ class Mesh:
             conductances[nn*nElemEdge:(nn+1)*nElemEdge]=elConds
             edgeIndices[nn*nElemEdge:(nn+1)*nElemEdge,:]=elEdges
         
+        self.edges=edgeIndices
         return edgeIndices,conductances
     
 
@@ -907,20 +1098,7 @@ class Octant():
         return descendants
 
     
-        
-    # def getConductances(self,sigma):
-    #     adm=AdmittanceHex(self.origin,self.span,sigma)
-    #     adm.setGlobalIndices(self.globalNodes)
-    #     conds=adm.getConductanceVals()
-    #     inds=adm.getConductanceIndices()
-    #     # globalInds=[self.globalNodes[l] for l in localInds]
-        
-    #     for ch in self.children:
-    #         chConds,chInds=ch.getConductances(sigma)
-    #         conds.extend(chConds)
-    #         inds.extend(chInds)
-            
-    #     return conds,inds
+
         
         
 def arrXor(arr):
@@ -930,68 +1108,78 @@ def arrXor(arr):
         
     return a
 
-# def toParentIndex(nthChild,nthNode,nXparent,nXchild):
-    
-#     def ndx2arr(ndx,nX):
-#         arr=[]
-#         for ii in range(3):
-#             arr.append(ndx%nX)
-#             ndx=ndx//nX
-#         return np.array(arr)
-    
-#     def arr2ndx(arr,nX):
-#         mask=np.array([nX**n for n in range(3)])
-#         return np.dot(arr,mask)
-    
-#     childArr=toBitArray(nthChild)
-#     nodeArr=
-    
-#     childOffset=arr2ndx(childArr, nX)
-    
-    
-#     maskCh=toBitArray(nthChild)
-#     maskN=toBitArray(nthNode)
-#     trips=np.array([3**n for n in range(3)])
-#     return np.dot(trips,maskCh)+np.dot(trips,maskN)
-
 
 def analyticVsrc(srcCoord,srcAmplitude,rVec,srcType='Current',sigma=1, srcRadius=1e-6):
-    # r=np.linalg.norm(srcCoord-sampleCoords,axis=1)
-    
-    rVec[rVec<srcRadius]=srcRadius
-    # if r<srcRadius:
-    #     r=srcRadius
+    """
+    Calculates voltage at an external point, due to current or voltage source
+
+    Parameters
+    ----------
+    srcCoord : float[:]
+        coords of source.
+    srcAmplitude : float
+        Source amplitude in volts or amperes.
+    rVec : float[:]
+        Vector of distances from source to evaluate voltage at.
+    srcType : 'Current' or 'Voltage', optional
+        Type of source. The default is 'Current'.
+    sigma : float, optional
+        Conductivity of surroundings. The default is 1.
+    srcRadius : float, optional
+        Effective radius of source, to give an analytical value at its center. The default is 1e-6.
+
+    Returns
+    -------
+    float[:]
+        Voltage at each specified distance.
+
+    """
+    r=rVec.copy()  
+    r[r<srcRadius]=srcRadius
+
         
     if srcType=='Current':
         v0=srcAmplitude/(4*np.pi*sigma*srcRadius)
     else:
         v0=srcAmplitude
         
-    return v0*srcRadius/rVec
+    return v0*srcRadius/r
+
+def getFVU(vsim,analytic,whichPts):
+    """
+    Calculates fraction of variance unexplained (FVU)
+
+    Parameters
+    ----------
+    vsim : float[:]
+        Simulated nodal voltages.
+    analytic : float[:]
+        analyitical nodal voltages.
+    whichPts : bool[:]
+        DESCRIPTION.
+
+    Returns
+    -------
+    VAF : float
+        Variation accounted for
+    error : float[:]
+        absolute error in simulated solution
+
+    """
+    v=vsim[whichPts]
+    vA=analytic[whichPts]
     
-# orig=np.random.rand(3)
-# span=np.random.uniform(size=3)
-# el=Element(orig,span,np.ones(3,dtype=np.float64))
-# v=np.random.rand(8)
-# interpC=getElementInterpolant(el,v)
-# bbox=np.concatenate((orig,orig+span))
-# ax=new3dPlot(bbox)
-# coords=el.getCoordsRecursively()
+    delVa=vA-np.mean(vA)
+    
+    error=v-vA
+    
+    SSerr=sum(error**2)
+    SStot=sum(delVa**2)
+    
+    FVU=SSerr/SStot
+    
+    # VAF=np.cov(v,vA)[0,1]**2
+    
+    return FVU, error
 
-
-# ivecs=[getCurrentVector(interpC,pt) for pt in coords]
-# X,Y,Z=np.hsplit(coords,3)
-
-
-# dx,dy,dz=np.hsplit(np.array(ivecs),3)
-
-# showNodes(ax, coords, v)
-# ax.quiver3D(X,Y,Z,dx,dy,dz)
-
-# mid=orig+span/2
-
-# iMid=getCurrentVector(interpC, mid)
-# dx,dy,dz=np.hsplit(np.array(iMid),3)
-# X,Y,Z=mid
-
-# ax.quiver3D(X,Y,Z,dx,dy,dz)
+        

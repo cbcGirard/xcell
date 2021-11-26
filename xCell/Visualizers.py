@@ -15,16 +15,16 @@ import matplotlib.tri as tri
 
 import pandas
 
-def plotBoundEffect(fname,ycat='RMS error'):
+def plotBoundEffect(fname,ycat='FVU',xcat='Domain size',groupby='Number of elements',legstem='%d elements'):
     dframe,_=importRunset(fname)
-    dX=dframe['Domain size']
-    dEl=dframe['Number of elements']
+    dX=dframe[xcat]
+    dEl=dframe[groupby]
     yval=dframe[ycat]
     l0=np.array([x/(n**(1/3)) for x,n in zip(dX,dEl)])
     
     sizes=np.unique(dEl)
     nSizes=len(sizes)
-    labs=['%d elements'%n for n in sizes]
+    labs=[legstem%n for n in sizes]
     
     
     def makePlot(xvals,xlabel):
@@ -32,7 +32,7 @@ def plotBoundEffect(fname,ycat='RMS error'):
         ax=plt.gca()
         ax.set_title('Simulation accuracy, uniform mesh')
         ax.grid(True)
-        ax.set_ylabel('RMS error [V]')
+        ax.set_ylabel('FVU')
         ax.set_xlabel(xlabel)
         outsideLegend()
         for ii in range(nSizes):
@@ -116,11 +116,11 @@ def showNodes(axis, coords, nodeVals):
     axis.figure.colorbar(mpl.cm.ScalarMappable(norm=cNorm, cmap=cMap))
 
 
-def getCmap(vals):
+def getCmap(vals,forceBipolar=False):
     mn=min(vals)
     mx=max(vals)
     
-    if (mn < 0) and (abs(mn)/mx>0.01):
+    if ((mn < 0) and (abs(mn)/mx>0.01)) or forceBipolar:
         cMap = mpl.cm.seismic
         cNorm = mpl.colors.CenteredNorm()
     else:
@@ -192,10 +192,13 @@ def showCurrentVecs(axis, pts,vecs):
     axis.quiver3D(X,Y,Z,dx,dy,dz, colors=colors)
     
     
-def showSlice(coords,vals,nX,sliceCoord=0,axis=2,edges=None,edgeColors=None):
+def showSlice(coords,vals,nX,sliceCoord=0,axis=2,plotWhich=None,edges=None,edgeColors=None,forceBipolar=False):
     axNames=[c for c in 'XYZ' if c!=axis]
     
-    sel=coords[:,axis]==sliceCoord
+    if plotWhich is None:
+        plotWhich=True
+    
+    sel=np.logical_and(coords[:,axis]==sliceCoord, plotWhich)
     selAx=np.array([n for n in range(3) if n!=axis])
     
     planeCoords=coords[:,selAx]
@@ -217,29 +220,28 @@ def showSlice(coords,vals,nX,sliceCoord=0,axis=2,edges=None,edgeColors=None):
     interpolator = tri.LinearTriInterpolator(triang, sliceVals)
     vImg= interpolator(XX, YY)
     
-    (cMap, cNorm) = getCmap(vImg.ravel())
-    
+    (cMap, cNorm) = getCmap(vImg.ravel(),forceBipolar)
     
     plt.imshow(vImg, origin='lower', extent=bnds,
-               cmap=cMap, norm=cNorm)
+               cmap=cMap, norm=cNorm,interpolation='bilinear')
     plt.colorbar()
-    plt.xlabel(axNames[0]+ ' [M]')
-    plt.ylabel(axNames[1]+' [M]')
+    
+    ax=plt.gca()
+    engform=mpl.ticker.EngFormatter()
+    ax.xaxis.set_major_formatter(engform)
+    ax.yaxis.set_major_formatter(engform)
+    plt.xlabel(axNames[0]+ ' [m]')
+    plt.ylabel(axNames[1]+' [m]')
     
     if edges is not None:
         if edgeColors is None:
             edgeColors=(0.,0.,0.,)
-            alpha=0.5
+            alpha=0.05
             
         edgePts=[[planeCoords[a,:],planeCoords[b,:]] for a,b in edges]
         
-        edgeCol=mpl.collections.LineCollection(edgePts, colors=edgeColors,alpha=alpha,
+        edgeCol=mpl.collections.LineCollection(edgePts, colors=edgeColors,alpha=0.05,
                                                linewidths=0.5)
         plt.gca().add_collection(edgeCol)
 
-# def showNodeValues(axis,coords, nodeVals):
-    
-# fname='Results/cube/table0-5.csv'
-# importAndPlot(fname,'Admittance')
-    
-    
+
