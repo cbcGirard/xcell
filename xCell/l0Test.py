@@ -35,6 +35,8 @@ def runL0Grid(maxDepth,coef,xmax,showGraphs,vMode,logTimes):
     def inverseSquare(coord):
         return 1/np.dot(coord,coord)
     
+    
+    @nb.njit
     def toR(coord):
         r=np.linalg.norm(coord)
         val=coef*np.linalg.norm(coord)
@@ -46,35 +48,13 @@ def runL0Grid(maxDepth,coef,xmax,showGraphs,vMode,logTimes):
     
     setup.startTiming("Make elements")
     otree.refineByMetric(metric)
-    # otree.printStructure()
-    numEl=otree.countElements()
-    print("%d elements"% numEl)
-    octs=otree.tree.getTerminalOctants()
+
     
+    setup.mesh=otree.makeMesh(setup.mesh)
+    coords=setup.mesh.nodeCoords
     
-    coords=otree.getCoordsRecursively()
-    setup.mesh.nodeCoords=coords
-    
-    
-    # ax=xCell.new3dPlot(bbox)
-    
-    # X,Y,Z=np.hsplit(coords,3)
-    # ax.scatter3D(X,Y,Z)
-    
-    l0_actuals=[]
-    l0_optimals=[]
-    for o in octs:
-        # o.calcGlobalIndices(bbox, maxDepth)
-        ocoords=o.getOwnCoords()
-        l0_actuals.append(o.l0)
-        l0_optimals.append(metric(o.center))
-        # oNdx=np.array([otree.coord2Index(c) for c in ocoords])
-        # globMask=np.isin(indices,oNdx,assume_unique=True)
-        # globndx=indices[globMask]
-        # globs=[np.]
-        setup.mesh.addElement(o.origin, o.span, sigma, o.globalNodes)
-        
     setup.logTime()
+    numEl=len(setup.mesh.elements)
     
     sourceIndex=otree.coord2Index(np.zeros(3))
     
@@ -98,12 +78,6 @@ def runL0Grid(maxDepth,coef,xmax,showGraphs,vMode,logTimes):
             vpt=xCell.analyticVsrc(np.zeros(3), srcMag, rpt,srcType=srcType)
             setup.addVoltageSource(vpt.squeeze(),index=ii)
         
-        
-    # Show conductances along edges
-    # edges,conductances=setup.mesh.getConductances()
-    
-    # ax=xCell.new3dPlot(bbox)
-    # xCell.showEdges(ax, coords, edges, conductances)
     
     
     v=setup.solve()
@@ -129,4 +103,4 @@ def runL0Grid(maxDepth,coef,xmax,showGraphs,vMode,logTimes):
 #     for xx in np.logspace(-5,-3,10):
 #         runL0Grid(12,co, xx, showGraphs=False, vMode=False, logTimes=True)
 
-runL0Grid(7, .3,1e-4, showGraphs=True, vMode=False, logTimes=False)
+runL0Grid(7, .5,1e-4, showGraphs=True, vMode=False, logTimes=False)

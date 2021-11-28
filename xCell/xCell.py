@@ -14,8 +14,9 @@ import scipy
 from scipy.sparse.linalg import spsolve, cg
 from Visualizers import *
 import time
-from os.path import exists
+import os
 import resource 
+import pickle
 
 
 nb.config.DISABLE_JIT=0
@@ -316,6 +317,8 @@ class Simulation:
         
         self.nodeVoltages=np.empty(0)
         self.edges=[[]]
+        self.gMat=[]
+        self.RHS=[]
         
         self.resultPath=resultPath
         
@@ -388,7 +391,7 @@ class Simulation:
         return ','.join(cols)
     
     def logAsTableEntry(self,csvFile,FVU,extraCols=None, extraVals=None):
-        oldfile=exists(csvFile)
+        oldfile=os.path.exists(csvFile)
         f=open(csvFile,'a')
         
         if not oldfile:
@@ -425,19 +428,45 @@ class Simulation:
         f.close()
         
         
-        
+#TODO: account for non-nodal sources   
     def addCurrentSource(self,value,coords=None,index=None):
         """
-        Attaches a current source to the 
+        Attaches a current source to the simulation.
+        Currently assumes source is located at a node
 
         Parameters
         ----------
         value : float
             Magnitude of current in amperes.
-        coords : TYPE, optional
-            DESCRIPTION. The default is None.
-        index : TYPE, optional
-            DESCRIPTION. The default is None.
+        coords : float[:], optional
+            Cartesian coordinates of source. The default is None.
+        index : int, optional
+            Nodal index of source. The default is None.
+
+        Returns
+        -------o
+        None.
+
+        """
+        if index is not None:
+            coords=self.mesh.nodeCoords[index]
+            self.iSourceNodes.append(index)
+            self.iSourceVals.append(value)
+
+#TODO: account for non-nodal sources        
+    def addVoltageSource(self,value,coords=None,index=None):
+        """
+        Add voltage source to simulation.
+        Currently assumes source is located at a node
+
+        Parameters
+        ----------
+        value : float
+            Source potential in volts.
+        coords : float[:], optional
+            Cartesian coordinates of source. The default is None.
+        index : int, optional
+            Nodal index of source. The default is None.
 
         Returns
         -------
@@ -445,11 +474,7 @@ class Simulation:
 
         """
         if index is not None:
-            self.iSourceNodes.append(index)
-            self.iSourceVals.append(value)
-            
-    def addVoltageSource(self,value,coords=None,index=None):
-        if index is not None:
+            coords=self.mesh.nodeCoords[index]
             self.vSourceNodes.append(index)
             self.vSourceVals.append(value)
         
@@ -639,6 +664,7 @@ class Simulation:
             b[nthDoF]=val
             
         self.logTime()
+        self.RHS=b
         
         return b
     
@@ -737,6 +763,7 @@ class Simulation:
         G.sum_duplicates()
         
         self.logTime()
+        self.gMat=G
         return G
 
     
@@ -792,6 +819,27 @@ class Mesh:
         self.nodeCoords=np.empty((0,3),dtype=np.float64)
         
         self.edges=[]
+        
+        
+    def __getstate__(self):
+        
+        state=self.__dict__.copy()
+        
+        elInfo=[]
+        for el in self.elements:
+            d={'origin':el.origin,
+               'extents':el.extents,
+               'sigma':el.sigma,
+               'nodeIndices':el.globalNodeIndices}
+            elInfo.append(d)
+            
+        state['elements']=elInfo
+        return state
+    
+    def __setstate__(self,state):
+        self.__dict__.update(state)
+        
+        
     def getContainingElement(coords):
         nElements=len(elements)
         
@@ -877,6 +925,20 @@ class Octree():
         
         
     def refineByMetric(self,l0Function):
+        """
+        Recursively splits elements until l0Function evaluated at the center
+        of each element is greater than that element's l0'
+
+        Parameters
+        ----------
+        l0Function : function
+            Function returning a scalar for each input cartesian coordinate.
+
+        Returns
+        -------
+        None.
+
+        """
         self.tree.refineByMetric(l0Function, self.maxDepth)
 
             
@@ -896,6 +958,17 @@ class Octree():
             idx=sparse2denseIndex(idx,self.indexMap)
         return idx
         
+    def makeMesh(self,mesh):
+        octs=self.tree.getTerminalOctants()
+        coords=self.getCoordsRecursively()
+        mesh.nodeCoords=coords
+        
+        for o in octs:
+            # ocoords=o.getOwnCoords()
+            mesh.addElement(o.origin,o.span,np.ones(3),o.globalNodes)
+        
+        return mesh
+    
     def printStructure(self):
         self.tree.printStructure()
         
@@ -933,6 +1006,19 @@ def sparse2denseIndex(sparseVal,denseList):
         
     # return None
         
+# octantspec= [
+#     ('origin',nb.float64[:]),
+#     ('span',nb.float64[:]),
+#     ('center',nb.float64[:]),
+#     ('l0',nb.float64),
+#     ('children',List[Octant]),
+#     ('depth',nb.int64),
+#     ('globalNodes',nb.int64[:]),
+#     ('nX',nb.int64),
+#     ('index',nb.int64),
+#     ('nodeIndices',nb.int64[:])
+#     ]
+# @nb.experimental.jitclass(spec=octantspec)
 class Octant():
     def __init__(self,origin, span,depth=0,index=0):
         self.origin=origin
@@ -946,8 +1032,7 @@ class Octant():
         self.index=index
         self.nodeIndices=-np.ones(27,dtype=np.int64)
         
-        self.surfaceNodes=[]
-        self.innerNodes=[]
+
         
     def calcGlobalIndices(self,globalBbox,maxdepth):
         x0=globalBbox[:3]
@@ -970,12 +1055,13 @@ class Octant():
             return 1
         else:
             return sum([ch.countElements() for ch in self.children])
-        
+     
+    # @nb.njit(parallel=True)
     def makeChildren(self,division=np.array([0.5,0.5,0.5])):
         newSpan=self.span*division
         
         
-        for ii in range(8):
+        for ii in nb.prange(8):
             offset=toBitArray(ii)*newSpan
             newOrigin=self.origin+offset
             self.children.append(Octant(newOrigin,newSpan,self.depth+1,ii))
@@ -1038,6 +1124,7 @@ class Octant():
     
             return indices
     
+    # @nb.njit(parallel=True)
     def refineByMetric(self,l0Function,maxDepth):
         l0Target=l0Function(self.center)
         # print("target\t%g"%l0Target)
@@ -1048,10 +1135,18 @@ class Octant():
             # print('depth '+str(self.depth)+', child'+str(self.index))
 
             self.makeChildren()
-            for ii in range(8):
+            for ii in nb.prange(8):
                 self.children[ii].refineByMetric(l0Function,maxDepth)
                 
     def printStructure(self):
+        """
+        Prints out octree structure
+
+        Returns
+        -------
+        None.
+
+        """
         base='> '*self.depth
         print(base+str(self.l0))
         
@@ -1084,6 +1179,15 @@ class Octant():
         
         
     def getTerminalOctants(self):
+        """
+        Gets all childless octants
+
+        Returns
+        -------
+        list of Octants
+            Childless octants (the actual elements of the mesh)
+
+        """
         if len(self.children)==0:
             return [self]
         else:
@@ -1183,3 +1287,73 @@ def getFVU(vsim,analytic,whichPts):
     return FVU, error
 
         
+class SimStudy:
+    def __init__(self,studyPath,boundingBox):
+        self.studyPath=studyPath
+        
+        self.nSims=-1
+        self.currentSim=None
+        self.bbox=boundingBox
+        self.span=boundingBox[3:]-boundingBox[:3]
+        self.center=boundingBox[:3]+self.span/2
+        
+        self.iSourceCoords=[]
+        self.iSourceVals=[]
+        self.vSourceCoords=[]
+        self.vSourceVals=[]
+        
+    def newSimulation(self,simName=None):
+        self.nSims+=1
+        
+        if simName is None:
+            simName='sim%d'%self.nSims
+            
+        sim=Simulation(simName)
+        sim.mesh.extents=self.span
+        
+        self.currentSim=sim
+        
+        return sim
+    
+    
+    def saveData(self,simulation):
+        data={}
+        
+        fname=os.path.join(self.studyPath,simulation.resultPath+'.p')
+        pickle.dump(simulation,open(fname,'wb'))
+        
+    def loadData(self,simName):
+        fname=os.path.join(self.studyPath,simName+'.p')
+        data=pickle.load( open(fname,'rb'))
+        return data
+        
+    def savePlot(self,fig,fileName,ext):
+        basepath=os.join(self.studypath,self.currentSim.resultPath)
+        fname=os.join(basepath,fileName+ext)
+        plt.savefig(fname)
+        
+    def animatePlot(self,plotfun,aniName=None):
+        ims=[]
+        cmax=0.
+        cmin=0.
+        fnames=os.listdir(self.studyPath)
+        fnames.sort()
+        
+        fig=plt.figure()
+        # assy=ErrorGraph(fig)
+        for fn in fnames:
+            name,ext=os.path.splitext(fn)
+            if ext=='.p':
+                dat=self.loadData(name)
+                im=plotfun(fig,dat)
+                # im=assy.update(dat)
+                ims.append(im)
+            
+        ani=mpl.animation.ArtistAnimation(fig, ims, interval=500, repeat_delay=1000)
+        
+        if aniName is None:
+            plt.show()
+        else:
+            ani.save(os.path.join(self.studyPath,aniName+'.mp4'))
+            
+        return ani

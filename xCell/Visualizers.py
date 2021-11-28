@@ -192,7 +192,7 @@ def showCurrentVecs(axis, pts,vecs):
     axis.quiver3D(X,Y,Z,dx,dy,dz, colors=colors)
     
     
-def showSlice(coords,vals,nX,sliceCoord=0,axis=2,plotWhich=None,edges=None,edgeColors=None,forceBipolar=False):
+def showSlice(coords,vals,nX=100,sliceCoord=0,axis=2,plotWhich=None,edges=None,edgeColors=None,forceBipolar=False):
     axNames=[c for c in 'XYZ' if c!=axis]
     
     if plotWhich is None:
@@ -222,7 +222,7 @@ def showSlice(coords,vals,nX,sliceCoord=0,axis=2,plotWhich=None,edges=None,edgeC
     
     (cMap, cNorm) = getCmap(vImg.ravel(),forceBipolar)
     
-    plt.imshow(vImg, origin='lower', extent=bnds,
+    img=plt.imshow(vImg, origin='lower', extent=bnds,
                cmap=cMap, norm=cNorm,interpolation='bilinear')
     plt.colorbar()
     
@@ -245,3 +245,149 @@ def showSlice(coords,vals,nX,sliceCoord=0,axis=2,plotWhich=None,edges=None,edgeC
         plt.gca().add_collection(edgeCol)
 
 
+    return img
+
+
+def centerSlice(fig,simulation):
+    
+    coords=simulation.mesh.nodeCoords
+    v=simulation.nodeVoltages
+    nTypes,_,_,_,_=simulation.getNodeTypes()
+    rest=nTypes==0
+    edges=simulation.ed
+    
+    r=np.linalg.norm(simulation.mesh.nodeCoords,axis=1)
+    rDense=np.linspace(min(r[rest]),max(r[rest]),100)
+    
+    analytic=analyticVsrc(np.zeros(3), srcAmplitude, r,srcType=srcType)
+    analyticDense=analyticVsrc(np.zeros(3), srcAmplitude, rDense,srcType=srcType)
+        
+        
+    
+    showSlice(coords, vals, plotWhich=rest, edges=edges)
+    
+    
+    
+    
+def error2d(fig,simulation):
+    
+    nTypes,_,_,_,_=simulation.getNodeTypes()
+    rest=nTypes==0
+    v=simulation.nodeVoltages
+    
+    nNodes=len(simulation.mesh.nodeCoords)
+    nElems=len(simulation.mesh.elements)
+    r=np.linalg.norm(simulation.mesh.nodeCoords,axis=1)
+    rDense=np.linspace(0,max(r[rest]),100)
+    
+    def vAna(r):
+        r[r<1e-6]=1e-6
+        return 1e-6/(4*np.pi*r)
+    
+    analytic=vAna(r)
+    analyticDense=vAna(rDense)
+        
+    # FVU=xCell.getFVU(v,analytic,rest)
+    err=v-analytic
+    FVU=np.trapz(err,r)
+    
+    # fig2d, axes=plt.subplots(2,1)
+    # ax2dA,ax2dB=axes
+    
+    if fig.axes==[]:
+        ax2dA=fig.add_subplot(2,1,1)
+        ax2dB=fig.add_subplot(2,1,2)
+            
+        ax2dA.xaxis.set_major_formatter(mpl.ticker.EngFormatter())  
+        ax2dA.set_xlabel('Distance from source [m]')
+        ax2dA.set_ylabel('Voltage [V]')
+        ax2dB.set_ylabel('Absolute error [V]')
+        ax2dB.sharex(ax2dA)
+    
+        isNew=True
+    else:
+        ax2dA,ax2dB=fig.axes
+        isNew=False
+        # ax2dA.cla()
+        # ax2dB.cla()
+        
+ 
+    anaLine=ax2dA.plot(rDense,analyticDense,c='b', label='Analytical')
+    simLine=ax2dA.scatter(r[rest],v[rest],c='k',label='Simulation')
+    if isNew:
+        ax2dA.legend()
+    # title=fig.suptitle('%d nodes, %d elements\nFVU= %g'%(nNodes,nElems,FVU))
+    title=fig.text(0.5,1.01,'%d nodes, %d elements, error %.2g Vm'%(nNodes,nElems,FVU),
+                    horizontalalignment='center', verticalalignment='bottom', transform=ax2dA.transAxes)
+
+    errLine=ax2dB.scatter(r[rest],err[rest],c='r',label='Absolute')
+
+    plt.tight_layout()
+    return [anaLine[0],simLine,errLine,title]
+    
+    # if savePlots:
+    #     figResult.savefig(self.resultPath+'result_'+self.iteration)
+    #     figImage.savefig(self.resultPath+'errorImage_'+self.iteration)
+    #     fig2d.savefig(self.resultPath+'errorPlot_'+self.iteration)
+
+
+class ErrorGraph():
+    def __init__(self,figure):
+        self.fig=figure
+        
+        if figure.axes==[]:
+            #not yet setup
+            ax1=figure.add_subplot(2,1,1)
+            ax2=figure.add_subplot(2,1,2)
+            
+            ax1.xaxis.set_major_formatter(mpl.ticker.EngFormatter())
+            anaLine=ax1.plot(0,0,label='Analytical')
+            simLine=ax1.plot(0,0,c='k',linestyle=None,label='Simulation',marker='.')
+            ax1.set_xlabel('Distance from source [m]')
+            ax1.set_ylabel('Voltage [V]')
+            ax1.set_title('')
+            ax1.legend()
+            
+            errLine=ax2.plot(0,0,c='r',linestyle=None,marker='.')
+            ax2.set_ylabel('Absolute error [V]')
+            ax2.sharex(ax1)
+
+
+        else:
+            ax1,ax2=figure.axes
+    
+        self.ax1=ax1
+        self.ax2=ax2
+        self.anaLine=anaLine[0]
+        self.simLine=simLine[0]
+        self.errLine=errLine[0]
+            
+    def update(self,simulation):
+        nTypes,_,_,_,_=simulation.getNodeTypes()
+        rest=nTypes==0
+        v=simulation.nodeVoltages
+        nNodes=len(simulation.mesh.nodeCoords)
+        nElems=len(simulation.mesh.elements)
+        r=np.linalg.norm(simulation.mesh.nodeCoords,axis=1)
+        rDense=np.linspace(0,max(r[rest]),100)
+        
+        def vAna(r):
+            r[r<1e-6]=1e-6
+            return 1e-6/(4*np.pi*r)
+        
+        analytic=vAna(r)
+        analyticDense=vAna(rDense)
+            
+        # FVU=xCell.getFVU(v,analytic,rest)
+        err=v-analytic
+        FVU=np.trapz(err,r)
+        
+        
+        
+        self.anaLine.set_data(rDense,analyticDense)
+        self.simLine.set_data(r[rest],v[rest])
+        self.errLine.set_data(r[rest],err[rest])
+            
+        self.ax1.title.set_text('%d nodes, %d elements\nError= %g Vm'%(nNodes,nElems,FVU))
+        plt.tight_layout()
+        return [self.anaLine, self.simLine, self.errLine]
