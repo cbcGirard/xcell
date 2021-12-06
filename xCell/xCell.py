@@ -29,7 +29,7 @@ nb.config.DEBUG_TYPEINFER=0
 #     #     bits=np.ceil(np.log2(val))
     
 #     return np.array([(val>>ii)&1 for ii in range(3)])
-
+@nb.njit
 def uniformResample(origin,span,nPts):
     vx,vy,vz=[np.linspace(o,o+s,nPts) for o,s in zip(origin,span)]
     
@@ -41,6 +41,7 @@ def uniformResample(origin,span,nPts):
     
     return coords
 
+# @nb.njit
 def getElementInterpolant(element,nodeVals):    
     coords=element.getCoordsRecursively()
     coefs=np.array([coord2InterpVals(xyz) for xyz in coords])
@@ -49,15 +50,18 @@ def getElementInterpolant(element,nodeVals):
     interpCoefs=np.linalg.solve(coefs, nodeVals)
     return interpCoefs
     
+@nb.njit
 def evalulateInterpolant(interp,location):
     
     # coeffs of a, bx, cy, dz, exy, fxz, gyz, hxyz
     varList=coord2InterpVals(location)
     
-    interpVal=np.matmul(interp,varList)
+    # interpVal=np.matmul(interp,varList)
+    interpVal=np.dot(interp,varList)
     
     return interpVal
-    
+
+@nb.njit
 def coord2InterpVals(coord):
     x,y,z=coord
     return np.array([1,
@@ -68,7 +72,7 @@ def coord2InterpVals(coord):
                      x*z,
                      y*z,
                      x*y*z]).transpose()
-
+@nb.njit
 def getCurrentVector(interpolant,location):
     #coeffs are 
     #0  1   2   3    4    5    6    7
@@ -128,6 +132,7 @@ def anyMatch(searchArray,searchVals):
 @nb.experimental.jitclass([
     ('origin', float64[:]),
     ('extents',float64[:]),
+    ('l0',float64),
     ('sigma',float64[:]),
     ('globalNodeIndices',int64[:])
     ])
@@ -135,6 +140,7 @@ class Element:
     def __init__(self,origin, extents,sigma):
         self.origin=origin
         self.extents=extents
+        self.l0=np.prod(extents)**(1/3)
         self.sigma=sigma
         self.globalNodeIndices=np.empty(8,dtype=np.int64)
         
@@ -162,6 +168,7 @@ class Element:
 @nb.experimental.jitclass([
     ('origin', float64[:]),
     ('extents',float64[:]),
+    ('l0', float64),
     ('sigma',float64[:]),
     ('globalNodeIndices',int64[:])
     ])
@@ -169,6 +176,7 @@ class FEMHex():
     def __init__(self, origin, extents, sigma):
         self.origin=origin
         self.extents=extents
+        self.l0=np.prod(extents)**(1/3)
         self.sigma=sigma
         self.globalNodeIndices=np.empty(8,dtype=np.int64)
         
@@ -237,6 +245,7 @@ class FEMHex():
 @nb.experimental.jitclass([
     ('origin', float64[:]),
     ('extents',float64[:]),
+    ('l0',float64),
     ('sigma',float64[:]),
     ('globalNodeIndices',int64[:])
     ])
@@ -244,6 +253,7 @@ class AdmittanceHex():
     def __init__(self, origin, extents, sigma):
         self.origin=origin
         self.extents=extents
+        self.l0=np.prod(extents)**(1/3)
         self.sigma=sigma
         self.globalNodeIndices=np.empty(8,dtype=np.int64)
         
@@ -300,7 +310,7 @@ class AdmittanceHex():
 #     ('iSourceVals',float64[:]),
 #     ])
 class Simulation:
-    def __init__(self,resultPath):
+    def __init__(self,resultPath,extents=np.zeros(3)):
         self.iSourceCoords=[]
         self.iSourceNodes=[]
         self.iSourceVals=[]
@@ -308,7 +318,7 @@ class Simulation:
         self.vSourceVals=[]
         self.vSourceNodes=[]
         
-        self.mesh=Mesh(np.array([0,0,0]))
+        self.mesh=Mesh(extents)
         self.currentTime=0.
         
         self.stepLogs=[]
@@ -321,6 +331,9 @@ class Simulation:
         self.RHS=[]
         
         self.resultPath=resultPath
+        self.meshtype='uniform'
+        
+        self.ptPerAxis=0
         
         self.iteration=0
         
@@ -378,19 +391,33 @@ class Simulation:
             "Element type",
             "Number of nodes",
             "Number of elements",
-            "FVU",
-            "MakeElements",
-            "Calc Conductances",
-            "Sort Nodes",
-            "Set RHS",
-            "Filter conductances",
-            "Assemble system",
-            "Solve system",
-            "Total time",
-            "Max memory"]
+            ]
+        
+        for log in self.stepLogs:
+            cols.append(log.name)
+            
+        cols.extend(["Total time","Max memory"])
         return ','.join(cols)
     
-    def logAsTableEntry(self,csvFile,FVU,extraCols=None, extraVals=None):
+    def logAsTableEntry(self,csvFile,extraCols=None, extraVals=None):
+        """
+        Logs key metrics of simulation as an additional line of a .csv file.
+        Custom categories (column headers) and their values can be added to the line
+
+        Parameters
+        ----------
+        csvFile : file path
+            File where data is written to.
+        extraCols : string[:], optional
+            Additional categories (column headers). The default is None.
+        extraVals : numeric[:], optional
+            Values corresponding to the additional categories. The default is None.
+
+        Returns
+        -------
+        None.
+
+        """
         oldfile=os.path.exists(csvFile)
         f=open(csvFile,'a')
         
@@ -409,7 +436,7 @@ class Simulation:
             self.mesh.elementType,
             self.mesh.nodeCoords.shape[0],
             len(self.mesh.elements),
-            FVU]
+            ]
         dt=0
         memory=0
         for log in self.stepLogs:
@@ -449,9 +476,11 @@ class Simulation:
 
         """
         if index is not None:
-            coords=self.mesh.nodeCoords[index]
             self.iSourceNodes.append(index)
             self.iSourceVals.append(value)
+            
+        else:
+            self.mesh.nodeCoords.append(coords)
 
 #TODO: account for non-nodal sources        
     def addVoltageSource(self,value,coords=None,index=None):
@@ -493,6 +522,8 @@ class Simulation:
         """
         self.startTiming("Calculate conductances")
         edges,conductances=self.mesh.getConductances()
+        self.edges=edges
+        self.conductances=conductances
         self.logTime()
         
         self.startTiming("Sort node types")
@@ -545,6 +576,8 @@ class Simulation:
         """
         self.startTiming("Calculate conductances")
         edges,conductances=self.mesh.getConductances()
+        self.edges=edges
+        self.conductances=conductances
         self.logTime()
         
         self.startTiming("Sort node types")
@@ -588,50 +621,58 @@ class Simulation:
         nElems=len(self.mesh.elements)
         
         r=np.linalg.norm(self.mesh.nodeCoords,axis=1)
-        rDense=np.linspace(min(r[rest]),max(r[rest]),100)
+        rDense=np.linspace(0,max(r[rest]),100)
+        
+        sorter=np.argsort(r)
+        rsort=r[sorter]
+        vsort=v[sorter]
+        
         
         
         
         #TODO: extend to multiple sources
-        analytic=analyticVsrc(np.zeros(3), srcAmplitude, r,srcType=srcType)
+        analytic=analyticVsrc(np.zeros(3), srcAmplitude, rsort,srcType=srcType)
         analyticDense=analyticVsrc(np.zeros(3), srcAmplitude, rDense,srcType=srcType)
         
-        FVU,err=getFVU(v, analytic, rest)
-        errAll=np.zeros(coords.shape[0])
-        errAll[rest]=err
+        err=vsort-analytic
+        # FVU,err=getFVU(v, analytic, rest)
+   
+        # errAll=np.zeros(coords.shape[0])
+        # errAll[rest]=err
+        FVU=np.trapz(abs(err),rsort)/np.trapz(analytic,rsort)
 
-        if showPlots:
+        # if showPlots:
             
-            figResult=plt.figure()
-            showSlice(coords,v, nX,plotWhich=rest,edges=edges)
-            plt.title('Simulated solution [V]')
-            plt.tight_layout()
+        #     figResult=plt.figure()
+        #     showSlice(coords,v, nX,plotWhich=None,edges=edges)
+        #     plt.title('Simulated solution [V]')
+        #     plt.tight_layout()
             
         
-            figImage=plt.figure()
-            showSlice(coords,errAll, nX,plotWhich=rest,edges=edges,forceBipolar=True)
-            plt.title('Absolute error [V]')
-            plt.tight_layout()
+        #     figImage=plt.figure()
+        #     showSlice(coords,errAll, nX,plotWhich=None,edges=edges,forceBipolar=True)
+        #     plt.title('Absolute error [V]')
+        #     plt.tight_layout()
             
-            fig2d, axes=plt.subplots(2,1)
-            ax2dA,ax2dB=axes
-            ax2dA.xaxis.set_major_formatter(mpl.ticker.EngFormatter())
-            ax2dA.plot(rDense,analyticDense, label='Analytical')
-            ax2dA.scatter(r[rest],v[rest],c='r',label='Simulation')
-            ax2dA.legend()
-            ax2dA.set_title('%d nodes, %d elements\nFVU= %g'%(nNodes,nElems,FVU))
-            ax2dA.set_xlabel('Distance from source [m]')
-            ax2dA.set_ylabel('Voltage [V]')
+        #     fig2d, axes=plt.subplots(2,1)
+        #     ax2dA,ax2dB=axes
+        #     ax2dA.xaxis.set_major_formatter(mpl.ticker.EngFormatter())
+        #     ax2dA.plot(rDense,analyticDense, label='Analytical')
+        #     ax2dA.scatter(r[rest],v[rest],c='r',label='Simulation')
+        #     ax2dA.legend()
+        #     ax2dA.set_title('%d nodes, %d elements\nFVU= %g'%(nNodes,nElems,FVU))
+        #     ax2dA.set_xlabel('Distance from source [m]')
+        #     ax2dA.set_ylabel('Voltage [V]')
             
-            ax2dB.scatter(r[rest],err,c='r',label='Absolute')
-            ax2dB.set_ylabel('Absolute error [V]')
-            ax2dB.sharex(ax2dA)
-            plt.tight_layout()
+        #     ax2dB.scatter(r[rest],err,c='r',label='Absolute')
+        #     ax2dB.set_ylabel('Absolute error [V]')
+        #     ax2dB.sharex(ax2dA)
+        #     plt.tight_layout()
             
-            if savePlots:
-                figResult.savefig(self.resultPath+'result_'+self.iteration)
-                figImage.savefig(self.resultPath+'errorImage_'+self.iteration)
-                fig2d.savefig(self.resultPath+'errorPlot_'+self.iteration)
+        #     if savePlots:
+        #         figResult.savefig(self.resultPath+'result_'+self.iteration)
+        #         figImage.savefig(self.resultPath+'errorImage_'+self.iteration)
+        #         fig2d.savefig(self.resultPath+'errorPlot_'+self.iteration)
         
         return FVU
     
@@ -768,7 +809,18 @@ class Simulation:
 
     
     def getNodeTypes(self):
-        
+        """
+        Gets an integer per node indicating its role:
+            0: Unknown voltage
+            1: Fixed voltage
+            2: Fixed current, unknown voltage
+
+        Returns
+        -------
+        TYPE
+            DESCRIPTION.
+
+        """
         nNodes=self.mesh.nodeCoords.shape[0]        
         nFixedV=len(self.vSourceNodes)
         nFixedI=len(self.iSourceNodes)
@@ -804,6 +856,36 @@ class Simulation:
         return nodeType, global2Subset, np.array(vFix2Global), np.array(iFix2Global), np.array(dof2Global)
         
     
+    def resamplePlane(self,nXSamples=None,normalAxis=2,axisLocation=0.):
+        
+        xmax=max(self.mesh.extents)/2
+
+        if nXSamples is None:
+            nXSamples=self.ptPerAxis
+                    
+        coords=self.mesh.nodeCoords
+        sel=np.equal(coords[:,normalAxis],axisLocation)
+        selAx=np.array([n for n in range(3) if n!=normalAxis])
+            
+        planeCoords=coords[:,selAx]
+        sliceCoords=planeCoords[sel]
+        
+        xx=np.linspace(-xmax,xmax,nXSamples)
+        XX,YY=np.meshgrid(xx,xx)
+        
+        interpCoords=np.vstack((XX.ravel(),YY.ravel(),np.zeros_like(XX.ravel()))).transpose()
+        vInterp=np.empty_like(XX.ravel())
+        
+        for ii in range(len(interpCoords)):
+            interpCoord=interpCoords[ii]
+            container=self.mesh.getContainingElement(interpCoord)
+            contNodes=container.globalNodeIndices
+            contV=self.nodeVoltages[contNodes]
+            interp=getElementInterpolant(container, contV)
+            vInterp[ii]=evalulateInterpolant(interp, interpCoord)
+            
+        return vInterp.reshape((nXSamples,nXSamples)), interpCoords
+    
 def getMappingArrays(generalArray,subsetArray):
     gen2sub=-np.ones(len(generalArray))
     sub2gen=[np.argwhere(n==generalArray).squeeze() for n in subsetArray]
@@ -817,8 +899,9 @@ class Mesh:
         self.conductances=[]
         self.elementType=elementType
         self.nodeCoords=np.empty((0,3),dtype=np.float64)
-        
         self.edges=[]
+        
+        self.minl0=0
         
         
     def __getstate__(self):
@@ -829,6 +912,7 @@ class Mesh:
         for el in self.elements:
             d={'origin':el.origin,
                'extents':el.extents,
+               'l0':el.l0,
                'sigma':el.sigma,
                'nodeIndices':el.globalNodeIndices}
             elInfo.append(d)
@@ -838,19 +922,34 @@ class Mesh:
     
     def __setstate__(self,state):
         self.__dict__.update(state)
+        elDicts=self.elements.copy()
+        self.elements=[]
         
+        for ii,el in enumerate(elDicts):
+            self.addElement(el['origin'], el['extents'],
+                            el['sigma'], el['nodeIndices'])
         
-    def getContainingElement(coords):
-        nElements=len(elements)
+    def getContainingElement(self,coords):
+        nElem=len(self.elements)
+        
+        #TODO: workaround fudge factor
+        tol=1e-9*np.ones(3)
         
         for nn in nb.prange(nElem):
             elem=self.elements[nn]
-            delta=coords-elem.origin
-            difs=np.logical_and(delta>0,delta<elem.extents)
+            # if type(elem) is dict:
+            #     delta=coords-elem['origin']
+            #     ext=elem['extents']
+            # else:
+            delta=coords-elem.origin+tol
+            ext=elem.extents+2*tol
+                
+                
+            difs=np.logical_and(delta>=0,delta<=ext)
             if all(difs):
-                return nn
+                return elem
            
-        raise ValueError('Point (%s) not inside any element' % ' '.join(map(coords)))
+        raise ValueError('Point (%s) not inside any element' % ','.join(map(str,coords)))
             
        
     def addElement(self,origin, extents,sigma,nodeIndices):
@@ -885,7 +984,12 @@ class Mesh:
         self.edges=edgeIndices
         return edgeIndices,conductances
     
-
+    def getL0Min(self):
+        l0Min=np.infty
+        
+        for el in self.elements:
+            l0Min=min(l0Min,el.l0)
+        return l0Min
 
 class Logger():
     def __init__(self,stepName):
@@ -985,6 +1089,7 @@ class Octree():
     def countElements(self):
         return self.tree.countElements()
     
+    #TODO: desperately slow. need to fix
     def getCoordsRecursively(self):
         coords,i=self.tree.getCoordsRecursively(self.bbox,self.maxDepth)
         indices=np.array(i)
@@ -996,6 +1101,8 @@ class Octree():
             newNodes=[sparse2denseIndex(n,np.array(indices)) for n in tstNodes]
             o.globalNodes=np.array(newNodes)
         return np.array(coords)
+    
+
   
 @nb.njit()
 def sparse2denseIndex(sparseVal,denseList):
@@ -1238,7 +1345,7 @@ def analyticVsrc(srcCoord,srcAmplitude,rVec,srcType='Current',sigma=1, srcRadius
         Voltage at each specified distance.
 
     """
-    r=rVec.copy()  
+    r=rVec.copy()
     r[r<srcRadius]=srcRadius
 
         
@@ -1247,7 +1354,10 @@ def analyticVsrc(srcCoord,srcAmplitude,rVec,srcType='Current',sigma=1, srcRadius
     else:
         v0=srcAmplitude
         
-    return v0*srcRadius/r
+    vVec=v0*srcRadius/r
+    
+            
+    return vVec
 
 def getFVU(vsim,analytic,whichPts):
     """
@@ -1289,6 +1399,9 @@ def getFVU(vsim,analytic,whichPts):
         
 class SimStudy:
     def __init__(self,studyPath,boundingBox):
+        
+        if not os.path.exists(studyPath):
+            os.makedirs(studyPath)
         self.studyPath=studyPath
         
         self.nSims=-1
@@ -1308,14 +1421,32 @@ class SimStudy:
         if simName is None:
             simName='sim%d'%self.nSims
             
-        sim=Simulation(simName)
-        sim.mesh.extents=self.span
+        sim=Simulation(simName,extents=self.span)
+        # sim.mesh.extents=self.span
         
         self.currentSim=sim
         
         return sim
     
-    
+    def newLogEntry(self,extraCols=None, extraVals=None):
+        fname=os.path.join(self.studyPath,'log.csv')
+        self.currentSim.logAsTableEntry(fname,extraCols=extraCols,extraVals=extraVals)
+        
+        
+    def makeStandardPlots(self,savePlots=True,keepOpen=False):
+        plotfuns=[error2d, centerSlice]
+        plotnames=['err2d','imgMesh']
+        
+        for f,n in zip(plotfuns,plotnames):
+            fig=plt.figure()
+            f(fig,self.currentSim)
+            
+            if savePlots:
+                self.savePlot(fig, n, '.png')
+                if not keepOpen:
+                    plt.close(fig)
+        
+        
     def saveData(self,simulation):
         data={}
         
@@ -1325,35 +1456,55 @@ class SimStudy:
     def loadData(self,simName):
         fname=os.path.join(self.studyPath,simName+'.p')
         data=pickle.load( open(fname,'rb'))
+
         return data
         
     def savePlot(self,fig,fileName,ext):
-        basepath=os.join(self.studypath,self.currentSim.resultPath)
-        fname=os.join(basepath,fileName+ext)
+        basepath=os.path.join(self.studyPath,self.currentSim.resultPath)
+        
+        if not os.path.exists(basepath):
+            os.makedirs(basepath)
+        fname=os.path.join(basepath,fileName+ext)
         plt.savefig(fname)
         
     def animatePlot(self,plotfun,aniName=None):
         ims=[]
         cmax=0.
         cmin=0.
-        fnames=os.listdir(self.studyPath)
+        files=os.listdir(self.studyPath)
+        
+        fnames=[]
+        
+        for n in files:
+            name,ext=os.path.splitext(n)
+            if ext=='.p':
+                fnames.append(name)
+            
         fnames.sort()
         
         fig=plt.figure()
-        # assy=ErrorGraph(fig)
-        for fn in fnames:
-            name,ext=os.path.splitext(fn)
-            if ext=='.p':
-                dat=self.loadData(name)
-                im=plotfun(fig,dat)
-                # im=assy.update(dat)
-                ims.append(im)
-            
-        ani=mpl.animation.ArtistAnimation(fig, ims, interval=500, repeat_delay=1000)
+        for ii,name in enumerate(fnames):
+            dat=self.loadData(name)
+            im=plotfun(fig,dat)
+            txt=fig.text(0.01,0.95,'frame %d'%ii,
+                           horizontalalignment='left',verticalalignment='bottom')
+            im.append(txt)
+            ims.append(im)
         
+        # def aniFun(ii):
+        #     sim=self.loadData(fnames[ii])
+        #     art=plotfun(fig,sim)
+        #     txt=fig.text(1,1,'frame %d'%ii,
+        #                  horizontalalignment='left',verticalalignment='bottom')
+        #     art.append(txt)
+        #     return art
+            
+            
+        ani=mpl.animation.ArtistAnimation(fig, ims, interval=1000, repeat_delay=2000,blit=False)
+        # ani=mpl.animation.FuncAnimation(fig, aniFun, interval=1000,repeat_delay=2000,blit=True)
         if aniName is None:
             plt.show()
         else:
-            ani.save(os.path.join(self.studyPath,aniName+'.mp4'))
+            ani.save(os.path.join(self.studyPath,aniName+'.mp4'),fps=1)
             
         return ani

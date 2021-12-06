@@ -18,39 +18,73 @@ import xCell
 import matplotlib.pyplot as plt
 
 
-showGraphs=True
-# fname="Results/cube/currentMode.csv"
-resultpath="Results/cube/errEst/"
-fname='uniform_current_dirsolve.csv'
+studyPath='Results/studyTst'
+
+maxdepth=10
+xmax=1e-4
+sigma=np.ones(3)
 
 
-xmax=1e-5
-#must be even
-nDiv=30
+vMode=False
+showGraphs=False
+generate=False
 
-# elType='FEM'
-elType='Admittance'
+vsrc=1.
+isrc=vsrc*4*np.pi*sigma*1e-6
 
-vMode=True
-def runUniformGrid(nDiv,elType,xmax,showGraphs,vMode=False,logTimes=False):
-    
-    # plt.close('all')
-    sigma=np.array([1.,1.,1.])
-    
-    
-    boundingBox=np.append(-xmax*np.ones(3),xmax*np.ones(3))
-    
-    xx=np.linspace(-xmax,xmax,nDiv+1)
+bbox=np.append(-xmax*np.ones(3),xmax*np.ones(3))
+
+
+study=xCell.SimStudy(studyPath,bbox)
+
+
+
+def makeUniformGrid(simulation,nX):
+    xmax=simulation.mesh.extents[0]
+       
+    xx=np.linspace(-xmax,xmax,nX+1)
     XX,YY,ZZ=np.meshgrid(xx,xx,xx)
     
     
     coords=np.vstack((XX.ravel(),YY.ravel(), ZZ.ravel())).transpose()
     r=np.linalg.norm(coords,axis=1)
-    setup=xCell.Simulation(resultpath)
     
-    setup.mesh.nodeCoords=coords
-    setup.mesh.extents=2*xmax*np.ones(3)
-    setup.mesh.elementType=elType
+    simulation.mesh.nodeCoords=coords
+    simulation.mesh.extents=2*xmax*np.ones(3)
+    simulation.mesh.elementType='Admittance'
+    
+    simulation.startTiming("Make elements")
+    for zz in range(nx):
+        for yy in range(nX):
+            for xx in range(nX):
+                elOriginNode=xx+yy*(nX+1)+zz*(nX+1)**2
+                origin=coords[elOriginNode]
+                elementNodes=elOriginNode+nodeOffsets
+                
+                simulation.mesh.addElement(origin, elExtents, sigma,elementNodes)
+                
+    simulation.logTime() 
+
+def runUniformGrid(nDiv,elType,xmax,showGraphs,vMode=False,logTimes=False):
+    
+    # plt.close('all')
+    # sigma=np.array([1.,1.,1.])
+    
+    
+    # boundingBox=np.append(-xmax*np.ones(3),xmax*np.ones(3))
+    
+    # xx=np.linspace(-xmax,xmax,nDiv+1)
+    # XX,YY,ZZ=np.meshgrid(xx,xx,xx)
+    
+    
+    # coords=np.vstack((XX.ravel(),YY.ravel(), ZZ.ravel())).transpose()
+    # r=np.linalg.norm(coords,axis=1)
+    # setup=xCell.Simulation(resultpath)
+    
+    # setup.mesh.nodeCoords=coords
+    # setup.mesh.extents=2*xmax*np.ones(3)
+    # setup.mesh.elementType=elType
+    makeUniformGrid(sim,nDiv)
     
     # place unit source at center 
     sourceIndex=np.floor_divide(coords.shape[0],2)
@@ -79,21 +113,21 @@ def runUniformGrid(nDiv,elType,xmax,showGraphs,vMode=False,logTimes=False):
     
     elExtents=setup.mesh.extents/nDiv
     
-    elOffsets=np.array([1,nDiv+1,(nDiv+1)**2])
-    nodeOffsets=np.array([np.dot(xCell.toBitArray(i),elOffsets) for i in range(8)])
+    # elOffsets=np.array([1,nDiv+1,(nDiv+1)**2])
+    # nodeOffsets=np.array([np.dot(xCell.toBitArray(i),elOffsets) for i in range(8)])
     
     
-    setup.startTiming("Make elements")
-    for zz in range(nDiv):
-        for yy in range(nDiv):
-            for xx in range(nDiv):
-                elOriginNode=xx+yy*(nDiv+1)+zz*(nDiv+1)**2
-                origin=coords[elOriginNode]
-                elementNodes=elOriginNode+nodeOffsets
+    # setup.startTiming("Make elements")
+    # for zz in range(nDiv):
+    #     for yy in range(nDiv):
+    #         for xx in range(nDiv):
+    #             elOriginNode=xx+yy*(nDiv+1)+zz*(nDiv+1)**2
+    #             origin=coords[elOriginNode]
+    #             elementNodes=elOriginNode+nodeOffsets
                 
-                setup.mesh.addElement(origin, elExtents, sigma,elementNodes)
+    #             setup.mesh.addElement(origin, elExtents, sigma,elementNodes)
                 
-    setup.logTime()            
+    # setup.logTime()            
     
     print('%d nodes, %d elements' % (coords.shape[0],len(setup.mesh.elements)))
                 
@@ -123,13 +157,5 @@ def runUniformGrid(nDiv,elType,xmax,showGraphs,vMode=False,logTimes=False):
 
 
 # runUniformGrid(nDiv, elType, xmax, showGraphs=True,vMode=True,logTimes=False)
-runUniformGrid(18, elType, 1e-3, showGraphs=True,vMode=False,logTimes=False)
+runUniformGrid(18, 1e-3, showGraphs=True,vMode=False,logTimes=False)
 
-
-# for nd in range(2,6):
-#     for xx in np.logspace(-5,-3,20):
-#         runUniformGrid(2**nd, elType, xx,showGraphs=False,vMode=False,logTimes=True)
-        
-
-# for nd in range(2,7):
-#     runUniformGrid(2**nd, elType, 1e-4, showGraphs=False,vMode=False,logTimes=True)

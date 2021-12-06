@@ -12,9 +12,9 @@ import matplotlib.pyplot as plt
 import numba as nb
 import resource 
 
-xmax=1e-3
+xmax=1e-4
 
-maxDepth=15
+maxDepth=8
 
 sigma=np.ones(3,dtype=np.float64)
 vMode=False
@@ -37,9 +37,11 @@ def runL0Grid(maxDepth,coef,xmax,showGraphs,vMode,logTimes):
     
     
     @nb.njit
-    def toR(coord):
+    def toR(coord,coef=coef):
         r=np.linalg.norm(coord)
-        val=coef*np.linalg.norm(coord)
+        # val=coef*np.linalg.norm(coord)
+        # val=(coef*r**2)**(1/3) #current continuity
+        val=(coef*r**4)**(1/3) #dirichlet energy continutity
         if val<1e-6:
             val=1e-6
         return val
@@ -103,4 +105,4 @@ def runL0Grid(maxDepth,coef,xmax,showGraphs,vMode,logTimes):
 #     for xx in np.logspace(-5,-3,10):
 #         runL0Grid(12,co, xx, showGraphs=False, vMode=False, logTimes=True)
 
-runL0Grid(7, .5,1e-4, showGraphs=True, vMode=False, logTimes=False)
+runL0Grid(5, 1e4,1e-4, showGraphs=True, vMode=False, logTimes=False)
