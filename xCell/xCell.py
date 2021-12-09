@@ -639,7 +639,24 @@ class Simulation:
    
         # errAll=np.zeros(coords.shape[0])
         # errAll[rest]=err
-        FVU=np.trapz(abs(err),rsort)/np.trapz(analytic,rsort)
+        # FVU=0
+        
+        # sel=np.zeros_like(v,dtype=bool)
+        # sel[:2]=True
+        
+        # for ii in range(len(v)-1):
+        #     ra,rb=rsort[sel]
+        #     anA,anB=analytic[sel]
+        #     simA,simB=v[sel]
+        #     areaSim=0.5*(rb-ra)*sum(v[sel])
+        #     areaAna=(anA/ra)*np.log(rb/ra)
+        #     if np.isinf(areaAna):
+        #         areaAna=
+            
+        #     FVU+=abs(areaAna-areaSim)
+        #     sel=np.roll(sel,1)
+            
+        FVU=np.trapz(abs(err),rsort)/np.trapz(analyticDense,rDense)
 
         # if showPlots:
             
@@ -992,9 +1009,10 @@ class Mesh:
         return l0Min
 
 class Logger():
-    def __init__(self,stepName):
+    def __init__(self,stepName,printStart=True):
         self.name=stepName
-        print(stepName+" starting")
+        if printStart:
+            print(stepName+" starting")
         self.start=time.process_time()
         self.duration=0
         self.memory=0
@@ -1059,18 +1077,24 @@ class Octree():
         
         idx=np.rint(newInd).astype(np.int64)
         if len(self.indexMap)!=0:
-            idx=sparse2denseIndex(idx,self.indexMap)
+            idx=reindex(idx,self.indexMap)
         return idx
         
     def makeMesh(self,mesh):
         octs=self.tree.getTerminalOctants()
         coords=self.getCoordsRecursively()
+        indices=self.indexMap
         mesh.nodeCoords=coords
         
+        
+        T=Logger('tree-makeElements',False)
         for o in octs:
             # ocoords=o.getOwnCoords()
-            mesh.addElement(o.origin,o.span,np.ones(3),o.globalNodes)
+            onodes=o.globalNodes
+            gnodes=sparse2denseIndex(onodes, indices)
+            mesh.addElement(o.origin,o.span,np.ones(3),gnodes)
         
+        T.logCompletion()
         return mesh
     
     def printStructure(self):
@@ -1089,29 +1113,56 @@ class Octree():
     def countElements(self):
         return self.tree.countElements()
     
-    #TODO: desperately slow. need to fix
     def getCoordsRecursively(self):
+        T=Logger('tree-coordRecursion',False)
         coords,i=self.tree.getCoordsRecursively(self.bbox,self.maxDepth)
+        T.logCompletion()
+        
         indices=np.array(i)
         self.indexMap=indices
         
-        for o in self.tree.getTerminalOctants():
-            tstNodes=o.globalNodes
-            # newNodes=[np.argwhere(indices==n).squeeze() for n in tstNodes]
-            newNodes=[sparse2denseIndex(n,np.array(indices)) for n in tstNodes]
-            o.globalNodes=np.array(newNodes)
+        # T=Logger('treeRenumberTermial',False)
+        # terms=self.tree.getTerminalOctants()
+        # for ii in nb.prange(len(terms)):
+        #     o=terms[ii]
+        #     tstNodes=o.globalNodes
+        #     # newNodes=[np.argwhere(indices==n).squeeze() for n in tstNodes]
+        #     # newNodes=[sparse2denseIndex(n,indices) for n in tstNodes]
+            
+        #     o.globalNodes=sparse2denseIndex(tstNodes,indices)
+        # T.logCompletion()
         return np.array(coords)
+         
     
 
   
+# @nb.njit()
+# def sparse2denseIndex(sparseVals,denseList):
+#     idxList=np.empty_like(sparseVals)
+#     for ns,sval in np.ndenumerate(sparseVals): 
+#         for n,val in np.ndenumerate(denseList):
+#             if val==sval:
+#                 idxList[ns]=n
+#                 break
+#     return idxList
+
+# @nb.njit(nb.int64[:](nb.int64[:],nb.int64[:]))
 @nb.njit()
-def sparse2denseIndex(sparseVal,denseList):
-    
+def sparse2denseIndex(sparseVals,denseVals):
+    # idxList=[reindex(sp,denseVals) for sp in sparseVals]
+    idxList=[]
+    for ii in nb.prange(len(sparseVals)):
+        idxList.append(reindex(sparseVals[ii],denseVals))
+    return np.array(idxList,dtype=np.int64)
+
+@nb.njit()
+def reindex(sparseVal,denseList):
+    # startguess=sparseVal//denseList[-1]
     for n,val in np.ndenumerate(denseList):
+    # for n,val in enumerate(denseList):
+
         if val==sparseVal:
             return n[0]
-        
-    # return None
         
 # octantspec= [
 #     ('origin',nb.float64[:]),
@@ -1127,7 +1178,7 @@ def sparse2denseIndex(sparseVal,denseList):
 #     ]
 # @nb.experimental.jitclass(spec=octantspec)
 class Octant():
-    def __init__(self,origin, span,depth=0,index=0):
+    def __init__(self,origin, span,depth=0,index=[]):
         self.origin=origin
         self.span=span
         self.center=origin+span/2
@@ -1142,19 +1193,33 @@ class Octant():
 
         
     def calcGlobalIndices(self,globalBbox,maxdepth):
-        x0=globalBbox[:3]
+        # x0=globalBbox[:3]
         nX=2**maxdepth
-        dX=(globalBbox[3:]-x0)/(nX)
-        coords=self.getOwnCoords()
+        # dX=(globalBbox[3:]-x0)/(nX)
+        # coords=self.getOwnCoords()
         
-        ndxOffsets=np.array([(nX+1)**n for n in range(3)])
+        toGlobal=np.array([(nX+1)**n for n in range(3)])
         
-        for N,c in enumerate(coords):
-            idxArray=(c-x0)/dX
-            ndx=np.dot(ndxOffsets,idxArray)
-            self.globalNodes[N]=ndx
+        # for N,c in enumerate(coords):
+        #     idxArray=(c-x0)/dX
+        #     ndx=np.dot(ndxOffsets,idxArray)
+        #     self.globalNodes[N]=ndx
             
-        return self.globalNodes
+        # return self.globalNodes
+        xyz=np.zeros(3,dtype=np.int64)
+        for ii,idx in enumerate(self.index):
+            ldepth=maxdepth-ii-1
+            step=2**ldepth
+            xyz+=step*toBitArray(idx)
+            
+        ownstep=2**(maxdepth-self.depth)
+        
+        ownXYZ=[xyz+ownstep*toBitArray(i) for i in range(8)]
+        indices=np.array([np.dot(ndxlist,toGlobal) for ndxlist in ownXYZ])
+            
+        self.globalNodes=indices
+        return indices
+            
             
         
     def countElements(self):
@@ -1171,14 +1236,18 @@ class Octant():
         for ii in nb.prange(8):
             offset=toBitArray(ii)*newSpan
             newOrigin=self.origin+offset
-            self.children.append(Octant(newOrigin,newSpan,self.depth+1,ii))
+            newIndex=self.index.copy()
+            newIndex.append(ii)
+            self.children.append(Octant(newOrigin,newSpan,self.depth+1,index=newIndex))
             
         # return self.children
     def getOwnCoords(self):
         return [self.origin+self.span*toBitArray(n) for n in range(8)]
+
     
-    
+        #TODO: desperately slow. need to fix
     def getCoordsRecursively(self,bbox,maxdepth):
+        # T=Logger('depth  %d'%self.depth, printStart=False)
         if len(self.children)==0:
             # coords=[self.origin+self.span*toBitArray(n) for n in range(8)]
             coords=self.getOwnCoords()
@@ -1200,11 +1269,12 @@ class Octant():
             
             indices,sel=np.unique(indexList,return_index=True)
             
-            self.globalNodes=indices
+            # self.globalNodes=indices
             
             coords=np.array(coordList)[sel]
             coords=coords.tolist()
                 
+        # T.logCompletion()
         return coords, indices.tolist()
     
     def index2pos(self,ndx,dX):

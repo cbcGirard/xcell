@@ -79,7 +79,7 @@ def runUniformGrid(nDiv,elType,xmax,showGraphs,vMode=False,logTimes=False):
     
     # coords=np.vstack((XX.ravel(),YY.ravel(), ZZ.ravel())).transpose()
     # r=np.linalg.norm(coords,axis=1)
-    # setup=xCell.Simulation(resultpath)
+    setup=xCell.Simulation(resultpath)
     
     # setup.mesh.nodeCoords=coords
     # setup.mesh.extents=2*xmax*np.ones(3)
@@ -157,5 +157,5 @@ def runUniformGrid(nDiv,elType,xmax,showGraphs,vMode=False,logTimes=False):
 
 
 # runUniformGrid(nDiv, elType, xmax, showGraphs=True,vMode=True,logTimes=False)
-runUniformGrid(18, 1e-3, showGraphs=True,vMode=False,logTimes=False)
+runUniformGrid(18, 1e-3, xmax=xmax,showGraphs=True,vMode=False,logTimes=False)
 

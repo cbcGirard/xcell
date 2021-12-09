@@ -94,6 +94,9 @@ def showEdges(axis,coords, edgeIndices, edgeVals=None,colorbar=True):
         (cMap, cNorm) = getCmap(edgeVals)
         gColor = cMap(cNorm(edgeVals))
         alpha=1.
+        if colorbar:
+            axis.figure.colorbar(mpl.cm.ScalarMappable(norm=cNorm, cmap=cMap))
+    
     else:
         # gColor=np.repeat([0,0,0,1], edgeIndices.shape[0])
         gColor=(0.,0.,0.)
@@ -103,9 +106,7 @@ def showEdges(axis,coords, edgeIndices, edgeVals=None,colorbar=True):
     
     axis.add_collection(gCollection)
 
-    if colorbar:
-        axis.figure.colorbar(mpl.cm.ScalarMappable(norm=cNorm, cmap=cMap))
-    
+
     
 def showNodes(axis, coords, nodeVals):
     

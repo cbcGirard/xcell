@@ -82,7 +82,7 @@ if generate:
     if meshtype=='uniform':
         varrange=np.arange(2,7)
     else:
-        varrange=np.linspace(1,0.05,10)
+        varrange=np.linspace(0,1,20)
     
     
     
@@ -90,7 +90,7 @@ if generate:
         if meshtype=='uniform':
             maxdepth=var
         else:
-            l0Param=var
+            l0Param=2**(-maxdepth*var)
         
         setup=study.newSimulation()
         setup.mesh.elementType='Admittance'
@@ -121,9 +121,6 @@ if generate:
     
         setup.startTiming("Make elements")
   
-        
-        
-        
         coords=setup.mesh.nodeCoords
         
         
@@ -132,6 +129,7 @@ if generate:
         numEl=len(setup.mesh.elements)
         
         print('%d elem'%numEl)
+        
         
         if meshtype=='uniform':
             sourceIndex=coords.shape[0]//2
@@ -168,6 +166,11 @@ if generate:
         study.newLogEntry(['Areal error'],[FVU])
         study.saveData(setup)
         lastNumEl=numEl
+        
+        
+        # ax=xCell.new3dPlot( bbox)
+        # xCell.showEdges(ax, coords, setup.mesh.edges)
+        # break
         
         if saveGraphs:
             study.makeStandardPlots()
