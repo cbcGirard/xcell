@@ -45,6 +45,33 @@ def plotBoundEffect(fname,ycat='FVU',xcat='Domain size',groupby='Number of eleme
         
     makePlot(dX,'Domain size [m]')
     makePlot(l0,'Element $l_0$ [m]')
+    
+    
+def groupedScatter(fname,xcat,ycat,groupcat,filtercat=None,df=None):
+    if df is None:
+        df,cats=importRunset(fname)
+    else:
+        cats=df.keys()
+    
+    dX=df[xcat]
+    dY=df[ycat]
+    dL=df[groupcat]
+    
+    catNames=dL.unique()
+
+    ax=plt.figure().add_subplot()
+    ax.grid(True)
+    ax.set_xlabel(xcat)
+    ax.set_ylabel(ycat)
+    # outsideLegend()
+    for ii,label in enumerate(catNames):
+        sel=dL==label
+        plt.loglog(dX[sel],dY[sel],marker='.',
+                   label=groupcat+': '+str(label))
+        
+    
+    outsideLegend()
+    plt.tight_layout()
 
 def importRunset(fname):
     df=pandas.read_csv(fname)
@@ -52,21 +79,21 @@ def importRunset(fname):
     
     return df,cats
 
-def importAndPlotTimes(fname,onlyType=None,xCat='Number of elements',numExtraFields=0):
+def importAndPlotTimes(fname,onlyCat=None,onlyVal=None,xCat='Number of elements'):
     df, cats = importRunset(fname)
-    if onlyType is not None:
-        df=df[df['Element type']==onlyType]
+    if onlyVal is not None:
+        df=df[df[onlyCat]==onlyVal]
     
     
     xvals=df[xCat].to_numpy()
-    nSkip=-1-numExtraFields
+    nSkip=1+np.argwhere(cats=='Total time')[0][0]
     
     def getTimes(df,cats):
-        cols=cats[5:nSkip]
+        cols=cats[6:nSkip]
         return df[cols].to_numpy().transpose()
     
     stepTimes=getTimes(df,cats)
-    stepNames=cats[5:nSkip]
+    stepNames=cats[6:nSkip]
     
     ax=plt.figure().add_subplot()
     
@@ -337,6 +364,7 @@ def centerSlice(fig,simulation,rElec=1e-6):
     errArt.append(showEdges2d(axE, edgePoints))
     
     vArt.extend(errArt)
+    plt.tight_layout()
     
     return vArt
 
@@ -351,7 +379,7 @@ def getPlanarEdgePoints(coords,edges, normalAxis=2, axisCoord=0):
 
     return edgePts
     
-def error2d(fig,simulation,rElec=1e-6):
+def error2d(fig,simulation,rElec=1e-6,datalabel='Simulation'):
     
     nTypes,_,_,_,_=simulation.getNodeTypes()
     # rest=np.logical_or(nTypes==0,nTypes==2)
@@ -366,7 +394,10 @@ def error2d(fig,simulation,rElec=1e-6):
     rsort=r[sorter]
     vsort=v[sorter]
 
-    rDense=np.linspace(0,max(r[rest]),100)
+    # rDense=np.linspace(0,max(r[rest]),100)
+    lmin=np.log10(rElec/2)
+    lmax=np.log10(max(r[rest]))
+    rDense=np.logspace(lmin,lmax,100)
     
     def vAna(r):
         r[r<rElec]=rElec
@@ -379,6 +410,7 @@ def error2d(fig,simulation,rElec=1e-6):
     err=vsort-analytic
     FVU=np.trapz(np.abs(err),rsort)/np.trapz(analyticDense,rDense)
     
+    # errRel=err/analytic
     # fig2d, axes=plt.subplots(2,1)
     # ax2dA,ax2dB=axes
     
@@ -390,10 +422,13 @@ def error2d(fig,simulation,rElec=1e-6):
         ax2dA.set_xlabel('Distance from source [m]')
         ax2dA.set_ylabel('Voltage [V]')
         ax2dB.set_ylabel('Absolute error [V]')
+        # ax2dB.set_ylabel('Relative error')
+
         ax2dA.set_xscale('log')
         ax2dB.set_xscale('log')
         ax2dB.sharex(ax2dA)
-    
+        anaLine=ax2dA.plot(rDense,analyticDense,c='b',label='Analytical')
+
         isNew=True
     else:
         ax2dA,ax2dB=fig.axes
@@ -402,16 +437,17 @@ def error2d(fig,simulation,rElec=1e-6):
         # ax2dB.cla()
         
  
-    anaLine=ax2dA.plot(rDense,analyticDense,c='b',label='Analytical')
-    simLine=ax2dA.plot(rsort,vsort,c='k',marker='.',label='Simulation')
+    simLine=ax2dA.plot(rsort,vsort,c='k',marker='.',label=datalabel)
     if isNew:
         ax2dA.legend()
     # title=fig.suptitle('%d nodes, %d elements\nFVU= %g'%(nNodes,nElems,FVU))
-    title=fig.text(0.5,1.01,'%d nodes, %d elements, error %.2g Vm'%(nNodes,nElems,FVU),
+    title=fig.text(0.5,1.01,
+                   '%s:%d nodes, %d elements, error %.2g Vm'%(simulation.meshtype,nNodes,nElems,FVU),
                     horizontalalignment='center', verticalalignment='bottom', transform=ax2dA.transAxes)
 
-    errLine=ax2dB.scatter(r[rest],err[rest],c='r',marker='.',label='Absolute')
+    errLine=ax2dB.scatter(r[rest],err[rest],c='r',marker='.',label=datalabel)
 
     plt.tight_layout()
-    return [anaLine[0],simLine[0],errLine,title]
+    return [simLine[0],errLine,title]
   
+    

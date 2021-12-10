@@ -127,7 +127,14 @@ def anyMatch(searchArray,searchVals):
             return True
     
     return False
+
+
+# @nb.experimental.jitclass([
     
+#     ])
+# class Source:
+#     def __init()__(self,typecoords,ampradius):
+        
 
 @nb.experimental.jitclass([
     ('origin', float64[:]),
@@ -310,7 +317,7 @@ class AdmittanceHex():
 #     ('iSourceVals',float64[:]),
 #     ])
 class Simulation:
-    def __init__(self,resultPath,extents=np.zeros(3)):
+    def __init__(self,name,extents=np.zeros(3)):
         self.iSourceCoords=[]
         self.iSourceNodes=[]
         self.iSourceVals=[]
@@ -330,7 +337,7 @@ class Simulation:
         self.gMat=[]
         self.RHS=[]
         
-        self.resultPath=resultPath
+        self.name=name
         self.meshtype='uniform'
         
         self.ptPerAxis=0
@@ -387,6 +394,8 @@ class Simulation:
     
     def makeTableHeader(self):
         cols=[
+            "File name",
+            "Mesh type",
             "Domain size",
             "Element type",
             "Number of nodes",
@@ -432,6 +441,8 @@ class Simulation:
         
         
         data=[
+            self.name,
+            self.meshtype,
             np.mean(self.mesh.extents),
             self.mesh.elementType,
             self.mesh.nodeCoords.shape[0],
@@ -687,9 +698,9 @@ class Simulation:
         #     plt.tight_layout()
             
         #     if savePlots:
-        #         figResult.savefig(self.resultPath+'result_'+self.iteration)
-        #         figImage.savefig(self.resultPath+'errorImage_'+self.iteration)
-        #         fig2d.savefig(self.resultPath+'errorPlot_'+self.iteration)
+        #         figResult.savefig(self.name+'result_'+self.iteration)
+        #         figImage.savefig(self.name+'errorImage_'+self.iteration)
+        #         fig2d.savefig(self.name+'errorPlot_'+self.iteration)
         
         return FVU
     
@@ -765,7 +776,10 @@ class Simulation:
         
         gDoF=[]
         gDofNodes=[]
-        for edge,g in zip(edges,conductances):     
+        # for edge,g in zip(edges,conductances):   
+        for ii in nb.prange(len(conductances)):
+            edge=edges[ii]
+            g=conductances[ii]
             #adjust diagonals
             diags[edge[0]]+=g
             diags[edge[1]]+=g
@@ -893,7 +907,7 @@ class Simulation:
         interpCoords=np.vstack((XX.ravel(),YY.ravel(),np.zeros_like(XX.ravel()))).transpose()
         vInterp=np.empty_like(XX.ravel())
         
-        for ii in range(len(interpCoords)):
+        for ii in nb.prange(len(interpCoords)):
             interpCoord=interpCoords[ii]
             container=self.mesh.getContainingElement(interpCoord)
             contNodes=container.globalNodeIndices
@@ -1087,14 +1101,16 @@ class Octree():
         mesh.nodeCoords=coords
         
         
-        T=Logger('tree-makeElements',False)
-        for o in octs:
+        # T=Logger('tree-makeElements',False)
+        # for o in octs:
+        for ii in nb.prange(len(octs)):
+            o=octs[ii]
             # ocoords=o.getOwnCoords()
             onodes=o.globalNodes
             gnodes=sparse2denseIndex(onodes, indices)
             mesh.addElement(o.origin,o.span,np.ones(3),gnodes)
         
-        T.logCompletion()
+        # T.logCompletion()
         return mesh
     
     def printStructure(self):
@@ -1114,9 +1130,9 @@ class Octree():
         return self.tree.countElements()
     
     def getCoordsRecursively(self):
-        T=Logger('tree-coordRecursion',False)
+        # T=Logger('tree-coordRecursion',False)
         coords,i=self.tree.getCoordsRecursively(self.bbox,self.maxDepth)
-        T.logCompletion()
+        # T.logCompletion()
         
         indices=np.array(i)
         self.indexMap=indices
@@ -1245,7 +1261,6 @@ class Octant():
         return [self.origin+self.span*toBitArray(n) for n in range(8)]
 
     
-        #TODO: desperately slow. need to fix
     def getCoordsRecursively(self,bbox,maxdepth):
         # T=Logger('depth  %d'%self.depth, printStart=False)
         if len(self.children)==0:
@@ -1520,7 +1535,7 @@ class SimStudy:
     def saveData(self,simulation):
         data={}
         
-        fname=os.path.join(self.studyPath,simulation.resultPath+'.p')
+        fname=os.path.join(self.studyPath,simulation.name+'.p')
         pickle.dump(simulation,open(fname,'wb'))
         
     def loadData(self,simName):
@@ -1530,35 +1545,74 @@ class SimStudy:
         return data
         
     def savePlot(self,fig,fileName,ext):
-        basepath=os.path.join(self.studyPath,self.currentSim.resultPath)
+        basepath=os.path.join(self.studyPath,self.currentSim.name)
         
         if not os.path.exists(basepath):
             os.makedirs(basepath)
         fname=os.path.join(basepath,fileName+ext)
         plt.savefig(fname)
         
-    def animatePlot(self,plotfun,aniName=None):
-        ims=[]
-        cmax=0.
-        cmin=0.
-        files=os.listdir(self.studyPath)
+    def loadLogfile(self):
+        """
+        Returns Pandas dataframe of logged runs
+
+        Returns
+        -------
+        df : TYPE
+            DESCRIPTION.
+        cats : TYPE
+            DESCRIPTION.
+
+        """
+        logfile=os.path.join(self.studyPath,'log.csv')
+        df,cats=importRunset(logfile)
+        return df,cats
         
-        fnames=[]
+    def plotTimes(self,xCat='Number of elements',sortCat=None):
+        logfile=os.path.join(self.studyPath,'log.csv')
+        df,cats=importRunset(logfile)
         
-        for n in files:
-            name,ext=os.path.splitext(n)
-            if ext=='.p':
-                fnames.append(name)
+        if sortCat is not None:
+            plotnames=df[sortCat].unique()
+        else:
+            plotnames=[None]
+
+        for cat in plotnames:
+            importAndPlotTimes(logfile,onlyCat=sortCat,onlyVal=cat,xCat=xCat)
+            plt.title(cat)
             
-        fnames.sort()
+    def plotAccuracyCost(self):
+        logfile=os.path.join(self.studyPath,'log.csv')
+        groupedScatter(logfile, xcat='Total time', ycat='Error', groupcat='Mesh type')
         
+    def animatePlot(self,plotfun,aniName=None,filterCategories=None,filterVals=None,sortCategory=None):
+        logfile=os.path.join(self.studyPath,'log.csv')
+        df,cats=importRunset(logfile)
+            
+        if filterCategories is not None:
+            selector=np.ones(len(df),dtype=bool)
+            for cat,val in zip(filterCategories,filterVals):
+                selector&=df[cat]==val
+                
+            fnames=df['File name'][selector]
+        else:
+            fnames=df['File name']
+            
+        if sortCategory is not None:
+            sortcats=df[sortCategory]
+            
+        
+        
+        ims=[]
         fig=plt.figure()
-        for ii,name in enumerate(fnames):
-            dat=self.loadData(name)
+        # for ii in range(len(fnames)):
+        #     dat=self.loadData(fnames[forder[ii]])
+        for ii,fname in enumerate(fnames):
+            dat=self.loadData(fname)
             im=plotfun(fig,dat)
-            txt=fig.text(0.01,0.95,'frame %d'%ii,
-                           horizontalalignment='left',verticalalignment='bottom')
-            im.append(txt)
+            # txt=fig.text(0.01,0.95,'frame %d'%ii,
+            #                horizontalalignment='left',verticalalignment='bottom')
+            # im.append(txt)
             ims.append(im)
         
         # def aniFun(ii):

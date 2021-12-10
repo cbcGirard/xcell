@@ -12,8 +12,8 @@ import xCell
 import matplotlib.pyplot as plt
 
 
-meshtype='l0/r'
-studyPath='Results/studyTst/'+meshtype
+meshtype='adaptive'
+studyPath='Results/studyTst/d_sweep/'#+meshtype
 
 maxdepth=6
 xmax=1e-4
@@ -52,7 +52,6 @@ def makeUniformGrid(simulation,nX):
     simulation.mesh.extents=2*xmax*np.ones(3)
     simulation.mesh.elementType='Admittance'
     
-    simulation.startTiming("Make elements")
     
     elExtents=np.ones(3)*2*xmax/nX
     elOffsets=np.array([1,nX+1,(nX+1)**2])
@@ -68,115 +67,121 @@ def makeUniformGrid(simulation,nX):
                 
                 simulation.mesh.addElement(origin, elExtents, sigma,elementNodes)
                 
-    simulation.logTime()
+    sourceIndex=coords.shape[0]//2
+    return sourceIndex
 
 
+def makeAdaptiveGrid(simulation,metric,maxdepth):
+
+    otree=xCell.Octree(bbox,maxDepth=maxdepth)
+    otree.refineByMetric(metric)
+    # numEl=len(otree.tree.getTerminalOctants())
+    # if numEl==lastNumEl:
+    #     continue
+    
+    setup.mesh=otree.makeMesh(setup.mesh)
+    
+    sourceIndex=otree.coord2Index(np.zeros(3))
+    return sourceIndex
 
 if generate:
-    # if vMode:
-    #     study.vSourceCoords=np.zeros(3)
-    #     study.vSourceVals=vsrc
-    # else:
-    #     study.iSourceCoords=np.zeros(3)
-    #     study.iSourceVals=isrc
-    if meshtype=='uniform':
-        varrange=np.arange(2,7)
-    else:
-        varrange=np.linspace(0,1,20)
-    
-    
-    
-    for var in varrange:
-        if meshtype=='uniform':
-            maxdepth=var
-        else:
-            l0Param=2**(-maxdepth*var)
-        
-        setup=study.newSimulation()
-        setup.mesh.elementType='Admittance'
-        setup.meshtype=meshtype
-        setup.mesh.minl0=2*xmax/(2**maxdepth)
-        setup.ptPerAxis=1+2**maxdepth
-        
-        if meshtype=='uniform':
-            makeUniformGrid(setup,2**maxdepth)
+   
+    # for var in np.linspace(0.1,0.7,15):
+    for maxdepth in range(2,12):
+        for meshtype in ["adaptive","uniform"]:
+        # for maxdepth in range(2,10):
+            # if meshtype=='uniform':
+            #     maxdepth=var
+            # else:
+            l0Param=2**(-maxdepth*0.2)
             
-        else:
-            def metric(coord,l0Param=l0Param):
-                r=np.linalg.norm(coord)
-                val=l0Param*r #1/r dependence
-                # val=(l0Param*r**2)**(1/3) #current continuity
-                # val=(l0Param*r**4)**(1/3) #dirichlet energy continutity
-                if val<rElec:
-                    val=rElec
-                return val
-            otree=xCell.Octree(bbox,maxDepth=maxdepth)
-            otree.refineByMetric(metric)
-            numEl=len(otree.tree.getTerminalOctants())
-            if numEl==lastNumEl:
-                continue
+            setup=study.newSimulation()
+            setup.mesh.elementType='Admittance'
+            setup.meshtype=meshtype
+            setup.mesh.minl0=2*xmax/(2**maxdepth)
+            setup.ptPerAxis=1+2**maxdepth
             
-            setup.mesh=otree.makeMesh(setup.mesh)
-        
-    
-        setup.startTiming("Make elements")
-  
-        coords=setup.mesh.nodeCoords
-        
-        
-            
-        setup.logTime()
-        numEl=len(setup.mesh.elements)
-        
-        print('%d elem'%numEl)
-        
-        
-        if meshtype=='uniform':
-            sourceIndex=coords.shape[0]//2
-        else:
-            sourceIndex=otree.coord2Index(np.zeros(3))
-        
-        if vMode:
-            srcMag=1.
-            srcType='Voltage'
-        else:
-            srcMag=4*np.pi*sigma[0]*rElec
-            setup.addCurrentSource(srcMag,index=sourceIndex)
-            srcType='Current'
-        
-        # ground boundary nodes, set v sources
-        for ii in nb.prange(coords.shape[0]):
-            pt=np.abs(coords[ii])
-            rpt=np.array(np.linalg.norm(pt))
-            if np.any(pt==xmax) or (rpt<=rElec):
-                # setup.addVoltageSource(0,index=ii)
+            if meshtype=='uniform':
+                newNx=int(np.ceil(lastNumEl**(1/3)))
+                sourceIndex=makeUniformGrid(setup,newNx+newNx%2)
                 
-                vpt=xCell.analyticVsrc(np.zeros(3), srcMag, rpt,srcType=srcType,srcRadius=rElec)
-                setup.addVoltageSource(vpt.squeeze(),index=ii)
+            else:
+                def metric(coord,l0Param=l0Param):
+                    r=np.linalg.norm(coord)
+                    val=l0Param*r #1/r dependence
+                    # val=(l0Param*r**2)**(1/3) #current continuity
+                    # val=(l0Param*r**4)**(1/3) #dirichlet energy continutity
+                    # if val<rElec:
+                    #     val=rElec
+                    return val
+                # otree=xCell.Octree(bbox,maxDepth=maxdepth)
+                # otree.refineByMetric(metric)
+                # numEl=len(otree.tree.getTerminalOctants())
+                # if numEl==lastNumEl:
+                #     continue
+                
+                # setup.mesh=otree.makeMesh(setup.mesh)
+                sourceIndex=makeAdaptiveGrid(setup, metric,maxdepth)
             
         
-        
-        # v=setup.solve()
-        v=setup.iterativeSolve(None,1e-9)
-        
-        setup.getMemUsage(True)
-        FVU=setup.calculateErrors(srcMag,srcType,showPlots=showGraphs)
-        print('error: %g'%FVU)
-        
-        study.newLogEntry(['Areal error'],[FVU])
-        study.saveData(setup)
-        lastNumEl=numEl
-        
-        
-        # ax=xCell.new3dPlot( bbox)
-        # xCell.showEdges(ax, coords, setup.mesh.edges)
-        # break
-        
-        if saveGraphs:
-            study.makeStandardPlots()
+            setup.startTiming("Make elements")
+      
+            coords=setup.mesh.nodeCoords
+            
+            
+                
+            setup.logTime()
+            numEl=len(setup.mesh.elements)
+            
+            print('%d elem'%numEl)
+            
+            
+            if vMode:
+                srcMag=1.
+                srcType='Voltage'
+            else:
+                srcMag=4*np.pi*sigma[0]*rElec
+                setup.addCurrentSource(srcMag,index=sourceIndex)
+                srcType='Current'
+            
+            # ground boundary nodes, set v sources
+            for ii in nb.prange(coords.shape[0]):
+                pt=np.abs(coords[ii])
+                rpt=np.array(np.linalg.norm(pt))
+                if np.any(pt==xmax):# or (rpt<=rElec):
+                    # setup.addVoltageSource(0,index=ii)
+                    
+                    vpt=xCell.analyticVsrc(np.zeros(3), srcMag, rpt,srcType=srcType,srcRadius=rElec)
+                    setup.addVoltageSource(vpt.squeeze(),index=ii)
+                
+            
+            
+            # v=setup.solve()
+            v=setup.iterativeSolve(None,1e-9)
+            
+            setup.getMemUsage(True)
+            FVU=setup.calculateErrors(srcMag,srcType,showPlots=showGraphs)
+            print('error: %g'%FVU)
+            
+            study.newLogEntry(['Error','k'],[FVU,l0Param])
+            study.saveData(setup)
+            lastNumEl=numEl
+            
+            
+            # ax=xCell.new3dPlot( bbox)
+            # xCell.showEdges(ax, coords, setup.mesh.edges)
+            # break
+            
+            if saveGraphs:
+                study.makeStandardPlots()
+    
+
+# aniGraph=study.animatePlot(xCell.error2d,'err2d')
+aniGraph=study.animatePlot(xCell.error2d,'err2d_adaptive',["Mesh type"],['adaptive'])
+aniGraph2=study.animatePlot(xCell.error2d,'err2d_uniform',['Mesh type'],['uniform'])
+# aniImg=study.animatePlot(xCell.centerSlice,'img_mesh')
+aniImg=study.animatePlot(xCell.centerSlice,'img_adaptive',["Mesh type"],['adaptive'])
+aniImg2=study.animatePlot(xCell.centerSlice,'img_uniform',['Mesh type'],['uniform'])
 
 
-aniGraph=study.animatePlot(xCell.error2d,'err2d')
-aniImg=study.animatePlot(xCell.centerSlice,'img_mesh')
-
-
+# study.plotAccuracyCost()
