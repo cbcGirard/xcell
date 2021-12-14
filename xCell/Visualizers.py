@@ -299,7 +299,8 @@ def centerSlice(fig,simulation,rElec=1e-6):
     
     coords=simulation.mesh.nodeCoords
     v=simulation.nodeVoltages
-    nTypes,_,_,_,_=simulation.getNodeTypes()
+    # nTypes,_,_,_,_=simulation.getNodeTypes()
+    nTypes=simulation.nodeRoleTable
     rest=nTypes==0
         
     nX=simulation.ptPerAxis
@@ -381,9 +382,9 @@ def getPlanarEdgePoints(coords,edges, normalAxis=2, axisCoord=0):
     
 def error2d(fig,simulation,rElec=1e-6,datalabel='Simulation'):
     
-    nTypes,_,_,_,_=simulation.getNodeTypes()
+    # nTypes,_,_,_,_=simulation.getNodeTypes()
     # rest=np.logical_or(nTypes==0,nTypes==2)
-    rest=nTypes==0
+    rest=simulation.nodeRoleTable==0
     v=simulation.nodeVoltages
     
     nNodes=len(simulation.mesh.nodeCoords)

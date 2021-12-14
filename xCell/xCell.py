@@ -22,13 +22,7 @@ import pickle
 nb.config.DISABLE_JIT=0
 nb.config.DEBUG_TYPEINFER=0
 
-# @nb.njit(int64[:](int64,int64))
-# @nb.njit
-# def toBitArray(val):
-#     # if bits==0:
-#     #     bits=np.ceil(np.log2(val))
-    
-#     return np.array([(val>>ii)&1 for ii in range(3)])
+
 @nb.njit
 def uniformResample(origin,span,nPts):
     vx,vy,vz=[np.linspace(o,o+s,nPts) for o,s in zip(origin,span)]
@@ -42,10 +36,12 @@ def uniformResample(origin,span,nPts):
     return coords
 
 # @nb.njit
-def getElementInterpolant(element,nodeVals):    
-    coords=element.getCoordsRecursively()
-    coefs=np.array([coord2InterpVals(xyz) for xyz in coords])
-
+# def getElementInterpolant(element,nodeVals):
+@nb.njit()
+def getElementInterpolant(nodeVals):
+    # coords=element.getOwnCoords()
+    # coefs=np.array([coord2InterpVals(xyz) for xyz in coords])
+    coefs=np.array([np.[x,y,z] for z in range(2) for y in range(2) for z in range(2)])
         
     interpCoefs=np.linalg.solve(coefs, nodeVals)
     return interpCoefs
@@ -128,13 +124,42 @@ def anyMatch(searchArray,searchVals):
     
     return False
 
+@nb.njit()
+def index2pos(ndx,dX):
+    arr=[]
+    for ii in range(3):
+        arr.append(ndx%dX)
+        ndx=ndx//dX
+    return np.array(arr)
+
+@nb.njit()
+def pos2index(pos,dX):
+    vals=np.array([dX**n for n in range(3)])
+    tmp=np.dot(vals,pos)
+    newNdx=int(np.rint(tmp))
+    return newNdx
 
 # @nb.experimental.jitclass([
-    
-#     ])
-# class Source:
-#     def __init()__(self,typecoords,ampradius):
-        
+#     ('value',float64),
+#     ('coords',float64[:]),
+#     ('radius',float64)
+#      ])
+class CurrentSource:
+    def __init__(self,value,coords,radius=0):
+        self.value=value
+        self.coords=coords
+        self.radius=radius
+
+# @nb.experimental.jitclass([
+#     ('value',float64),
+#     ('coords',float64[:]),
+#     ('radius',float64)
+#      ])
+class VoltageSource:
+    def __init__(self,value,coords,radius=0):
+        self.value=value
+        self.coords=coords
+        self.radius=radius
 
 @nb.experimental.jitclass([
     ('origin', float64[:]),
@@ -316,16 +341,23 @@ class AdmittanceHex():
 #     ('iSourceCoords',float64[:,:]),
 #     ('iSourceVals',float64[:]),
 #     ])
+
+
+
 class Simulation:
-    def __init__(self,name,extents=np.zeros(3)):
-        self.iSourceCoords=[]
-        self.iSourceNodes=[]
-        self.iSourceVals=[]
-        self.vSourceCoords=[]
-        self.vSourceVals=[]
-        self.vSourceNodes=[]
+    def __init__(self,name,bbox):
         
-        self.mesh=Mesh(extents)
+        self.currentSources=[]
+        self.voltageSources=[]
+        
+        self.vSourceNodes=[]
+        self.vSourceVals=[]
+        
+        
+        self.nodeRoleTable=np.empty(0)
+        self.nodeRoleVals=np.empty(0)
+        
+        self.mesh=Mesh(bbox)
         self.currentTime=0.
         
         self.stepLogs=[]
@@ -334,8 +366,10 @@ class Simulation:
         
         self.nodeVoltages=np.empty(0)
         self.edges=[[]]
+        
         self.gMat=[]
         self.RHS=[]
+        self.nDoF=0
         
         self.name=name
         self.meshtype='uniform'
@@ -465,59 +499,83 @@ class Simulation:
         f.write('\n')
         f.close()
         
+    def finalizeMesh(self):
+        self.mesh.finalize()
+        numEl=len(self.mesh.elements)
         
-#TODO: account for non-nodal sources   
-    def addCurrentSource(self,value,coords=None,index=None):
-        """
-        Attaches a current source to the simulation.
-        Currently assumes source is located at a node
+        print('%d elem'%numEl)
+        nNodes=len(self.mesh.nodeCoords)
+        self.nodeRoleTable=np.zeros(nNodes,dtype=np.int64)
+        self.nodeRoleVals=np.zeros(nNodes,dtype=np.int64)
+        # self.insertSourcesInMesh()
+        
+    def addCurrentSource(self,value,coords,radius=0):
+        self.currentSources.append(CurrentSource(value,coords,radius))
 
-        Parameters
-        ----------
-        value : float
-            Magnitude of current in amperes.
-        coords : float[:], optional
-            Cartesian coordinates of source. The default is None.
-        index : int, optional
-            Nodal index of source. The default is None.
-
-        Returns
-        -------o
-        None.
-
-        """
-        if index is not None:
-            self.iSourceNodes.append(index)
-            self.iSourceVals.append(value)
+    def addVoltageSource(self,value,coords=None,radius=0):
+        self.voltageSources.append(VoltageSource(value,coords,radius))
+        
+    def insertSourcesInMesh(self,snaplength=0):
+        for ii in nb.prange(len(self.voltageSources)):
+            src=self.voltageSources[ii]
             
-        else:
-            self.mesh.nodeCoords.append(coords)
-
-#TODO: account for non-nodal sources        
-    def addVoltageSource(self,value,coords=None,index=None):
-        """
-        Add voltage source to simulation.
-        Currently assumes source is located at a node
-
-        Parameters
-        ----------
-        value : float
-            Source potential in volts.
-        coords : float[:], optional
-            Cartesian coordinates of source. The default is None.
-        index : int, optional
-            Nodal index of source. The default is None.
-
-        Returns
-        -------
-        None.
-
-        """
-        if index is not None:
-            coords=self.mesh.nodeCoords[index]
-            self.vSourceNodes.append(index)
-            self.vSourceVals.append(value)
+            indices=self.__nodesInSource(src)
+            
+            self.nodeRoleTable[indices]=1
+            self.nodeRoleVals[indices]=ii
+            
+            # self.vSourceNodes.extend(indices)
+            # self.vSourceVals.extend(src.value*np.ones(len(indices)))
+            self.nodeVoltages[indices]=src.value
+            
+        for ii in nb.prange(len(self.currentSources)):
+            src=self.currentSources[ii]
+            
+            indices=self.__nodesInSource(src)
+            
+            self.nodeRoleTable[indices]=2
+            self.nodeRoleVals[indices]=ii      
+    
+    
+    def __nodesInSource(self, source):
         
+        
+        d=np.linalg.norm(source.coords-self.mesh.nodeCoords,axis=1)
+        inside=d<=source.radius
+        
+        if sum(inside)>0:
+            # index=self.mesh.indexMap[inside]
+            index=np.nonzero(inside)[0]
+
+        else:
+            el=self.mesh.getContainingElement(source.coords)
+            elIndices=sparse2denseIndex(el.globalNodeIndices, self.mesh.indexMap)
+            elCoords=self.mesh.nodeCoords[elIndices]
+            
+            d=np.linalg.norm(src.coords-elCoords,axis=1)
+            index=elIndices[d==min(d)]
+            
+       
+        return index
+            
+    def setBoundaryNodes(self,boundaryFun=None):
+        
+        bnodes=self.mesh.getBoundaryNodes()
+        self.nodeVoltages=np.empty(self.mesh.nodeCoords.shape[0])
+        
+    
+        if boundaryFun is None:
+            bvals=np.zeros_like(bnodes)
+        else:
+            bcoords=self.mesh.nodeCoords[bnodes]
+            blist=[]
+            for ii in nb.prange(len(bnodes)):
+                blist.append(boundaryFun(bcoords[ii]))
+            bvals=np.array(blist)
+            
+        self.nodeVoltages[bnodes]=bvals
+        self.nodeRoleTable[bnodes]=1
+                
     
     def solve(self):
         """
@@ -545,14 +603,8 @@ class Simulation:
         nNodes=self.mesh.nodeCoords.shape[0]
         voltages=np.empty(nNodes,dtype=np.float64)
 
-        nFixedV=len(vFix2Global)
-        voltages[self.vSourceNodes]=self.vSourceVals
         
-        # dofNodes=np.setdiff1d(range(nNodes), self.vSourceNodes)
-        nDoF=len(dof2Global)
-        #TODO: handle non-nodal sources
-        
-        b = self.setRHS(nDoF,nodeSubset)
+        b = self.setRHS()
         
         M=self.getMatrix(nNodes,edges,conductances,nodeType,nodeSubset,b,dof2Global)
         
@@ -592,38 +644,44 @@ class Simulation:
         self.logTime()
         
         self.startTiming("Sort node types")
-        nodeType,nodeSubset, vFix2Global, iFix2Global, dof2Global = self.getNodeTypes()
+        # nodeType,nodeSubset, vFix2Global, iFix2Global, dof2Global = self.getNodeTypes()
+        self.getNodeTypes()
         self.logTime()
         
         
         nNodes=self.mesh.nodeCoords.shape[0]
-        voltages=np.empty(nNodes,dtype=np.float64)
+        voltages=self.nodeVoltages
 
-        nFixedV=len(vFix2Global)
-        voltages[self.vSourceNodes]=self.vSourceVals
+        # nFixedV=len(vFix2Global)
         
         # dofNodes=np.setdiff1d(range(nNodes), self.vSourceNodes)
-        nDoF=len(dof2Global)
-        #TODO: handle non-nodal sources
+        dof2Global=np.nonzero(self.nodeRoleTable==0)[0]
+        nDoF=sum(self.nodeRoleTable==0)
+
+        b = self.setRHS(nDoF)
         
-        b = self.setRHS(nDoF,nodeSubset)
-        
-        M=self.getMatrix(nNodes,edges,conductances,nodeType,nodeSubset,b,dof2Global)
+        M=self.getMatrix()
         
         self.startTiming('Solving')
         vDoF,_=cg(M.tocsc(),b,vGuess,tol)
         self.logTime()
         
-        voltages[dof2Global]=vDoF
+        
+        voltages[dof2Global]=vDoF[:nDoF]
+        
+        for nn in range(len(self.currentSources)):
+            v=vDoF[nDoF+nn]
+            voltages[np.logical_and(self.nodeRoleTable==2,self.nodeRoleVals==nn)]=v
         
         self.nodeVoltages=voltages
         return voltages
     
     def calculateErrors(self,srcAmplitude,srcType,nX=100,showPlots=False,savePlots=False):
         
-        nTypes,_,_,_,_=self.getNodeTypes()
+        
+        # nTypes,_,_,_,_=self.getNodeTypes()
         v=self.nodeVoltages
-        rest=nTypes==0
+        rest=self.nodeRoleTable==0
         
         coords=self.mesh.nodeCoords
         edges=self.mesh.edges
@@ -641,71 +699,18 @@ class Simulation:
         
         
         
-        #TODO: extend to multiple sources
         analytic=analyticVsrc(np.zeros(3), srcAmplitude, rsort,srcType=srcType)
         analyticDense=analyticVsrc(np.zeros(3), srcAmplitude, rDense,srcType=srcType)
         
         err=vsort-analytic
-        # FVU,err=getFVU(v, analytic, rest)
-   
-        # errAll=np.zeros(coords.shape[0])
-        # errAll[rest]=err
-        # FVU=0
-        
-        # sel=np.zeros_like(v,dtype=bool)
-        # sel[:2]=True
-        
-        # for ii in range(len(v)-1):
-        #     ra,rb=rsort[sel]
-        #     anA,anB=analytic[sel]
-        #     simA,simB=v[sel]
-        #     areaSim=0.5*(rb-ra)*sum(v[sel])
-        #     areaAna=(anA/ra)*np.log(rb/ra)
-        #     if np.isinf(areaAna):
-        #         areaAna=
-            
-        #     FVU+=abs(areaAna-areaSim)
-        #     sel=np.roll(sel,1)
-            
+
         FVU=np.trapz(abs(err),rsort)/np.trapz(analyticDense,rDense)
 
-        # if showPlots:
-            
-        #     figResult=plt.figure()
-        #     showSlice(coords,v, nX,plotWhich=None,edges=edges)
-        #     plt.title('Simulated solution [V]')
-        #     plt.tight_layout()
-            
-        
-        #     figImage=plt.figure()
-        #     showSlice(coords,errAll, nX,plotWhich=None,edges=edges,forceBipolar=True)
-        #     plt.title('Absolute error [V]')
-        #     plt.tight_layout()
-            
-        #     fig2d, axes=plt.subplots(2,1)
-        #     ax2dA,ax2dB=axes
-        #     ax2dA.xaxis.set_major_formatter(mpl.ticker.EngFormatter())
-        #     ax2dA.plot(rDense,analyticDense, label='Analytical')
-        #     ax2dA.scatter(r[rest],v[rest],c='r',label='Simulation')
-        #     ax2dA.legend()
-        #     ax2dA.set_title('%d nodes, %d elements\nFVU= %g'%(nNodes,nElems,FVU))
-        #     ax2dA.set_xlabel('Distance from source [m]')
-        #     ax2dA.set_ylabel('Voltage [V]')
-            
-        #     ax2dB.scatter(r[rest],err,c='r',label='Absolute')
-        #     ax2dB.set_ylabel('Absolute error [V]')
-        #     ax2dB.sharex(ax2dA)
-        #     plt.tight_layout()
-            
-        #     if savePlots:
-        #         figResult.savefig(self.name+'result_'+self.iteration)
-        #         figImage.savefig(self.name+'errorImage_'+self.iteration)
-        #         fig2d.savefig(self.name+'errorPlot_'+self.iteration)
-        
+
         return FVU
     
     
-    def setRHS(self,nDoF,nodeSubset):
+    def setRHS(self,nDoF):
         """
         Set right-hand-side of system of equations (as determined by simulation's boundary conditions)
 
@@ -725,12 +730,16 @@ class Simulation:
         """
         #set right-hand side
         self.startTiming('Setting RHS')
-        b=np.zeros(nDoF,dtype=np.float64)
+        nCurrent=len(self.currentSources)
+        b=np.zeros(nDoF+nCurrent,dtype=np.float64)
         
-        for n,val in zip(self.iSourceNodes,self.iSourceVals):
-            # b[global2subset(n,nDoF)]=val
-            nthDoF=nodeSubset[n]
-            b[nthDoF]=val
+        # for n,val in zip(self.iSourceNodes,self.iSourceVals):
+        #     # b[global2subset(n,nDoF)]=val
+        #     nthDoF=nodeSubset[n]
+        #     b[nthDoF]=val
+        
+        for ii in nb.prange(nCurrent):
+            b[nDoF+ii]=self.currentSources[ii].value
             
         self.logTime()
         self.RHS=b
@@ -738,7 +747,8 @@ class Simulation:
         return b
     
     
-    def getMatrix(self,nNodes,edges,conductances,nodeType,nodeSubset, b,dof2Global):
+    # def getMatrix(self,nNodes,edges,conductances,nodeType,nodeSubset, b,dof2Global):
+    def getMatrix(self):
         """
         Calculates conductivity matrix G for the current mesh.
 
@@ -765,80 +775,139 @@ class Simulation:
             Conductance matrix G in system Gv=b.
 
         """
-        #TODO: parallelize it
         self.startTiming("Filtering conductances")
         #diagonal elements are -sum of row
         
-        nNodes=self.mesh.nodeCoords.shape[0]
-        nDoF=len(dof2Global)
-
-        diags=np.zeros(nNodes,dtype=np.float64)
+        # nNodes=self.mesh.nodeCoords.shape[0]
+        nCurrent=len(self.currentSources)
+        nDoF=sum(self.nodeRoleTable==0)+nCurrent
         
-        gDoF=[]
+        # dofMap=np.hstack(((np.nonzero(self.nodeRoleTable==0)),np.zeros(nCurrent)))
+        
+        edges=self.edges
+        conductances=self.conductances
+        b=self.RHS
+
+        # diags=np.zeros(nDoF,dtype=np.float64)
+        
         gDofNodes=[]
+        
+        nodeA=[]
+        nodeB=[]
+        cond=[]
         # for edge,g in zip(edges,conductances):   
         for ii in nb.prange(len(conductances)):
             edge=edges[ii]
+            # types=self.nodeRoleTable[edge]
             g=conductances[ii]
-            #adjust diagonals
-            diags[edge[0]]+=g
-            diags[edge[1]]+=g
-            # isFixed=np.isin(edge,self.vSourceNodes)
-            isFixed=nodeType[edge]==1
-            numfixed=np.sum(isFixed)
-            # only adjust RHS if one node is fixed V
-            if numfixed==2:
-                # both nodes fixed; ignore
-                continue
-            else: 
-                if numfixed==1:
-                    # one node fixed; adjust RHS for other node
+            typeIndex=self.nodeRoleVals[edge]
+            
+            for nn in range(2):
+                this=np.arange(2)==nn
+                thisrole,thisDoF=self.__toDoF(edge[this][0])
+                thatrole,thatDoF=self.__toDoF(edge[~this][0])
+
+                if thisDoF is not None:
+                    # valid degree of freedom
+                    cond.append(g)
+                    nodeA.append(thisDoF)
+                    nodeB.append(thisDoF)
                     
-                    nVGlobal=edge[isFixed]
-                    nFreeGlobal=edge[~isFixed]
+                    if thatDoF is not None:
+                        # other node is DoF
+                        cond.append(-g)
+                        nodeA.append(thisDoF)
+                        nodeB.append(thatDoF)
+                        
+                    else:
+                        #other node is fixed voltage
+                        nthVoltage=typeIndex[~this][0]
+                        thatVoltage=self.nodeVoltages[edge[~this]]
+                        b[thisDoF]-=g*thatVoltage
+                        
+                # else:
+                #     if thatDoF is not None:
+                            
+
+                        
+                
+                
+        #     #adjust diagonals
+        #     diags[edge[0]]+=g
+        #     diags[edge[1]]+=g
+        #     isFixed=np.isin(edge,self.vSourceNodes)
+        #     # isFixed=tyoes==1
+        #     numfixed=np.sum(isFixed)
+        #     # only adjust RHS if one node is fixed V
+        #     if numfixed==2:
+        #         # both nodes fixed; ignore
+        #         continue
+        #     else: 
+        #         if numfixed==1:
+        #             # one node fixed; adjust RHS for other node
                     
-                    nthV=nodeSubset[nVGlobal]
-                    nthDoF=nodeSubset[nFreeGlobal]
+        #             nVGlobal=edge[isFixed]
+        #             nFreeGlobal=edge[~isFixed]
+                    
+        #             nthV=self.nodeRoleVals[nVGlobal]
+        #             nthDoF=self.nodeRoleVals[nFreeGlobal]
                     
                     
-                    # nthV=global2subset(nVGlobal, self.vSourceNodes)
-                    # nthDoF=global2subset(nFreeGlobal, dofNodes)
+        #             # nthV=global2subset(nVGlobal, self.vSourceNodes)
+        #             # nthDoF=global2subset(nFreeGlobal, dofNodes)
                     
-                    # b[nthDoF]-=self.vSourceVals[nthV.ravel()[0]]*g
-                    b[nthDoF]+=self.vSourceVals[nthV[0]]*g
+        #             # b[nthDoF]-=self.vSourceVals[nthV.ravel()[0]]*g
+        #             vAmp=self.vSourceVals[nthV[0]]
                     
-                else:
-                    # both nodes are DoF
-                    gDoF.append(-g)
-                    dofEdge=np.array([nodeSubset[e] for e in edge])
-                    gDofNodes.append(dofEdge)
+        #             b[nthDoF]+=vAmp*g
+                    
+        #         else:
+        #             # both nodes are DoF
+        #             cond.append(-g)
+        #             # dofEdge=np.array([nodeSubset[e] for e in edge])
+        #             # dofEdge=sparse2denseIndex(edge, self.mesh.indexMap)
+        #             dofEdge=self.nodeRoleVals[edge]
+        #             gDofNodes.append(dofEdge)
         
         
-        diagVals=diags[dof2Global]
+        # dof2Global=self.nodeRoleTable==0
+        # diagVals=diags[dof2Global]
         
         self.logTime()
         
-        gDofNodes=np.array(gDofNodes)
-        nodeA=gDofNodes[:,0]
-        nodeB=gDofNodes[:,1]  
-        diagIndex=np.arange(nDoF)
+        # gDofNodes=np.array(gDofNodes)
+        # nodeA=gDofNodes[:,0]
+        # nodeB=gDofNodes[:,1]  
+        # diagIndex=np.arange(nDoF)
         
-        nA=np.concatenate((nodeA, nodeB,diagIndex))
-        nB=np.concatenate((nodeB,nodeA,diagIndex))
-        cond2=np.concatenate((gDoF,gDoF,diagVals))       
+        # nA=np.concatenate((nodeA, nodeB,diagIndex))
+        # nB=np.concatenate((nodeB,nodeA,diagIndex))
+        # cond2=np.concatenate((gDoF,gDoF,diagVals))       
     
         self.startTiming("assembling system")
         # double up for matrix symmetry
 
-        
-        G = scipy.sparse.coo_matrix((cond2, (nA,nB)), shape=(nDoF, nDoF))
+        G=scipy.sparse.coo_matrix((cond,(nodeA,nodeB)),shape=(nDoF,nDoF))
+        # G = scipy.sparse.coo_matrix((cond2, (nA,nB)), shape=(nDoF, nDoF))
         G.sum_duplicates()
         
         self.logTime()
         self.gMat=G
+        self.RHS=b
         return G
 
-    
+    def __toDoF(self,globalIndex):
+        role=self.nodeRoleTable[globalIndex]
+        roleVal=self.nodeRoleVals[globalIndex]
+        if role==1:
+            dofIndex= None
+        else:
+            dofIndex=roleVal
+            if role==2:
+                dofIndex+=self.nDoF
+                
+        return role,dofIndex
+
     def getNodeTypes(self):
         """
         Gets an integer per node indicating its role:
@@ -852,39 +921,29 @@ class Simulation:
             DESCRIPTION.
 
         """
-        nNodes=self.mesh.nodeCoords.shape[0]        
-        nFixedV=len(self.vSourceNodes)
-        nFixedI=len(self.iSourceNodes)
-        
-        nDoF=nNodes-nFixedV+nFixedI
-        
-        dof2Global=[]
-        vFix2Global=[]
-        iFix2Global=[]
-        
-        nodeType=np.zeros(nNodes,dtype=np.int64)
-        global2Subset=np.empty(nNodes,dtype=np.int64)
+        nNodes=self.mesh.nodeCoords.shape[0]  
+        # self.nodeRoleTable=np.zeros(nNodes,dtype=np.int64)
+        # self.nodeRoleVals=np.zeros(nNodes,dtype=np.int64)
 
-        nodeType[self.vSourceNodes]=1
-        nodeType[self.iSourceNodes]=2
-
-        for sub,n in enumerate(self.vSourceNodes):
-            global2Subset[n]=sub
-
+        self.insertSourcesInMesh()
         
-        for n in nb.prange(nNodes):
-            typ=nodeType[n]
-            if typ==0:
-                global2Subset[n]=len(dof2Global)
-                dof2Global.append(n)
+        self.nDoF=sum(self.nodeRoleTable==0)
+        trueDoF=np.nonzero(self.nodeRoleTable==0)[0]
+        
+        
+        # dofTable=np.nonzero(trueDoF)[0]
+        
+        
+        for n in nb.prange(len(trueDoF)):
+            self.nodeRoleVals[trueDoF[n]]=n
         
         #add current sources to list of DoFs
-        nFree=len(dof2Global)
-        dof2Global.extend(self.iSourceNodes)
-        for nthI,glob in enumerate(self.iSourceNodes):
-            global2Subset[glob]=nFree+nthI
+        # nFree=len(dof2Global)
+        # dof2Global.extend(self.iSourceNodes)
+        # for nthI,glob in enumerate(self.iSourceNodes):
+        #     global2Subset[glob]=nFree+nthI
         
-        return nodeType, global2Subset, np.array(vFix2Global), np.array(iFix2Global), np.array(dof2Global)
+        # return nodeType, global2Subset, np.array(vFix2Global), np.array(iFix2Global), np.array(dof2Global)
         
     
     def resamplePlane(self,nXSamples=None,normalAxis=2,axisLocation=0.):
@@ -910,9 +969,13 @@ class Simulation:
         for ii in nb.prange(len(interpCoords)):
             interpCoord=interpCoords[ii]
             container=self.mesh.getContainingElement(interpCoord)
+            localCoord=(interpCoord-container.origin)/container.span
+            
             contNodes=container.globalNodeIndices
-            contV=self.nodeVoltages[contNodes]
-            interp=getElementInterpolant(container, contV)
+            meshNodes=sparse2denseIndex(contNodes,self.mesh.indexMap)
+            contV=self.nodeVoltages[meshNodes]
+            print('%d of %d'%(ii,len(interpCoords)))
+            interp=getElementInterpolant(contV)
             vInterp[ii]=evalulateInterpolant(interp, interpCoord)
             
         return vInterp.reshape((nXSamples,nXSamples)), interpCoords
@@ -924,8 +987,9 @@ def getMappingArrays(generalArray,subsetArray):
     return gen2sub, sub2gen
         
 class Mesh:
-    def __init__(self,extents,elementType='Admittance'):
-        self.extents=extents
+    def __init__(self,bbox,elementType='Admittance'):
+        self.bbox=bbox
+        self.extents=(bbox[3:]-bbox[:3])/2
         self.elements=[]
         self.conductances=[]
         self.elementType=elementType
@@ -961,6 +1025,25 @@ class Mesh:
                             el['sigma'], el['nodeIndices'])
         
     def getContainingElement(self,coords):
+        """
+        Get element containing specified point
+
+        Parameters
+        ----------
+        coords : float[:]
+            Cartesian coordinates of point.
+
+        Raises
+        ------
+        ValueError
+            Error if no element contains the point.
+
+        Returns
+        -------
+        elem : TYPE
+            Containing element.
+
+        """
         nElem=len(self.elements)
         
         #TODO: workaround fudge factor
@@ -984,6 +1067,25 @@ class Mesh:
             
        
     def addElement(self,origin, extents,sigma,nodeIndices):
+        """
+        Inserts element into the mesh
+
+        Parameters
+        ----------
+        origin : float[:]
+            Cartesian coords of element's origin.
+        extents : float[:]
+            Length of edges in x,y,z.
+        sigma : float
+            Conductivity of element.
+        nodeIndices : int64[:]
+            Numbering of element nodes according to global mesh.
+
+        Returns
+        -------
+        None.
+
+        """
         if self.elementType=='Admittance':
             newEl=AdmittanceHex(origin,extents,sigma)
         elif self.elementType=='FEM':
@@ -993,6 +1095,17 @@ class Mesh:
         self.elements.append(newEl)
         
     def getConductances(self):
+        """
+        Gets the discrete conductances from every element
+
+        Returns
+        -------
+        edgeIndices : int64[:,:]
+            List of node pairs spanned by each conductance.
+        conductances : float
+            Conductance in siemens.
+
+        """
         nElem=len(self.elements)
         if self.elementType=='Admittance':
             nElemEdge=12
@@ -1016,11 +1129,32 @@ class Mesh:
         return edgeIndices,conductances
     
     def getL0Min(self):
+        """
+        Get the smallest edge length in mesh
+
+        Returns
+        -------
+        l0Min : float
+            smallest edge length.
+
+        """
         l0Min=np.infty
         
         for el in self.elements:
             l0Min=min(l0Min,el.l0)
         return l0Min
+
+    def getBoundaryNodes(self):
+        mins,maxes=np.hsplit(self.bbox,2)
+        
+        atmin=np.equals(mins,self.mesh.nodeCoords)
+        atmax=np.equals(maxes,self.mesh.nodeCoords)
+        isbnd=np.any(np.logical_and(atmin,atmax),axis=1)
+        tmpIndex=np.nonzero(isbnd)[0][0]
+        
+        globalIndices=sparse2denseIndex(tmpIndex,self.indexMap)
+    
+        return globalIndices
 
 class Logger():
     def __init__(self,stepName,printStart=True):
@@ -1040,17 +1174,14 @@ class Logger():
         self.duration=duration       
         self.memory=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         
-@nb.njit
-def distMetric(evalLocation,srcLocation,iVal,sigma):
-    delta=evalLocation-srcLocation
-    dist=np.linalg.norm(delta/sigma)
-    return iVal/(4*np.pi*dist)
         
 
-class Octree():
-    def __init__(self,boundingBox,maxDepth=10):
+class Octree(Mesh):
+    def __init__(self,boundingBox,maxDepth=10,elementType='Admittance'):
         self.center=np.mean(boundingBox.reshape(2,3),axis=0)
         self.span=(boundingBox[3:]-boundingBox[:3])
+        super().__init__(boundingBox, elementType)
+
         self.maxDepth=maxDepth
         self.bbox=boundingBox
         self.indexMap=np.empty(0,dtype=np.int64)
@@ -1058,6 +1189,11 @@ class Octree():
         coord0=self.center-self.span/2
         
         self.tree=Octant(coord0,self.span)
+        
+    def getContainingElement(self, coords):
+        
+        el=self.tree.getContainingElement(coords)
+        return el
         
         
     def refineByMetric(self,l0Function):
@@ -1094,29 +1230,53 @@ class Octree():
             idx=reindex(idx,self.indexMap)
         return idx
         
-    def makeMesh(self,mesh):
+    def finalize(self):
         octs=self.tree.getTerminalOctants()
-        coords=self.getCoordsRecursively()
-        indices=self.indexMap
-        mesh.nodeCoords=coords
+        # self.elements=octs
+        self.nodeCoords=self.getCoordsRecursively()
+        # indices=self.indexMap
+        # mesh.nodeCoords=coords
         
         
-        # T=Logger('tree-makeElements',False)
-        # for o in octs:
+
         for ii in nb.prange(len(octs)):
             o=octs[ii]
-            # ocoords=o.getOwnCoords()
-            onodes=o.globalNodes
-            gnodes=sparse2denseIndex(onodes, indices)
-            mesh.addElement(o.origin,o.span,np.ones(3),gnodes)
+            onodes=o.globalNodeIndices
+            gnodes=sparse2denseIndex(onodes, self.indexMap)
+            self.addElement(o.origin,o.span,np.ones(3),gnodes)
+            # o.setGlobalIndices(gnodes)
         
         # T.logCompletion()
-        return mesh
+        return 
     
     def printStructure(self):
+        """
+        Debug tool to print structure of tree
+
+        Returns
+        -------
+        None.
+
+        """
         self.tree.printStructure()
         
     def octantByList(self,indexList,octant=None):
+        """
+        Selects an octant by recursing through a list of indices
+
+        Parameters
+        ----------
+        indexList : int64[]
+            Octant identifier, where i=indexList[n] specifies child i of octant n
+        octant : Octant, optional
+            Used internally to recurse. The default is None.
+
+        Returns
+        -------
+        Octant
+            The octant object specified.
+
+        """
         head=indexList.pop(0)
         if octant is None:
             octant=self.tree
@@ -1127,52 +1287,87 @@ class Octree():
             return self.octantByList(indexList,oc)
         
     def countElements(self):
+        
         return self.tree.countElements()
     
     def getCoordsRecursively(self):
-        # T=Logger('tree-coordRecursion',False)
+        """
+        Determines coordinates of mesh nodes
+
+        Returns
+        -------
+        TYPE
+            DESCRIPTION.
+
+        """
         coords,i=self.tree.getCoordsRecursively(self.bbox,self.maxDepth)
-        # T.logCompletion()
         
         indices=np.array(i)
         self.indexMap=indices
-        
-        # T=Logger('treeRenumberTermial',False)
-        # terms=self.tree.getTerminalOctants()
-        # for ii in nb.prange(len(terms)):
-        #     o=terms[ii]
-        #     tstNodes=o.globalNodes
-        #     # newNodes=[np.argwhere(indices==n).squeeze() for n in tstNodes]
-        #     # newNodes=[sparse2denseIndex(n,indices) for n in tstNodes]
-            
-        #     o.globalNodes=sparse2denseIndex(tstNodes,indices)
-        # T.logCompletion()
+        self.nodeCoords=coords
+
         return np.array(coords)
          
-    
+    def getBoundaryNodes(self):
+        bnodes=[]
+        nX=1+2**self.maxDepth
+        for ii in nb.prange(len(self.indexMap)):
+            nn=self.indexMap[ii]
+            xyz=index2pos(nn,nX)
+            if np.any(xyz==0) or np.any(xyz==(nX-1)):
+                bnodes.append(ii)
+        
+        return np.array(bnodes)
 
-  
-# @nb.njit()
-# def sparse2denseIndex(sparseVals,denseList):
-#     idxList=np.empty_like(sparseVals)
-#     for ns,sval in np.ndenumerate(sparseVals): 
-#         for n,val in np.ndenumerate(denseList):
-#             if val==sval:
-#                 idxList[ns]=n
-#                 break
-#     return idxList
+
 
 # @nb.njit(nb.int64[:](nb.int64[:],nb.int64[:]))
 @nb.njit()
 def sparse2denseIndex(sparseVals,denseVals):
+    """
+    Gets the indices where each sparseVal are within DenseVals.
+    Used for e.g. mapping a global node index to degree of freedom index
+    Assumes one-to-one mapping of every value
+
+    Parameters
+    ----------
+    sparseVals : int64[:]
+        List of nonconsecutive values to find.
+    denseVals : int64[:]
+        List of values to be searched.
+
+    Returns
+    -------
+    int64[:]
+        Indices where each sparseVal occurs in denseVals.
+
+    """
     # idxList=[reindex(sp,denseVals) for sp in sparseVals]
     idxList=[]
     for ii in nb.prange(len(sparseVals)):
         idxList.append(reindex(sparseVals[ii],denseVals))
+                         
+        
     return np.array(idxList,dtype=np.int64)
 
 @nb.njit()
 def reindex(sparseVal,denseList):
+    """
+    Get position of sparseVal in denseList, returning as soon as found
+
+    Parameters
+    ----------
+    sparseVal : int64
+        Value to find index of match.
+    denseList : int64[:]
+        List of nonconsecutive indices.
+
+    Returns
+    -------
+    int64
+        index where sparseVal occurs in denseList.
+
+    """
     # startguess=sparseVal//denseList[-1]
     for n,val in np.ndenumerate(denseList):
     # for n,val in enumerate(denseList):
@@ -1194,18 +1389,17 @@ def reindex(sparseVal,denseList):
 #     ]
 # @nb.experimental.jitclass(spec=octantspec)
 class Octant():
-    def __init__(self,origin, span,depth=0,index=[]):
+    def __init__(self,origin, span,depth=0,sigma=np.ones(3),index=[]):
+        # super().__init__(origin, span, sigma)
         self.origin=origin
         self.span=span
         self.center=origin+span/2
         self.l0=np.prod(span)**(1/3)
         self.children=[]
         self.depth=depth
-        self.globalNodes=np.empty(8,dtype=np.int64)
+        self.globalNodeIndices=np.empty(8,dtype=np.int64)
         self.nX=2
-        self.index=index
-        self.nodeIndices=-np.ones(27,dtype=np.int64)
-        
+        self.index=index        
 
         
     def calcGlobalIndices(self,globalBbox,maxdepth):
@@ -1219,9 +1413,9 @@ class Octant():
         # for N,c in enumerate(coords):
         #     idxArray=(c-x0)/dX
         #     ndx=np.dot(ndxOffsets,idxArray)
-        #     self.globalNodes[N]=ndx
+        #     self.globalNodeIndices[N]=ndx
             
-        # return self.globalNodes
+        # return self.globalNodeIndices
         xyz=np.zeros(3,dtype=np.int64)
         for ii,idx in enumerate(self.index):
             ldepth=maxdepth-ii-1
@@ -1233,7 +1427,7 @@ class Octant():
         ownXYZ=[xyz+ownstep*toBitArray(i) for i in range(8)]
         indices=np.array([np.dot(ndxlist,toGlobal) for ndxlist in ownXYZ])
             
-        self.globalNodes=indices
+        self.globalNodeIndices=indices
         return indices
             
             
@@ -1266,7 +1460,7 @@ class Octant():
         if len(self.children)==0:
             # coords=[self.origin+self.span*toBitArray(n) for n in range(8)]
             coords=self.getOwnCoords()
-            # indices=self.globalNodes
+            # indices=self.globalNodeIndices
             indices=self.calcGlobalIndices(bbox, maxdepth)
         else:
             coordList=[]
@@ -1284,7 +1478,7 @@ class Octant():
             
             indices,sel=np.unique(indexList,return_index=True)
             
-            # self.globalNodes=indices
+            # self.globalNodeIndices=indices
             
             coords=np.array(coordList)[sel]
             coords=coords.tolist()
@@ -1292,17 +1486,18 @@ class Octant():
         # T.logCompletion()
         return coords, indices.tolist()
     
-    def index2pos(self,ndx,dX):
-        arr=[]
-        for ii in range(3):
-            arr.append(ndx%dX)
-            ndx=ndx//dX
-        return np.array(arr)
+    # def index2pos(self,ndx,dX):
+    #     arr=[]
+    #     for ii in range(3):
+    #         arr.append(ndx%dX)
+    #         ndx=ndx//dX
+    #     return np.array(arr)
     
-    def pos2index(self,pos,dX):
-        vals=np.array([dX**n for n in range(3)])
-        newNdx=np.dot(vals,pos)
-        return np.rint(newNdx)
+    # def pos2index(self,pos,dX):
+    #     vals=np.array([dX**n for n in range(3)])
+    #     newNdx=np.dot(vals,pos)
+    #     return np.rint(newNdx)
+    
     
     def getIndicesRecursively(self):
         
@@ -1392,6 +1587,22 @@ class Octant():
                 if grandkids is not None:
                     descendants.extend(grandkids)
         return descendants
+    
+    
+    def getContainingElement(self,coords):
+        if len(self.children)==0:
+            if self.containsPoint(coords):
+                return self
+            else:
+                return None
+        else:
+            for ch in self.children:
+                tmp=ch.getContainingElement(coords)
+                if tmp is not None:
+                    return tmp
+            return None
+                
+
 
     
 
@@ -1506,7 +1717,7 @@ class SimStudy:
         if simName is None:
             simName='sim%d'%self.nSims
             
-        sim=Simulation(simName,extents=self.span)
+        sim=Simulation(simName,bbox=self.bbox)
         # sim.mesh.extents=self.span
         
         self.currentSim=sim
