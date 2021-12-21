@@ -13,131 +13,20 @@ import math
 import scipy
 from scipy.sparse.linalg import spsolve, cg
 from Visualizers import *
+from util import *
 import time
 import os
 import resource 
 import pickle
+
+import matplotlib.ticker as tickr
+import matplotlib.pyplot as plt
 
 
 nb.config.DISABLE_JIT=0
 nb.config.DEBUG_TYPEINFER=0
 
 
-@nb.njit
-def uniformResample(origin,span,nPts):
-    vx,vy,vz=[np.linspace(o,o+s,nPts) for o,s in zip(origin,span)]
-    
-    XX,YY,ZZ=np.meshgrid(vx,vy,vz)
-
-
-    coords=np.vstack((XX.ravel(),YY.ravel(), ZZ.ravel())).transpose()
-
-    
-    return coords
-
-# @nb.njit
-# def getElementInterpolant(element,nodeVals):
-@nb.njit()
-def getElementInterpolant(nodeVals):
-    # coords=element.getOwnCoords()
-    # coefs=np.array([coord2InterpVals(xyz) for xyz in coords])
-    coefs=np.array([np.[x,y,z] for z in range(2) for y in range(2) for z in range(2)])
-        
-    interpCoefs=np.linalg.solve(coefs, nodeVals)
-    return interpCoefs
-    
-@nb.njit
-def evalulateInterpolant(interp,location):
-    
-    # coeffs of a, bx, cy, dz, exy, fxz, gyz, hxyz
-    varList=coord2InterpVals(location)
-    
-    # interpVal=np.matmul(interp,varList)
-    interpVal=np.dot(interp,varList)
-    
-    return interpVal
-
-@nb.njit
-def coord2InterpVals(coord):
-    x,y,z=coord
-    return np.array([1,
-                     x,
-                     y,
-                     z,
-                     x*y,
-                     x*z,
-                     y*z,
-                     x*y*z]).transpose()
-@nb.njit
-def getCurrentVector(interpolant,location):
-    #coeffs are 
-    #0  1   2   3    4    5    6    7
-    #a, bx, cy, dz, exy, fxz, gyz, hxyz
-    #gradient is [
-    #   [b + ey + fz + hyz],
-    #   [c + ex + gz + hxz],
-    #   [d + fx + gy + hxy]
-    
-    varList=coord2InterpVals(location)
-    
-    varSets=np.array([[0,2,3,6],
-                      [0,1,3,5],
-                      [0,1,2,4]])
-    coefSets=np.array([[1,4,5,7],
-                       [2,4,6,7],
-                       [3,5,6,7]])
-    
-    varVals=np.array([varList[n] for n in varSets])
-    coefVals=np.array([interpolant[n] for n in coefSets])
-    
-    vecVals=np.array([-np.dot(v,c) for v,c in zip(varVals,coefVals)])
-
-    return vecVals
-
-
-@nb.njit()
-# @nb.njit(['int64[:](int64, int64)', 'int64[:](int64, Omitted(int64))'])
-def toBitArray(val,nBits=3):
-    return np.array([(val>>n)&1 for n in range(nBits)])
-
-@nb.njit
-def anyMatch(searchArray,searchVals):
-    """
-    Rapid search if any matches occur (returns immediately at first match)
-
-    Parameters
-    ----------
-    searchArray : array
-        Array to seach.
-    searchVals : array
-        Values to search array for.
-
-    Returns
-    -------
-    bool
-        DESCRIPTION.
-
-    """
-    for el in searchArray.ravel():
-        if any(np.isin(searchVals,el)):
-            return True
-    
-    return False
-
-@nb.njit()
-def index2pos(ndx,dX):
-    arr=[]
-    for ii in range(3):
-        arr.append(ndx%dX)
-        ndx=ndx//dX
-    return np.array(arr)
-
-@nb.njit()
-def pos2index(pos,dX):
-    vals=np.array([dX**n for n in range(3)])
-    tmp=np.dot(vals,pos)
-    newNdx=int(np.rint(tmp))
-    return newNdx
 
 # @nb.experimental.jitclass([
 #     ('value',float64),
@@ -378,6 +267,42 @@ class Simulation:
         
         self.iteration=0
         
+        
+    def makeUniformGrid(self,nX,sigma=np.array([1.,1.,1.])):
+        
+        self.startTiming("Make elements")
+
+        xmax=self.mesh.extents[0]
+        self.ptPerAxis=nX+1
+           
+        xx=np.linspace(-xmax,xmax,nX+1)
+        XX,YY,ZZ=np.meshgrid(xx,xx,xx)
+        
+        
+        coords=np.vstack((XX.ravel(),YY.ravel(), ZZ.ravel())).transpose()
+        r=np.linalg.norm(coords,axis=1)
+        
+        self.mesh.nodeCoords=coords
+        # self.mesh.extents=2*xmax*np.ones(3)
+        
+        elOffsets=np.array([1,nX+1,(nX+1)**2])
+        nodeOffsets=np.array([np.dot(toBitArray(i),elOffsets) for i in range(8)])
+        elExtents=self.mesh.extents/nX
+        
+        
+        
+        for zz in range(nX):
+            for yy in range(nX):
+                for xx in range(nX):
+                    elOriginNode=xx+yy*(nX+1)+zz*(nX+1)**2
+                    origin=coords[elOriginNode]
+                    elementNodes=elOriginNode+nodeOffsets
+                    
+                    self.mesh.addElement(origin, elExtents, sigma,elementNodes)
+                    
+        self.logTime()
+        print("%d elements in mesh"%(nX**3))
+        
     def startTiming(self,stepName):
         """
         General call to start timing an execution step
@@ -421,10 +346,21 @@ class Simulation:
 
         
         if printVal:
-            engFormat=mpl.ticker.EngFormatter(unit='b')
+            engFormat=tickr.EngFormatter(unit='b')
             print(engFormat(mem*1024)+" used")
         
         return mem
+    
+    def intifyCoords(self):
+        nx=self.ptPerAxis
+        bb=self.mesh.bbox
+        
+        span=bb[3:]-bb[:3]
+        float0=self.mesh.nodeCoords-bb[:3]
+        ints=(nx*float0)/span
+        
+        return ints.astype(np.int64)
+    
     
     def makeTableHeader(self):
         cols=[
@@ -552,7 +488,7 @@ class Simulation:
             elIndices=sparse2denseIndex(el.globalNodeIndices, self.mesh.indexMap)
             elCoords=self.mesh.nodeCoords[elIndices]
             
-            d=np.linalg.norm(src.coords-elCoords,axis=1)
+            d=np.linalg.norm(source.coords-elCoords,axis=1)
             index=elIndices[d==min(d)]
             
        
@@ -649,7 +585,7 @@ class Simulation:
         self.logTime()
         
         
-        nNodes=self.mesh.nodeCoords.shape[0]
+        # nNodes=self.mesh.nodeCoords.shape[0]
         voltages=self.nodeVoltages
 
         # nFixedV=len(vFix2Global)
@@ -676,38 +612,76 @@ class Simulation:
         self.nodeVoltages=voltages
         return voltages
     
-    def calculateErrors(self,srcAmplitude,srcType,nX=100,showPlots=False,savePlots=False):
+    def calculateErrors(self):
         
+        srcV=[]
+        srcI=[]
+        srcLocs=[]
+        srcRadii=[]
         
+        for ii in nb.prange(len(self.currentSources)):
+            I=self.currentSources[ii].value
+            rad=self.currentSources[ii].radius
+            srcI.append(I)
+            srcLocs.append(self.currentSources[ii].coords)
+            srcRadii.append(rad)
+            
+            if rad>0:
+                V=I/(4*np.pi*rad)
+            srcV.append(V)
+            
+        for ii in nb.prange(len(self.voltageSources)):
+            V=self.voltageSources[ii].value
+            srcV.append(V)
+            srcLocs.append(self.voltageSources[ii].coords)
+            rad=self.voltageSources[ii].radius
+            srcRadii.append(rad)
+            if rad>0:
+                I=V*4*np.pi*rad
+                
+            srcI.append(I)
+            
+        def __analytic(rad,V,I,r):
+            inside=r<rad
+            voltage=np.empty_like(r)
+            voltage[inside]=V
+            voltage[~inside]=I/(4*np.pi*r[~inside])
+            return voltage
+            
         # nTypes,_,_,_,_=self.getNodeTypes()
         v=self.nodeVoltages
-        rest=self.nodeRoleTable==0
+        
+        vAna=np.zeros_like(v)
+        anaInt=0.
         
         coords=self.mesh.nodeCoords
-        edges=self.mesh.edges
         
-        nNodes=coords.shape[0]
-        nElems=len(self.mesh.elements)
-        
-        r=np.linalg.norm(self.mesh.nodeCoords,axis=1)
-        rDense=np.linspace(0,max(r[rest]),100)
-        
-        sorter=np.argsort(r)
+        for ii in nb.prange(len(srcI)):
+            
+            r=np.linalg.norm(coords-srcLocs[ii],axis=1)
+            rDense=np.linspace(0,max(r),100)
+            
+            # inside=r<srcRadii[ii]
+            
+            # vEst=np.empty_like(v)
+            # vEst[inside]=srcV[ii]
+            # vEst[~inside]=srcI[ii]/(4*np.pi*r[~inside])
+
+            vEst=__analytic(srcRadii[ii], srcV[ii], srcI[ii], r)
+            vDense=__analytic(srcRadii[ii], srcV[ii], srcI[ii], rDense)
+            vAna+=vEst
+            anaInt+=np.trapz(vDense,rDense)
+            
+        sorter=np.argsort(np.linalg.norm(coords,axis=1))
         rsort=r[sorter]
-        vsort=v[sorter]
         
-        
-        
-        
-        analytic=analyticVsrc(np.zeros(3), srcAmplitude, rsort,srcType=srcType)
-        analyticDense=analyticVsrc(np.zeros(3), srcAmplitude, rDense,srcType=srcType)
-        
-        err=vsort-analytic
-
-        FVU=np.trapz(abs(err),rsort)/np.trapz(analyticDense,rDense)
+            
+        err=v-vAna
+        errSort=err[sorter]
+        errSummary=np.trapz(abs(errSort),rsort)/anaInt
 
 
-        return FVU
+        return errSort, errSummary
     
     
     def setRHS(self,nDoF):
@@ -790,7 +764,7 @@ class Simulation:
 
         # diags=np.zeros(nDoF,dtype=np.float64)
         
-        gDofNodes=[]
+        # gDofNodes=[]
         
         nodeA=[]
         nodeB=[]
@@ -800,7 +774,7 @@ class Simulation:
             edge=edges[ii]
             # types=self.nodeRoleTable[edge]
             g=conductances[ii]
-            typeIndex=self.nodeRoleVals[edge]
+            # typeIndex=self.nodeRoleVals[edge]
             
             for nn in range(2):
                 this=np.arange(2)==nn
@@ -821,7 +795,7 @@ class Simulation:
                         
                     else:
                         #other node is fixed voltage
-                        nthVoltage=typeIndex[~this][0]
+                        # nthVoltage=typeIndex[~this][0]
                         thatVoltage=self.nodeVoltages[edge[~this]]
                         b[thisDoF]-=g*thatVoltage
                         
@@ -921,7 +895,7 @@ class Simulation:
             DESCRIPTION.
 
         """
-        nNodes=self.mesh.nodeCoords.shape[0]  
+        # nNodes=self.mesh.nodeCoords.shape[0]  
         # self.nodeRoleTable=np.zeros(nNodes,dtype=np.int64)
         # self.nodeRoleVals=np.zeros(nNodes,dtype=np.int64)
 
@@ -948,7 +922,7 @@ class Simulation:
     
     def resamplePlane(self,nXSamples=None,normalAxis=2,axisLocation=0.):
         
-        xmax=max(self.mesh.extents)/2
+        xmax=max(self.mesh.extents)
 
         if nXSamples is None:
             nXSamples=self.ptPerAxis
@@ -959,27 +933,67 @@ class Simulation:
             
         planeCoords=coords[:,selAx]
         sliceCoords=planeCoords[sel]
+        vPlane=self.nodeVoltages[sel]
+        
+        # kX=self.ptPerAxis//2
+        kX=nXSamples//2
+        sliceIdx=np.array(kX+kX*sliceCoords/(xmax*np.ones(2)),dtype=np.int64)
+        
         
         xx=np.linspace(-xmax,xmax,nXSamples)
         XX,YY=np.meshgrid(xx,xx)
         
         interpCoords=np.vstack((XX.ravel(),YY.ravel(),np.zeros_like(XX.ravel()))).transpose()
-        vInterp=np.empty_like(XX.ravel())
+        vInterp=np.empty_like(XX)
         
-        for ii in nb.prange(len(interpCoords)):
-            interpCoord=interpCoords[ii]
-            container=self.mesh.getContainingElement(interpCoord)
-            localCoord=(interpCoord-container.origin)/container.span
+        #set known values
+        for ii in nb.prange(len(vPlane)):
+            x,y=sliceIdx[ii]
+            vInterp[x,y]=vPlane[ii]
+        
+        print('%d of %d known'%(len(vPlane),nXSamples**2))
             
-            contNodes=container.globalNodeIndices
-            meshNodes=sparse2denseIndex(contNodes,self.mesh.indexMap)
-            contV=self.nodeVoltages[meshNodes]
-            print('%d of %d'%(ii,len(interpCoords)))
-            interp=getElementInterpolant(contV)
-            vInterp[ii]=evalulateInterpolant(interp, interpCoord)
+        
+        for ii in nb.prange(nXSamples):
+            sameX=sliceIdx[:,0]==ii
+            # print('%d of %d'%(ii,nXSamples))
+
+            for jj in nb.prange(nXSamples):
+                sameY=sliceIdx[:,1]==jj
+                xyMatch=np.logical_and(sameX,sameY)
+                
+                if not any(xyMatch):
+                    x0=maxUnder(ii,sliceIdx[:,0])
+                    x1=minOver(ii,sliceIdx[:,0])
+                    y0=maxUnder(jj,sliceIdx[:,1])
+                    y1=minOver(jj,sliceIdx[:,1])
+                    
+                    vNodes=np.array([vInterp[x,y] for y in [y0,y1] for x in [x0,x1]])
+                    
+                    local=np.zeros(2,dtype=np.float64)
+                    if x0!=x1:
+                        local[0]=(ii-x0)/(x1-x0)
+                    if y1!=y0:
+                        local[1]=(jj-y0)/(y1-y0)
+                    
+                    
+                    
+                    vInterp[ii,jj]=interpolateBilin(vNodes,local)
+                    # interpCoord=interpCoords[ii*nXSamples+jj]
+                    # container=self.mesh.getContainingElement(interpCoord)
+                    # localCoord=(interpCoord-container.origin)/container.span
+                    
+                    # contNodes=container.globalNodeIndices
+                    # meshNodes=sparse2denseIndex(contNodes,self.mesh.indexMap)
+                    # contV=self.nodeVoltages[meshNodes]
+                    
+                    
+                    # interp=getElementInterpolant(contV)
+                    # vInterp[ii,jj]=evalulateInterpolant(interp, localCoord)
             
-        return vInterp.reshape((nXSamples,nXSamples)), interpCoords
+        return vInterp, interpCoords
     
+                
 def getMappingArrays(generalArray,subsetArray):
     gen2sub=-np.ones(len(generalArray))
     sub2gen=[np.argwhere(n==generalArray).squeeze() for n in subsetArray]
@@ -1066,6 +1080,9 @@ class Mesh:
         raise ValueError('Point (%s) not inside any element' % ','.join(map(str,coords)))
             
        
+    def finalize(self):
+       pass
+       
     def addElement(self,origin, extents,sigma,nodeIndices):
         """
         Inserts element into the mesh
@@ -1147,12 +1164,12 @@ class Mesh:
     def getBoundaryNodes(self):
         mins,maxes=np.hsplit(self.bbox,2)
         
-        atmin=np.equals(mins,self.mesh.nodeCoords)
-        atmax=np.equals(maxes,self.mesh.nodeCoords)
-        isbnd=np.any(np.logical_and(atmin,atmax),axis=1)
-        tmpIndex=np.nonzero(isbnd)[0][0]
+        atmin=np.equal(mins,self.nodeCoords)
+        atmax=np.equal(maxes,self.nodeCoords)
+        isbnd=np.any(np.logical_or(atmin,atmax),axis=1)
+        globalIndices=np.nonzero(isbnd)[0]
         
-        globalIndices=sparse2denseIndex(tmpIndex,self.indexMap)
+        # globalIndices=sparse2denseIndex(tmpIndex,self.indexMap)
     
         return globalIndices
 
@@ -1169,7 +1186,7 @@ class Logger():
     def logCompletion(self):
         tend=time.process_time()
         duration=tend-self.start
-        engFormat=mpl.ticker.EngFormatter()
+        engFormat=tickr.EngFormatter()
         print(self.name+": "+engFormat(duration)+ " seconds")
         self.duration=duration       
         self.memory=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -1826,6 +1843,7 @@ class SimStudy:
             # im.append(txt)
             ims.append(im)
         
+        plt.tight_layout()
         # def aniFun(ii):
         #     sim=self.loadData(fnames[ii])
         #     art=plotfun(fig,sim)

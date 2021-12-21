@@ -15,6 +15,7 @@ from scipy.interpolate import interp2d
 import matplotlib.tri as tri
 
 import pandas
+from util import uniformResample
 
 def plotBoundEffect(fname,ycat='FVU',xcat='Domain size',groupby='Number of elements',legstem='%d elements'):
     dframe,_=importRunset(fname)
@@ -154,7 +155,7 @@ def getCmap(vals,forceBipolar=False):
         cNorm = mpl.colors.CenteredNorm()
     else:
         cMap = mpl.cm.plasma
-        cNorm = mpl.colors.Normalize()
+        cNorm = mpl.colors.Normalize(vmin=0,vmax=mx)
     return (cMap, cNorm)
 
 
@@ -285,7 +286,7 @@ def showSlice(coords,vals,nX=100,sliceCoord=0,axis=2,plotWhich=None,edges=None,e
     
     return [img]
 
-def showEdges2d(axis,edgePoints,edgeColors=None):
+def showEdges2d(axis,edgePoints,edgeColors=None,alpha=None):
     if edgeColors is None:
         edgeColors=(0.,0.,0.,)
         alpha=0.05
@@ -297,54 +298,46 @@ def showEdges2d(axis,edgePoints,edgeColors=None):
 
 def centerSlice(fig,simulation,rElec=1e-6):
     
-    coords=simulation.mesh.nodeCoords
-    v=simulation.nodeVoltages
-    # nTypes,_,_,_,_=simulation.getNodeTypes()
-    nTypes=simulation.nodeRoleTable
-    rest=nTypes==0
+    sel=simulation.mesh.nodeCoords[:,-1]==0
+    intcoord=simulation.intifyCoords()
+    pcoord=intcoord[sel,:-1]
+    ccoord=simulation.mesh.nodeCoords[sel,:-1]
+    pv=simulation.nodeVoltages[sel]
+
+
+    nx=simulation.ptPerAxis
+    if nx>2**12:
+        nx=2**10+1
         
-    nX=simulation.ptPerAxis
-    xmax=max(simulation.mesh.extents)/2
-    
-    bnds=np.array([-xmax,xmax,-xmax,xmax])
-    
-# vInterp,interpCoords=simulation.resamplePlane(nXSamples=nX)
-    sel=coords[:,2]==0
-    pcoord=coords[sel]   
-    pval=v[sel]    
-    xx0,yy0,_=np.hsplit(pcoord,3)
-    
-    xx=np.linspace(bnds[0],bnds[1],nX)
-    yy=np.linspace(bnds[2],bnds[3],nX)
-    XX,YY=np.meshgrid(xx,yy)
-    
-#     quads=interp2d(xx0,yy0,sliceVals)
-#     vImg=quads(xx,yy).reshape((nX,nX))
-                   
-
-    triang = tri.Triangulation(xx0.squeeze(), yy0.squeeze())
-    interpolator = tri.LinearTriInterpolator(triang, pval)
-    vInterp= interpolator(XX, YY)
-    
-    interpCoords=np.vstack((XX.ravel(),YY.ravel())).transpose()
-    
-    
-    nX=vInterp.shape[0]
     
 
-    # rest=None
-    edges=simulation.edges
-    edgePoints=getPlanarEdgePoints(coords, edges)
+    xmax=max(ccoord[:,1])
+    xx=np.linspace(min(ccoord[:,0]),
+                   xmax,
+                   nx)
+    XX,YY=np.meshgrid(xx,xx)
     
-    r=np.linalg.norm(interpCoords,axis=1)
+    # r=np.linalg.norm(ccoord,axis=1)
+    r=np.sqrt(XX**2 + YY**2)
     
-    def vAna(r):
-        r[r<rElec]=rElec
-        return rElec/(r)
+    # vInterp=uniformResample(pcoord, pv, nx)
     
-    analytic=vAna(r)        
-    err=vInterp.ravel()-analytic
-    errImg=err.reshape((nX,nX))
+    triSet=tri.Triangulation(ccoord[:,0], ccoord[:,1])    
+    interp=tri.LinearTriInterpolator(triSet, pv)
+    vInterp=interp(XX.ravel(),YY.ravel()).reshape((nx,nx))
+    
+    
+    inside=r<1e-6
+    ana=np.empty_like(r)
+    ana[inside]=1
+    ana[~inside]=1e-6/r[~inside]
+    
+    err=vInterp-ana
+    
+    interpCoords=np.vstack((XX.ravel(), YY.ravel())).transpose()
+
+    
+    edgePoints=getPlanarEdgePoints(simulation.mesh.nodeCoords, simulation.edges)
         
     if fig.axes==[]:
         axV=fig.add_subplot(1,2,1)
@@ -353,21 +346,50 @@ def centerSlice(fig,simulation,rElec=1e-6):
         caxE=None
         axV.set_title('Simulated potential [V]')
         axE.set_title('Absolute error [V]')
+        
+        engform=mpl.ticker.EngFormatter()
+        for ax in [axV,axE]:
+            ax.xaxis.set_major_formatter(engform)
+            ax.yaxis.set_major_formatter(engform)
+            ax.set_xlabel('X [m]')
+            ax.set_ylabel('Y [m]')
+            ax.set_xlim(min(ccoord[:,0]),max(ccoord[:,0]))
+            ax.set_ylim(min(ccoord[:,1]),max(ccoord[:,1]))
     else:
         axV=fig.axes[0]
         axE=fig.axes[1]
         caxV=fig.axes[2]
         caxE=fig.axes[3]
 
-    vArt=showSlice(interpCoords, vInterp, nX=nX,axes=[axV,caxV],xmax=xmax)
+    vArt=showSlice(interpCoords, vInterp, nX=nx,axes=[axV,caxV],xmax=xmax)
     vArt.append(showEdges2d(axV, edgePoints))
-    errArt=showSlice(interpCoords,errImg, forceBipolar=True,nX=nX,axes=[axE,caxE],xmax=xmax)
+    errArt=showSlice(interpCoords,err, forceBipolar=True,nX=nx,axes=[axE,caxE],xmax=xmax)
     errArt.append(showEdges2d(axE, edgePoints))
+    
+    # vArt=patchworkImage(axV, caxV, qc, qv)
+    # vArt.append(showEdges2d(axV, edgePoints))
+    # errArt=patchworkImage(axE, caxE, qc, qerr)
+    # errArt.append(showEdges2d(axE, edgePoints))
     
     vArt.extend(errArt)
     plt.tight_layout()
     
     return vArt
+
+def patchworkImage(axis,caxis,quadBbox,quadVal):
+    imlist=[]
+    cMap,cNorm=getCmap(quadVal.ravel())
+    
+    for c,v in zip(quadVal,quadBbox):
+        im=axis.imshow(v.reshape((2,2)),
+               origin='lower',extent=c.squeeze(),
+                cmap=cMap, norm=cNorm,interpolation='bilinear')
+        imlist.append(im)
+        
+    cbar=plt.gcf().colorbar(mpl.cm.ScalarMappable(norm=cNorm, cmap=cMap),
+                            ax=axis,cax=caxis) 
+    
+    return imlist
 
 def getPlanarEdgePoints(coords,edges, normalAxis=2, axisCoord=0):
 
@@ -382,52 +404,70 @@ def getPlanarEdgePoints(coords,edges, normalAxis=2, axisCoord=0):
     
 def error2d(fig,simulation,rElec=1e-6,datalabel='Simulation'):
     
-    # nTypes,_,_,_,_=simulation.getNodeTypes()
-    # rest=np.logical_or(nTypes==0,nTypes==2)
-    rest=simulation.nodeRoleTable==0
+    # # nTypes,_,_,_,_=simulation.getNodeTypes()
+    # # rest=np.logical_or(nTypes==0,nTypes==2)
+    isDoF=simulation.nodeRoleTable==0
     v=simulation.nodeVoltages
     
     nNodes=len(simulation.mesh.nodeCoords)
     nElems=len(simulation.mesh.elements)
     r=np.linalg.norm(simulation.mesh.nodeCoords,axis=1)
     
+    
+    
     sorter=np.argsort(r)
     rsort=r[sorter]
     vsort=v[sorter]
+    rsort[0]=rElec/2
 
-    # rDense=np.linspace(0,max(r[rest]),100)
+    # # rDense=np.linspace(0,max(r[rest]),100)
+    # # rmin=min(rElec/2,min(rsort[1:]))
     lmin=np.log10(rElec/2)
-    lmax=np.log10(max(r[rest]))
-    rDense=np.logspace(lmin,lmax,100)
+    lmax=np.log10(max(r))
+    rDense=np.logspace(lmin,lmax,200)
     
     def vAna(r):
-        r[r<rElec]=rElec
-        return rElec/(r)
+        r0=r.copy()
+        r0[r<rElec]=rElec
+        return rElec/(r0)
     
-    analytic=vAna(rsort)
+    # analytic=vAna(rsort)
     analyticDense=vAna(rDense)
         
-    # FVU=xCell.getFVU(v,analytic,rest)
-    err=vsort-analytic
-    FVU=np.trapz(np.abs(err),rsort)/np.trapz(analyticDense,rDense)
+    # # FVU=xCell.getFVU(v,analytic,rest)
+    # err=vsort-analytic
+    # FVU=np.trapz(np.abs(err),rsort)/np.trapz(analyticDense,rDense)
     
-    # errRel=err/analytic
-    # fig2d, axes=plt.subplots(2,1)
-    # ax2dA,ax2dB=axes
+    # # errRel=err/analytic
+    # # fig2d, axes=plt.subplots(2,1)
+    # # ax2dA,ax2dB=axes
+    
+    err,FVU = simulation.calculateErrors()
+    
+    # filter non DoF
+    filt=isDoF[sorter]
+    
+    rFilt=rsort[filt]
+    errFilt=err[filt]
+    
     
     if fig.axes==[]:
         ax2dA=fig.add_subplot(2,1,1)
         ax2dB=fig.add_subplot(2,1,2)
+        ax2dA.grid(True)
+        ax2dB.grid(True)
+        ax2dA.set_xlim(left=rElec/2,right=2*max(r))
             
         ax2dA.xaxis.set_major_formatter(mpl.ticker.EngFormatter())  
         ax2dA.set_xlabel('Distance from source [m]')
         ax2dA.set_ylabel('Voltage [V]')
         ax2dB.set_ylabel('Absolute error [V]')
-        # ax2dB.set_ylabel('Relative error')
 
         ax2dA.set_xscale('log')
         ax2dB.set_xscale('log')
         ax2dB.sharex(ax2dA)
+        # ax2dB.autoscale(enable=True, axis='y', tight=True)
+        
         anaLine=ax2dA.plot(rDense,analyticDense,c='b',label='Analytical')
 
         isNew=True
@@ -446,9 +486,10 @@ def error2d(fig,simulation,rElec=1e-6,datalabel='Simulation'):
                    '%s:%d nodes, %d elements, error %.2g Vm'%(simulation.meshtype,nNodes,nElems,FVU),
                     horizontalalignment='center', verticalalignment='bottom', transform=ax2dA.transAxes)
 
-    errLine=ax2dB.scatter(r[rest],err[rest],c='r',marker='.',label=datalabel)
+    errLine=ax2dB.plot(rFilt,errFilt,c='r',marker='.',linestyle='None',label=datalabel)
+    # errLine=ax2dB.plot(rsort,err,c='r',marker='.',label=datalabel)
 
     plt.tight_layout()
-    return [simLine[0],errLine,title]
+    return [simLine[0],errLine[0],title]
   
     

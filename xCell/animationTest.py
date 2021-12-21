@@ -13,16 +13,15 @@ import matplotlib.pyplot as plt
 
 
 meshtype='adaptive'
-studyPath='Results/studyTst/refactor/'#+meshtype
+studyPath='Results/studyTst/fixedK/'#+meshtype
 
-maxdepth=12
 xmax=1e-4
 sigma=np.ones(3)
 
 
 vMode=False
 showGraphs=False
-generate=True
+generate=False
 saveGraphs=False
 
 vsrc=1.
@@ -39,7 +38,7 @@ rElec=1e-6
 lastNumEl=0
 
 def makeUniformGrid(simulation,nX):
-    xmax=simulation.mesh.extents[0]/2
+    xmax=simulation.mesh.extents[0]
        
     xx=np.linspace(-xmax,xmax,nX+1)
     XX,YY,ZZ=np.meshgrid(xx,xx,xx)
@@ -86,16 +85,17 @@ def makeAdaptiveGrid(simulation,metric,maxdepth):
 if generate:
    
     # for var in np.linspace(0.1,0.7,15):
-    for maxdepth in [10]:#range(2,12):
-        for meshtype in ["adaptive"]:#,"uniform"]:
+    for maxdepth in range(2,14):
+        for meshtype in ["adaptive","uniform"]:
         # for maxdepth in range(2,10):
             # if meshtype=='uniform':
             #     maxdepth=var
             # else:
-            l0Param=2**(-maxdepth*0.2)
+            # l0Param=2**(-maxdepth*0.2)
+            l0Param=0.2
             
             setup=study.newSimulation()
-            setup.mesh.elementType='FEM'
+            setup.mesh.elementType='Admittance'
             setup.meshtype=meshtype
             setup.mesh.minl0=2*xmax/(2**maxdepth)
             setup.ptPerAxis=1+2**maxdepth
@@ -123,16 +123,17 @@ if generate:
             
             if meshtype=='uniform':
                 newNx=int(np.ceil(lastNumEl**(1/3)))
+                nX=newNx+newNx%2
                 sourceIndex=makeUniformGrid(setup,newNx+newNx%2)
-                
+                print('uniform, %d per axis'%nX)
             else:
                 def metric(coord,l0Param=l0Param):
                     r=np.linalg.norm(coord)
                     val=l0Param*r #1/r dependence
                     # val=(l0Param*r**2)**(1/3) #current continuity
                     # val=(l0Param*r**4)**(1/3) #dirichlet energy continutity
-                    if val<rElec:
-                        val=rElec
+                    # if val<rElec:
+                    #     val=rElec
                     return val
                 # otree=xCell.Octree(bbox,maxDepth=maxdepth)
                 # otree.refineByMetric(metric)
@@ -187,27 +188,27 @@ if generate:
             v=setup.iterativeSolve(None,1e-9)
             
             setup.getMemUsage(True)
-            FVU=setup.calculateErrors(srcMag,srcType,showPlots=showGraphs)
-            print('error: %g'%FVU)
+            _,errEst=setup.calculateErrors()#srcMag,srcType,showPlots=showGraphs)
+            print('error: %g'%errEst)
             
-            study.newLogEntry(['Error','k'],[FVU,l0Param])
+            study.newLogEntry(['Error','k','Depth'],[errEst,l0Param,maxdepth])
             study.saveData(setup)
-            # lastNumEl=numEl
+            lastNumEl=len(setup.mesh.elements)
             
             
             # ax=xCell.new3dPlot( bbox)
             # xCell.showEdges(ax, coords, setup.mesh.edges)
             # break
         
-            fig=plt.figure()
-            xCell.centerSlice(fig, setup)
+            # fig=plt.figure()
+            # xCell.centerSlice(fig, setup)
             
             if saveGraphs:
                 study.makeStandardPlots()
     
 
 # aniGraph=study.animatePlot(xCell.error2d,'err2d')
-# aniGraph=study.animatePlot(xCell.error2d,'err2d_adaptive',["Mesh type"],['adaptive'])
+aniGraph=study.animatePlot(xCell.error2d,'err2d_adaptive',["Mesh type"],['adaptive'])
 # aniGraph2=study.animatePlot(xCell.error2d,'err2d_uniform',['Mesh type'],['uniform'])
 # aniImg=study.animatePlot(xCell.centerSlice,'img_mesh')
 # aniImg=study.animatePlot(xCell.centerSlice,'img_adaptive',["Mesh type"],['adaptive'])
@@ -215,3 +216,4 @@ if generate:
 
 
 # study.plotAccuracyCost()
+# xCell.groupedScatter(study.studyPath+'log.csv',xcat='Number of elements',ycat='Error',groupcat='Mesh type')
