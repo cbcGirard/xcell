@@ -17,6 +17,25 @@ from numba import int64, float64
 nb.config.DISABLE_JIT=0
 nb.config.DEBUG_TYPEINFER=0
 
+@nb.njit()
+def edgeRoles(edges,nodeRoleTable):
+    edgeRoles=np.empty_like(edges)
+    for ii in nb.prange(edges.shape[0]):
+        edgeRoles[ii]=nodeRoleTable[edges[ii]]
+        
+    return edgeRoles
+
+@nb.njit()
+def edgeNodesOfType(edges, nodeSelect):
+    N=edges.shape[0]
+    matches=np.empty(N,dtype=np.int64)
+
+    for ii in nb.prange(N):
+        e=edges[ii]
+        matches[ii]=np.sum(e)
+        
+    return matches
+
 # @nb.njit
 def intify(pts,nX):
     mn=np.min(pts,axis=0)

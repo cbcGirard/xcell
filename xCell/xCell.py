@@ -268,8 +268,17 @@ class Simulation:
         self.iteration=0
         
         
-    def makeUniformGrid(self,nX,sigma=np.array([1.,1.,1.])):
+    def makeAdaptiveGrid(self,metric,maxdepth):
+        self.startTiming("Make elements")
+        self.ptPerAxis=2**maxdepth+1
+        self.meshtype='adaptive'
+        self.mesh=Octree(self.mesh.bbox,maxdepth)
+    
+        self.mesh.refineByMetric(metric)
+        self.logTime()
         
+    def makeUniformGrid(self,nX,sigma=np.array([1.,1.,1.])):
+        self.meshtype='uniform'
         self.startTiming("Make elements")
 
         xmax=self.mesh.extents[0]
@@ -1831,26 +1840,25 @@ class SimStudy:
             
         
         
-        ims=[]
+        # ims=[]
         fig=plt.figure()
-        # for ii in range(len(fnames)):
-        #     dat=self.loadData(fnames[forder[ii]])
-        for ii,fname in enumerate(fnames):
-            dat=self.loadData(fname)
-            im=plotfun(fig,dat)
-            # txt=fig.text(0.01,0.95,'frame %d'%ii,
-            #                horizontalalignment='left',verticalalignment='bottom')
-            # im.append(txt)
-            ims.append(im)
+        # loopargs=None
+        # # for ii in range(len(fnames)):
+        # #     dat=self.loadData(fnames[forder[ii]])
+        # for ii,fname in enumerate(fnames):
+        #     dat=self.loadData(fname)
+        #     im,loopargs=plotfun(fig,dat,loopargs)
+        #     # txt=fig.text(0.01,0.95,'frame %d'%ii,
+        #     #                horizontalalignment='left',verticalalignment='bottom')
+        #     # im.append(txt)
+        #     ims.append(im)
         
-        plt.tight_layout()
-        # def aniFun(ii):
-        #     sim=self.loadData(fnames[ii])
-        #     art=plotfun(fig,sim)
-        #     txt=fig.text(1,1,'frame %d'%ii,
-        #                  horizontalalignment='left',verticalalignment='bottom')
-        #     art.append(txt)
-        #     return art
+        plottr=plotfun(fig,self)
+        for ii, fname in enumerate(fnames):
+            dat=self.loadData(fname)
+            plottr.addSimulationData(dat)
+            
+        ims=plottr.getArtists()
             
             
         ani=mpl.animation.ArtistAnimation(fig, ims, interval=1000, repeat_delay=2000,blit=False)

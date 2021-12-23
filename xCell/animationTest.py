@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 
 meshtype='adaptive'
-studyPath='Results/studyTst/fixedK/'#+meshtype
+studyPath='Results/studyTst/miniset/'#+meshtype
 
 xmax=1e-4
 sigma=np.ones(3)
@@ -37,62 +37,25 @@ rElec=1e-6
 
 lastNumEl=0
 
-def makeUniformGrid(simulation,nX):
-    xmax=simulation.mesh.extents[0]
-       
-    xx=np.linspace(-xmax,xmax,nX+1)
-    XX,YY,ZZ=np.meshgrid(xx,xx,xx)
-    
-    
-    coords=np.vstack((XX.ravel(),YY.ravel(), ZZ.ravel())).transpose()
-    r=np.linalg.norm(coords,axis=1)
-    
-    simulation.mesh.nodeCoords=coords
-    simulation.mesh.extents=2*xmax*np.ones(3)
-    simulation.mesh.elementType='Admittance'
-    
-    
-    elExtents=np.ones(3)*2*xmax/nX
-    elOffsets=np.array([1,nX+1,(nX+1)**2])
-    nodeOffsets=np.array([np.dot(xCell.toBitArray(i),elOffsets) for i in range(8)])
-    
-    
-    for zz in range(nX):
-        for yy in range(nX):
-            for xx in range(nX):
-                elOriginNode=xx+yy*(nX+1)+zz*(nX+1)**2
-                origin=coords[elOriginNode]
-                elementNodes=elOriginNode+nodeOffsets
-                
-                simulation.mesh.addElement(origin, elExtents, sigma,elementNodes)
-                
-    sourceIndex=coords.shape[0]//2
-    return sourceIndex
-
-
 def makeAdaptiveGrid(simulation,metric,maxdepth):
 
     simulation.mesh=xCell.Octree(bbox,maxdepth)
 
-    # otree=xCell.Octree(bbox,maxDepth=maxdepth)
     simulation.mesh.refineByMetric(metric)
 
-    # simulation.mesh.finalize()
-    
-    # sourceIndex=setup.mesh.coord2Index(np.zeros(3))
-    # return sourceIndex
+
 
 if generate:
    
     # for var in np.linspace(0.1,0.7,15):
-    for maxdepth in range(2,14):
+    for maxdepth in range(2,10):
         for meshtype in ["adaptive","uniform"]:
         # for maxdepth in range(2,10):
             # if meshtype=='uniform':
             #     maxdepth=var
             # else:
-            # l0Param=2**(-maxdepth*0.2)
-            l0Param=0.2
+            l0Param=2**(-maxdepth*0.2)
+            # l0Param=0.2
             
             setup=study.newSimulation()
             setup.mesh.elementType='Admittance'
@@ -107,24 +70,12 @@ if generate:
             else:
                 srcMag=4*np.pi*sigma[0]*rElec
                 setup.addCurrentSource(srcMag,np.zeros(3),rElec)
-                # setup.addCurrentSource(srcMag,index=sourceIndex)
                 srcType='Current'
-            
-            # # ground boundary nodes, set v sources
-            # for ii in nb.prange(coords.shape[0]):
-            #     pt=np.abs(coords[ii])
-            #     rpt=np.array(np.linalg.norm(pt))
-            #     if np.any(pt==xmax):# or (rpt<=rElec):
-            #         # setup.addVoltageSource(0,index=ii)
-                    
-            #         vpt=xCell.analyticVsrc(np.zeros(3), srcMag, rpt,srcType=srcType,srcRadius=rElec)
-            #         setup.addVoltageSource(vpt.squeeze(),index=ii)
-            
-            
+
             if meshtype=='uniform':
                 newNx=int(np.ceil(lastNumEl**(1/3)))
                 nX=newNx+newNx%2
-                sourceIndex=makeUniformGrid(setup,newNx+newNx%2)
+                setup.makeUniformGrid(newNx+newNx%2)
                 print('uniform, %d per axis'%nX)
             else:
                 def metric(coord,l0Param=l0Param):
@@ -134,19 +85,15 @@ if generate:
                     # val=(l0Param*r**4)**(1/3) #dirichlet energy continutity
                     # if val<rElec:
                     #     val=rElec
+                    
+                    if (r+val)<rElec:
+                        val=rElec/2
                     return val
-                # otree=xCell.Octree(bbox,maxDepth=maxdepth)
-                # otree.refineByMetric(metric)
-                # numEl=len(otree.tree.getTerminalOctants())
-                # if numEl==lastNumEl:
-                #     continue
-                
-                # setup.mesh=otree.makeMesh(setup.mesh)
-                # sourceIndex=
-                makeAdaptiveGrid(setup, metric,maxdepth)
+
+                setup.makeAdaptiveGrid(metric,maxdepth)
             
         
-            setup.startTiming("Make elements")
+            # setup.startTiming("Make elements")
       
             coords=setup.mesh.nodeCoords
             
@@ -155,35 +102,13 @@ if generate:
                 return rElec/(r*np.pi*4)
             
                 
-            setup.logTime()
-            # numEl=len(setup.mesh.elements)
-            
-            # print('%d elem'%numEl)
+            # setup.logTime()
+
             setup.finalizeMesh()
 
             # setup.insertSourcesInMesh()
             setup.setBoundaryNodes(boundaryFun)
-            
-            # if vMode:
-            #     srcMag=1.
-            #     srcType='Voltage'
-            # else:
-            #     srcMag=4*np.pi*sigma[0]*rElec
-            #     setup.addCurrentSource(srcMag,index=sourceIndex)
-            #     srcType='Current'
-            
-            # # ground boundary nodes, set v sources
-            # for ii in nb.prange(coords.shape[0]):
-            #     pt=np.abs(coords[ii])
-            #     rpt=np.array(np.linalg.norm(pt))
-            #     if np.any(pt==xmax):# or (rpt<=rElec):
-            #         # setup.addVoltageSource(0,index=ii)
-                    
-            #         vpt=xCell.analyticVsrc(np.zeros(3), srcMag, rpt,srcType=srcType,srcRadius=rElec)
-            #         setup.addVoltageSource(vpt.squeeze(),index=ii)
-                
-            
-            
+
             # v=setup.solve()
             v=setup.iterativeSolve(None,1e-9)
             
@@ -208,10 +133,10 @@ if generate:
     
 
 # aniGraph=study.animatePlot(xCell.error2d,'err2d')
-aniGraph=study.animatePlot(xCell.error2d,'err2d_adaptive',["Mesh type"],['adaptive'])
+# aniGraph=study.animatePlot(xCell.ErrorGraph,'err2d_adaptive',["Mesh type"],['adaptive'])
 # aniGraph2=study.animatePlot(xCell.error2d,'err2d_uniform',['Mesh type'],['uniform'])
 # aniImg=study.animatePlot(xCell.centerSlice,'img_mesh')
-# aniImg=study.animatePlot(xCell.centerSlice,'img_adaptive',["Mesh type"],['adaptive'])
+aniImg=study.animatePlot(xCell.SliceSet,'img_adaptive',["Mesh type"],['adaptive'])
 # aniImg2=study.animatePlot(xCell.centerSlice,'img_uniform',['Mesh type'],['uniform'])
 
 

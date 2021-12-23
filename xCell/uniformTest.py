@@ -20,8 +20,10 @@ import matplotlib.pyplot as plt
 
 studyPath='Results/studyTst'
 
+nDiv=6
 maxdepth=10
-xmax=1e-4
+xmax=3e-6
+
 sigma=np.ones(3)
 rElec=1e-6
 
@@ -29,6 +31,20 @@ rElec=1e-6
 vMode=False
 showGraphs=False
 generate=False
+
+
+def metric(coord):
+    r=np.linalg.norm(coord)
+    l0target=0.2*r
+    
+    #avoid subdivision inside source
+    if (r+l0target)<rElec:
+        l0target=rElec
+    return l0target
+
+def boundaryFun(coord):
+    r=np.linalg.norm(coord)
+    return rElec/(r*np.pi*4)
 
 vsrc=1.
 isrc=vsrc*4*np.pi*sigma*1e-6
@@ -39,93 +55,44 @@ bbox=np.append(-xmax*np.ones(3),xmax*np.ones(3))
 study=xCell.SimStudy(studyPath,bbox)
 
 
+# setup=study.newSimulation()
+# if vMode:
+#     setup.addVoltageSource(1,np.zeros(3),rElec)
+#     srcMag=1.
+#     srcType='Voltage'
+# else:
+#     srcMag=4*np.pi*sigma[0]*rElec
+#     setup.addCurrentSource(srcMag,np.zeros(3),rElec)
+#     # setup.addCurrentSource(srcMag,index=sourceIndex)
+#     srcType='Current'
+    
+# # setup.makeUniformGrid(nDiv)
+# setup.makeAdaptiveGrid(metric, maxdepth)
 
 
 
-# def runUniformGrid(nDiv,elType,xmax,showGraphs,vMode=False,logTimes=False):
-nDiv=6
+# setup.finalizeMesh()
+# setup.setBoundaryNodes(boundaryFun)
+# coords=setup.mesh.nodeCoords    
 
-# plt.close('all')
-# sigma=np.array([1.,1.,1.])
+# print('%d nodes, %d elements' % (coords.shape[0],len(setup.mesh.elements)))
+          
 
+    
 
-# boundingBox=np.append(-xmax*np.ones(3),xmax*np.ones(3))
+# # edges,conductances=setup.mesh.getConductances()
+# # ax=xCell.new3dPlot(boundingBox)
+# # xCell.showEdges(ax, coords, edges, conductances)
 
-# xx=np.linspace(-xmax,xmax,nDiv+1)
-# XX,YY,ZZ=np.meshgrid(xx,xx,xx)
+# # v=setup.solve()
+# v=setup.iterativeSolve(None,1e-9)
 
+# setup.getMemUsage(True)
 
-# coords=np.vstack((XX.ravel(),YY.ravel(), ZZ.ravel())).transpose()
-# r=np.linalg.norm(coords,axis=1)
-# setup=xCell.simulation(resultpath)
-setup=study.newSimulation()
+# err,FVU=setup.calculateErrors()#srcMag,srcType,showPlots=showGraphs)
+# study.saveData(setup)
 
-# setup.mesh.nodeCoords=coords
-# setup.mesh.extents=2*xmax*np.ones(3)
-# setup.mesh.elementType=elType
-setup.makeUniformGrid(nDiv)
-coords=setup.mesh.nodeCoords
-
-# place unit source at center 
-sourceIndex=np.floor_divide(coords.shape[0],2)
-
-if vMode:
-    setup.addVoltageSource(1,np.zeros(3),rElec)
-    srcMag=1.
-    srcType='Voltage'
-else:
-    srcMag=4*np.pi*sigma[0]*rElec
-    setup.addCurrentSource(srcMag,np.zeros(3),rElec)
-    # setup.addCurrentSource(srcMag,index=sourceIndex)
-    srcType='Current'
-
-# ground boundary nodes
-# for ii in nb.prange(coords.shape[0]):
-#     pt=np.abs(coords[ii])
-#     rpt=np.array(np.linalg.norm(pt))
-#     if np.any(pt==xmax) or (rpt<=1e-6):
-#         # setup.addVoltageSource(0,index=ii)
-        
-#         vpt=xCell.analyticVsrc(np.zeros(3), srcMag, rpt,srcType=srcType)
-#         setup.addVoltageSource(vpt.squeeze(),index=ii)
-
-def boundaryFun(coord):
-    r=np.linalg.norm(coord)
-    return rElec/(r*np.pi*4)
-
-setup.finalizeMesh()
-setup.setBoundaryNodes(boundaryFun)
-
-# elOffsets=np.array([1,nDiv+1,(nDiv+1)**2])
-# nodeOffsets=np.array([np.dot(xCell.toBitArray(i),elOffsets) for i in range(8)])
-
-
-# setup.startTiming("Make elements")
-# for zz in range(nDiv):
-#     for yy in range(nDiv):
-#         for xx in range(nDiv):
-#             elOriginNode=xx+yy*(nDiv+1)+zz*(nDiv+1)**2
-#             origin=coords[elOriginNode]
-#             elementNodes=elOriginNode+nodeOffsets
-            
-#             setup.mesh.addElement(origin, elExtents, sigma,elementNodes)
-            
-# setup.logTime()            
-
-print('%d nodes, %d elements' % (coords.shape[0],len(setup.mesh.elements)))
-            
-edges,conductances=setup.mesh.getConductances()
-
-
-# ax=xCell.new3dPlot(boundingBox)
-# xCell.showEdges(ax, coords, edges, conductances)
-
-# v=setup.solve()
-v=setup.iterativeSolve(None,1e-9)
-
-setup.getMemUsage(True)
-
-err,FVU=setup.calculateErrors()#srcMag,srcType,showPlots=showGraphs)
+setup=study.loadData('sim0')
 
 # xCell.error2d(plt.figure(),setup)
 xCell.centerSlice(plt.figure(),setup)
