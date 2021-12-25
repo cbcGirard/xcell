@@ -48,7 +48,7 @@ def makeAdaptiveGrid(simulation,metric,maxdepth):
 if generate:
    
     # for var in np.linspace(0.1,0.7,15):
-    for maxdepth in range(2,10):
+    for maxdepth in range(2,16,2):
         for meshtype in ["adaptive","uniform"]:
         # for maxdepth in range(2,10):
             # if meshtype=='uniform':
@@ -108,6 +108,7 @@ if generate:
 
             # setup.insertSourcesInMesh()
             setup.setBoundaryNodes(boundaryFun)
+            setup.getEdgeCurrents()
 
             # v=setup.solve()
             v=setup.iterativeSolve(None,1e-9)
@@ -128,17 +129,25 @@ if generate:
             # fig=plt.figure()
             # xCell.centerSlice(fig, setup)
             
-            if saveGraphs:
-                study.makeStandardPlots()
+            # if saveGraphs:
+            #     study.makeStandardPlots()
     
 
 # aniGraph=study.animatePlot(xCell.error2d,'err2d')
 # aniGraph=study.animatePlot(xCell.ErrorGraph,'err2d_adaptive',["Mesh type"],['adaptive'])
 # aniGraph2=study.animatePlot(xCell.error2d,'err2d_uniform',['Mesh type'],['uniform'])
 # aniImg=study.animatePlot(xCell.centerSlice,'img_mesh')
-aniImg=study.animatePlot(xCell.SliceSet,'img_adaptive',["Mesh type"],['adaptive'])
+# aniImg=study.animatePlot(xCell.SliceSet,'img_adaptive',["Mesh type"],['adaptive'])
 # aniImg2=study.animatePlot(xCell.centerSlice,'img_uniform',['Mesh type'],['uniform'])
 
-
+# plotr=xCell.ErrorGraph(plt.figure(),study)
+# anig=plotr.animateStudy(filterCategories=["Mesh type"],
+#                           filterVals=['adaptive'])
+plotr=xCell.SliceSet(plt.figure(),study)
+aniI=plotr.animateStudy(filterCategories=["Mesh type"],
+                          filterVals=['adaptive'])
+# plotr=xCell.CurrentPlot(plt.figure(),study)
+# anic=plotr.animateStudy(filterCategories=["Mesh type"],
+#                           filterVals=['adaptive'])
 # study.plotAccuracyCost()
 # xCell.groupedScatter(study.studyPath+'log.csv',xcat='Number of elements',ycat='Error',groupcat='Mesh type')

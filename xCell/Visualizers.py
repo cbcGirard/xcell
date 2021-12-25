@@ -11,6 +11,7 @@ import mpl_toolkits.mplot3d as p3d
 import matplotlib as mpl
 import numpy as np
 from scipy.interpolate import interp2d
+from scipy.sparse import tril
 
 import matplotlib.tri as tri
 from mpl_toolkits.axes_grid1 import AxesGrid
@@ -18,7 +19,17 @@ from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes, mark_inset
 
 
 import pandas
-from util import uniformResample,edgeRoles
+from util import uniformResample,edgeRoles,getquads,quadsToMaskedArrays
+
+
+def formatXYAxis(axis,bounds,xlabel='X [m]', ylabel='Y [m]'):
+    engform=mpl.ticker.EngFormatter()
+    axis.xaxis.set_major_formatter(engform)
+    axis.yaxis.set_major_formatter(engform)
+    axis.set_xlabel(xlabel)
+    axis.set_ylabel(ylabel)
+    axis.set_xlim(bounds[0],bounds[1])
+    axis.set_ylim(bounds[2],bounds[3])
 
 def plotBoundEffect(fname,ycat='FVU',xcat='Domain size',groupby='Number of elements',legstem='%d elements'):
     dframe,_=importRunset(fname)
@@ -154,11 +165,13 @@ def getCmap(vals,forceBipolar=False):
     mx=max(vals)
     
     if ((mn < 0) and (abs(mn)/mx>0.01)) or forceBipolar:
+        amax=max(abs(mn),mx)
         cMap = mpl.cm.seismic
         cNorm = mpl.colors.CenteredNorm()
     else:
         cMap = mpl.cm.plasma
         cNorm = mpl.colors.Normalize(vmin=0,vmax=mx)
+        
     return (cMap, cNorm)
 
 
@@ -224,45 +237,45 @@ def showCurrentVecs(axis, pts,vecs):
     
     axis.quiver3D(X,Y,Z,dx,dy,dz, colors=colors)
     
- #TODO: deprecate   
-def showSlice(coords,vals,nX=100,sliceCoord=0,axis=2,plotWhich=None,edges=None,edgeColors=None,forceBipolar=False,axes=None,xmax=None):
-    axNames=[c for c in 'XYZ' if c!=axis]
-    if plotWhich is None:
-        plotWhich=True
+#  #TODO: deprecate   
+# def showSlice(coords,vals,nX=100,sliceCoord=0,axis=2,plotWhich=None,edges=None,edgeColors=None,forceBipolar=False,axes=None,xmax=None):
+#     axNames=[c for c in 'XYZ' if c!=axis]
+#     if plotWhich is None:
+#         plotWhich=True
 
-    if xmax is None:
-        xx0,yy0=np.hsplit(sliceCoords,2)
-        bnds=np.array([min(xx0), max(xx0), min(yy0), max(yy0)]).squeeze()
-    else:
-        bnds=np.array([-xmax,xmax,-xmax,xmax])
+#     if xmax is None:
+#         xx0,yy0=np.hsplit(sliceCoords,2)
+#         bnds=np.array([min(xx0), max(xx0), min(yy0), max(yy0)]).squeeze()
+#     else:
+#         bnds=np.array([-xmax,xmax,-xmax,xmax])
         
     
-    vImg=vals
+#     vImg=vals
     
-    (cMap, cNorm) = getCmap(vImg.ravel(),forceBipolar)
+#     (cMap, cNorm) = getCmap(vImg.ravel(),forceBipolar)
     
     
-    if axes is None:
-        ax=plt.gca()
-        cax=None
-    else:
-        ax=axes[0]
-        cax=axes[1]
+#     if axes is None:
+#         ax=plt.gca()
+#         cax=None
+#     else:
+#         ax=axes[0]
+#         cax=axes[1]
 
     
-    img=ax.imshow(vImg, origin='lower', extent=bnds,
-               cmap=cMap, norm=cNorm,interpolation='bilinear')
-    # cbar=plt.colorbar()
-    cbar=plt.gcf().colorbar(img,ax=ax,cax=cax)
+#     img=ax.imshow(vImg, origin='lower', extent=bnds,
+#                cmap=cMap, norm=cNorm,interpolation='bilinear')
+#     # cbar=plt.colorbar()
+#     cbar=plt.gcf().colorbar(img,ax=ax,cax=cax)
     
     
-    engform=mpl.ticker.EngFormatter()
-    ax.xaxis.set_major_formatter(engform)
-    ax.yaxis.set_major_formatter(engform)
-    ax.set_xlabel(axNames[0]+ ' [m]')
-    ax.set_ylabel(axNames[1]+' [m]')
+#     engform=mpl.ticker.EngFormatter()
+#     ax.xaxis.set_major_formatter(engform)
+#     ax.yaxis.set_major_formatter(engform)
+#     ax.set_xlabel(axNames[0]+ ' [m]')
+#     ax.set_ylabel(axNames[1]+' [m]')
     
-    return [img]
+#     return [img]
 
 def showEdges2d(axis,edgePoints,edgeColors=None,**kwargs):
     if edgeColors is None:
@@ -276,183 +289,285 @@ def showEdges2d(axis,edgePoints,edgeColors=None,**kwargs):
     axis.add_collection(edgeCol)
     return edgeCol
 
-def centerSlice(fig,simulation,grid=None):
-    artists=[]
-    isNodeInPlane=simulation.mesh.nodeCoords[:,-1]==0
-    intcoord=simulation.intifyCoords()
-    pcoord=intcoord[isNodeInPlane,:-1]
-    xyCoord=simulation.mesh.nodeCoords[:,:-1]
-    ccoord=xyCoord[isNodeInPlane]
-    pv=simulation.nodeVoltages[isNodeInPlane]
-    rElec=simulation.currentSources[0].radius
+# def centerSlice(fig,simulation,grid=None):
+#     artists=[]
+#     isNodeInPlane=simulation.mesh.nodeCoords[:,-1]==0
+#     intcoord=simulation.intifyCoords()
+#     pcoord=intcoord[isNodeInPlane,:-1]
+#     xyCoord=simulation.mesh.nodeCoords[:,:-1]
+#     ccoord=xyCoord[isNodeInPlane]
+#     pv=simulation.nodeVoltages[isNodeInPlane]
+#     rElec=simulation.currentSources[0].radius
 
-    nx=simulation.ptPerAxis
-    if nx>2**12:
-        nx=2**10+1
+#     nx=simulation.ptPerAxis
+#     if nx>2**12:
+#         nx=2**10+1
         
     
 
-    xmax=max(ccoord[:,1])
-    xx=np.linspace(min(ccoord[:,0]),
-                   xmax,
-                   nx)
-    XX,YY=np.meshgrid(xx,xx)
+#     xmax=max(ccoord[:,1])
+#     xx=np.linspace(min(ccoord[:,0]),
+#                    xmax,
+#                    nx)
+#     XX,YY=np.meshgrid(xx,xx)
     
-    xx0,yy0=np.hsplit(xyCoord,2)
-    bnds=np.array([min(xx0), max(xx0), min(yy0), max(yy0)]).squeeze()
-    bndInset=rElec*np.array([-3., 3., -3., 3.])
-    zoomFactor=np.mean(0.4*bnds/bndInset)
+#     xx0,yy0=np.hsplit(xyCoord,2)
+#     bnds=np.array([min(xx0), max(xx0), min(yy0), max(yy0)]).squeeze()
+#     bndInset=rElec*np.array([-3., 3., -3., 3.])
+#     zoomFactor=np.mean(0.4*bnds/bndInset)
     
-    r=np.sqrt(XX**2 + YY**2)
-    
-    
-    triSet=tri.Triangulation(ccoord[:,0], ccoord[:,1])    
-    interp=tri.LinearTriInterpolator(triSet, pv)
-    vInterp=interp(XX.ravel(),YY.ravel()).reshape((nx,nx))
+#     r=np.sqrt(XX**2 + YY**2)
     
     
+#     triSet=tri.Triangulation(ccoord[:,0], ccoord[:,1])    
+#     interp=tri.LinearTriInterpolator(triSet, pv)
+#     vInterp=interp(XX.ravel(),YY.ravel()).reshape((nx,nx))
     
-    inside=r<rElec
-    ana=np.empty_like(r)
-    ana[inside]=1
-    ana[~inside]=rElec/r[~inside]
     
-    err=vInterp-ana
     
-    interpCoords=np.vstack((XX.ravel(), YY.ravel())).transpose()
+#     inside=r<rElec
+#     ana=np.empty_like(r)
+#     ana[inside]=1
+#     ana[~inside]=rElec/r[~inside]
+    
+#     err=vInterp-ana
+    
+#     interpCoords=np.vstack((XX.ravel(), YY.ravel())).transpose()
 
-    filteredRoles=simulation.nodeRoleTable.copy()
-    filteredRoles[~isNodeInPlane]=-1
-    allEdges=np.array(simulation.edges)
-    roles=edgeRoles(allEdges,filteredRoles)
+#     filteredRoles=simulation.nodeRoleTable.copy()
+#     filteredRoles[~isNodeInPlane]=-1
+#     allEdges=np.array(simulation.edges)
+#     roles=edgeRoles(allEdges,filteredRoles)
     
-    isEdgeInPlane=~np.any(roles==-1,axis=1)
-    touchesSource=roles==2
+#     isEdgeInPlane=~np.any(roles==-1,axis=1)
+#     touchesSource=roles==2
     
-    isInvalid=np.all(touchesSource,axis=1)|(~isEdgeInPlane)
-    isBoundaryNode=np.logical_and(touchesSource,np.sum(touchesSource,axis=1,keepdims=True)==1)
+#     isInvalid=np.all(touchesSource,axis=1)|(~isEdgeInPlane)
+#     isBoundaryNode=np.logical_and(touchesSource,np.sum(touchesSource,axis=1,keepdims=True)==1)
     
-    boundaryNodes=allEdges[isBoundaryNode&np.expand_dims(isEdgeInPlane,axis=1)]
+#     boundaryNodes=allEdges[isBoundaryNode&np.expand_dims(isEdgeInPlane,axis=1)]
     
-    edgePoints=toEdgePoints(xyCoord,allEdges[~isInvalid])
-    sourceEdge=[[np.zeros(2),xy] for xy in xyCoord[boundaryNodes]]
+#     edgePoints=toEdgePoints(xyCoord,allEdges[~isInvalid])
+#     sourceEdge=[[np.zeros(2),xy] for xy in xyCoord[boundaryNodes]]
         
         
-    if fig.axes==[]:    
-        grid = AxesGrid(fig, 111,  # similar to subplot(144)
-                    nrows_ncols=(1, 2),
-                    axes_pad=(0.45, 0.15),
-                    # axes_pad=0.2,
-                    label_mode="L",
-                    share_all=True,
-                    cbar_location="right",
-                    cbar_mode="each",
-                    cbar_size="5%",
-                    cbar_pad="2%",
-                    )
+#     if fig.axes==[]:    
+#         grid = AxesGrid(fig, 111,  # similar to subplot(144)
+#                     nrows_ncols=(1, 2),
+#                     axes_pad=(0.45, 0.15),
+#                     # axes_pad=0.2,
+#                     label_mode="L",
+#                     share_all=True,
+#                     cbar_location="right",
+#                     cbar_mode="each",
+#                     cbar_size="5%",
+#                     cbar_pad="2%",
+#                     )
     
    
-        grid[0].set_title('Simulated potential [V]')
-        grid[1].set_title('Absolute error [V]')
-        # axV=fig.add_subplot(1,2,1)
-        # axE=fig.add_subplot(1,2,2)
-        # caxV=None
-        # caxE=None
-        # axV.set_title('Simulated potential [V]')
-        # axE.set_title('Absolute error [V]')
+#         grid[0].set_title('Simulated potential [V]')
+#         grid[1].set_title('Absolute error [V]')
+#         # axV=fig.add_subplot(1,2,1)
+#         # axE=fig.add_subplot(1,2,2)
+#         # caxV=None
+#         # caxE=None
+#         # axV.set_title('Simulated potential [V]')
+#         # axE.set_title('Absolute error [V]')
         
-        engform=mpl.ticker.EngFormatter()
-        # for ax in [axV,axE]:
-        for ax in grid:
-            ax.xaxis.set_major_formatter(engform)
-            ax.yaxis.set_major_formatter(engform)
-            ax.set_xlabel('X [m]')
-            ax.set_ylabel('Y [m]')
-            ax.set_xlim(min(ccoord[:,0]),max(ccoord[:,0]))
-            ax.set_ylim(min(ccoord[:,1]),max(ccoord[:,1]))
+#         engform=mpl.ticker.EngFormatter()
+#         # for ax in [axV,axE]:
+#         for ax in grid:
+#             ax.xaxis.set_major_formatter(engform)
+#             ax.yaxis.set_major_formatter(engform)
+#             ax.set_xlabel('X [m]')
+#             ax.set_ylabel('Y [m]')
+#             ax.set_xlim(min(ccoord[:,0]),max(ccoord[:,0]))
+#             ax.set_ylim(min(ccoord[:,1]),max(ccoord[:,1]))
            
-        vsub=zoomed_inset_axes(grid[0],zoom=zoomFactor, loc=1)
-        vsub.set_xlim(bndInset[0],bndInset[1])
-        vsub.set_ylim(bndInset[2],bndInset[3])
-        mark_inset(grid[0],vsub,loc1=2, loc2=4,
-                   fc='none', ec="0.5")
+#         vsub=zoomed_inset_axes(grid[0],zoom=zoomFactor, loc=1)
+#         vsub.set_xlim(bndInset[0],bndInset[1])
+#         vsub.set_ylim(bndInset[2],bndInset[3])
+#         mark_inset(grid[0],vsub,loc1=2, loc2=4,
+#                    fc='none', ec="0.5")
     
-            # ax.set_xlim(-3e-6, 3e-6)
-            # ax.set_ylim(-3e-6, 3e-6)
-    # else:
-        # axV=fig.axes[0]
-        # axE=fig.axes[1]
-        # caxV=fig.axes[2]
-        # caxE=fig.axes[3]
-    # vmin=min(vInterp.ravel())
-    # vmax=max(vInterp.ravel())
-    # ermax=max(err.ravel())
-    
-    
+#             # ax.set_xlim(-3e-6, 3e-6)
+#             # ax.set_ylim(-3e-6, 3e-6)
+#     # else:
+#         # axV=fig.axes[0]
+#         # axE=fig.axes[1]
+#         # caxV=fig.axes[2]
+#         # caxE=fig.axes[3]
+#     # vmin=min(vInterp.ravel())
+#     # vmax=max(vInterp.ravel())
+#     # ermax=max(err.ravel())
     
     
-    vmap,vnorm=getCmap(vInterp.ravel())
-    emap,enorm=getCmap(err.ravel(),forceBipolar=True)
+    
+    
+#     vmap,vnorm=getCmap(vInterp.ravel())
+#     emap,enorm=getCmap(err.ravel(),forceBipolar=True)
 
 
     
-    vArt=grid[0].imshow(vInterp, origin='lower', extent=bnds,
-               # cmap=vmap, norm=vnorm,interpolation='bilinear')
-               cmap=vmap, interpolation='bilinear')
-    grid.cbar_axes[0].colorbar(vArt)
+#     vArt=grid[0].imshow(vInterp, origin='lower', extent=bnds,
+#                # cmap=vmap, norm=vnorm,interpolation='bilinear')
+#                cmap=vmap, interpolation='bilinear')
+#     grid.cbar_axes[0].colorbar(vArt)
     
-    # artists.append(vsub.imshow(vInterp, origin='lower', extent=bnds,
-    #             cmap=vmap, norm=vnorm,interpolation='bilinear'))
+#     # artists.append(vsub.imshow(vInterp, origin='lower', extent=bnds,
+#     #             cmap=vmap, norm=vnorm,interpolation='bilinear'))
     
     
-    errArt=grid[1].imshow(err, origin='lower', extent=bnds,
-                cmap=emap, norm=enorm,interpolation='bilinear')
-               # cmap=emap, interpolation='bilinear')
-    grid.cbar_axes[1].colorbar(errArt)
+#     errArt=grid[1].imshow(err, origin='lower', extent=bnds,
+#                 cmap=emap, norm=enorm,interpolation='bilinear')
+#                # cmap=emap, interpolation='bilinear')
+#     grid.cbar_axes[1].colorbar(errArt)
     
-    # vArt=showSlice(interpCoords, vInterp, nX=nx,axes=[axV,caxV],xmax=xmax)
-    # vArt.append(showEdges2d(axV, edgePoints))
-    # errArt=showSlice(interpCoords,err, forceBipolar=True,nX=nx,axes=[axE,caxE],xmax=xmax)
-    # errArt.append(showEdges2d(axE, edgePoints))
+#     # vArt=showSlice(interpCoords, vInterp, nX=nx,axes=[axV,caxV],xmax=xmax)
+#     # vArt.append(showEdges2d(axV, edgePoints))
+#     # errArt=showSlice(interpCoords,err, forceBipolar=True,nX=nx,axes=[axE,caxE],xmax=xmax)
+#     # errArt.append(showEdges2d(axE, edgePoints))
     
-    # for ax, art in zip([axV,axE],[vArt,errArt]):
-    # axlist=[vsub]
-    # axlist.extend(grid)
-    # for ax in axlist:
-    for ax in grid:
-        artists.append(showEdges2d(ax, edgePoints))
-        artists.append(showEdges2d(ax, sourceEdge,edgeColors=(.5,.5,.5),alpha=.25,linestyles=':'))
+#     # for ax, art in zip([axV,axE],[vArt,errArt]):
+#     # axlist=[vsub]
+#     # axlist.extend(grid)
+#     # for ax in axlist:
+#     for ax in grid:
+#         artists.append(showEdges2d(ax, edgePoints))
+#         artists.append(showEdges2d(ax, sourceEdge,edgeColors=(.5,.5,.5),alpha=.25,linestyles=':'))
         
-        tht=np.linspace(0,2*np.pi)
-        x=rElec*np.cos(tht)
-        y=rElec*np.sin(tht)
-        artists.append(ax.plot(x,y,'k:',alpha=0.5)[0])
+#         tht=np.linspace(0,2*np.pi)
+#         x=rElec*np.cos(tht)
+#         y=rElec*np.sin(tht)
+#         artists.append(ax.plot(x,y,'k:',alpha=0.5)[0])
     
-    # vArt=patchworkImage(axV, caxV, qc, qv)
-    # vArt.append(showEdges2d(axV, edgePoints))
-    # errArt=patchworkImage(axE, caxE, qc, qerr)
-    # errArt.append(showEdges2d(axE, edgePoints))
+#     # vArt=patchworkImage(axV, caxV, qc, qv)
+#     # vArt.append(showEdges2d(axV, edgePoints))
+#     # errArt=patchworkImage(axE, caxE, qc, qerr)
+#     # errArt.append(showEdges2d(axE, edgePoints))
     
-    artists.append(errArt)
-    artists.append(vArt)
-    # plt.tight_layout()
+#     artists.append(errArt)
+#     artists.append(vArt)
+#     # plt.tight_layout()
     
-    return artists,grid
+#     return artists,grid
 
-def patchworkImage(axis,caxis,quadBbox,quadVal):
+def showSourceBoundary(axes,radius,srcCenter=np.zeros(2)):
+    """
+    Plot faint ring representing source's boundary
+
+    Parameters
+    ----------
+    axes : [axis]
+        Axes to plot to
+    radius : float
+        Source radius.
+    srcCenter : float[:], optional
+        Center of source. The default is np.zeros(2).
+
+    Returns
+    -------
+    None.
+
+    """
+    tht=np.linspace(0,2*np.pi)
+    x=radius*np.cos(tht)+srcCenter[0]
+    y=radius*np.sin(tht)+srcCenter[1]
+    
+    for ax in axes:
+        ax.plot(x,y,'k',alpha=0.1)
+        
+def addInset(baseAxis,rInset,xmax,relativeLoc=(.5, -.8)):
+    """
+    Create sub-axis for plotting a zoomed-in view of the main axis.
+    Plot commands executed in the main axis DO NOT automatically
+    appear in inset; to keep them synchronized, use a pattern like
+    
+    axes=[mainAx,inset]
+    for ax in axes:
+        ax.plot_command(...)
+
+    Parameters
+    ----------
+    baseAxis : axis
+        Parent axis.
+    rInset : float
+        Size of inset bounds (such that bounding box is 
+                              rInset*[-1,1,-1,1])
+    xmax : float
+        Size of parent axis' bounds.
+    relativeLoc : TYPE, optional
+        Placement of inset's center, relative to parent axis. 
+        The default is (.5, -.8), which plots
+        directly beneath the main plot.
+
+    Returns
+    -------
+    inset : axis
+        Inset axis.
+
+    """
+    insetZoom=0.8*xmax/rInset
+    inset=zoomed_inset_axes(baseAxis,zoom=insetZoom, 
+                            bbox_to_anchor=relativeLoc, loc='center',
+                            bbox_transform=baseAxis.transAxes)
+    
+    inset.set_xlim(-rInset,rInset)
+    inset.set_ylim(-rInset,rInset)
+    bnds=rInset*np.array([-1,1,-1,1])
+    formatXYAxis(inset, bnds,xlabel=None, ylabel=None)
+
+    mark_inset(baseAxis,inset,loc1=1, loc2=2,
+           fc='none', ec="0.5")
+           
+    return inset
+
+def patchworkImage(axis,maskedArrays,cMap, cNorm,extent):
+    """
+    Produces composite image from discrete rectangular regions.
+    Shows the actual interpolation structure of adaptive (non-conforming)
+    grid
+
+    Parameters
+    ----------
+    axis : axis
+        Axis to plot on.
+    quadBbox : float[:,:]
+        List of [xmin, xmax, ymin, ymax] for each discrete
+        rectangle.
+    quadVal : float[:,:]
+        DESCRIPTION.
+    cMap : colormap
+        Desired colormap for image.
+    cNorm : norm
+        Desired colormap.
+
+    Returns
+    -------
+    imlist : list of artists
+        Artists required to tile region.
+
+    """
     imlist=[]
-    cMap,cNorm=getCmap(quadVal.ravel())
     
-    for c,v in zip(quadVal,quadBbox):
-        im=axis.imshow(v.reshape((2,2)),
-               origin='lower',extent=c.squeeze(),
-                cmap=cMap, norm=cNorm,interpolation='bilinear')
+    cmap=cMap.with_extremes(bad=(1.,1.,1.,0.))
+    
+    
+    for vmask in maskedArrays:
+       
+        im=axis.imshow(vmask,
+               origin='lower',extent=extent,
+                cmap=cmap, norm=cNorm,interpolation='bilinear')
         imlist.append(im)
-        
-    cbar=plt.gcf().colorbar(mpl.cm.ScalarMappable(norm=cNorm, cmap=cMap),
-                            ax=axis,cax=caxis) 
     
-    return imlist,grid
+    # for c,v in zip(quadVal,quadBbox):
+    #     im=axis.imshow(v.reshape((2,2)),
+    #            origin='lower',#extent=c.squeeze(),
+    #             cmap=cMap, norm=cNorm,interpolation='bilinear')
+    #     imlist.append(im)
+        
+    
+    return imlist
 
 def getPlanarEdgePoints(coords,edges, normalAxis=2, axisCoord=0):
 
@@ -470,6 +585,7 @@ def toEdgePoints(planeCoords,edges):
     
     return edgePts
     
+#TODO: deprecate
 def error2d(fig,simulation,rElec=1e-6,datalabel='Simulation'):
     
     # # nTypes,_,_,_,_=simulation.getNodeTypes()
@@ -563,14 +679,34 @@ def error2d(fig,simulation,rElec=1e-6,datalabel='Simulation'):
     
 class FigureAnimator:
     def __init__(self,fig,study):
-        pass
+        self.fig=fig
+        self.study=study
+        
     def addSimulationData(self,sim):
         pass
+    def animateStudy(self,**kwargs):
+        fnames=self.study.getSavedSims(**kwargs)
+        for name in fnames:
+            self.addSimulationData(self.study.loadData(name))
+            
+        artists=self.getArtists()
+        
+        animation=mpl.animation.ArtistAnimation(self.fig, 
+                                                artists,
+                                                interval=1000, 
+                                                repeat_delay=2000, 
+                                                blit=False)
+        return animation
+        
     def getArtists(self):
         pass
     
+    
+    
 class SliceSet(FigureAnimator):
     def __init__(self,fig,study):
+        
+        super().__init__(fig, study)
         self.bnds=study.bbox[[0,3,2,4]]
         self.grid = AxesGrid(fig, 211,  # similar to subplot(144)
                     nrows_ncols=(1, 2),
@@ -590,16 +726,9 @@ class SliceSet(FigureAnimator):
         self.grid[0].set_title('Simulated potential [V]')
         self.grid[1].set_title('Absolute error [V]')
 
-        
-        engform=mpl.ticker.EngFormatter()
-        # for ax in [axV,axE]:
         for ax in self.grid[:2]:
-            ax.xaxis.set_major_formatter(engform)
-            ax.yaxis.set_major_formatter(engform)
-            ax.set_xlabel('X [m]')
-            ax.set_ylabel('Y [m]')
-            ax.set_xlim(self.bnds[0],self.bnds[1])
-            ax.set_ylim(self.bnds[2],self.bnds[3])
+            formatXYAxis(ax, self.bnds)
+
             
         self.vArrays=[]
         self.errArrays=[]
@@ -612,16 +741,12 @@ class SliceSet(FigureAnimator):
         
         self.rElec=0
         
-           
+        # self.quadBndSet=[]
+        # self.quadValSet=[]
+        # self.quadErrSet=[]
+        self.maskedVArr=[]
+        self.maskedErrArr=[]
         
-        
-    # def addInset(self,axIndex):
-    #     vsub=zoomed_inset_axes(grid[0],zoom=zoomFactor, loc=1)
-    #     vsub.set_xlim(bndInset[0],bndInset[1])
-    #     vsub.set_ylim(bndInset[2],bndInset[3])
-    #     mark_inset(grid[0],vsub,loc1=2, loc2=4,
-    #                fc='none', ec="0.5")
-    
     def addSimulationData(self,sim):
         isNodeInPlane=sim.mesh.nodeCoords[:,-1]==0
         intcoord=sim.intifyCoords()
@@ -639,41 +764,64 @@ class SliceSet(FigureAnimator):
             
         
     
-        xmax=max(ccoord[:,1])
-        xx=np.linspace(min(ccoord[:,0]),
-                       xmax,
-                       nx)
-        XX,YY=np.meshgrid(xx,xx)
+        # xmax=max(ccoord[:,1])
+        # xx=np.linspace(min(ccoord[:,0]),
+        #                xmax,
+        #                nx)
+        # XX,YY=np.meshgrid(xx,xx)
         
-        xx0,yy0=np.hsplit(xyCoord,2)
-        bnds=np.array([min(xx0), max(xx0), min(yy0), max(yy0)]).squeeze()
-        bndInset=rElec*np.array([-3., 3., -3., 3.])
-        zoomFactor=np.mean(0.4*bnds/bndInset)
+        # xx0,yy0=np.hsplit(xyCoord,2)
+        # bnds=np.array([min(xx0), max(xx0), min(yy0), max(yy0)]).squeeze()
+        # bndInset=rElec*np.array([-3., 3., -3., 3.])
+        # zoomFactor=np.mean(0.4*bnds/bndInset)
         
-        r=np.sqrt(XX**2 + YY**2)
-        
-        
-        triSet=tri.Triangulation(ccoord[:,0], ccoord[:,1])    
-        interp=tri.LinearTriInterpolator(triSet, pv)
-        vInterp=interp(XX.ravel(),YY.ravel()).reshape((nx,nx))
+        # r=np.sqrt(XX**2 + YY**2)
         
         
+        # triSet=tri.Triangulation(ccoord[:,0], ccoord[:,1])    
+        # interp=tri.LinearTriInterpolator(triSet, pv)
+        # vInterp=interp(XX.ravel(),YY.ravel()).reshape((nx,nx))
         
-        inside=r<rElec
-        ana=np.empty_like(r)
-        ana[inside]=1
-        ana[~inside]=rElec/r[~inside]
+        qvals, qcoords=getquads(pcoord[:,0],
+                                pcoord[:,1],
+                                pcoord[:,0],
+                                pcoord[:,1],
+                                pv)
         
-        err=vInterp-ana
+        rcoord=np.linalg.norm(sim.mesh.nodeCoords[isNodeInPlane])
+        rinside=rcoord<=rElec
+        ana1d=np.empty_like(rcoord)
+        ana1d[rinside]=1
+        ana1d[~rinside]=rElec/rcoord[~rinside]
+        err1d=pv-ana1d
         
-        self.vbounds[0]=min(self.vbounds[0],min(vInterp.ravel()))
-        self.vbounds[1]=max(self.vbounds[1],max(vInterp.ravel()))
+        qerr,_=getquads(pcoord[:,0],
+                                pcoord[:,1],
+                                pcoord[:,0],
+                                pcoord[:,1],
+                                err1d)
         
-        self.errbounds[0]=min(self.errbounds[0],min(err.ravel()))
-        self.errbounds[1]=max(self.errbounds[1],max(err.ravel()))
+        vArrays=quadsToMaskedArrays(qcoords, qvals)
+        erArrays=quadsToMaskedArrays(qcoords, qerr)
+        self.maskedVArr.append(vArrays)
+        self.maskedErrArr.append(erArrays)
+        
+        # inside=r<=rElec
+        # ana=np.empty_like(r)
+        # ana[inside]=1
+        # ana[~inside]=rElec/r[~inside]
+        
+        # err=vInterp-ana
+    
+        
+        self.vbounds[0]=min(self.vbounds[0],min(pv))
+        self.vbounds[1]=max(self.vbounds[1],max(pv))
+        
+        self.errbounds[0]=min(self.errbounds[0],min(err1d))
+        self.errbounds[1]=max(self.errbounds[1],max(err1d))
 
         
-        interpCoords=np.vstack((XX.ravel(), YY.ravel())).transpose()
+        # interpCoords=np.vstack((XX.ravel(), YY.ravel())).transpose()
     
         filteredRoles=sim.nodeRoleTable.copy()
         filteredRoles[~isNodeInPlane]=-1
@@ -692,8 +840,8 @@ class SliceSet(FigureAnimator):
         sourceEdge=[[np.zeros(2),xy] for xy in xyCoord[boundaryNodes]]
           
         
-        self.vArrays.append(vInterp)
-        self.errArrays.append(err)
+        # self.vArrays.append(vInterp)
+        # self.errArrays.append(err)
         self.meshEdges.append(edgePoints)
         self.sourceEdges.append(sourceEdge)
         
@@ -702,75 +850,72 @@ class SliceSet(FigureAnimator):
         emap,enorm=getCmap(self.errbounds, forceBipolar=True)
         artistSet=[]
         
+        self.grid.cbar_axes[0].colorbar(
+            mpl.cm.ScalarMappable(norm=vnorm, cmap=vmap))
+        self.grid.cbar_axes[1].colorbar(
+            mpl.cm.ScalarMappable(norm=enorm, cmap=emap))
+        
+        
+        insets=[]
         if self.rElec>0:
-            tht=np.linspace(0,2*np.pi)
-            x=self.rElec*np.cos(tht)
-            y=self.rElec*np.sin(tht)
-            
-            rInset=3*self.rElec
-            insetZoom=0.8*self.bnds[1]/rInset
-            
             for ax in self.grid:
-                ax.plot(x,y,'k',alpha=0.5)
+                inset=addInset(ax, 3*self.rElec, self.bnds[1])
+                showSourceBoundary([ax,inset], self.rElec)
+                insets.append(inset)
                 
-        if insetZoom>0:
-            inset=[]
-            for ii in range(2):
-                
-                inset.append(zoomed_inset_axes(self.grid[ii],zoom=insetZoom, 
-                                               # loc=1))
-                                               bbox_to_anchor=(.5, -.8), loc='center',
-                                               bbox_transform=self.grid[ii].transAxes))
-                inset[ii].set_xlim(-rInset,rInset)
-                inset[ii].set_ylim(-rInset,rInset)
-                # inset[ii].set_xlim(,rInset)
-                # inset[ii].set_ylim(-rInset,0)
-                mark_inset(self.grid[ii],inset[ii],loc1=1, loc2=2,
-                           fc='none', ec="0.5")
-                
-                # inset[ii].yaxis.get_major_locator().set_params(nbins=3)
-                # inset[ii].xaxis.get_major_locator().set_params(nbins=3)
-                # inset[ii].tick_params(labelleft=False, labelbottom=False)
-            
-            for ax in inset:
-                ax.plot(x,y,'k',alpha=0.5)
 
-        for ii in range(len(self.vArrays)):
+        for ii in range(len(self.maskedVArr)):
             artists=[]
-            vInterp=self.vArrays[ii]
-            err=self.errArrays[ii]
+            # vInterp=self.vArrays[ii]
+            # err=self.errArrays[ii]
             edgePoints=self.meshEdges[ii]
             sourceEdge=self.sourceEdges[ii]
-            vArt=self.grid[0].imshow(vInterp, origin='lower', extent=self.bnds,
-                        cmap=vmap, norm=vnorm,interpolation='bilinear')
-            self.grid.cbar_axes[0].colorbar(vArt)
-            
+            # vArt=self.grid[0].imshow(vInterp, origin='lower', extent=self.bnds,
+            #             cmap=vmap, norm=vnorm,interpolation='bilinear')
+            # self.grid.cbar_axes[0].colorbar(vArt)
+            vArt=patchworkImage(self.grid[0], 
+                                self.maskedVArr[ii], 
+                                vmap, vnorm,
+                                extent=self.bnds)
+            errArt=patchworkImage(self.grid[1], 
+                                self.maskedErrArr[ii], 
+                                emap, enorm,
+                                extent=self.bnds)
+            artists.extend(vArt)
+            artists.extend(errArt)
                     
-            errArt=self.grid[1].imshow(err, origin='lower', extent=self.bnds,
-                        cmap=emap, norm=enorm,interpolation='bilinear')
-            self.grid.cbar_axes[1].colorbar(errArt)
+            # errArt=self.grid[1].imshow(err, origin='lower', extent=self.bnds,
+            #             cmap=emap, norm=enorm,interpolation='bilinear')
+            # self.grid.cbar_axes[1].colorbar(errArt)
             
             
-            if insetZoom>0:
-                artists.append(inset[0].imshow(vInterp, origin='lower', extent=self.bnds,
-                            cmap=vmap, norm=vnorm,interpolation='bilinear'))
-                artists.append(inset[1].imshow(err, origin='lower', extent=self.bnds,
-                            cmap=emap, norm=enorm,interpolation='bilinear'))
-            
+            if len(insets)>0:
+                # artists.append(insets[0].imshow(vInterp, origin='lower', extent=self.bnds,
+                #             cmap=vmap, norm=vnorm,interpolation='bilinear'))
+                # artists.append(insets[1].imshow(err, origin='lower', extent=self.bnds,
+                #             cmap=emap, norm=enorm,interpolation='bilinear'))
+                artists.extend(patchworkImage(insets[0], 
+                                    self.maskedVArr[ii], 
+                                    vmap, vnorm,
+                                    extent=self.bnds))
+                artists.extend(patchworkImage(insets[1], 
+                                    self.maskedErrArr[ii], 
+                                    emap, enorm,
+                                    extent=self.bnds))
     
 
             
             for ax in self.grid:
                 artists.append(showEdges2d(ax, edgePoints))
                 
-            for ax in inset:
+            for ax in insets:
                 artists.append(showEdges2d(ax, edgePoints))
                 artists.append(showEdges2d(ax, sourceEdge,edgeColors=(.5,.5,.5),alpha=.25,linestyles=':'))
                 
                 
             
-            artists.append(errArt)
-            artists.append(vArt)
+            # artists.append(errArt)
+            # artists.append(vArt)
             artistSet.append(artists)
         
         return artistSet
@@ -778,7 +923,7 @@ class SliceSet(FigureAnimator):
     
 class ErrorGraph(FigureAnimator):
     def __init__(self,fig,study):
-        self.fig=fig
+        super().__init__(fig, study)
         axV=fig.add_subplot(2,1,1)
         axErr=fig.add_subplot(2,1,2)
         axV.grid(True)
@@ -890,4 +1035,116 @@ class ErrorGraph(FigureAnimator):
         return artistSet
         
         
+class CurrentPlot(FigureAnimator):
+    def __init__(self, fig, study):
+        super().__init__(fig, study)
+        self.crange=np.zeros(2)
+        self.cvals=[]
+        self.pts=[]
+        if fig is None:
+            self.ax=new3dPlot(study.bbox)
+            self.dim=3
+        else:
+            self.dim=2
+            self.ax=plt.subplot2grid((3,3), (0,1), 
+                                     colspan=2, rowspan=2,
+                                     fig=fig)
+            bnds=study.bbox[[0,3,1,4]]
+            formatXYAxis(self.ax, bnds)
+            
+        self.rElec=0
+    
         
+    def addSimulationData(self, sim):
+        # curr, cedges=sim.getEdgeCurrents()
+        
+        isDoF=sim.nodeRoleTable==0
+        g=tril(sim.gMat,-1)
+        E=np.array(g.nonzero()).transpose()
+        vdof=sim.nodeVoltages[isDoF]
+        vs=sim.nodeVoltages[sim.nodeRoleTable==2]
+        v=np.concatenate((vdof,np.array(vs[0],ndmin=1)))
+        dv=-np.diff(v[E],axis=1).squeeze()
+        gv=-g.data
+        self.rElec=sim.currentSources[0].radius
+        
+        needFlip=dv<0
+        
+        i=gv*dv.squeeze()
+        i[needFlip]=-i[needFlip]
+        E[needFlip]=np.fliplr(E[needFlip])
+        
+        srcCoords=np.array([s.coords for s in sim.currentSources])
+        dofCoords=np.vstack((sim.mesh.nodeCoords[isDoF],srcCoords))
+        
+        if self.dim==3:
+            eplane=E
+            iplane=i
+        
+        else:
+            ptInPlane=dofCoords[:,-1]==0.
+            edgeInPlane=[np.all(ptInPlane[e]) for e in E]
+            
+            eplane=E[edgeInPlane]
+            iplane=i[edgeInPlane]
+        
+        self.cvals.append(iplane)
+        self.pts.append(dofCoords[eplane])
+        
+
+        self.crange[0]=min(self.crange[0],min(i))
+        self.crange[1]=max(self.crange[1],max(i))
+        
+    def getArtists(self):
+        cmap,cnorm=getCmap(self.crange)
+        # cmap=mpl.cm.YlOrBr
+        # cnorm=mpl.colors.Normalize(vmin=self.crange[0],
+        #                           vmax=self.crange[1])
+        plt.colorbar(mpl.cm.ScalarMappable(norm=cnorm, cmap=cmap),
+                     ax=self.ax)
+        
+        inset=None
+        if (self.rElec>0)&(self.dim!=3):
+            inset=addInset(self.ax, 
+                                3*self.rElec, 
+                                self.study.bbox[3],
+                                (-.2,-.2))
+            showSourceBoundary([self.ax,inset], 
+                               self.rElec)
+        
+        
+        
+        artists=[]
+        for ii in range(len(self.pts)):
+            pt=self.pts[ii]
+            cv=self.cvals[ii]
+            colors=cmap(cnorm(cv))
+            
+            x0=pt[:,0,:].squeeze()
+            d0=pt[:,1,:].squeeze()-x0
+            
+            
+            x,y,z=np.hsplit(x0,3)
+            a,b,c=np.hsplit(d0,3)
+            if self.dim==3:
+                artists.append([
+                    self.ax.quiver3D(x,y,z,a,b,c,
+                                 colors=colors)
+                    ])
+
+            else:
+                axes=[self.ax]
+                art=[]
+                if inset is not None:
+                    axes.append(inset)
+                    
+                for ax in axes:
+                    art.append(ax.quiver(x,y,a,b,
+                                        color=colors,
+                                         angles='xy', 
+                                         scale_units='xy', 
+                                         scale=1))
+                artists.append(art)
+                
+        return artists
+            

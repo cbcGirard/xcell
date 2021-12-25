@@ -17,6 +17,71 @@ from numba import int64, float64
 nb.config.DISABLE_JIT=0
 nb.config.DEBUG_TYPEINFER=0
 
+
+def quadsToMaskedArrays(quadInds,quadVals):
+    arrays=[]
+    quadSize=quadInds[:,1]-quadInds[:,0]
+    nmax=max(quadInds.ravel())
+    
+    sizes=np.unique(quadSize)
+    
+    for s in sizes:
+        which=quadSize==s
+        nGrid=nmax//s+1
+        vArr=np.nan*np.empty((nGrid,nGrid))
+        grid0s=quadInds[:,[0,2]][which]//s
+        vgrids=quadVals[which]
+        
+        # if nGrid==9:
+        #     print()
+        
+        for ii in range(vgrids.shape[0]):
+            a,b=grid0s[ii]
+            v=vgrids[ii]
+            vArr[a,b]=v[0]
+            vArr[a+1,b]=v[1]
+            vArr[a,b+1]=v[2]
+            vArr[a+1,b+1]=v[3]
+            
+        vmask=np.ma.masked_invalid(vArr)
+        arrays.append(vmask)
+    return arrays
+
+@nb.njit(parallel=True)
+def edgeCurrentLoop(gList,edgeMat,dof2Global,vvec,gCoords,srcCoords):
+    currents=np.empty_like(gList,dtype=np.float64)
+    nEdges=gList.shape[0]
+    edges=np.empty((nEdges,2,3),
+                   dtype=np.float64)
+    for ii in nb.prange(nEdges):
+        g=gList[ii]
+        dofEdge=edgeMat[ii]
+        globalEdge=dof2Global[dofEdge]
+        
+        vs=vvec[dofEdge]
+        dv=vs[1]-vs[0]
+
+        if dv<0:
+            dv=-dv
+            globalEdge=np.array([globalEdge[1], globalEdge[0]])
+        
+        
+        for pp in np.arange(2):
+            p=globalEdge[pp]
+            if p<0:
+                c=srcCoords[-1-p]
+            else:
+                c=gCoords[p]
+            
+            edges[ii,pp]=c
+            
+        # i=g*dv
+        
+        currents[ii]=g*dv
+        # edges[ii]=np.array(coords)
+        
+    return (currents, edges)
+
 @nb.njit()
 def edgeRoles(edges,nodeRoleTable):
     edgeRoles=np.empty_like(edges)
@@ -96,21 +161,18 @@ def __getquadLoop(x,y,kx,ky,nx,ny,values):
     for yy in nb.prange(len(ky)-1):
         for xx in nb.prange(len(kx)-1):
             
-            sel=__getSel(nx, ny, xx, yy)
-            ok=True
-            for ii in np.arange(4):
-                ok&=np.any(sel[ii])
-            
-            if ok:
+            indices=__getSel(nx, ny, xx, yy)
+
+            if indices.shape[0]>0:
                 # x0,y0=xy[sel[0]][0]
                 # x1,y1=xy[sel[3]][0]
-                x0=x[sel[0]][0]
-                y0=y[sel[0]][0]
-                x1=x[sel[3]][0]
-                y1=y[sel[3]][0]
+                x0=x[indices[0]]
+                y0=y[indices[0]]
+                x1=x[indices[3]]
+                y1=y[indices[3]]
                 qcoords=np.array([x0,x1,y0,y1])
-                where=np.array([np.nonzero(s)[0][0] for s in sel])
-                qvals=values[where]
+                # where=np.array([np.nonzero(s)[0][0] for s in sel])
+                qvals=values[indices]
                 # qvals=np.array([values[sel[n,:]] for n in np.arange(4)]).squeeze()
 
                 quadVals.append(qvals)
@@ -118,29 +180,57 @@ def __getquadLoop(x,y,kx,ky,nx,ny,values):
                 
     return np.array(quadVals), np.array(quadCoords)
 
+# @nb.njit()
+# def __getSel(x,y,x0,y0,k=0):
+#     sel=np.empty((4,x.shape[0]),dtype=np.bool8)
+    
+#     sel[0]=np.logical_and(x==x0,y==y0)
+#     sel[1]=np.logical_and(x>(x0+k),y==y0)
+#     sel[2]=np.logical_and(x==x0,y>(y0+k))
+    
+#     if np.any(sel[1]) & np.any(sel[2]):
+#         x1=x[sel[1]][0]
+#         y1=y[sel[2]][0]
+        
+#         sel[3]=np.logical_and(x==x1,y==y1)
+        
+#         if not np.any(sel[3]):
+#             sel=__getSel(x, y, x0, y0,k=k+1)
+#         else: 
+#             sel[1]=np.logical_and(x==x1,y==y0)
+#             sel[2]=np.logical_and(x==x0,y==y1)
+    
+    
+#     return sel
+
 @nb.njit()
 def __getSel(x,y,x0,y0,k=0):
-    sel=np.empty((4,x.shape[0]),dtype=np.bool8)
-    
-    sel[0]=np.logical_and(x==x0,y==y0)
-    sel[1]=np.logical_and(x>(x0+k),y==y0)
-    sel[2]=np.logical_and(x==x0,y>(y0+k))
-    
-    if np.any(sel[1]) & np.any(sel[2]):
-        x1=x[sel[1]][0]
-        y1=y[sel[2]][0]
+    #verify first point is in mesh
+    s0=np.nonzero(np.logical_and(
+                x==x0, y==y0))[0]
+    if s0.shape[0]>0:
+        sel=np.logical_and(x>x0,y>y0)
+        tstX=x[sel]
+        tstY=y[sel]
         
-        sel[3]=np.logical_and(x==x1,y==y1)
+        for ii in nb.prange(tstX.shape[0]):
+            x1=tstX[ii]
+            y1=tstY[ii]
+            
+            s1=np.nonzero(np.logical_and(x==x1, y==y0))[0]
+            s2=np.nonzero(np.logical_and(x==x0, y==y1))[0]
+            s3=np.nonzero(
+                np.logical_and(x==x1, y==y1))[0]
+            
+            valid=(s1.shape[0]>0) & (s2.shape[0]>0) & (s3.shape[0]>0)
+            if valid:
+                indices=np.array([s0[0],s1[0],s2[0],s3[0]])
+                return indices
+            
+    return np.empty(0,dtype=np.int64)
         
-        if not np.any(sel[3]):
-            sel=__getSel(x, y, x0, y0,k=k+1)
-        else: 
-            sel[1]=np.logical_and(x==x1,y==y0)
-            sel[2]=np.logical_and(x==x0,y==y1)
-    
-    
-    return sel
-   
+        
+
 
 @nb.njit
 def toBilinearVars(coord):

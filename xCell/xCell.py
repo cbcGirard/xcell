@@ -360,13 +360,54 @@ class Simulation:
         
         return mem
     
+    
+
+    def getEdgeCurrents(self):
+        condMat=scipy.sparse.tril(self.gMat,-1)
+        
+        edgeMat=np.array(condMat.nonzero()).transpose()
+        dofNodes=np.argwhere(self.nodeRoleTable==0).squeeze()
+        nDoF=len(dofNodes)
+        
+        currentNodes=self.nodeRoleTable==2
+        nCurrent=sum(currentNodes)
+   
+        
+        dofCurr=-1-np.arange(nCurrent)
+        dof2Global=np.concatenate((dofNodes,dofCurr))
+        
+        srcCoords=np.array([s.coords for s in self.currentSources])
+        gCoords=self.mesh.nodeCoords
+        
+        vvec=self.nodeVoltages
+        
+        gList=-condMat.data
+        
+        # currents=[]
+        # edges=[]
+        # for ii in nb.prange(len(gList)):
+        #     g=gList[ii]
+        #     globalEdge=dof2Global[edgeMat[ii]]
+            
+        #     dv=np.diff(vvec[globalEdge])
+            
+        #     currents.append(dv*g)
+        #     edges.append(globalEdge)
+            
+        currents, edges = edgeCurrentLoop(gList, edgeMat, 
+                                          dof2Global, vvec,
+                                          gCoords, srcCoords)
+        return currents, edges
+    
+        
+    
     def intifyCoords(self):
-        nx=self.ptPerAxis
+        nx=self.ptPerAxis-1
         bb=self.mesh.bbox
         
         span=bb[3:]-bb[:3]
         float0=self.mesh.nodeCoords-bb[:3]
-        ints=(nx*float0)/span
+        ints=np.rint((nx*float0)/span)
         
         return ints.astype(np.int64)
     
@@ -614,12 +655,28 @@ class Simulation:
         
         voltages[dof2Global]=vDoF[:nDoF]
         
-        for nn in range(len(self.currentSources)):
-            v=vDoF[nDoF+nn]
-            voltages[np.logical_and(self.nodeRoleTable==2,self.nodeRoleVals==nn)]=v
+        # for nn in range(len(self.currentSources)):
+        #     v=vDoF[nDoF+nn]
+        #     voltages[np.logical_and(self.nodeRoleTable==2,self.nodeRoleVals==nn)]=v
+        
+        for nn in range(nDoF,len(vDoF)):
+            sel=self.__selByDoF(nn)
+            voltages[sel]=vDoF[nn]
         
         self.nodeVoltages=voltages
         return voltages
+    
+    def __selByDoF(self, dofNdx):
+        nDoF=sum(self.nodeRoleTable==0)
+        
+        nCur=dofNdx-nDoF
+        if nCur<0:
+            selector=np.zeros_like(self.nodeRoleTable,dtype=bool)
+        else:
+            selector=np.logical_and(self.nodeRoleTable==2,self.nodeRoleVals==nCur)
+        
+        return selector
+        
     
     def calculateErrors(self):
         
@@ -730,27 +787,12 @@ class Simulation:
         return b
     
     
-    # def getMatrix(self,nNodes,edges,conductances,nodeType,nodeSubset, b,dof2Global):
     def getMatrix(self):
         """
         Calculates conductivity matrix G for the current mesh.
 
         Parameters
         ----------
-        nNodes : int
-            Total number of nodes.
-        edges : [[]]
-            Pairs of node indices indicating conductive mesh edge.
-        conductances : float[:]
-            Conductance [in s] of edge.
-        nodeType : int[:]
-            Indicates node characteristics (0=unknown, 1=fixed voltage, 2= fixed current).
-        nodeSubset : TYPE
-            DESCRIPTION.
-        b : float[:]
-            RHS of equations.
-        dof2Global : int[:]
-            Array mapping degree of freedom numbering to global node numbering.
 
         Returns
         -------
@@ -761,29 +803,20 @@ class Simulation:
         self.startTiming("Filtering conductances")
         #diagonal elements are -sum of row
         
-        # nNodes=self.mesh.nodeCoords.shape[0]
         nCurrent=len(self.currentSources)
         nDoF=sum(self.nodeRoleTable==0)+nCurrent
         
-        # dofMap=np.hstack(((np.nonzero(self.nodeRoleTable==0)),np.zeros(nCurrent)))
         
         edges=self.edges
         conductances=self.conductances
         b=self.RHS
-
-        # diags=np.zeros(nDoF,dtype=np.float64)
-        
-        # gDofNodes=[]
         
         nodeA=[]
         nodeB=[]
         cond=[]
-        # for edge,g in zip(edges,conductances):   
         for ii in nb.prange(len(conductances)):
             edge=edges[ii]
-            # types=self.nodeRoleTable[edge]
             g=conductances[ii]
-            # typeIndex=self.nodeRoleVals[edge]
             
             for nn in range(2):
                 this=np.arange(2)==nn
@@ -804,74 +837,15 @@ class Simulation:
                         
                     else:
                         #other node is fixed voltage
-                        # nthVoltage=typeIndex[~this][0]
                         thatVoltage=self.nodeVoltages[edge[~this]]
                         b[thisDoF]-=g*thatVoltage
-                        
-                # else:
-                #     if thatDoF is not None:
-                            
-
-                        
-                
-                
-        #     #adjust diagonals
-        #     diags[edge[0]]+=g
-        #     diags[edge[1]]+=g
-        #     isFixed=np.isin(edge,self.vSourceNodes)
-        #     # isFixed=tyoes==1
-        #     numfixed=np.sum(isFixed)
-        #     # only adjust RHS if one node is fixed V
-        #     if numfixed==2:
-        #         # both nodes fixed; ignore
-        #         continue
-        #     else: 
-        #         if numfixed==1:
-        #             # one node fixed; adjust RHS for other node
-                    
-        #             nVGlobal=edge[isFixed]
-        #             nFreeGlobal=edge[~isFixed]
-                    
-        #             nthV=self.nodeRoleVals[nVGlobal]
-        #             nthDoF=self.nodeRoleVals[nFreeGlobal]
-                    
-                    
-        #             # nthV=global2subset(nVGlobal, self.vSourceNodes)
-        #             # nthDoF=global2subset(nFreeGlobal, dofNodes)
-                    
-        #             # b[nthDoF]-=self.vSourceVals[nthV.ravel()[0]]*g
-        #             vAmp=self.vSourceVals[nthV[0]]
-                    
-        #             b[nthDoF]+=vAmp*g
-                    
-        #         else:
-        #             # both nodes are DoF
-        #             cond.append(-g)
-        #             # dofEdge=np.array([nodeSubset[e] for e in edge])
-        #             # dofEdge=sparse2denseIndex(edge, self.mesh.indexMap)
-        #             dofEdge=self.nodeRoleVals[edge]
-        #             gDofNodes.append(dofEdge)
-        
-        
-        # dof2Global=self.nodeRoleTable==0
-        # diagVals=diags[dof2Global]
-        
+      
         self.logTime()
-        
-        # gDofNodes=np.array(gDofNodes)
-        # nodeA=gDofNodes[:,0]
-        # nodeB=gDofNodes[:,1]  
-        # diagIndex=np.arange(nDoF)
-        
-        # nA=np.concatenate((nodeA, nodeB,diagIndex))
-        # nB=np.concatenate((nodeB,nodeA,diagIndex))
-        # cond2=np.concatenate((gDoF,gDoF,diagVals))       
+    
     
         self.startTiming("assembling system")
-        # double up for matrix symmetry
 
         G=scipy.sparse.coo_matrix((cond,(nodeA,nodeB)),shape=(nDoF,nDoF))
-        # G = scipy.sparse.coo_matrix((cond2, (nA,nB)), shape=(nDoF, nDoF))
         G.sum_duplicates()
         
         self.logTime()
@@ -904,29 +878,14 @@ class Simulation:
             DESCRIPTION.
 
         """
-        # nNodes=self.mesh.nodeCoords.shape[0]  
-        # self.nodeRoleTable=np.zeros(nNodes,dtype=np.int64)
-        # self.nodeRoleVals=np.zeros(nNodes,dtype=np.int64)
 
         self.insertSourcesInMesh()
         
         self.nDoF=sum(self.nodeRoleTable==0)
         trueDoF=np.nonzero(self.nodeRoleTable==0)[0]
         
-        
-        # dofTable=np.nonzero(trueDoF)[0]
-        
-        
         for n in nb.prange(len(trueDoF)):
             self.nodeRoleVals[trueDoF[n]]=n
-        
-        #add current sources to list of DoFs
-        # nFree=len(dof2Global)
-        # dof2Global.extend(self.iSourceNodes)
-        # for nthI,glob in enumerate(self.iSourceNodes):
-        #     global2Subset[glob]=nFree+nthI
-        
-        # return nodeType, global2Subset, np.array(vFix2Global), np.array(iFix2Global), np.array(dof2Global)
         
     
     def resamplePlane(self,nXSamples=None,normalAxis=2,axisLocation=0.):
@@ -1821,8 +1780,10 @@ class SimStudy:
     def plotAccuracyCost(self):
         logfile=os.path.join(self.studyPath,'log.csv')
         groupedScatter(logfile, xcat='Total time', ycat='Error', groupcat='Mesh type')
+      
         
-    def animatePlot(self,plotfun,aniName=None,filterCategories=None,filterVals=None,sortCategory=None):
+
+    def getSavedSims(self,filterCategories=None,filterVals=None,sortCategory=None):
         logfile=os.path.join(self.studyPath,'log.csv')
         df,cats=importRunset(logfile)
             
@@ -1838,6 +1799,27 @@ class SimStudy:
         if sortCategory is not None:
             sortcats=df[sortCategory]
             
+        return fnames
+        
+        
+    def animatePlot(self,plotfun,aniName=None,filterCategories=None,filterVals=None,sortCategory=None):
+        # logfile=os.path.join(self.studyPath,'log.csv')
+        # df,cats=importRunset(logfile)
+            
+        # if filterCategories is not None:
+        #     selector=np.ones(len(df),dtype=bool)
+        #     for cat,val in zip(filterCategories,filterVals):
+        #         selector&=df[cat]==val
+                
+        #     fnames=df['File name'][selector]
+        # else:
+        #     fnames=df['File name']
+            
+        # if sortCategory is not None:
+        #     sortcats=df[sortCategory]
+        fnames=self.getSavedSims(filterCategories=filterCategories,
+                                 filterVals=filterVals,
+                                 sortCategory=sortCategory)
         
         
         # ims=[]
