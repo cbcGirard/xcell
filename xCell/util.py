@@ -10,13 +10,232 @@ Utilities
 
 import numpy as np
 import numba as nb
-from numba import int64, float64
 
 
 
 nb.config.DISABLE_JIT=0
 nb.config.DEBUG_TYPEINFER=0
 
+# insert subset in global: main[subIndices]=subValues
+# get subset: subVals=main[boolMask]
+# subInGlobalIndices=nonzero(boolMask)
+# globalInSubIndices=(-ones()[boolMask])
+
+@nb.njit
+def condenseIndices(globalMask):
+    """
+    Get array for mapping local to global numbering.
+
+    Parameters
+    ----------
+    globalMask : bool array
+        Global elements included in subset.
+
+    Returns
+    -------
+    whereSubset : int array
+        DESCRIPTION.
+
+    """
+    # whereSubset=-np.ones_like(globalMask)
+    whereSubset= np.empty_like(globalMask)
+    nSubset=globalMask.nonzero()[0].shape[0]
+    whereSubset[globalMask]=np.arange(nSubset)
+    
+    return whereSubset
+
+# @nb.njit(parallel=True)
+@nb.njit
+def getIndexDict(globalMask):
+    """
+    Get a dict of subsetIndex: globalIndex.
+    
+    .. deprecated:: 1.6.0
+        Lower mem usage, but horribly slow.
+        Use `condenseIndices` instead
+
+    Parameters
+    ----------
+    globalMask : bool array
+        Global elements included in subset.
+
+    Returns
+    -------
+    indexDict : dict
+        Dictionary of subset:global indices.
+
+    """
+    indexDict=dict()
+    globalInd=np.nonzero(globalMask)[0]
+    
+    for ii in nb.prange(globalInd.shape[0]):
+        ind=globalInd[ii]
+        indexDict[ind]=ii
+        
+    return indexDict
+
+@nb.njit(parallel=True)
+def renumberIndices(edges,globalMask):
+    """
+    Renumber indices according to a subset.
+
+    Parameters
+    ----------
+    edges : int array (1- or 2-d)
+        Node indices by global numbering.
+    globalMask : bool array
+        Boolean mask of which global elements are in subset.
+
+    Returns
+    -------
+    subNumberedEdges : int array
+        Edges contained in subset, according to subset ordering.
+
+    """
+    hasValidNode=np.empty_like(edges,dtype=np.bool_)
+    # hasValidNode=globalMask[edges]
+    # for ii in range(2):
+    for ii in nb.prange(edges.shape[1]):
+        hasValidNode[:,ii]=globalMask[edges[:,ii]]
+        
+    if edges.shape[1]>1:
+        isValid=np.logical_and(hasValidNode[:,0],
+                           hasValidNode[:,1])
+    else:
+        isValid=hasValidNode[:,0]
+    
+    validEdges=edges[isValid]
+    nValid=validEdges.shape[0]
+    subNumberedEdges=np.empty((nValid,edges.shape[1]),
+                              dtype=np.int64)
+
+
+    ### dict-based approach, roughly 2x slower for 1e6 nodes,6e6 edges
+    # subsInGlobal=condenseIndices(globalMask)
+    
+    # for nn in nb.prange(nValid):
+    #     for jj in nb.prange(2):
+    #         n=validEdges[nn,jj]
+    #         subNumberedEdges[nn,jj]=subsInGlobal[n]
+    
+    
+
+    ### array-based approach; high memory usage
+    nodeDict=getIndexDict(globalMask)
+    
+    for nn in nb.prange(validEdges.shape[0]):
+        for jj in nb.prange(validEdges.shape[1]):
+    # for nn in nb.prange(nValid):
+    #     for jj in nb.prange(2):
+            n=validEdges[nn,jj]
+            subNumberedEdges[nn,jj]=nodeDict[n]
+        
+    
+    ####global search method; appears to crash...
+    # validIndex=np.nonzero(globalMask)[0]
+    # for nn in nb.prange(nValid):
+    #     for jj in nb.prange(2):
+    #         n=validEdges[nn,jj]
+    #         subNumberedEdges[nn,jj]=reindex(n,validIndex)
+    
+    
+    return subNumberedEdges
+
+# @nb.njit(nb.int64[:](nb.int64[:],nb.int64[:]))
+@nb.njit(parallel=True)
+def sparse2denseIndex(sparseVals,denseVals):
+    """
+    Get the indices where each sparseVal are within DenseVals.
+    
+    .. deprecated:: 0.0.1
+        Use 
+    Used for e.g. mapping a global node index to degree of freedom index
+    Assumes one-to-one mapping of every value
+
+    Parameters
+    ----------
+    sparseVals : int64[:]
+        List of nonconsecutive values to find.
+    denseVals : int64[:]
+        List of values to be searched.
+
+    Returns
+    -------
+    int64[:]
+        Indices where each sparseVal occurs in denseVals.
+
+    """
+    idxList=[]
+    for ii in nb.prange(sparseVals.shape[0]):
+        #TODO: deprecated
+        idxList.append(reindex(sparseVals[ii],denseVals))
+                         
+        
+    return np.array(idxList,dtype=np.int64)
+
+@nb.njit()
+def reindex(sparseVal,denseList):
+    """
+    Get position of sparseVal in denseList, returning as soon as found
+
+    Parameters
+    ----------
+    sparseVal : int64
+        Value to find index of match.
+    denseList : int64[:]
+        List of nonconsecutive indices.
+
+    Returns
+    -------
+    int64
+        index where sparseVal occurs in denseList.
+
+    """
+    # startguess=sparseVal//denseList[-1]
+    for n,val in np.ndenumerate(denseList):
+    # for n,val in enumerate(denseList):
+
+        if val==sparseVal:
+            return n[0]
+        
+
+def coords2MaskedArrays(intCoords,edges,planeMask,vals):
+    pcoords=np.ma.masked_array(intCoords, mask=~planeMask.repeat(2))
+    edgeInPlane=np.all(planeMask[edges], axis=1)
+    pEdges=np.ma.masked_array(edges, mask=~edgeInPlane.repeat(2))
+    edgeLs=abs(np.diff(np.diff(pcoords[pEdges], axis=2), axis=1)).squeeze()
+    
+    span=pcoords.max()
+    edgeSizes=getUnmasked(np.unique(edgeLs))
+    
+    arrays=[]
+    for s in edgeSizes:
+        nArray=span//s+1
+        arr=np.nan*np.empty((nArray,nArray))
+        
+        #get 
+        edgesThisSize=np.ma.array(pEdges, mask=(edgeLs!=s).repeat(2))
+        nodesThisSize,nConn=np.unique(edgesThisSize.compressed(),return_counts=True)
+        
+        # nodesThisSize[nConn<2]=np.ma.masked
+        # whichNodes=getUnmasked(nodesThisSize)
+        whichNodes=nodesThisSize
+        
+        arrCoords=getUnmasked(pcoords[whichNodes])//s
+        arrI,arrJ=np.hsplit(arrCoords, 2)
+        
+        arr[arrI.squeeze(),arrJ.squeeze()]=vals[whichNodes]
+        arrays.append(np.ma.masked_invalid(arr))
+        
+    return arrays
+        
+        
+def getUnmasked(maskArray):
+    if len(maskArray.shape)>1:
+        isValid=np.all(~maskArray.mask, axis=1)
+    else:
+        isValid=~maskArray.mask
+    return maskArray.data[isValid]
 
 def quadsToMaskedArrays(quadInds,quadVals):
     arrays=[]
@@ -47,6 +266,7 @@ def quadsToMaskedArrays(quadInds,quadVals):
         arrays.append(vmask)
     return arrays
 
+#TODO: deprecate?
 @nb.njit(parallel=True)
 def edgeCurrentLoop(gList,edgeMat,dof2Global,vvec,gCoords,srcCoords):
     currents=np.empty_like(gList,dtype=np.float64)
@@ -90,6 +310,8 @@ def edgeRoles(edges,nodeRoleTable):
         
     return edgeRoles
 
+
+#TODO: deprecate, unused?
 @nb.njit()
 def edgeNodesOfType(edges, nodeSelect):
     N=edges.shape[0]
@@ -101,45 +323,7 @@ def edgeNodesOfType(edges, nodeSelect):
         
     return matches
 
-# @nb.njit
-def intify(pts,nX):
-    mn=np.min(pts,axis=0)
-    mx=np.max(pts,axis=0)
-    
-    span=mx-mn
-    
-    float0=pts-mn
-    ints=nX*float0/span
-    return ints.astype(np.int64)
-
-# @nb.njit(parallel=True)
-def uniformResample(coords,vals,nX):
-    imgArray=np.empty((nX,nX),dtype=np.float64)
-    ptI=intify(coords,nX)
-    
-    qVals,qIdx = getquads(ptI[:,0],ptI[:,1],
-             ptI[:,0],ptI[:,1],vals)
-    
-    for ii in nb.prange(qVals.shape[0]):
-        valset=qVals[ii]
-        bnds=qIdx[ii]
-        coef=getBilinCoefs(valset).squeeze()
-        
-        origin=bnds[[0,2]]
-        span=bnds[[1,3]]-origin
-        for xx in range(span[0]):
-            for yy in range(span[1]):
-                
-                gX=xx+origin[0]
-                gY=yy+origin[1]
-                
-                localCoord=np.array([xx,yy],dtype=np.float64)/span
-                localCoef=toBilinearVars(localCoord)
-                imgArray[gX,gY]=np.dot(coef,localCoef)
-    
-    return imgArray
-
-
+#TODO: deprecate, unused?
 def getquads(x,y,xInt,yInt,values):
     # x,y=np.hsplit(xy,2)
     # x=xy[:,0]
@@ -151,6 +335,7 @@ def getquads(x,y,xInt,yInt,values):
             
     return quadVals, quadCoords
 
+#TODO: deprecate, unused?
 # @nb.njit(parallel=True)
 def __getquadLoop(x,y,kx,ky,nx,ny,values):
     quadVals=[]
@@ -179,57 +364,6 @@ def __getquadLoop(x,y,kx,ky,nx,ny,values):
                 quadCoords.append(qcoords)
                 
     return np.array(quadVals), np.array(quadCoords)
-
-# @nb.njit()
-# def __getSel(x,y,x0,y0,k=0):
-#     sel=np.empty((4,x.shape[0]),dtype=np.bool8)
-    
-#     sel[0]=np.logical_and(x==x0,y==y0)
-#     sel[1]=np.logical_and(x>(x0+k),y==y0)
-#     sel[2]=np.logical_and(x==x0,y>(y0+k))
-    
-#     if np.any(sel[1]) & np.any(sel[2]):
-#         x1=x[sel[1]][0]
-#         y1=y[sel[2]][0]
-        
-#         sel[3]=np.logical_and(x==x1,y==y1)
-        
-#         if not np.any(sel[3]):
-#             sel=__getSel(x, y, x0, y0,k=k+1)
-#         else: 
-#             sel[1]=np.logical_and(x==x1,y==y0)
-#             sel[2]=np.logical_and(x==x0,y==y1)
-    
-    
-#     return sel
-
-@nb.njit()
-def __getSel(x,y,x0,y0,k=0):
-    #verify first point is in mesh
-    s0=np.nonzero(np.logical_and(
-                x==x0, y==y0))[0]
-    if s0.shape[0]>0:
-        sel=np.logical_and(x>x0,y>y0)
-        tstX=x[sel]
-        tstY=y[sel]
-        
-        for ii in nb.prange(tstX.shape[0]):
-            x1=tstX[ii]
-            y1=tstY[ii]
-            
-            s1=np.nonzero(np.logical_and(x==x1, y==y0))[0]
-            s2=np.nonzero(np.logical_and(x==x0, y==y1))[0]
-            s3=np.nonzero(
-                np.logical_and(x==x1, y==y1))[0]
-            
-            valid=(s1.shape[0]>0) & (s2.shape[0]>0) & (s3.shape[0]>0)
-            if valid:
-                indices=np.array([s0[0],s1[0],s2[0],s3[0]])
-                return indices
-            
-    return np.empty(0,dtype=np.int64)
-        
-        
 
 
 @nb.njit
@@ -361,7 +495,7 @@ def toBitArray(val,nBits=3):
 @nb.njit
 def anyMatch(searchArray,searchVals):
     """
-    Rapid search if any matches occur (returns immediately at first match)
+    Rapid search if any matches occur (returns immediately at first match).
 
     Parameters
     ----------

@@ -13,7 +13,7 @@ import math
 import scipy
 from scipy.sparse.linalg import spsolve, cg
 from Visualizers import *
-from util import *
+# from util import *
 import time
 import os
 import resource 
@@ -269,6 +269,22 @@ class Simulation:
         
         
     def makeAdaptiveGrid(self,metric,maxdepth):
+        """
+        Fast utility to construct an octree-based mesh of the domain.
+
+        Parameters
+        ----------
+        metric : function
+            Must take a 1d array of xyz coordinates and return target l0
+            for that location.
+        maxdepth : int
+            Maximum allowable rounds of subdivision.
+
+        Returns
+        -------
+        None.
+
+        """
         self.startTiming("Make elements")
         self.ptPerAxis=2**maxdepth+1
         self.meshtype='adaptive'
@@ -278,6 +294,21 @@ class Simulation:
         self.logTime()
         
     def makeUniformGrid(self,nX,sigma=np.array([1.,1.,1.])):
+        """
+        Fast utility to construct a uniformly spaced mesh of the domain.
+
+        Parameters
+        ----------
+        nX : int
+            Number of elements along each axis (yielding nX**3 total elements).
+        sigma : TYPE, optional
+            Global conductivity. The default is np.array([1.,1.,1.]).
+
+        Returns
+        -------
+        None.
+
+        """
         self.meshtype='uniform'
         self.startTiming("Make elements")
 
@@ -289,13 +320,13 @@ class Simulation:
         
         
         coords=np.vstack((XX.ravel(),YY.ravel(), ZZ.ravel())).transpose()
-        r=np.linalg.norm(coords,axis=1)
+        # r=np.linalg.norm(coords,axis=1)
         
         self.mesh.nodeCoords=coords
         # self.mesh.extents=2*xmax*np.ones(3)
         
         elOffsets=np.array([1,nX+1,(nX+1)**2])
-        nodeOffsets=np.array([np.dot(toBitArray(i),elOffsets) for i in range(8)])
+        nodeOffsets=np.array([np.dot(util.toBitArray(i),elOffsets) for i in range(8)])
         elExtents=self.mesh.extents/nX
         
         
@@ -314,7 +345,7 @@ class Simulation:
         
     def startTiming(self,stepName):
         """
-        General call to start timing an execution step
+        General call to start timing an execution step.
 
         Parameters
         ----------
@@ -330,7 +361,7 @@ class Simulation:
         
     def logTime(self):
         """
-        Signals completion of step
+        Signals completion of step.
 
         Returns
         -------
@@ -341,7 +372,7 @@ class Simulation:
         
     def getMemUsage(self, printVal=False):
         """
-        Gets memory usage of simulation
+        Get memory usage of simulation.
 
         Returns
         -------
@@ -360,53 +391,62 @@ class Simulation:
         
         return mem
     
-    
-
+        
     def getEdgeCurrents(self):
-        condMat=scipy.sparse.tril(self.gMat,-1)
+        """
+        Get currents through each edge of the mesh.
+
+        Returns
+        -------
+        currents : float[:]
+            Current through edge in amperes; .
+        edges : int[:,:]
+            Pairs of node (global) node indices corresponding to 
+            [start, end] of each current vector.
+
+        """
+        gAll=self.getEdgeMat()
+        condMat=scipy.sparse.tril(gAll,-1)
+        edges=np.array(condMat.nonzero()).transpose()
         
-        edgeMat=np.array(condMat.nonzero()).transpose()
-        dofNodes=np.argwhere(self.nodeRoleTable==0).squeeze()
-        nDoF=len(dofNodes)
+        dv=np.diff(self.nodeVoltages[edges]).squeeze()
+        iTmp=-condMat.data*dv
         
-        currentNodes=self.nodeRoleTable==2
-        nCurrent=sum(currentNodes)
-   
+        #make currents positive, and flip direction if negative
+        needsFlip=iTmp<0
+        currents=abs(iTmp)
+        edges[needsFlip]=np.fliplr(edges[needsFlip])
         
-        dofCurr=-1-np.arange(nCurrent)
-        dof2Global=np.concatenate((dofNodes,dofCurr))
-        
-        srcCoords=np.array([s.coords for s in self.currentSources])
-        gCoords=self.mesh.nodeCoords
-        
-        vvec=self.nodeVoltages
-        
-        gList=-condMat.data
-        
-        # currents=[]
-        # edges=[]
-        # for ii in nb.prange(len(gList)):
-        #     g=gList[ii]
-        #     globalEdge=dof2Global[edgeMat[ii]]
-            
-        #     dv=np.diff(vvec[globalEdge])
-            
-        #     currents.append(dv*g)
-        #     edges.append(globalEdge)
-            
-        currents, edges = edgeCurrentLoop(gList, edgeMat, 
-                                          dof2Global, vvec,
-                                          gCoords, srcCoords)
         return currents, edges
     
-        
     
-    def intifyCoords(self):
+    def intifyCoords(self,coords=None):
+        """
+        Expresses coordinates as triplet of positive integers.
+        
+        Prevents rounding
+        errors when determining if two points correspond to the same
+        mesh node
+        
+        Parameters
+        ----------
+        coords: float[:,:]
+            Coordinates to rescale as integers, or mesh nodes if None.
+
+        Returns
+        -------
+        int[:,:]
+            Mesh nodes as integers.
+
+        """
         nx=self.ptPerAxis-1
         bb=self.mesh.bbox
         
+        if coords is None:
+            coords=self.mesh.nodeCoords
+        
         span=bb[3:]-bb[:3]
-        float0=self.mesh.nodeCoords-bb[:3]
+        float0=coords-bb[:3]
         ints=np.rint((nx*float0)/span)
         
         return ints.astype(np.int64)
@@ -430,7 +470,8 @@ class Simulation:
     
     def logAsTableEntry(self,csvFile,extraCols=None, extraVals=None):
         """
-        Logs key metrics of simulation as an additional line of a .csv file.
+        Log key metrics of simulation as an additional line of a .csv file.
+        
         Custom categories (column headers) and their values can be added to the line
 
         Parameters
@@ -485,7 +526,16 @@ class Simulation:
         f.write('\n')
         f.close()
         
+        #TODO: doc better
     def finalizeMesh(self):
+        """
+        Prepare mesh for simulation.
+
+        Returns
+        -------
+        None.
+
+        """
         self.mesh.finalize()
         numEl=len(self.mesh.elements)
         
@@ -494,6 +544,12 @@ class Simulation:
         self.nodeRoleTable=np.zeros(nNodes,dtype=np.int64)
         self.nodeRoleVals=np.zeros(nNodes,dtype=np.int64)
         # self.insertSourcesInMesh()
+        
+        self.startTiming("Calculate conductances")
+        edges,conductances=self.mesh.getConductances()
+        self.edges=edges
+        self.conductances=conductances
+        self.logTime()
         
     def addCurrentSource(self,value,coords,radius=0):
         self.currentSources.append(CurrentSource(value,coords,radius))
@@ -535,7 +591,8 @@ class Simulation:
 
         else:
             el=self.mesh.getContainingElement(source.coords)
-            elIndices=sparse2denseIndex(el.globalNodeIndices, self.mesh.indexMap)
+            #TODO: change deprecated
+            elIndices=util.sparse2denseIndex(el.globalNodeIndices, self.mesh.indexMap)
             elCoords=self.mesh.nodeCoords[elIndices]
             
             d=np.linalg.norm(source.coords-elCoords,axis=1)
@@ -547,7 +604,7 @@ class Simulation:
     def setBoundaryNodes(self,boundaryFun=None):
         
         bnodes=self.mesh.getBoundaryNodes()
-        self.nodeVoltages=np.empty(self.mesh.nodeCoords.shape[0])
+        self.nodeVoltages=np.zeros(self.mesh.nodeCoords.shape[0])
         
     
         if boundaryFun is None:
@@ -565,40 +622,42 @@ class Simulation:
     
     def solve(self):
         """
-        Directly solves for nodal voltages, given current mesh and distribution
-        of sources. Computational time grows significantly with simulation size;
+        Directly solves for nodal voltages.
+        
+        Computational time grows significantly with simulation size;
         try iterativeSolve() for faster convergence
         
         Returns
         -------
         voltages : float[:]
-            Nodal voltages.
+            Simulated nodal voltages.
+            
+        See Also
+        --------
+        iterativeSolve: conjugate gradient solver
 
         """
-        self.startTiming("Calculate conductances")
-        edges,conductances=self.mesh.getConductances()
-        self.edges=edges
-        self.conductances=conductances
-        self.logTime()
-        
         self.startTiming("Sort node types")
-        nodeType,nodeSubset, vFix2Global, iFix2Global, dof2Global = self.getNodeTypes()
+        self.getNodeTypes()
         self.logTime()
         
         
-        nNodes=self.mesh.nodeCoords.shape[0]
-        voltages=np.empty(nNodes,dtype=np.float64)
+        # nNodes=self.mesh.nodeCoords.shape[0]
+        voltages=self.nodeVoltages
 
+        dof2Global=np.nonzero(self.nodeRoleTable==0)[0]
+        nDoF=dof2Global.shape[0]
         
-        b = self.setRHS()
-        
-        M=self.getMatrix(nNodes,edges,conductances,nodeType,nodeSubset,b,dof2Global)
-        
+        M,b=self.getSystem()
         self.startTiming('Solving')
         vDoF=spsolve(M.tocsc(), b)
         self.logTime()
         
-        voltages[dof2Global]=vDoF
+        voltages[dof2Global]=vDoF[:nDoF]
+        
+        for nn in range(nDoF,len(vDoF)):
+            sel=self.__selByDoF(nn)
+            voltages[sel]=vDoF[nn]
         
         self.nodeVoltages=voltages
         return voltages
@@ -606,31 +665,27 @@ class Simulation:
 
     def iterativeSolve(self,vGuess=None,tol=1e-5):
         """
-        Solves nodal voltages using conjgate gradient method. Likely to achieve
-        similar accuracy to direct solution at much greater speed for element
-        counts above a few thousand
+        Solves nodal voltages using conjgate gradient method.
+        
+        Likely to achieve similar accuracy to direct solution at much greater 
+        speed for element counts above a few thousand
 
         Parameters
         ----------
-        vGuess : TYPE
-            DESCRIPTION. Default None.
-        tol : TYPE, optional
-            DESCRIPTION. The default is 1e-5.
+        vGuess : float[:]
+            Initial guess for nodal voltages. Default None.
+        tol : float, optional
+            Maximum allowed norm of the residual. The default is 1e-5.
 
         Returns
         -------
-        voltages : TYPE
-            DESCRIPTION.
+        voltages : float[:]
+            Simulated nodal voltages.
 
         """
-        self.startTiming("Calculate conductances")
-        edges,conductances=self.mesh.getConductances()
-        self.edges=edges
-        self.conductances=conductances
-        self.logTime()
+
         
         self.startTiming("Sort node types")
-        # nodeType,nodeSubset, vFix2Global, iFix2Global, dof2Global = self.getNodeTypes()
         self.getNodeTypes()
         self.logTime()
         
@@ -642,11 +697,13 @@ class Simulation:
         
         # dofNodes=np.setdiff1d(range(nNodes), self.vSourceNodes)
         dof2Global=np.nonzero(self.nodeRoleTable==0)[0]
-        nDoF=sum(self.nodeRoleTable==0)
+        nDoF=dof2Global.shape[0]
 
-        b = self.setRHS(nDoF)
+        # b = self.setRHS(nDoF)
         
-        M=self.getMatrix()
+        # M=self.getMatrix()
+        
+        M,b=self.getSystem()
         
         self.startTiming('Solving')
         vDoF,_=cg(M.tocsc(),b,vGuess,tol)
@@ -678,13 +735,49 @@ class Simulation:
         return selector
         
     
-    def calculateErrors(self):
+    def analyticalEstimate(self,rvec=None):
+        """
+        Analytical estimate of potential field.
         
-        srcV=[]
+        Calculates estimated potential from sum of piecewise functions
+        
+              Vsrc,         r<=rSrc
+        v(r)={
+              isrc/(4Pi*r)
+              
+        If rvec is none, calculates at every node of mesh
+
+        Parameters
+        ----------
+        rvec : float[:], optional
+            Distances from source to evaluate at. The default is None.
+
+        Returns
+        -------
+        vAna, list of float[:]
+            List (per source) of estimated potentials 
+        intAna, list of float
+            Integral of analytical curve across specified range.
+
+        """
         srcI=[]
         srcLocs=[]
         srcRadii=[]
+        srcV=[]
+  
+          
+        def __analytic(rad,V,I,r):
+            inside=r<rad
+            voltage=np.empty_like(r)
+            voltage[inside]=V
+            voltage[~inside]=I/(4*np.pi*r[~inside])
+            
+            #integral
+            integral=V*rad #inside
+            integral+=(I*4*np.pi)*(np.log(max(r))-np.log(rad))
+            return voltage, integral
         
+
         for ii in nb.prange(len(self.currentSources)):
             I=self.currentSources[ii].value
             rad=self.currentSources[ii].radius
@@ -707,38 +800,69 @@ class Simulation:
                 
             srcI.append(I)
             
-        def __analytic(rad,V,I,r):
-            inside=r<rad
-            voltage=np.empty_like(r)
-            voltage[inside]=V
-            voltage[~inside]=I/(4*np.pi*r[~inside])
-            return voltage
+        vAna=[]
+        intAna=[]
+        for ii in nb.prange(len(srcI)):
+            if rvec is None:
+                r=np.linalg.norm(
+                    self.mesh.nodeCoords-srcLocs[ii],
+                    axis=1)
+            else:
+                r=rvec
+
+            vEst,intEst=__analytic(srcRadii[ii], srcV[ii], srcI[ii], r)
             
-        # nTypes,_,_,_,_=self.getNodeTypes()
+            vAna.append(vEst)
+            intAna.append(intEst)
+            
+        return vAna, intAna
+        
+    def calculateErrors(self,rvec=None):
+        """
+        Estimate error in solution.
+        
+        Estimates error between simulated solution assuming point/spherical
+        sources in uniform conductivity.
+        
+        For the error metric to be applicable across a range of domain
+        sizes and mesh densities, it must 
+        
+        The normalized error metric approximates the area between the 
+        analytical solution i/(4*pi*sigma*r) and a linear interpolation
+        between the simulated nodal voltages, evaluated across the simulation domain
+
+        Parameters
+        ----------
+        rvec : float[:], optional
+            Alternative points at which to evaluate the analytical solution. The default is None.
+            
+        Returns
+        -------
+        errSummary : float
+            Normalized, overall error metric.
+        err : float[:]
+            Absolute error estimate at each node (following global node ordering)
+        vAna : float[:]
+            Estimated potential at each node (following global ordering)
+        sorter : int[:]
+            Indices to sort globally-ordered array based on the corresponding node's distance from center
+            e.g. erSorted=err[sorter]
+        """
         v=self.nodeVoltages
-        
-        vAna=np.zeros_like(v)
-        anaInt=0.
-        
+
         coords=self.mesh.nodeCoords
         
-        for ii in nb.prange(len(srcI)):
-            
-            r=np.linalg.norm(coords-srcLocs[ii],axis=1)
-            rDense=np.linspace(0,max(r),100)
-            
-            # inside=r<srcRadii[ii]
-            
-            # vEst=np.empty_like(v)
-            # vEst[inside]=srcV[ii]
-            # vEst[~inside]=srcI[ii]/(4*np.pi*r[~inside])
+        if rvec is None:
+            r=np.linalg.norm(coords,axis=1)
+        else:
+            r=rvec
+        
+        vEst, intAna=self.analyticalEstimate(r)
+        
+        vAna=np.sum(np.array(vEst),axis=0)
+        anaInt=sum(intAna)
 
-            vEst=__analytic(srcRadii[ii], srcV[ii], srcI[ii], r)
-            vDense=__analytic(srcRadii[ii], srcV[ii], srcI[ii], rDense)
-            vAna+=vEst
-            anaInt+=np.trapz(vDense,rDense)
-            
-        sorter=np.argsort(np.linalg.norm(coords,axis=1))
+        sorter=np.argsort(r)
         rsort=r[sorter]
         
             
@@ -747,111 +871,111 @@ class Simulation:
         errSummary=np.trapz(abs(errSort),rsort)/anaInt
 
 
-        return errSort, errSummary
+        return errSummary, err, vAna, sorter
     
-    
-    def setRHS(self,nDoF):
-        """
-        Set right-hand-side of system of equations (as determined by simulation's boundary conditions)
+   #TODO: deprecate 
+    # def setRHS(self,nDoF):
+    #     """
+    #     Set right-hand-side of system of equations (as determined by simulation's boundary conditions)
 
-        Parameters
-        ----------
-        nDoF : int64
-            Number of degrees of freedom. Equal to number of nodes with unknown voltages plus number of nodes
-            with a fixed injected current
-        nodeSubset : TYPE
-            DESCRIPTION.
+    #     Parameters
+    #     ----------
+    #     nDoF : int64
+    #         Number of degrees of freedom. Equal to number of nodes with unknown voltages plus number of nodes
+    #         with a fixed injected current
+    #     nodeSubset : TYPE
+    #         DESCRIPTION.
 
-        Returns
-        -------
-        b : float[:]
-            RHS of system Gv=b.
+    #     Returns
+    #     -------
+    #     b : float[:]
+    #         RHS of system Gv=b.
 
-        """
-        #set right-hand side
-        self.startTiming('Setting RHS')
-        nCurrent=len(self.currentSources)
-        b=np.zeros(nDoF+nCurrent,dtype=np.float64)
+    #     """
+    #     #set right-hand side
+    #     self.startTiming('Setting RHS')
+    #     nCurrent=len(self.currentSources)
+    #     b=np.zeros(nDoF+nCurrent,dtype=np.float64)
         
-        # for n,val in zip(self.iSourceNodes,self.iSourceVals):
-        #     # b[global2subset(n,nDoF)]=val
-        #     nthDoF=nodeSubset[n]
-        #     b[nthDoF]=val
+    #     # for n,val in zip(self.iSourceNodes,self.iSourceVals):
+    #     #     # b[global2subset(n,nDoF)]=val
+    #     #     nthDoF=nodeSubset[n]
+    #     #     b[nthDoF]=val
         
-        for ii in nb.prange(nCurrent):
-            b[nDoF+ii]=self.currentSources[ii].value
+    #     for ii in nb.prange(nCurrent):
+    #         b[nDoF+ii]=self.currentSources[ii].value
             
-        self.logTime()
-        self.RHS=b
+    #     self.logTime()
+    #     self.RHS=b
         
-        return b
+    #     return b
     
-    
-    def getMatrix(self):
-        """
-        Calculates conductivity matrix G for the current mesh.
+    #TODO: deprecate
+    # def getMatrix(self):
+    #     """
+    #     Calculates conductivity matrix G for the current mesh.
 
-        Parameters
-        ----------
+    #     Parameters
+    #     ----------
 
-        Returns
-        -------
-        G: sparse matrix
-            Conductance matrix G in system Gv=b.
+    #     Returns
+    #     -------
+    #     G: sparse matrix
+    #         Conductance matrix G in system Gv=b.
 
-        """
-        self.startTiming("Filtering conductances")
-        #diagonal elements are -sum of row
+    #     """
+    #     self.startTiming("Filtering conductances")
+    #     #diagonal elements are -sum of row
         
-        nCurrent=len(self.currentSources)
-        nDoF=sum(self.nodeRoleTable==0)+nCurrent
+    #     nCurrent=len(self.currentSources)
+    #     nDoF=sum(self.nodeRoleTable==0)+nCurrent
         
         
-        edges=self.edges
-        conductances=self.conductances
-        b=self.RHS
+    #     edges=self.edges
+    #     conductances=self.conductances
+    #     b=self.RHS
         
-        nodeA=[]
-        nodeB=[]
-        cond=[]
-        for ii in nb.prange(len(conductances)):
-            edge=edges[ii]
-            g=conductances[ii]
+    #     nodeA=[]
+    #     nodeB=[]
+    #     cond=[]
+    #     for ii in nb.prange(len(conductances)):
+    #         edge=edges[ii]
+    #         g=conductances[ii]
             
-            for nn in range(2):
-                this=np.arange(2)==nn
-                thisrole,thisDoF=self.__toDoF(edge[this][0])
-                thatrole,thatDoF=self.__toDoF(edge[~this][0])
+    #         for nn in range(2):
+    #             this=np.arange(2)==nn
+    #             thisrole,thisDoF=self.__toDoF(edge[this][0])
+    #             thatrole,thatDoF=self.__toDoF(edge[~this][0])
 
-                if thisDoF is not None:
-                    # valid degree of freedom
-                    cond.append(g)
-                    nodeA.append(thisDoF)
-                    nodeB.append(thisDoF)
+    #             if thisDoF is not None:
+    #                 # valid degree of freedom
+    #                 cond.append(g)
+    #                 nodeA.append(thisDoF)
+    #                 nodeB.append(thisDoF)
                     
-                    if thatDoF is not None:
-                        # other node is DoF
-                        cond.append(-g)
-                        nodeA.append(thisDoF)
-                        nodeB.append(thatDoF)
+    #                 if thatDoF is not None:
+    #                     # other node is DoF
+    #                     cond.append(-g)
+    #                     nodeA.append(thisDoF)
+    #                     nodeB.append(thatDoF)
                         
-                    else:
-                        #other node is fixed voltage
-                        thatVoltage=self.nodeVoltages[edge[~this]]
-                        b[thisDoF]-=g*thatVoltage
+    #                 else:
+    #                     #other node is fixed voltage
+    #                     thatVoltage=self.nodeVoltages[edge[~this]]
+    #                     b[thisDoF]-=g*thatVoltage
       
-        self.logTime()
+    #     self.logTime()
     
     
-        self.startTiming("assembling system")
+    #     self.startTiming("assembling system")
 
-        G=scipy.sparse.coo_matrix((cond,(nodeA,nodeB)),shape=(nDoF,nDoF))
-        G.sum_duplicates()
+    #     G=scipy.sparse.coo_matrix((cond,(nodeA,nodeB)),shape=(nDoF,nDoF))
+    #     G.sum_duplicates()
         
-        self.logTime()
-        self.gMat=G
-        self.RHS=b
-        return G
+    #     self.logTime()
+    #     self.gMat=G
+    #     self.RHS=b
+    #     return G
 
     def __toDoF(self,globalIndex):
         role=self.nodeRoleTable[globalIndex]
@@ -867,18 +991,18 @@ class Simulation:
 
     def getNodeTypes(self):
         """
-        Gets an integer per node indicating its role:
+        Get an integer per node indicating its role.
+        
+        Type indices:
             0: Unknown voltage
             1: Fixed voltage
             2: Fixed current, unknown voltage
 
         Returns
         -------
-        TYPE
-            DESCRIPTION.
+        None.
 
         """
-
         self.insertSourcesInMesh()
         
         self.nDoF=sum(self.nodeRoleTable==0)
@@ -888,86 +1012,241 @@ class Simulation:
             self.nodeRoleVals[trueDoF[n]]=n
         
     
-    def resamplePlane(self,nXSamples=None,normalAxis=2,axisLocation=0.):
+    def getEdgeMat(self,dedup=True):
+        """Return conductance matrix across all nodes in mesh.
         
-        xmax=max(self.mesh.extents)
+        Parameters
+        ----------
+        dedup : bool, optional
+            Sum parallel conductances. The default is True.
 
-        if nXSamples is None:
-            nXSamples=self.ptPerAxis
-                    
-        coords=self.mesh.nodeCoords
-        sel=np.equal(coords[:,normalAxis],axisLocation)
-        selAx=np.array([n for n in range(3) if n!=normalAxis])
-            
-        planeCoords=coords[:,selAx]
-        sliceCoords=planeCoords[sel]
-        vPlane=self.nodeVoltages[sel]
-        
-        # kX=self.ptPerAxis//2
-        kX=nXSamples//2
-        sliceIdx=np.array(kX+kX*sliceCoords/(xmax*np.ones(2)),dtype=np.int64)
-        
-        
-        xx=np.linspace(-xmax,xmax,nXSamples)
-        XX,YY=np.meshgrid(xx,xx)
-        
-        interpCoords=np.vstack((XX.ravel(),YY.ravel(),np.zeros_like(XX.ravel()))).transpose()
-        vInterp=np.empty_like(XX)
-        
-        #set known values
-        for ii in nb.prange(len(vPlane)):
-            x,y=sliceIdx[ii]
-            vInterp[x,y]=vPlane[ii]
-        
-        print('%d of %d known'%(len(vPlane),nXSamples**2))
-            
-        
-        for ii in nb.prange(nXSamples):
-            sameX=sliceIdx[:,0]==ii
-            # print('%d of %d'%(ii,nXSamples))
+        Returns
+        -------
+        gAll : COO sparse matrix
+            Conductance matrix, N x N for a mesh of N nodes.
 
-            for jj in nb.prange(nXSamples):
-                sameY=sliceIdx[:,1]==jj
-                xyMatch=np.logical_and(sameX,sameY)
-                
-                if not any(xyMatch):
-                    x0=maxUnder(ii,sliceIdx[:,0])
-                    x1=minOver(ii,sliceIdx[:,0])
-                    y0=maxUnder(jj,sliceIdx[:,1])
-                    y1=minOver(jj,sliceIdx[:,1])
-                    
-                    vNodes=np.array([vInterp[x,y] for y in [y0,y1] for x in [x0,x1]])
-                    
-                    local=np.zeros(2,dtype=np.float64)
-                    if x0!=x1:
-                        local[0]=(ii-x0)/(x1-x0)
-                    if y1!=y0:
-                        local[1]=(jj-y0)/(y1-y0)
-                    
-                    
-                    
-                    vInterp[ii,jj]=interpolateBilin(vNodes,local)
-                    # interpCoord=interpCoords[ii*nXSamples+jj]
-                    # container=self.mesh.getContainingElement(interpCoord)
-                    # localCoord=(interpCoord-container.origin)/container.span
-                    
-                    # contNodes=container.globalNodeIndices
-                    # meshNodes=sparse2denseIndex(contNodes,self.mesh.indexMap)
-                    # contV=self.nodeVoltages[meshNodes]
-                    
-                    
-                    # interp=getElementInterpolant(contV)
-                    # vInterp[ii,jj]=evalulateInterpolant(interp, localCoord)
+        """
+        nNodes=self.mesh.nodeCoords.shape[0]
+        a=np.tile(self.conductances, 2)
+        E=np.vstack((self.edges,np.fliplr(self.edges)))
+        gAll=scipy.sparse.coo_matrix((a, (E[:,0], E[:,1])),
+                                     shape=(nNodes,nNodes))
+        if dedup:
+            gAll.sum_duplicates()
             
-        return vInterp, interpCoords
+        return gAll
     
-                
-def getMappingArrays(generalArray,subsetArray):
-    gen2sub=-np.ones(len(generalArray))
-    sub2gen=[np.argwhere(n==generalArray).squeeze() for n in subsetArray]
-    
-    return gen2sub, sub2gen
+    def getNodeConnectivity(self):
+        """
+        Calculate how many conductances terminate in each node.
         
+        A fully-connected hex node will have 24 edges prior to merging parallel
+        conductances; less than this indicates the node is hanging (nonconforming).
+
+        Raises
+        ------
+        ValueError
+            DESCRIPTION.
+
+        Returns
+        -------
+        nConn : int[:]
+            Number of edges that terminate in each node.
+
+        """
+        _,nConn=np.unique(self.edges.ravel(),return_counts=True)
+        
+        if self.mesh.nodeCoords.shape[0]!=nConn.shape[0]:
+            raise ValueError('Length mismatch: %d nodes, but %d values\nIs a node unconnected?'%(
+                self.mesh.nodeCoords.shape[0], nConn.shape[0]))
+            
+        return nConn
+    
+    def regularizeMesh(self):
+        nConn=self.getNodeConnectivity()
+        # self.__dedupEdges()
+        
+        badNodes=np.argwhere(nConn<24).squeeze()
+        keepEdge=np.ones(self.edges.shape[0],dtype=bool)
+        boundaryNodes=self.mesh.getBoundaryNodes()
+        
+        newEdges=[]
+        newConds=[]
+        
+        for ii in nb.prange(badNodes.shape[0]):
+            node=badNodes[ii]
+            if np.isin(node,boundaryNodes):
+                continue
+            
+            #get edges connected to hanging node
+            isSharedE=np.any(self.edges==node,axis=1, keepdims=True)
+            isOther=self.edges!=node
+            neighbors=self.edges[isSharedE&isOther]
+            #get edges connected adjacent to hanging node
+            matchesNeighbor=np.isin(self.edges,neighbors)
+            isLongEdge=np.all(matchesNeighbor, axis=1)
+            
+            #get long edges (forms triangle with edges to hanging node)
+            longEdges=self.edges[isLongEdge]
+            gLong=self.conductances[isLongEdge]
+            
+
+            #TODO: generalize split
+            for eg,g in zip(longEdges,gLong):
+                for n in eg:
+                    newEdges.append([n,node])
+                    newConds.append(0.5*g)
+                #     shortEdge=np.array([n, node])
+                #     isShort=self.__isMatchingEdge(self.edges, 
+                #                                   shortEdge)
+                #     theseConds=self.conductances[isShort]
+                #     theseEdges=self.edges[isShort]
+                    
+                #     newConds.extend(theseConds.tolist())
+                #     newEdges.extend(theseEdges.tolist())
+                
+            
+            keepEdge[isLongEdge]=False
+            # print('%d of %d'%(ii,badNodes.shape[0]))
+            
+        revisedEdges=np.vstack((self.edges[keepEdge],
+                                np.array(newEdges)))
+        revisedConds=np.concatenate((self.conductances[keepEdge], 
+                                     np.array(newConds)))
+        
+        self.conductances=revisedConds
+        self.edges=revisedEdges
+        
+        return revisedConds, revisedEdges
+    
+    def __dedupEdges(self):
+        e=self.edges
+        g=self.conductances
+        nnodes=self.mesh.nodeCoords.shape[0]
+        
+        gdup=np.concatenate((g,g))
+        edup=np.vstack((e,np.fliplr(e)))
+        
+        a,b=np.hsplit(edup,2)
+            
+        gmat=scipy.sparse.coo_matrix((gdup,(edup[:,0], edup[:,1])),
+                                     shape=(nnodes,nnodes))
+        gmat.sum_duplicates()
+        
+        tmp=scipy.sparse.tril(gmat,-1)
+        
+        gComp=tmp.data
+        eComp=np.array(tmp.nonzero()).transpose()
+        
+        self.edges=eComp
+        self.conductances=gComp
+            
+            
+    def __isMatchingEdge(self,edges,toMatch):
+        nodeMatches=np.isin(edges,toMatch)
+        matchingEdge=np.all(nodeMatches, axis=1)
+        return matchingEdge
+            
+    
+    def getSystem(self):
+        """
+        Construct system of equations GV=b.
+        
+        Rows represent each node without a voltage or current 
+        constraint, followed by an additional row per current
+        source.
+
+        Returns
+        -------
+        G : COO sparse matrix
+            Conductances between degrees of freedom.
+        b : float[:]
+            Right-hand side of system, representing injected current
+            and contributions of fixed-voltage nodes.
+
+        """
+        # global mat is NxN
+        # for Ns current sources, Nf fixed nodes, and Nx floating nodes, 
+        # N - nf = Ns + Nx =Nd
+        # system is Nd x Nd
+        
+        isSrc=self.nodeRoleTable==2
+        isFix=self.nodeRoleTable==1
+        
+        # N=self.mesh.nodeCoords.shape[0]
+        Ns=len(self.currentSources)
+        Nx=np.nonzero(self.nodeRoleTable==0)[0].shape[0]
+        Nd=Nx+Ns
+        Nf=np.nonzero(isFix)[0].shape[0]
+        N_ext=Nd+Nf
+        
+        self.startTiming("Filtering conductances")
+        #renumber nodes in order of dof, current source, fixed v
+        dofNumbering=self.nodeRoleVals.copy()
+        dofNumbering[isSrc]=Nx+dofNumbering[isSrc]
+        dofNumbering[isFix]=Nd+np.arange(Nf)
+        
+        edges=dofNumbering[self.edges]
+        
+        #filter bad vals (both same DoF)
+        isValid=edges[:,0]!=edges[:,1]
+        evalid=edges[isValid]
+        cvalid=self.conductances[isValid]
+        
+        # duplicate for symmetric matrix
+        Edup=np.vstack((evalid, np.fliplr(evalid)))
+        cdup=np.tile(cvalid,2)
+
+        
+        #get only DOF rows/col
+        isRowDoF=Edup[:,0]<Nd
+        
+        #Fill matrix with initial degrees of freedom
+        E=Edup[isRowDoF]
+        c=cdup[isRowDoF]
+        
+        self.logTime()
+        self.startTiming("assembling system")
+        G=scipy.sparse.coo_matrix(
+            (-c, (E[:,0], E[:,1]) ),
+                                    shape=(Nd,N_ext))
+
+        gR=G.tocsr()
+        
+        v=np.zeros(N_ext)
+        v[Nd:]=self.nodeVoltages[isFix]
+
+        b=np.array(gR.dot(v)).squeeze()
+        
+        for ii in range(Ns):
+            b[ii+Nx]+=self.currentSources[ii].value
+        
+        diags=-np.array(gR.sum(1)).squeeze()
+
+        G.setdiag(diags)
+        G.resize(Nd,Nd)
+        
+        self.logTime()
+        
+        self.RHS=b
+        self.gMat=G
+        return G, b
+        
+     
+    
+    def selGlobalByDoF(self,nthDoF):
+        nDoF=sum(self.nodeRoleTable==0)
+        
+        if nthDoF>=nDoF:
+            #select current source
+            nval=(self.nodeRoleTable==2)
+        else:
+            nval=(self.nodeRoleTable==0)
+            
+        bSel=nval&(self.nodeRoleVals==nthDoF)
+        return bSel
+                
+
 class Mesh:
     def __init__(self,bbox,elementType='Admittance'):
         self.bbox=bbox
@@ -1008,7 +1287,7 @@ class Mesh:
         
     def getContainingElement(self,coords):
         """
-        Get element containing specified point
+        Get element containing specified point.
 
         Parameters
         ----------
@@ -1053,7 +1332,7 @@ class Mesh:
        
     def addElement(self,origin, extents,sigma,nodeIndices):
         """
-        Inserts element into the mesh
+        Insert element into the mesh.
 
         Parameters
         ----------
@@ -1081,7 +1360,7 @@ class Mesh:
         
     def getConductances(self):
         """
-        Gets the discrete conductances from every element
+        Get the discrete conductances from every element.
 
         Returns
         -------
@@ -1136,9 +1415,7 @@ class Mesh:
         atmax=np.equal(maxes,self.nodeCoords)
         isbnd=np.any(np.logical_or(atmin,atmax),axis=1)
         globalIndices=np.nonzero(isbnd)[0]
-        
-        # globalIndices=sparse2denseIndex(tmpIndex,self.indexMap)
-    
+            
         return globalIndices
 
 class Logger():
@@ -1212,6 +1489,7 @@ class Octree(Mesh):
         
         idx=np.rint(newInd).astype(np.int64)
         if len(self.indexMap)!=0:
+            #TODO: remove deprecated
             idx=reindex(idx,self.indexMap)
         return idx
         
@@ -1227,7 +1505,8 @@ class Octree(Mesh):
         for ii in nb.prange(len(octs)):
             o=octs[ii]
             onodes=o.globalNodeIndices
-            gnodes=sparse2denseIndex(onodes, self.indexMap)
+            #TODO: deprecated function
+            gnodes=util.sparse2denseIndex(onodes, self.indexMap)
             self.addElement(o.origin,o.span,np.ones(3),gnodes)
             # o.setGlobalIndices(gnodes)
         
@@ -1298,7 +1577,7 @@ class Octree(Mesh):
         nX=1+2**self.maxDepth
         for ii in nb.prange(len(self.indexMap)):
             nn=self.indexMap[ii]
-            xyz=index2pos(nn,nX)
+            xyz=util.index2pos(nn,nX)
             if np.any(xyz==0) or np.any(xyz==(nX-1)):
                 bnodes.append(ii)
         
@@ -1306,60 +1585,7 @@ class Octree(Mesh):
 
 
 
-# @nb.njit(nb.int64[:](nb.int64[:],nb.int64[:]))
-@nb.njit()
-def sparse2denseIndex(sparseVals,denseVals):
-    """
-    Gets the indices where each sparseVal are within DenseVals.
-    Used for e.g. mapping a global node index to degree of freedom index
-    Assumes one-to-one mapping of every value
 
-    Parameters
-    ----------
-    sparseVals : int64[:]
-        List of nonconsecutive values to find.
-    denseVals : int64[:]
-        List of values to be searched.
-
-    Returns
-    -------
-    int64[:]
-        Indices where each sparseVal occurs in denseVals.
-
-    """
-    # idxList=[reindex(sp,denseVals) for sp in sparseVals]
-    idxList=[]
-    for ii in nb.prange(len(sparseVals)):
-        idxList.append(reindex(sparseVals[ii],denseVals))
-                         
-        
-    return np.array(idxList,dtype=np.int64)
-
-@nb.njit()
-def reindex(sparseVal,denseList):
-    """
-    Get position of sparseVal in denseList, returning as soon as found
-
-    Parameters
-    ----------
-    sparseVal : int64
-        Value to find index of match.
-    denseList : int64[:]
-        List of nonconsecutive indices.
-
-    Returns
-    -------
-    int64
-        index where sparseVal occurs in denseList.
-
-    """
-    # startguess=sparseVal//denseList[-1]
-    for n,val in np.ndenumerate(denseList):
-    # for n,val in enumerate(denseList):
-
-        if val==sparseVal:
-            return n[0]
-        
 # octantspec= [
 #     ('origin',nb.float64[:]),
 #     ('span',nb.float64[:]),
@@ -1405,11 +1631,11 @@ class Octant():
         for ii,idx in enumerate(self.index):
             ldepth=maxdepth-ii-1
             step=2**ldepth
-            xyz+=step*toBitArray(idx)
+            xyz+=step*util.toBitArray(idx)
             
         ownstep=2**(maxdepth-self.depth)
         
-        ownXYZ=[xyz+ownstep*toBitArray(i) for i in range(8)]
+        ownXYZ=[xyz+ownstep*util.toBitArray(i) for i in range(8)]
         indices=np.array([np.dot(ndxlist,toGlobal) for ndxlist in ownXYZ])
             
         self.globalNodeIndices=indices
@@ -1429,7 +1655,7 @@ class Octant():
         
         
         for ii in nb.prange(8):
-            offset=toBitArray(ii)*newSpan
+            offset=util.toBitArray(ii)*newSpan
             newOrigin=self.origin+offset
             newIndex=self.index.copy()
             newIndex.append(ii)
@@ -1437,13 +1663,12 @@ class Octant():
             
         # return self.children
     def getOwnCoords(self):
-        return [self.origin+self.span*toBitArray(n) for n in range(8)]
+        return [self.origin+self.span*util.toBitArray(n) for n in range(8)]
 
     
     def getCoordsRecursively(self,bbox,maxdepth):
         # T=Logger('depth  %d'%self.depth, printStart=False)
         if len(self.children)==0:
-            # coords=[self.origin+self.span*toBitArray(n) for n in range(8)]
             coords=self.getOwnCoords()
             # indices=self.globalNodeIndices
             indices=self.calcGlobalIndices(bbox, maxdepth)
@@ -1470,18 +1695,6 @@ class Octant():
                 
         # T.logCompletion()
         return coords, indices.tolist()
-    
-    # def index2pos(self,ndx,dX):
-    #     arr=[]
-    #     for ii in range(3):
-    #         arr.append(ndx%dX)
-    #         ndx=ndx//dX
-    #     return np.array(arr)
-    
-    # def pos2index(self,pos,dX):
-    #     vals=np.array([dX**n for n in range(3)])
-    #     newNdx=np.dot(vals,pos)
-    #     return np.rint(newNdx)
     
     
     def getIndicesRecursively(self):
@@ -1586,97 +1799,6 @@ class Octant():
                 if tmp is not None:
                     return tmp
             return None
-                
-
-
-    
-
-        
-        
-def arrXor(arr):
-    val=False
-    for a in arr:
-        val=val^a
-        
-    return a
-
-
-def analyticVsrc(srcCoord,srcAmplitude,rVec,srcType='Current',sigma=1, srcRadius=1e-6):
-    """
-    Calculates voltage at an external point, due to current or voltage source
-
-    Parameters
-    ----------
-    srcCoord : float[:]
-        coords of source.
-    srcAmplitude : float
-        Source amplitude in volts or amperes.
-    rVec : float[:]
-        Vector of distances from source to evaluate voltage at.
-    srcType : 'Current' or 'Voltage', optional
-        Type of source. The default is 'Current'.
-    sigma : float, optional
-        Conductivity of surroundings. The default is 1.
-    srcRadius : float, optional
-        Effective radius of source, to give an analytical value at its center. The default is 1e-6.
-
-    Returns
-    -------
-    float[:]
-        Voltage at each specified distance.
-
-    """
-    r=rVec.copy()
-    r[r<srcRadius]=srcRadius
-
-        
-    if srcType=='Current':
-        v0=srcAmplitude/(4*np.pi*sigma*srcRadius)
-    else:
-        v0=srcAmplitude
-        
-    vVec=v0*srcRadius/r
-    
-            
-    return vVec
-
-def getFVU(vsim,analytic,whichPts):
-    """
-    Calculates fraction of variance unexplained (FVU)
-
-    Parameters
-    ----------
-    vsim : float[:]
-        Simulated nodal voltages.
-    analytic : float[:]
-        analyitical nodal voltages.
-    whichPts : bool[:]
-        DESCRIPTION.
-
-    Returns
-    -------
-    VAF : float
-        Variation accounted for
-    error : float[:]
-        absolute error in simulated solution
-
-    """
-    v=vsim[whichPts]
-    vA=analytic[whichPts]
-    
-    delVa=vA-np.mean(vA)
-    
-    error=v-vA
-    
-    SSerr=sum(error**2)
-    SStot=sum(delVa**2)
-    
-    FVU=SSerr/SStot
-    
-    # VAF=np.cov(v,vA)[0,1]**2
-    
-    return FVU, error
-
         
 class SimStudy:
     def __init__(self,studyPath,boundingBox):
@@ -1741,7 +1863,7 @@ class SimStudy:
         return data
         
     def savePlot(self,fig,fileName,ext):
-        basepath=os.path.join(self.studyPath,self.currentSim.name)
+        basepath=os.path.join(self.studyPath)
         
         if not os.path.exists(basepath):
             os.makedirs(basepath)

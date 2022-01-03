@@ -13,7 +13,8 @@ import matplotlib.pyplot as plt
 
 
 meshtype='adaptive'
-studyPath='Results/studyTst/miniset/'#+meshtype
+# studyPath='Results/studyTst/miniCur/'#+meshtype
+studyPath='Results/studyTst/miniset/'
 
 xmax=1e-4
 sigma=np.ones(3)
@@ -21,7 +22,7 @@ sigma=np.ones(3)
 
 vMode=False
 showGraphs=False
-generate=False
+generate=True
 saveGraphs=False
 
 vsrc=1.
@@ -36,20 +37,14 @@ l0Min=1e-6
 rElec=1e-6
 
 lastNumEl=0
-
-def makeAdaptiveGrid(simulation,metric,maxdepth):
-
-    simulation.mesh=xCell.Octree(bbox,maxdepth)
-
-    simulation.mesh.refineByMetric(metric)
-
+meshTypes=["adaptive","uniform"]
 
 
 if generate:
    
     # for var in np.linspace(0.1,0.7,15):
-    for maxdepth in range(2,16,2):
-        for meshtype in ["adaptive","uniform"]:
+    for maxdepth in range(2,20):
+        for meshtype in meshTypes:
         # for maxdepth in range(2,10):
             # if meshtype=='uniform':
             #     maxdepth=var
@@ -89,7 +84,19 @@ if generate:
                     if (r+val)<rElec:
                         val=rElec/2
                     return val
-
+                
+                # def metric(coord):
+                #     r=np.linalg.norm(coord)
+                #     # val=l0Param*r #1/r dependence
+                #     val=(1e-7*r**2)**(1/3) #current continuity
+                #     # val=(l0Param*r**4)**(1/3) #dirichlet energy continutity
+                #     # if val<rElec:
+                #     #     val=rElec
+                    
+                #     if (r+val)<rElec:
+                #         val=rElec/2
+                #     return val
+                
                 setup.makeAdaptiveGrid(metric,maxdepth)
             
         
@@ -108,13 +115,13 @@ if generate:
 
             # setup.insertSourcesInMesh()
             setup.setBoundaryNodes(boundaryFun)
-            setup.getEdgeCurrents()
+            # setup.getEdgeCurrents()
 
             # v=setup.solve()
             v=setup.iterativeSolve(None,1e-9)
             
             setup.getMemUsage(True)
-            _,errEst=setup.calculateErrors()#srcMag,srcType,showPlots=showGraphs)
+            errEst,_,_,_=setup.calculateErrors()#srcMag,srcType,showPlots=showGraphs)
             print('error: %g'%errEst)
             
             study.newLogEntry(['Error','k','Depth'],[errEst,l0Param,maxdepth])
@@ -140,14 +147,55 @@ if generate:
 # aniImg=study.animatePlot(xCell.SliceSet,'img_adaptive',["Mesh type"],['adaptive'])
 # aniImg2=study.animatePlot(xCell.centerSlice,'img_uniform',['Mesh type'],['uniform'])
 
-# plotr=xCell.ErrorGraph(plt.figure(),study)
-# anig=plotr.animateStudy(filterCategories=["Mesh type"],
-#                           filterVals=['adaptive'])
-plotr=xCell.SliceSet(plt.figure(),study)
-aniI=plotr.animateStudy(filterCategories=["Mesh type"],
+
+
+# fig=plt.figure()
+# plotters=[xCell.ErrorGraph,
+#           xCell.SliceSet,
+#           xCell.CurrentPlot,
+#           xCell.CurrentPlot]
+# ptype=['ErrorGraph',
+#        'SliceSet',
+#        'CurrentShort',
+#        'CurrentLong']
+
+# for mt in meshTypes:
+#     for ii,p in enumerate(plotters):
+#         plt.clf()
+#         if ii==3:
+#             plotr=p(fig,study,fullarrow=True)
+#         else:
+#             plotr=p(fig,study)
+        
+#         plotr.getStudyData(filterCategories=["Mesh type"],
+#                           filterVals=[mt])
+        
+#         name=ptype[ii]+'_'+mt
+        
+#         ani=plotr.animateStudy(name)
+        
+        
+
+
+
+plotE=xCell.ErrorGraph(plt.figure(),study)#,{'showRelativeError':True})
+plotE.getStudyData(filterCategories=["Mesh type"],
                           filterVals=['adaptive'])
-# plotr=xCell.CurrentPlot(plt.figure(),study)
-# anic=plotr.animateStudy(filterCategories=["Mesh type"],
-#                           filterVals=['adaptive'])
-# study.plotAccuracyCost()
-# xCell.groupedScatter(study.studyPath+'log.csv',xcat='Number of elements',ycat='Error',groupcat='Mesh type')
+aniE=plotE.animateStudy()
+
+
+plotS=xCell.SliceSet(plt.figure(),study)
+plotS.getStudyData(filterCategories=["Mesh type"],
+                          filterVals=['adaptive'])
+aniS=plotS.animateStudy()
+
+
+plotC=xCell.CurrentPlot(plt.figure(),study)
+plotC.getStudyData(filterCategories=["Mesh type"],
+                          filterVals=['adaptive'])
+aniC=plotC.animateStudy()
+
+xCell.groupedScatter(study.studyPath+'log.csv',xcat='Number of elements',ycat='Error',groupcat='Mesh type')
+nufig=plt.gcf()
+study.savePlot(nufig, 'AccuracyCost', '.eps')
+study.savePlot(nufig, 'AccuracyCost', '.png')
