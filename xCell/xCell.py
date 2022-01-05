@@ -2,18 +2,21 @@
 # -*- coding: utf-8 -*-
 """
 Created on Fri Oct 15 12:22:58 2021
-Main API for handling extracellular simulation
+Main API for handling extracellular simulations
 @author: benoit
 """
 
 import numpy as np
 import numba as nb
+import Elements
+import Meshes
 from numba import int64, float64
 import math
 import scipy
 from scipy.sparse.linalg import spsolve, cg
 from Visualizers import *
 # from util import *
+import util
 import time
 import os
 import resource 
@@ -50,189 +53,6 @@ class VoltageSource:
         self.coords=coords
         self.radius=radius
 
-@nb.experimental.jitclass([
-    ('origin', float64[:]),
-    ('extents',float64[:]),
-    ('l0',float64),
-    ('sigma',float64[:]),
-    ('globalNodeIndices',int64[:])
-    ])
-class Element:
-    def __init__(self,origin, extents,sigma):
-        self.origin=origin
-        self.extents=extents
-        self.l0=np.prod(extents)**(1/3)
-        self.sigma=sigma
-        self.globalNodeIndices=np.empty(8,dtype=np.int64)
-        
-    def getCoordsRecursively(self):
-        coords=np.empty((8,3))
-        for ii in range(8):
-            weights=np.array([(ii>>n)&1 for n in range(3)],dtype=np.float64)
-            offset=self.origin+self.extents*weights
-            coords[ii]=offset
-
-        return coords
-    
-    def getConductanceVals(self):
-        pass
-    
-    def getConductanceIndices(self):
-        pass
-    
-    def getCharLength(self):
-        return math.pow(np.prod(self.extents),1.0/3)
-    
-    def setGlobalIndices(self,indices):
-        self.globalNodeIndices=indices
-
-@nb.experimental.jitclass([
-    ('origin', float64[:]),
-    ('extents',float64[:]),
-    ('l0', float64),
-    ('sigma',float64[:]),
-    ('globalNodeIndices',int64[:])
-    ])
-class FEMHex():
-    def __init__(self, origin, extents, sigma):
-        self.origin=origin
-        self.extents=extents
-        self.l0=np.prod(extents)**(1/3)
-        self.sigma=sigma
-        self.globalNodeIndices=np.empty(8,dtype=np.int64)
-        
-    def getCoordsRecursively(self):
-        coords=np.empty((8,3))
-        for ii in range(8):
-            weights=np.array([(ii>>n)&1 for n in range(3)],dtype=np.float64)
-            offset=self.origin+self.extents*weights
-            coords[ii]=offset
-
-        return coords
-        
-    def getCharLength(self):
-        return math.pow(np.prod(self.extents),1.0/3)
-    
-    def setGlobalIndices(self,indices):
-        self.globalNodeIndices=indices
-        
-        
-    def getConductanceVals(self):
-        if self.sigma.shape[0]==1:
-            sigma=self.sigma*np.ones(3)
-        else:
-            sigma=self.sigma
-            
-        # k=self.extents/(36*np.roll(self.extents,1)*np.roll(self.extents,2))
-        k=np.roll(self.extents,1)*np.roll(self.extents,2)/(36*self.extents)
-        K=sigma*k
-        
-        g=np.empty(28,dtype=np.float64)
-        nn=0
-        weights=np.empty(3,dtype=np.float64)
-        for ii in range(8):
-            for jj in range(ii+1,8):
-                dif=np.bitwise_xor(ii,jj)
-            
-                mask = np.array([(dif >> i)&1 for i in range(3)])
-                numDif = np.sum(mask)
-        
-                if numDif == 1:
-                    coef = 2*(mask^1)-4*mask
-                elif numDif == 2:
-                    coef = (mask^1)-2*mask
-                else:
-                    coef = -mask
-                    
-                weights=-coef.astype(np.float64)
-                g0=np.dot(K,weights)
-                g[nn]=g0
-                nn=nn+1
-                
-        return g
-    
-    def getConductanceIndices(self):
-        edges=np.empty((28,2),dtype=np.int64)
-        nn=0
-        for ii in range(8):
-            for jj in range(ii+1,8):
-                edges[nn,:]=self.globalNodeIndices[np.array([ii,jj])]
-                nn+=1
-                
-        return edges
-                
-    
-    
-@nb.experimental.jitclass([
-    ('origin', float64[:]),
-    ('extents',float64[:]),
-    ('l0',float64),
-    ('sigma',float64[:]),
-    ('globalNodeIndices',int64[:])
-    ])
-class AdmittanceHex():
-    def __init__(self, origin, extents, sigma):
-        self.origin=origin
-        self.extents=extents
-        self.l0=np.prod(extents)**(1/3)
-        self.sigma=sigma
-        self.globalNodeIndices=np.empty(8,dtype=np.int64)
-        
-    def getCoordsRecursively(self):
-        coords=np.empty((8,3))
-        for ii in range(8):
-            weights=np.array([(ii>>n)&1 for n in range(3)],dtype=np.float64)
-            offset=self.origin+self.extents*weights
-            coords[ii]=offset
-
-        return coords
-    
-    def getMidpoint(self):
-        return self.origin+self.extents/2
-        
-    def getCharLength(self):
-        return math.pow(np.prod(self.extents),1.0/3)
-    
-    def setGlobalIndices(self,indices):
-        self.globalNodeIndices=indices
-        
-        
-    def getConductanceVals(self):
-        if self.sigma.shape[0]==1:
-            sigma=self.sigma*np.ones(3)
-        else:
-            sigma=self.sigma
-            
-        k=np.roll(self.extents,1)*np.roll(self.extents,2)/self.extents
-        K=sigma*k/4
-        
-        g=np.array([K[ii] for ii in range(3) for jj in range(4)])
-        
-
-                
-        return g
-    
-    def getConductanceIndices(self):
-        nodesA=np.array([0,2,4,6,0,1,4,5,0,1,2,3])
-        offsets=np.array([2**np.floor(ii/4) for ii in range(12)])
-        offsets=offsets.astype(np.int64)
-        
-        # edges=np.array([[self.globalNodeIndices[a],self.globalNodeIndices[a+o]] for a,o in zip(nodesA,offsets)])
-        edges=np.empty((12,2),dtype=np.int64)
-        for ii in range(12):
-            nodeA=nodesA[ii]
-            nodeB=nodeA+offsets[ii]
-            edges[ii,0]=self.globalNodeIndices[nodeA]
-            edges[ii,1]=self.globalNodeIndices[nodeB]
-        return edges
-
-# @nb.experimental.jitclass([
-#     ('iSourceCoords',float64[:,:]),
-#     ('iSourceVals',float64[:]),
-#     ])
-
-
-
 class Simulation:
     def __init__(self,name,bbox):
         
@@ -246,7 +66,7 @@ class Simulation:
         self.nodeRoleTable=np.empty(0)
         self.nodeRoleVals=np.empty(0)
         
-        self.mesh=Mesh(bbox)
+        self.mesh=Meshes.Mesh(bbox)
         self.currentTime=0.
         
         self.stepLogs=[]
@@ -288,7 +108,7 @@ class Simulation:
         self.startTiming("Make elements")
         self.ptPerAxis=2**maxdepth+1
         self.meshtype='adaptive'
-        self.mesh=Octree(self.mesh.bbox,maxdepth)
+        self.mesh=Meshes.Octree(self.mesh.bbox,maxdepth)
     
         self.mesh.refineByMetric(metric)
         self.logTime()
@@ -530,6 +350,9 @@ class Simulation:
     def finalizeMesh(self):
         """
         Prepare mesh for simulation.
+        
+        Locks connectivity, sets global node numbering, gets list of 
+        edges and corresponding conductances from all elements.
 
         Returns
         -------
@@ -586,10 +409,11 @@ class Simulation:
         inside=d<=source.radius
         
         if sum(inside)>0:
-            # index=self.mesh.indexMap[inside]
+            # Grab all nodes inside of source
             index=np.nonzero(inside)[0]
 
         else:
+            # Get closest mesh node
             el=self.mesh.getContainingElement(source.coords)
             #TODO: change deprecated
             elIndices=util.sparse2denseIndex(el.globalNodeIndices, self.mesh.indexMap)
@@ -602,7 +426,22 @@ class Simulation:
         return index
             
     def setBoundaryNodes(self,boundaryFun=None):
+        """
+        Set potential of nodes at simulation boundary.
         
+        Can pass user-defined function to calculate node potential from its 
+        Cartesian coordinates; otherwise, boundary is assumed to be grounded.
+
+        Parameters
+        ----------
+        boundaryFun : function, optional
+            User-defined potential as function of coords. The default is None.
+
+        Returns
+        -------
+        None.
+
+        """
         bnodes=self.mesh.getBoundaryNodes()
         self.nodeVoltages=np.zeros(self.mesh.nodeCoords.shape[0])
         
@@ -622,7 +461,7 @@ class Simulation:
     
     def solve(self):
         """
-        Directly solves for nodal voltages.
+        Directly solve for nodal voltages.
         
         Computational time grows significantly with simulation size;
         try iterativeSolve() for faster convergence
@@ -665,7 +504,7 @@ class Simulation:
 
     def iterativeSolve(self,vGuess=None,tol=1e-5):
         """
-        Solves nodal voltages using conjgate gradient method.
+        Solve nodal voltages using conjgate gradient method.
         
         Likely to achieve similar accuracy to direct solution at much greater 
         speed for element counts above a few thousand
@@ -683,8 +522,6 @@ class Simulation:
             Simulated nodal voltages.
 
         """
-
-        
         self.startTiming("Sort node types")
         self.getNodeTypes()
         self.logTime()
@@ -1247,176 +1084,6 @@ class Simulation:
         return bSel
                 
 
-class Mesh:
-    def __init__(self,bbox,elementType='Admittance'):
-        self.bbox=bbox
-        self.extents=(bbox[3:]-bbox[:3])/2
-        self.elements=[]
-        self.conductances=[]
-        self.elementType=elementType
-        self.nodeCoords=np.empty((0,3),dtype=np.float64)
-        self.edges=[]
-        
-        self.minl0=0
-        
-        
-    def __getstate__(self):
-        
-        state=self.__dict__.copy()
-        
-        elInfo=[]
-        for el in self.elements:
-            d={'origin':el.origin,
-               'extents':el.extents,
-               'l0':el.l0,
-               'sigma':el.sigma,
-               'nodeIndices':el.globalNodeIndices}
-            elInfo.append(d)
-            
-        state['elements']=elInfo
-        return state
-    
-    def __setstate__(self,state):
-        self.__dict__.update(state)
-        elDicts=self.elements.copy()
-        self.elements=[]
-        
-        for ii,el in enumerate(elDicts):
-            self.addElement(el['origin'], el['extents'],
-                            el['sigma'], el['nodeIndices'])
-        
-    def getContainingElement(self,coords):
-        """
-        Get element containing specified point.
-
-        Parameters
-        ----------
-        coords : float[:]
-            Cartesian coordinates of point.
-
-        Raises
-        ------
-        ValueError
-            Error if no element contains the point.
-
-        Returns
-        -------
-        elem : TYPE
-            Containing element.
-
-        """
-        nElem=len(self.elements)
-        
-        #TODO: workaround fudge factor
-        tol=1e-9*np.ones(3)
-        
-        for nn in nb.prange(nElem):
-            elem=self.elements[nn]
-            # if type(elem) is dict:
-            #     delta=coords-elem['origin']
-            #     ext=elem['extents']
-            # else:
-            delta=coords-elem.origin+tol
-            ext=elem.extents+2*tol
-                
-                
-            difs=np.logical_and(delta>=0,delta<=ext)
-            if all(difs):
-                return elem
-           
-        raise ValueError('Point (%s) not inside any element' % ','.join(map(str,coords)))
-            
-       
-    def finalize(self):
-       pass
-       
-    def addElement(self,origin, extents,sigma,nodeIndices):
-        """
-        Insert element into the mesh.
-
-        Parameters
-        ----------
-        origin : float[:]
-            Cartesian coords of element's origin.
-        extents : float[:]
-            Length of edges in x,y,z.
-        sigma : float
-            Conductivity of element.
-        nodeIndices : int64[:]
-            Numbering of element nodes according to global mesh.
-
-        Returns
-        -------
-        None.
-
-        """
-        if self.elementType=='Admittance':
-            newEl=AdmittanceHex(origin,extents,sigma)
-        elif self.elementType=='FEM':
-            newEl=FEMHex(origin,extents,sigma)
-            
-        newEl.setGlobalIndices(nodeIndices)
-        self.elements.append(newEl)
-        
-    def getConductances(self):
-        """
-        Get the discrete conductances from every element.
-
-        Returns
-        -------
-        edgeIndices : int64[:,:]
-            List of node pairs spanned by each conductance.
-        conductances : float
-            Conductance in siemens.
-
-        """
-        nElem=len(self.elements)
-        if self.elementType=='Admittance':
-            nElemEdge=12
-        elif self.elementType=='FEM':
-            nElemEdge=28
-            
-        nEdges=nElemEdge*nElem
-        
-        conductances=np.empty(nEdges,dtype=np.float64)
-        edgeIndices=np.empty((nEdges,2),dtype=np.int64)
-        
-        for nn in nb.prange(nElem):
-            
-            elem=self.elements[nn]
-            elConds=elem.getConductanceVals()
-            elEdges=elem.getConductanceIndices()
-            conductances[nn*nElemEdge:(nn+1)*nElemEdge]=elConds
-            edgeIndices[nn*nElemEdge:(nn+1)*nElemEdge,:]=elEdges
-        
-        self.edges=edgeIndices
-        return edgeIndices,conductances
-    
-    def getL0Min(self):
-        """
-        Get the smallest edge length in mesh
-
-        Returns
-        -------
-        l0Min : float
-            smallest edge length.
-
-        """
-        l0Min=np.infty
-        
-        for el in self.elements:
-            l0Min=min(l0Min,el.l0)
-        return l0Min
-
-    def getBoundaryNodes(self):
-        mins,maxes=np.hsplit(self.bbox,2)
-        
-        atmin=np.equal(mins,self.nodeCoords)
-        atmax=np.equal(maxes,self.nodeCoords)
-        isbnd=np.any(np.logical_or(atmin,atmax),axis=1)
-        globalIndices=np.nonzero(isbnd)[0]
-            
-        return globalIndices
 
 class Logger():
     def __init__(self,stepName,printStart=True):
@@ -1438,367 +1105,7 @@ class Logger():
         
         
 
-class Octree(Mesh):
-    def __init__(self,boundingBox,maxDepth=10,elementType='Admittance'):
-        self.center=np.mean(boundingBox.reshape(2,3),axis=0)
-        self.span=(boundingBox[3:]-boundingBox[:3])
-        super().__init__(boundingBox, elementType)
 
-        self.maxDepth=maxDepth
-        self.bbox=boundingBox
-        self.indexMap=np.empty(0,dtype=np.int64)
-        
-        coord0=self.center-self.span/2
-        
-        self.tree=Octant(coord0,self.span)
-        
-    def getContainingElement(self, coords):
-        
-        el=self.tree.getContainingElement(coords)
-        return el
-        
-        
-    def refineByMetric(self,l0Function):
-        """
-        Recursively splits elements until l0Function evaluated at the center
-        of each element is greater than that element's l0'
-
-        Parameters
-        ----------
-        l0Function : function
-            Function returning a scalar for each input cartesian coordinate.
-
-        Returns
-        -------
-        None.
-
-        """
-        self.tree.refineByMetric(l0Function, self.maxDepth)
-
-            
-#TODO: vectorize
-    def coord2Index(self,coord):
-        x0=self.center-self.span/2
-        nE=2**(self.maxDepth)
-        dX=self.span/(nE)
-        
-        ndxOffsets=np.array([(nE+1)**n for n in range(3)])
-        
-        idxArray=(coord-x0)/dX
-        newInd=np.dot(idxArray,ndxOffsets)
-        
-        idx=np.rint(newInd).astype(np.int64)
-        if len(self.indexMap)!=0:
-            #TODO: remove deprecated
-            idx=reindex(idx,self.indexMap)
-        return idx
-        
-    def finalize(self):
-        octs=self.tree.getTerminalOctants()
-        # self.elements=octs
-        self.nodeCoords=self.getCoordsRecursively()
-        # indices=self.indexMap
-        # mesh.nodeCoords=coords
-        
-        
-
-        for ii in nb.prange(len(octs)):
-            o=octs[ii]
-            onodes=o.globalNodeIndices
-            #TODO: deprecated function
-            gnodes=util.sparse2denseIndex(onodes, self.indexMap)
-            self.addElement(o.origin,o.span,np.ones(3),gnodes)
-            # o.setGlobalIndices(gnodes)
-        
-        # T.logCompletion()
-        return 
-    
-    def printStructure(self):
-        """
-        Debug tool to print structure of tree
-
-        Returns
-        -------
-        None.
-
-        """
-        self.tree.printStructure()
-        
-    def octantByList(self,indexList,octant=None):
-        """
-        Selects an octant by recursing through a list of indices
-
-        Parameters
-        ----------
-        indexList : int64[]
-            Octant identifier, where i=indexList[n] specifies child i of octant n
-        octant : Octant, optional
-            Used internally to recurse. The default is None.
-
-        Returns
-        -------
-        Octant
-            The octant object specified.
-
-        """
-        head=indexList.pop(0)
-        if octant is None:
-            octant=self.tree
-        oc=octant.children[head]
-        if len(oc.children)==0:
-            return oc
-        else:
-            return self.octantByList(indexList,oc)
-        
-    def countElements(self):
-        
-        return self.tree.countElements()
-    
-    def getCoordsRecursively(self):
-        """
-        Determines coordinates of mesh nodes
-
-        Returns
-        -------
-        TYPE
-            DESCRIPTION.
-
-        """
-        coords,i=self.tree.getCoordsRecursively(self.bbox,self.maxDepth)
-        
-        indices=np.array(i)
-        self.indexMap=indices
-        self.nodeCoords=coords
-
-        return np.array(coords)
-         
-    def getBoundaryNodes(self):
-        bnodes=[]
-        nX=1+2**self.maxDepth
-        for ii in nb.prange(len(self.indexMap)):
-            nn=self.indexMap[ii]
-            xyz=util.index2pos(nn,nX)
-            if np.any(xyz==0) or np.any(xyz==(nX-1)):
-                bnodes.append(ii)
-        
-        return np.array(bnodes)
-
-
-
-
-# octantspec= [
-#     ('origin',nb.float64[:]),
-#     ('span',nb.float64[:]),
-#     ('center',nb.float64[:]),
-#     ('l0',nb.float64),
-#     ('children',List[Octant]),
-#     ('depth',nb.int64),
-#     ('globalNodes',nb.int64[:]),
-#     ('nX',nb.int64),
-#     ('index',nb.int64),
-#     ('nodeIndices',nb.int64[:])
-#     ]
-# @nb.experimental.jitclass(spec=octantspec)
-class Octant():
-    def __init__(self,origin, span,depth=0,sigma=np.ones(3),index=[]):
-        # super().__init__(origin, span, sigma)
-        self.origin=origin
-        self.span=span
-        self.center=origin+span/2
-        self.l0=np.prod(span)**(1/3)
-        self.children=[]
-        self.depth=depth
-        self.globalNodeIndices=np.empty(8,dtype=np.int64)
-        self.nX=2
-        self.index=index        
-
-        
-    def calcGlobalIndices(self,globalBbox,maxdepth):
-        # x0=globalBbox[:3]
-        nX=2**maxdepth
-        # dX=(globalBbox[3:]-x0)/(nX)
-        # coords=self.getOwnCoords()
-        
-        toGlobal=np.array([(nX+1)**n for n in range(3)])
-        
-        # for N,c in enumerate(coords):
-        #     idxArray=(c-x0)/dX
-        #     ndx=np.dot(ndxOffsets,idxArray)
-        #     self.globalNodeIndices[N]=ndx
-            
-        # return self.globalNodeIndices
-        xyz=np.zeros(3,dtype=np.int64)
-        for ii,idx in enumerate(self.index):
-            ldepth=maxdepth-ii-1
-            step=2**ldepth
-            xyz+=step*util.toBitArray(idx)
-            
-        ownstep=2**(maxdepth-self.depth)
-        
-        ownXYZ=[xyz+ownstep*util.toBitArray(i) for i in range(8)]
-        indices=np.array([np.dot(ndxlist,toGlobal) for ndxlist in ownXYZ])
-            
-        self.globalNodeIndices=indices
-        return indices
-            
-            
-        
-    def countElements(self):
-        if len(self.children)==0:
-            return 1
-        else:
-            return sum([ch.countElements() for ch in self.children])
-     
-    # @nb.njit(parallel=True)
-    def makeChildren(self,division=np.array([0.5,0.5,0.5])):
-        newSpan=self.span*division
-        
-        
-        for ii in nb.prange(8):
-            offset=util.toBitArray(ii)*newSpan
-            newOrigin=self.origin+offset
-            newIndex=self.index.copy()
-            newIndex.append(ii)
-            self.children.append(Octant(newOrigin,newSpan,self.depth+1,index=newIndex))
-            
-        # return self.children
-    def getOwnCoords(self):
-        return [self.origin+self.span*util.toBitArray(n) for n in range(8)]
-
-    
-    def getCoordsRecursively(self,bbox,maxdepth):
-        # T=Logger('depth  %d'%self.depth, printStart=False)
-        if len(self.children)==0:
-            coords=self.getOwnCoords()
-            # indices=self.globalNodeIndices
-            indices=self.calcGlobalIndices(bbox, maxdepth)
-        else:
-            coordList=[]
-            indexList=[]
-            
-            for ch in self.children:
-                c,i = ch.getCoordsRecursively(bbox,maxdepth)
-                
-                if len(coordList)==0:
-                    coordList=c
-                    indexList=i
-                else:
-                    coordList.extend(c)
-                    indexList.extend(i)
-            
-            indices,sel=np.unique(indexList,return_index=True)
-            
-            # self.globalNodeIndices=indices
-            
-            coords=np.array(coordList)[sel]
-            coords=coords.tolist()
-                
-        # T.logCompletion()
-        return coords, indices.tolist()
-    
-    
-    def getIndicesRecursively(self):
-        
-        if self.isTerminal():
-            return np.arange(8,dtype=np.int64)
-        
-        else:
-            indices=[]
-            for ch in self.children:
-                indices.append(ch.getIndicesRecursively())
-    
-            return indices
-    
-    # @nb.njit(parallel=True)
-    def refineByMetric(self,l0Function,maxDepth):
-        l0Target=l0Function(self.center)
-        # print("target\t%g"%l0Target)
-        # print("l0\t\t%g"%self.l0)
-        # print(self.center)
-        if (self.l0>l0Target) and (self.depth<maxDepth):
-            # print('\n\n')
-            # print('depth '+str(self.depth)+', child'+str(self.index))
-
-            self.makeChildren()
-            for ii in nb.prange(8):
-                self.children[ii].refineByMetric(l0Function,maxDepth)
-                
-    def printStructure(self):
-        """
-        Prints out octree structure
-
-        Returns
-        -------
-        None.
-
-        """
-        base='> '*self.depth
-        print(base+str(self.l0))
-        
-        for ch in self.children:
-            ch.printStructure()
-            
-    
-    def isTerminal(self):
-        return len(self.children)==0
-        
-    def containsPoint(self,coord):
-        gt=np.greater_equal(coord,self.origin)
-        lt=np.less_equal(coord-self.origin,self.span)
-        return np.all(gt&lt)
-    
-    
-    def distributeNodes(self,nodeCoords,nodeIndices):
-        if self.isTerminal():
-            return [], []
-        else:
-            for N in len(nodeIndices):
-                if self.containsPoint(nodeCoords[N]):
-                    self.innerNodes
-                    
-            
-            
-            
-            return nodeCoords,nodeIndices
-        
-        
-        
-    def getTerminalOctants(self):
-        """
-        Gets all childless octants
-
-        Returns
-        -------
-        list of Octants
-            Childless octants (the actual elements of the mesh)
-
-        """
-        if len(self.children)==0:
-            return [self]
-        else:
-            
-            descendants=[]
-            for ch in self.children:
-            # if len(ch.children)==0:
-                grandkids=ch.getTerminalOctants()
-                
-                if grandkids is not None:
-                    descendants.extend(grandkids)
-        return descendants
-    
-    
-    def getContainingElement(self,coords):
-        if len(self.children)==0:
-            if self.containsPoint(coords):
-                return self
-            else:
-                return None
-        else:
-            for ch in self.children:
-                tmp=ch.getContainingElement(coords)
-                if tmp is not None:
-                    return tmp
-            return None
         
 class SimStudy:
     def __init__(self,studyPath,boundingBox):

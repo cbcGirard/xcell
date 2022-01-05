@@ -1,0 +1,187 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Jan  4 14:39:59 2022
+Element type routines
+@author: benoit
+"""
+import numpy as np
+import numba as nb
+from numba import int64, float64
+
+
+@nb.experimental.jitclass([
+    ('origin', float64[:]),
+    ('extents',float64[:]),
+    ('l0',float64),
+    ('sigma',float64[:]),
+    ('globalNodeIndices',int64[:])
+    ])
+class Element:
+    def __init__(self,origin, extents,sigma):
+        self.origin=origin
+        self.extents=extents
+        self.l0=np.prod(extents)**(1/3)
+        self.sigma=sigma
+        self.globalNodeIndices=np.empty(8,dtype=np.int64)
+        
+    def getCoordsRecursively(self):
+        coords=np.empty((8,3))
+        for ii in range(8):
+            weights=np.array([(ii>>n)&1 for n in range(3)],dtype=np.float64)
+            offset=self.origin+self.extents*weights
+            coords[ii]=offset
+
+        return coords
+    
+    def getConductanceVals(self):
+        pass
+    
+    def getConductanceIndices(self):
+        pass
+    
+    def getCharLength(self):
+        return math.pow(np.prod(self.extents),1.0/3)
+    
+    def setGlobalIndices(self,indices):
+        self.globalNodeIndices=indices
+
+@nb.experimental.jitclass([
+    ('origin', float64[:]),
+    ('extents',float64[:]),
+    ('l0', float64),
+    ('sigma',float64[:]),
+    ('globalNodeIndices',int64[:])
+    ])
+class FEMHex():
+    def __init__(self, origin, extents, sigma):
+        self.origin=origin
+        self.extents=extents
+        self.l0=np.prod(extents)**(1/3)
+        self.sigma=sigma
+        self.globalNodeIndices=np.empty(8,dtype=np.int64)
+        
+    def getCoordsRecursively(self):
+        coords=np.empty((8,3))
+        for ii in range(8):
+            weights=np.array([(ii>>n)&1 for n in range(3)],dtype=np.float64)
+            offset=self.origin+self.extents*weights
+            coords[ii]=offset
+
+        return coords
+        
+    def getCharLength(self):
+        return math.pow(np.prod(self.extents),1.0/3)
+    
+    def setGlobalIndices(self,indices):
+        self.globalNodeIndices=indices
+        
+        
+    def getConductanceVals(self):
+        if self.sigma.shape[0]==1:
+            sigma=self.sigma*np.ones(3)
+        else:
+            sigma=self.sigma
+            
+        # k=self.extents/(36*np.roll(self.extents,1)*np.roll(self.extents,2))
+        k=np.roll(self.extents,1)*np.roll(self.extents,2)/(36*self.extents)
+        K=sigma*k
+        
+        g=np.empty(28,dtype=np.float64)
+        nn=0
+        weights=np.empty(3,dtype=np.float64)
+        for ii in range(8):
+            for jj in range(ii+1,8):
+                dif=np.bitwise_xor(ii,jj)
+            
+                mask = np.array([(dif >> i)&1 for i in range(3)])
+                numDif = np.sum(mask)
+        
+                if numDif == 1:
+                    coef = 2*(mask^1)-4*mask
+                elif numDif == 2:
+                    coef = (mask^1)-2*mask
+                else:
+                    coef = -mask
+                    
+                weights=-coef.astype(np.float64)
+                g0=np.dot(K,weights)
+                g[nn]=g0
+                nn=nn+1
+                
+        return g
+    
+    def getConductanceIndices(self):
+        edges=np.empty((28,2),dtype=np.int64)
+        nn=0
+        for ii in range(8):
+            for jj in range(ii+1,8):
+                edges[nn,:]=self.globalNodeIndices[np.array([ii,jj])]
+                nn+=1
+                
+        return edges
+                
+    
+    
+@nb.experimental.jitclass([
+    ('origin', float64[:]),
+    ('extents',float64[:]),
+    ('l0',float64),
+    ('sigma',float64[:]),
+    ('globalNodeIndices',int64[:])
+    ])
+class AdmittanceHex():
+    def __init__(self, origin, extents, sigma):
+        self.origin=origin
+        self.extents=extents
+        self.l0=np.prod(extents)**(1/3)
+        self.sigma=sigma
+        self.globalNodeIndices=np.empty(8,dtype=np.int64)
+        
+    def getCoordsRecursively(self):
+        coords=np.empty((8,3))
+        for ii in range(8):
+            weights=np.array([(ii>>n)&1 for n in range(3)],dtype=np.float64)
+            offset=self.origin+self.extents*weights
+            coords[ii]=offset
+
+        return coords
+    
+    def getMidpoint(self):
+        return self.origin+self.extents/2
+        
+    def getCharLength(self):
+        return math.pow(np.prod(self.extents),1.0/3)
+    
+    def setGlobalIndices(self,indices):
+        self.globalNodeIndices=indices
+        
+        
+    def getConductanceVals(self):
+        if self.sigma.shape[0]==1:
+            sigma=self.sigma*np.ones(3)
+        else:
+            sigma=self.sigma
+            
+        k=np.roll(self.extents,1)*np.roll(self.extents,2)/self.extents
+        K=sigma*k/4
+        
+        g=np.array([K[ii] for ii in range(3) for jj in range(4)])
+        
+
+                
+        return g
+    
+    def getConductanceIndices(self):
+        nodesA=np.array([0,2,4,6,0,1,4,5,0,1,2,3])
+        offsets=np.array([2**np.floor(ii/4) for ii in range(12)])
+        offsets=offsets.astype(np.int64)
+        
+        # edges=np.array([[self.globalNodeIndices[a],self.globalNodeIndices[a+o]] for a,o in zip(nodesA,offsets)])
+        edges=np.empty((12,2),dtype=np.int64)
+        for ii in range(12):
+            nodeA=nodesA[ii]
+            nodeB=nodeA+offsets[ii]
+            edges[ii,0]=self.globalNodeIndices[nodeA]
+            edges[ii,1]=self.globalNodeIndices[nodeB]
+        return edges

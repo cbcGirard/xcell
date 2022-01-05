@@ -13,7 +13,7 @@ import numba as nb
 
 
 
-nb.config.DISABLE_JIT=0
+# nb.config.DISABLE_JIT=0
 nb.config.DEBUG_TYPEINFER=0
 
 # insert subset in global: main[subIndices]=subValues
@@ -121,12 +121,10 @@ def renumberIndices(edges,globalMask):
     
 
     ### array-based approach; high memory usage
-    nodeDict=getIndexDict(globalMask)
+    nodeDict=condenseIndices(globalMask)
     
     for nn in nb.prange(validEdges.shape[0]):
         for jj in nb.prange(validEdges.shape[1]):
-    # for nn in nb.prange(nValid):
-    #     for jj in nb.prange(2):
             n=validEdges[nn,jj]
             subNumberedEdges[nn,jj]=nodeDict[n]
         
@@ -165,18 +163,28 @@ def sparse2denseIndex(sparseVals,denseVals):
         Indices where each sparseVal occurs in denseVals.
 
     """
-    idxList=[]
+    idxList=np.empty_like(sparseVals, dtype=np.int64)
     for ii in nb.prange(sparseVals.shape[0]):
-        #TODO: deprecated
-        idxList.append(reindex(sparseVals[ii],denseVals))
-                         
+        sval=sparseVals[ii]
+        idxList[ii]=reindex(sval,denseVals)
         
-    return np.array(idxList,dtype=np.int64)
+    return idxList
+
+@nb.njit(parallel=True)
+def octreeLoop_GetBoundaryNodesLoop(nX,indexMap):
+    bnodes=[]
+    for ii in nb.prange(indexMap.shape[0]):
+        nn=indexMap[ii]
+        xyz=index2pos(nn,nX)
+        if np.any(xyz==0) or np.any(xyz==(nX-1)):
+            bnodes.append(ii)
+            
+    return np.array(bnodes,dtype=np.int64)
 
 @nb.njit()
 def reindex(sparseVal,denseList):
     """
-    Get position of sparseVal in denseList, returning as soon as found
+    Get position of sparseVal in denseList, returning as soon as found.
 
     Parameters
     ----------
@@ -184,6 +192,11 @@ def reindex(sparseVal,denseList):
         Value to find index of match.
     denseList : int64[:]
         List of nonconsecutive indices.
+        
+    Raises
+    ------
+    ValueError
+        Error if sparseVal not found.
 
     Returns
     -------
@@ -192,12 +205,13 @@ def reindex(sparseVal,denseList):
 
     """
     # startguess=sparseVal//denseList[-1]
-    for n,val in np.ndenumerate(denseList):
-    # for n,val in enumerate(denseList):
-
+    # for n,val in np.ndenumerate(denseList):
+    for n,val in enumerate(denseList):
         if val==sparseVal:
-            return n[0]
+            return n
         
+    # raise ValueError('%d not a member of denseList'%sparseVal)
+    raise ValueError('not a member of denseList')
 
 def coords2MaskedArrays(intCoords,edges,planeMask,vals):
     pcoords=np.ma.masked_array(intCoords, mask=~planeMask.repeat(2))

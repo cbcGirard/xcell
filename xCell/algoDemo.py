@@ -37,7 +37,7 @@ bbox=np.append(xmax*np.zeros(3),xmax*np.ones(3))
 study=xCell.SimStudy(studyPath,bbox)
 
 l0Min=1e-6
-rElec=1e-6
+rElec=1e-1
 
 lastNumEl=0
 
@@ -70,7 +70,7 @@ r=np.sqrt(XX**2+YY**2)
 # im=plt.imshow(k*r,extent=[0.,1.,0.,1.],origin='lower',interpolation='bilinear')
 # plt.colorbar(im)
 
-for maxdepth in range(0,10):
+for maxdepth in range(1,10):
     l0Param=2**(-maxdepth*0.2)
     
     setup=study.newSimulation()
@@ -91,7 +91,7 @@ for maxdepth in range(0,10):
 
     if meshtype=='uniform':
         newNx=int(np.ceil(lastNumEl**(1/3)))
-        sourceIndex=makeUniformGrid(setup,newNx+newNx%2)
+        sourceIndex=setup.makeUniformGrid(newNx+newNx%2)
     else:
         def metric(coord):
             r=np.linalg.norm(coord)
@@ -102,13 +102,11 @@ for maxdepth in range(0,10):
             #     val=rElec
             return val
 
-        makeAdaptiveGrid(setup, metric,maxdepth)
+        setup.makeAdaptiveGrid(metric,maxdepth)
     
 
     setup.startTiming("Make elements")
-  
-    coords=setup.mesh.nodeCoords
-    
+      
     def boundaryFun(coord):
         r=np.linalg.norm(coord)
         return rElec/(r*np.pi*4)
