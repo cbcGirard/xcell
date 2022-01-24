@@ -9,6 +9,7 @@ import numpy as np
 import numba as nb
 import Elements
 import util
+import FEM
 
 class Mesh:
     def __init__(self,bbox,elementType='Admittance'):
@@ -30,7 +31,7 @@ class Mesh:
         elInfo=[]
         for el in self.elements:
             d={'origin':el.origin,
-               'extents':el.extents,
+               'span':el.span,
                'l0':el.l0,
                'sigma':el.sigma,
                'nodeIndices':el.globalNodeIndices}
@@ -45,7 +46,7 @@ class Mesh:
         self.elements=[]
         
         for ii,el in enumerate(elDicts):
-            self.addElement(el['origin'], el['extents'],
+            self.addElement(el['origin'], el['span'],
                             el['sigma'], el['nodeIndices'])
         
     def getContainingElement(self,coords):
@@ -147,8 +148,16 @@ class Mesh:
         for nn in nb.prange(nElem):
             
             elem=self.elements[nn]
-            elConds=elem.getConductanceVals()
-            elEdges=elem.getConductanceIndices()
+            # elConds=elem.getConductanceVals()
+            # elEdges=elem.getConductanceIndices()
+            if self.elementType=='Admittance':
+                elConds=FEM.getAdmittanceConductances(elem.span,elem.sigma)
+                elEdges=elem.globalNodeIndices[FEM.getAdmittanceIndices()]
+            else:
+                elConds=FEM.getHexConductances(elem.span,elem.sigma)
+                elEdges=elem.globalNodeIndices[FEM.getHexIndices()]
+            
+            
             conductances[nn*nElemEdge:(nn+1)*nElemEdge]=elConds
             edgeIndices[nn*nElemEdge:(nn+1)*nElemEdge,:]=elEdges
         
@@ -232,6 +241,7 @@ class Octree(Mesh):
         """
         octs=self.tree.getTerminalOctants()
         # self.elements=octs
+        #TODO: slowdown here?
         self.nodeCoords=self.getCoordsRecursively()
         # indices=self.indexMap
         # mesh.nodeCoords=coords
@@ -392,7 +402,7 @@ class Octant():
             return sum([ch.countElements() for ch in self.children])
      
     # @nb.njit(parallel=True)
-    def makeChildren(self,division=np.array([0.5,0.5,0.5])):
+    def split(self,division=np.array([0.5,0.5,0.5])):
         newSpan=self.span*division
         
         
@@ -461,7 +471,7 @@ class Octant():
             # print('\n\n')
             # print('depth '+str(self.depth)+', child'+str(self.index))
 
-            self.makeChildren()
+            self.split()
             for ii in nb.prange(8):
                 self.children[ii].refineByMetric(l0Function,maxDepth)
                 

@@ -10,6 +10,7 @@ Utilities
 
 import numpy as np
 import numba as nb
+import scipy
 
 
 
@@ -20,6 +21,98 @@ nb.config.DEBUG_TYPEINFER=0
 # get subset: subVals=main[boolMask]
 # subInGlobalIndices=nonzero(boolMask)
 # globalInSubIndices=(-ones()[boolMask])
+
+
+# @nb.njit(parallel=True)
+def eliminateRows(matrix):
+    N=matrix.shape[0]
+    # lo=scipy.sparse.tril(matrix,-1)
+    lo=matrix.copy()
+    lo.sum_duplicates()
+    
+    rowIdx,colIdx=lo.nonzero()
+    _,count=np.unique(rowIdx,return_counts=True)
+    
+    
+    tup = __eliminateRowsLoop(rowIdx,colIdx,count)
+    v,r,c = tup
+
+            
+            
+    # xmat=scipy.sparse.coo_matrix(tup,
+    #                              shape=(N,N))
+    xmat=scipy.sparse.coo_matrix((v, (r, c)),
+                                 shape=(N,N))
+    
+    return xmat
+
+# @nb.njit(nb.types.Tuple(nb.float64[:], nb.int64[:], nb.int64[:])(nb.int64[:], nb.int64[:], nb.int64[:]),
+#          parallel=True)
+# @nb.njit(parallel=True)
+def __eliminateRowsLoop(rowIdx, colIdx, count):
+    r=[]
+    c=[]
+    v=[]
+    hanging=count<6
+    for ii in nb.prange(count.shape[0]):
+        if hanging[ii]:
+            nconn=count[ii]-1
+            cols=colIdx[rowIdx==ii]
+            cols=cols[cols!=ii]
+            
+            
+            vals=np.ones(nconn)/nconn
+            
+            if vals.shape!=cols.shape:
+                print()
+            
+            for jj in nb.prange(cols.shape[0]):
+                c.append(cols[jj])
+                r.append(ii)
+                v.append(vals[jj])
+            
+            
+        else:
+            r.append(ii)
+            c.append(ii)
+            v.append(1.0)
+            
+    # tupIdx=(np.array(r),np.array(c))    
+    # tup=(np.array(v),tupIdx)
+    # tup=(np.array(v), np.array(r), np.array(c))
+    return (v,r,c)
+    # return tup
+    
+
+def getLinearMetric(minl0,maxl0,domainSize):
+    rmin=np.sqrt(3)*minl0/2
+    rmax=np.sqrt(3)*(domainSize-maxl0/2)
+    k=(maxl0-minl0)/(rmax-rmin)
+    b=minl0-k*rmin
+    
+    @nb.njit()
+    def metric(coord):
+        r=np.linalg.norm(coord)
+        return k*r+b
+    
+    return metric
+
+
+def deduplicateEdges(edges,conductances):
+    N=max(edges.ravel())+1
+    mat=scipy.sparse.coo_matrix((conductances,
+                                 (edges[:,0], edges[:,1])),
+                                shape=(N,N))
+    
+    dmat=mat.copy()+mat.transpose()
+    
+    dedup=scipy.sparse.tril(dmat,k=-1)
+    
+    newEdges=np.array(dedup.nonzero()).transpose()
+    
+    newConds=dedup.data
+    
+    return newEdges, newConds
 
 @nb.njit
 def condenseIndices(globalMask):

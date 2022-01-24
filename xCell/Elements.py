@@ -12,16 +12,16 @@ from numba import int64, float64
 
 @nb.experimental.jitclass([
     ('origin', float64[:]),
-    ('extents',float64[:]),
+    ('span',float64[:]),
     ('l0',float64),
     ('sigma',float64[:]),
     ('globalNodeIndices',int64[:])
     ])
 class Element:
-    def __init__(self,origin, extents,sigma):
+    def __init__(self,origin, span,sigma):
         self.origin=origin
-        self.extents=extents
-        self.l0=np.prod(extents)**(1/3)
+        self.span=span
+        self.l0=np.prod(span)**(1/3)
         self.sigma=sigma
         self.globalNodeIndices=np.empty(8,dtype=np.int64)
         
@@ -29,7 +29,7 @@ class Element:
         coords=np.empty((8,3))
         for ii in range(8):
             weights=np.array([(ii>>n)&1 for n in range(3)],dtype=np.float64)
-            offset=self.origin+self.extents*weights
+            offset=self.origin+self.span*weights
             coords[ii]=offset
 
         return coords
@@ -41,23 +41,23 @@ class Element:
         pass
     
     def getCharLength(self):
-        return math.pow(np.prod(self.extents),1.0/3)
+        return math.pow(np.prod(self.span),1.0/3)
     
     def setGlobalIndices(self,indices):
         self.globalNodeIndices=indices
 
 @nb.experimental.jitclass([
     ('origin', float64[:]),
-    ('extents',float64[:]),
+    ('span',float64[:]),
     ('l0', float64),
     ('sigma',float64[:]),
     ('globalNodeIndices',int64[:])
     ])
 class FEMHex():
-    def __init__(self, origin, extents, sigma):
+    def __init__(self, origin, span, sigma):
         self.origin=origin
-        self.extents=extents
-        self.l0=np.prod(extents)**(1/3)
+        self.span=span
+        self.l0=np.prod(span)**(1/3)
         self.sigma=sigma
         self.globalNodeIndices=np.empty(8,dtype=np.int64)
         
@@ -65,13 +65,13 @@ class FEMHex():
         coords=np.empty((8,3))
         for ii in range(8):
             weights=np.array([(ii>>n)&1 for n in range(3)],dtype=np.float64)
-            offset=self.origin+self.extents*weights
+            offset=self.origin+self.span*weights
             coords[ii]=offset
 
         return coords
         
     def getCharLength(self):
-        return math.pow(np.prod(self.extents),1.0/3)
+        return math.pow(np.prod(self.span),1.0/3)
     
     def setGlobalIndices(self,indices):
         self.globalNodeIndices=indices
@@ -83,8 +83,8 @@ class FEMHex():
         else:
             sigma=self.sigma
             
-        # k=self.extents/(36*np.roll(self.extents,1)*np.roll(self.extents,2))
-        k=np.roll(self.extents,1)*np.roll(self.extents,2)/(36*self.extents)
+        # k=self.span/(36*np.roll(self.span,1)*np.roll(self.span,2))
+        k=np.roll(self.span,1)*np.roll(self.span,2)/(36*self.span)
         K=sigma*k
         
         g=np.empty(28,dtype=np.float64)
@@ -125,16 +125,16 @@ class FEMHex():
     
 @nb.experimental.jitclass([
     ('origin', float64[:]),
-    ('extents',float64[:]),
+    ('span',float64[:]),
     ('l0',float64),
     ('sigma',float64[:]),
     ('globalNodeIndices',int64[:])
     ])
 class AdmittanceHex():
-    def __init__(self, origin, extents, sigma):
+    def __init__(self, origin, span, sigma):
         self.origin=origin
-        self.extents=extents
-        self.l0=np.prod(extents)**(1/3)
+        self.span=span
+        self.l0=np.prod(span)**(1/3)
         self.sigma=sigma
         self.globalNodeIndices=np.empty(8,dtype=np.int64)
         
@@ -142,16 +142,16 @@ class AdmittanceHex():
         coords=np.empty((8,3))
         for ii in range(8):
             weights=np.array([(ii>>n)&1 for n in range(3)],dtype=np.float64)
-            offset=self.origin+self.extents*weights
+            offset=self.origin+self.span*weights
             coords[ii]=offset
 
         return coords
     
     def getMidpoint(self):
-        return self.origin+self.extents/2
+        return self.origin+self.span/2
         
     def getCharLength(self):
-        return math.pow(np.prod(self.extents),1.0/3)
+        return math.pow(np.prod(self.span),1.0/3)
     
     def setGlobalIndices(self,indices):
         self.globalNodeIndices=indices
@@ -163,7 +163,7 @@ class AdmittanceHex():
         else:
             sigma=self.sigma
             
-        k=np.roll(self.extents,1)*np.roll(self.extents,2)/self.extents
+        k=np.roll(self.span,1)*np.roll(self.span,2)/self.span
         K=sigma*k/4
         
         g=np.array([K[ii] for ii in range(3) for jj in range(4)])

@@ -177,9 +177,10 @@ class Simulation:
         None.
 
         """
-        self.stepLogs.append(Logger(stepName))
+        logger=Logger(stepName)
+        self.stepLogs.append(logger)
         
-    def logTime(self):
+    def logTime(self,logger=None):
         """
         Signals completion of step.
 
@@ -188,7 +189,9 @@ class Simulation:
         None.
 
         """
-        self.stepLogs[-1].logCompletion()
+        if logger is None:
+            logger=self.stepLogs[-1]
+        logger.logCompletion()
         
     def getMemUsage(self, printVal=False):
         """
@@ -210,6 +213,14 @@ class Simulation:
             print(engFormat(mem*1024)+" used")
         
         return mem
+    
+    def printTotalTime(self):
+        t=0
+        for l in self.stepLogs:
+            t+=l.duration
+            
+        engFormat=tickr.EngFormatter()
+        print('\tTotal time: '+engFormat(t)+ " s")
     
         
     def getEdgeCurrents(self):
@@ -347,7 +358,7 @@ class Simulation:
         f.close()
         
         #TODO: doc better
-    def finalizeMesh(self):
+    def finalizeMesh(self,regularize=False):
         """
         Prepare mesh for simulation.
         
@@ -359,8 +370,10 @@ class Simulation:
         None.
 
         """
+        self.startTiming('Finalize mesh')
         self.mesh.finalize()
         numEl=len(self.mesh.elements)
+        self.logTime()
         
         print('%d elem'%numEl)
         nNodes=len(self.mesh.nodeCoords)
@@ -372,6 +385,11 @@ class Simulation:
         edges,conductances=self.mesh.getConductances()
         self.edges=edges
         self.conductances=conductances
+        self.logTime()
+        
+        self.startTiming('Regularize mesh')
+        if regularize:
+            self.regularizeMesh()
         self.logTime()
         
     def addCurrentSource(self,value,coords,radius=0):
@@ -899,6 +917,7 @@ class Simulation:
             
         return nConn
     
+    #TODO: slow, worse error. bad algo?
     def regularizeMesh(self):
         nConn=self.getNodeConnectivity()
         # self.__dedupEdges()
@@ -907,13 +926,13 @@ class Simulation:
         keepEdge=np.ones(self.edges.shape[0],dtype=bool)
         boundaryNodes=self.mesh.getBoundaryNodes()
         
+        hangingNodes=np.setdiff1d(badNodes, boundaryNodes)
+        
         newEdges=[]
         newConds=[]
         
-        for ii in nb.prange(badNodes.shape[0]):
-            node=badNodes[ii]
-            if np.isin(node,boundaryNodes):
-                continue
+        for ii in nb.prange(hangingNodes.shape[0]):
+            node=hangingNodes[ii]
             
             #get edges connected to hanging node
             isSharedE=np.any(self.edges==node,axis=1, keepdims=True)
@@ -946,15 +965,16 @@ class Simulation:
             keepEdge[isLongEdge]=False
             # print('%d of %d'%(ii,badNodes.shape[0]))
             
-        revisedEdges=np.vstack((self.edges[keepEdge],
-                                np.array(newEdges)))
-        revisedConds=np.concatenate((self.conductances[keepEdge], 
-                                     np.array(newConds)))
+        if len(newEdges)>0:
+            revisedEdges=np.vstack((self.edges[keepEdge],
+                                    np.array(newEdges)))
+            revisedConds=np.concatenate((self.conductances[keepEdge], 
+                                         np.array(newConds)))
+            
+            self.conductances=revisedConds
+            self.edges=revisedEdges
         
-        self.conductances=revisedConds
-        self.edges=revisedEdges
-        
-        return revisedConds, revisedEdges
+        # return revisedConds, revisedEdges
     
     def __dedupEdges(self):
         e=self.edges
@@ -1007,21 +1027,25 @@ class Simulation:
         # N - nf = Ns + Nx =Nd
         # system is Nd x Nd
         
-        isSrc=self.nodeRoleTable==2
+        # isSrc=self.nodeRoleTable==2
         isFix=self.nodeRoleTable==1
         
         # N=self.mesh.nodeCoords.shape[0]
-        Ns=len(self.currentSources)
-        Nx=np.nonzero(self.nodeRoleTable==0)[0].shape[0]
-        Nd=Nx+Ns
-        Nf=np.nonzero(isFix)[0].shape[0]
-        N_ext=Nd+Nf
+        # Ns=len(self.currentSources)
+        # Nx=np.nonzero(self.nodeRoleTable==0)[0].shape[0]
+        # Nd=Nx+Ns
+        # Nf=np.nonzero(isFix)[0].shape[0]
         
         self.startTiming("Filtering conductances")
-        #renumber nodes in order of dof, current source, fixed v
-        dofNumbering=self.nodeRoleVals.copy()
-        dofNumbering[isSrc]=Nx+dofNumbering[isSrc]
-        dofNumbering[isFix]=Nd+np.arange(Nf)
+        # #renumber nodes in order of dof, current source, fixed v
+        # dofNumbering=self.nodeRoleVals.copy()
+        # dofNumbering[isSrc]=Nx+dofNumbering[isSrc]
+        # dofNumbering[isFix]=Nd+np.arange(Nf)
+        
+        dofNumbering,Nset=self.getOrdering('dof')
+        Nx,Nf,Ns,Nd=Nset
+        N_ext=Nd+Nf
+
         
         edges=dofNumbering[self.edges]
         
@@ -1053,7 +1077,7 @@ class Simulation:
         v=np.zeros(N_ext)
         v[Nd:]=self.nodeVoltages[isFix]
 
-        b=np.array(gR.dot(v)).squeeze()
+        b=-np.array(gR.dot(v)).squeeze()
         
         for ii in range(Ns):
             b[ii+Nx]+=self.currentSources[ii].value
@@ -1068,22 +1092,100 @@ class Simulation:
         self.RHS=b
         self.gMat=G
         return G, b
-        
-     
     
-    def selGlobalByDoF(self,nthDoF):
-        nDoF=sum(self.nodeRoleTable==0)
-        
-        if nthDoF>=nDoF:
-            #select current source
-            nval=(self.nodeRoleTable==2)
-        else:
-            nval=(self.nodeRoleTable==0)
+    def getCoords(self,orderType='mesh',maskArray=None):
+        if orderType=='mesh':
+            reorderCoords=self.mesh.nodeCoords
             
-        bSel=nval&(self.nodeRoleVals==nthDoF)
-        return bSel
+        if orderType=='dof':
+            ordering,_=self.getOrdering('dof')
+            dofCoords=self.mesh.nodeCoords[self.nodeRoleTable==0]
+            srcCoords=np.array([s.coords for s in self.currentSources])
+            reorderCoords=np.vstack((dofCoords, srcCoords))
+            
+        if orderType=='electrical':
+            ordering,(Nx,Nf,Ns,Nd)=self.getOrdering('electrical')
+            uniVals,valid=np.unique(ordering,return_index=True)
+            if maskArray is None:
+                coords=self.mesh.nodeCoords
+            else:
+                coords=np.ma.array(self.mesh.nodeCoords,
+                                   mask=~maskArray)
+                
+            # nonSrc=ordering>=0
+            reorderCoords=np.empty((Nx+Nf+Ns,3))
+            # reorderCoords[:Nx+Nf]=coords[ordering[nonSrc]]
+            # for ii in nb.prange(len(self.currentSources)):
+            #     reorderCoords[Nx+Nf+ii]=self.currentSources[ii].coords
+            
+            nonSrc=self.nodeRoleTable<2
+            reorderCoords[:Nx+Nf]=coords[nonSrc]
+            for ii in nb.prange(len(self.currentSources)):
+                reorderCoords[Nx+Nf+ii]=self.currentSources[ii].coords
+            
+        return reorderCoords
+        
+    def getEdges(self,orderType='mesh',maskArray=None):
+        if orderType=='mesh':
+            edges=self.edges
+        if orderType=='electrical':
+            ordering,(Nx,Nf,Ns,Nd)=self.getOrdering(orderType)
+            isSrc=ordering<0
+            ordering[isSrc]=Nx+Nf-1-ordering[isSrc]
+            if maskArray is None:
+                oldEdges=self.edges
+            else:
+                okEdge=np.all(maskArray[oldEdges],axis=1)
+                oldEdges=self.edges[okEdge]
+                
+            
+            # edges=oldEdges.copy()
+            isSrc=self.nodeRoleTable==2
+            order=np.empty(isSrc.shape[0],dtype=np.int64)
+            order[~isSrc]=np.arange(Nx+Nf)
+            order[isSrc]=self.nodeRoleVals[isSrc]+Nx+Nf
+            edges=order[oldEdges]
+            
+            
+        return edges
+        
+            
+            
+    def getOrdering(self,orderType):#,maskArray):
+        isSrc=self.nodeRoleTable==2
+        isFix=self.nodeRoleTable==1
+        
+        # N=self.mesh.nodeCoords.shape[0]
+        Ns=len(self.currentSources)
+        Nx=np.nonzero(self.nodeRoleTable==0)[0].shape[0]
+        Nd=Nx+Ns
+        Nf=np.nonzero(isFix)[0].shape[0]
+            
+        # if orderType=='electrical':
+        if orderType=='dof':
+            # if maskArray is None:
+            #     role=self.nodeRoleTable
+            #     val=self.nodeRoleVals
+            # else:
+            #     role=np.ma.array(self.nodeRoleTable,
+            #                      mask=~maskArray)
+            #     val=np.ma.array(self.nodeRoleVals,
+            #                     mask=~maskArray)
                 
 
+            
+            #renumber nodes in order of dof, current source, fixed v
+            numbering=self.nodeRoleVals.copy()
+            numbering[isSrc]=Nx+numbering[isSrc]
+            numbering[isFix]=Nd+np.arange(Nf)
+            
+        if orderType=='electrical':
+            numbering=self.nodeRoleVals.copy()
+            numbering[isFix]=Nx+np.arange(Nf)
+            numbering[isSrc]=-1-numbering[isSrc]
+            
+        return numbering, (Nx,Nf,Ns,Nd)
+            
 
 class Logger():
     def __init__(self,stepName,printStart=True):
