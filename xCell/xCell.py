@@ -362,7 +362,7 @@ class Simulation:
         f.close()
         
         #TODO: doc better
-    def finalizeMesh(self,regularize=False,dualMesh=False):
+    def finalizeMesh(self,regularize=False):
         """
         Prepare mesh for simulation.
         
@@ -375,9 +375,7 @@ class Simulation:
 
         """
         self.startTiming('Finalize mesh')
-        if dualMesh:
-            self.mesh.elementType='Face'
-        self.mesh.finalize(dualMesh=dualMesh)
+        self.mesh.finalize()
         numEl=len(self.mesh.elements)
         self.logTime()
         
@@ -1107,49 +1105,39 @@ class Simulation:
     
     def getCoords(self,orderType='mesh',maskArray=None):
         if orderType=='mesh':
-            # reorderCoords=self.mesh.nodeCoords
-            reorderCoords,idxMap=self.mesh.getCoordsRecursively(asDual=False)
-        else:
-            asDual=self.mesh.elementType=='Face'
-            coords,idxMap=self.mesh.getCoordsRecursively(asDual=asDual)
-            if orderType=='dof':
-                ordering,_=self.getOrdering('dof')
-                dofCoords=coords[self.nodeRoleTable==0]
-                srcCoords=np.array([s.coords for s in self.currentSources])
-                reorderCoords=np.vstack((dofCoords, srcCoords))
-                
-            if orderType=='electrical':
-                ordering,(Nx,Nf,Ns,Nd)=self.getOrdering('electrical')
-                uniVals,valid=np.unique(ordering,return_index=True)
-                if maskArray is not None:
-                    coords=np.ma.array(self.mesh.nodeCoords,
-                                       mask=~maskArray)
-                    
-                # nonSrc=ordering>=0
-                reorderCoords=np.empty((Nx+Nf+Ns,3))
-                # reorderCoords[:Nx+Nf]=coords[ordering[nonSrc]]
-                # for ii in nb.prange(len(self.currentSources)):
-                #     reorderCoords[Nx+Nf+ii]=self.currentSources[ii].coords
-                
-                nonSrc=self.nodeRoleTable<2
-                reorderCoords[:Nx+Nf]=coords[nonSrc]
-                for ii in nb.prange(len(self.currentSources)):
-                    reorderCoords[Nx+Nf+ii]=self.currentSources[ii].coords
+            reorderCoords=self.mesh.nodeCoords
             
-        return reorderCoords,idxMap
+        if orderType=='dof':
+            ordering,_=self.getOrdering('dof')
+            dofCoords=self.mesh.nodeCoords[self.nodeRoleTable==0]
+            srcCoords=np.array([s.coords for s in self.currentSources])
+            reorderCoords=np.vstack((dofCoords, srcCoords))
+            
+        if orderType=='electrical':
+            ordering,(Nx,Nf,Ns,Nd)=self.getOrdering('electrical')
+            uniVals,valid=np.unique(ordering,return_index=True)
+            if maskArray is None:
+                coords=self.mesh.nodeCoords
+            else:
+                coords=np.ma.array(self.mesh.nodeCoords,
+                                   mask=~maskArray)
+                
+            # nonSrc=ordering>=0
+            reorderCoords=np.empty((Nx+Nf+Ns,3))
+            # reorderCoords[:Nx+Nf]=coords[ordering[nonSrc]]
+            # for ii in nb.prange(len(self.currentSources)):
+            #     reorderCoords[Nx+Nf+ii]=self.currentSources[ii].coords
+            
+            nonSrc=self.nodeRoleTable<2
+            reorderCoords[:Nx+Nf]=coords[nonSrc]
+            for ii in nb.prange(len(self.currentSources)):
+                reorderCoords[Nx+Nf+ii]=self.currentSources[ii].coords
+            
+        return reorderCoords
         
     def getEdges(self,orderType='mesh',maskArray=None):
         if orderType=='mesh':
-            # edges=self.edges
-            elist=[]
-            for ii in nb.prange(len(self.mesh.elements)):
-                el=self.mesh.elements[ii]
-                elEdges=el.globalNodeIndices[Meshes.FEM.getAdmittanceIndices()]
-                elist.extend(elEdges)
-                
-            # eRenumber=util.sparse2denseIndex(np.array(elEdges),self.mesh.indexMap)
-            edges=np.array(elist)
-            
+            edges=self.edges
         if orderType=='electrical':
             ordering,(Nx,Nf,Ns,Nd)=self.getOrdering(orderType)
             isSrc=ordering<0

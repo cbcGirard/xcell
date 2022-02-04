@@ -114,11 +114,10 @@ class Mesh:
         None.
 
         """
-        
-        if self.elementType=='FEM':
-            newEl=Elements.FEMHex(origin,extents,sigma)
-        else:
+        if self.elementType=='Admittance':
             newEl=Elements.AdmittanceHex(origin,extents,sigma)
+        elif self.elementType=='FEM':
+            newEl=Elements.FEMHex(origin,extents,sigma)
             
         newEl.setGlobalIndices(nodeIndices)
         self.elements.append(newEl)
@@ -235,7 +234,7 @@ class Octree(Mesh):
         self.tree.refineByMetric(l0Function, self.maxDepth)
 
         
-    def finalize(self,asDual=False):
+    def finalize(self):
         """
         Convert terminal octants to mesh elements, mapping sparse to dense numbering.
 
@@ -245,32 +244,22 @@ class Octree(Mesh):
 
         """
         octs=self.tree.getTerminalOctants()
-        # if asDual:
-        #     for o in octs:
-        #         o.split()
-        #     self.maxDepth+=1
-        #     self.elementType='Face'
-        #     octs=self.tree.getTerminalOctants()
-                
+        # self.elements=octs
         #TODO: slowdown here?
-        coords,ind=self.getCoordsRecursively(asDual)
-        self.nodeCoords=coords
-        self.indexMap=ind
-
-
+        self.nodeCoords=self.getCoordsRecursively()
+        # indices=self.indexMap
+        # mesh.nodeCoords=coords
         
+        
+
         for ii in nb.prange(len(octs)):
             o=octs[ii]
-            if asDual:
-                onodes=o.globalFaceIndices
-            else:
-                onodes=o.globalNodeIndices
+            onodes=o.globalNodeIndices
             #TODO: deprecated function
-            gnodes=util.sparse2denseIndex(onodes, ind)
-            # self.addElement(o.origin,o.span,np.ones(3),gnodes)
-            o.globalNodeIndices=gnodes
-            
-        self.elements=octs
+            gnodes=util.sparse2denseIndex(onodes, self.indexMap)
+            self.addElement(o.origin,o.span,np.ones(3),gnodes)
+            # o.setGlobalIndices(gnodes)
+        
         # T.logCompletion()
         return 
     
@@ -315,7 +304,7 @@ class Octree(Mesh):
         
         return self.tree.countElements()
     
-    def getCoordsRecursively(self,asDual=False):
+    def getCoordsRecursively(self):
         """
         Determine coordinates of mesh nodes.
         
@@ -378,52 +367,39 @@ class Octant():
         self.children=[]
         self.depth=depth
         self.globalNodeIndices=np.empty(8,dtype=np.int64)
-        self.globalFaceIndices=np.empty(7,dtype=np.int64)
         self.nX=2
-        self.index=index   
-        self.sigma=sigma
+        self.index=index        
 
         
-    def calcGlobalIndices(self,maxdepth,asDual=False):
-        maxdepth=maxdepth+int(asDual)
+    def calcGlobalIndices(self,globalBbox,maxdepth):
+        # x0=globalBbox[:3]
         nX=2**maxdepth
+        # dX=(globalBbox[3:]-x0)/(nX)
+        # coords=self.getOwnCoords()
         
         toGlobal=np.array([(nX+1)**n for n in range(3)])
-
-        origin=np.zeros(3,dtype=np.int64)
+        
+        # for N,c in enumerate(coords):
+        #     idxArray=(c-x0)/dX
+        #     ndx=np.dot(ndxOffsets,idxArray)
+        #     self.globalNodeIndices[N]=ndx
+            
+        # return self.globalNodeIndices
+        xyz=np.zeros(3,dtype=np.int64)
         for ii,idx in enumerate(self.index):
             ldepth=maxdepth-ii-1
             step=2**ldepth
-            origin+=step*util.toBitArray(idx)
+            xyz+=step*util.toBitArray(idx)
+            
+        ownstep=2**(maxdepth-self.depth)
         
-        
-        if asDual:
-            ownstep=2**(maxdepth-self.depth-1)
-            stepArr=np.array([
-                [1,1,0],
-                [1,0,1],
-                [0,1,1],
-                [1,1,1],
-                [2,1,1],
-                [1,2,1],
-                [1,1,2]
-                ],dtype=np.int64)
-            ownXYZ=[origin+ownstep*stepArr[ii] for ii in range(7)]
-            # ownXYZ=[origin+stepArr[ii] for ii in range(7)]
-        else:
-            ownstep=2**(maxdepth-self.depth)
-            ownXYZ=[origin+ownstep*util.toBitArray(i) for i in range(8)]
-        
+        ownXYZ=[xyz+ownstep*util.toBitArray(i) for i in range(8)]
         indices=np.array([np.dot(ndxlist,toGlobal) for ndxlist in ownXYZ])
             
-        if asDual:
-            self.globalFaceIndices=indices
-            self.calcGlobalIndices(maxdepth-1,False)
-        else:
-            self.globalNodeIndices=indices
+        self.globalNodeIndices=indices
         return indices
-    
-          
+            
+            
         
     def countElements(self):
         if len(self.children)==0:
@@ -448,48 +424,48 @@ class Octant():
         return [self.origin+self.span*util.toBitArray(n) for n in range(8)]
 
     
-    def getCoordsRecursively(self,maxdepth,asDual=False):
+    def getCoordsRecursively(self,bbox,maxdepth):
         # T=Logger('depth  %d'%self.depth, printStart=False)
         if len(self.children)==0:
-            
-            # coords=self.getOwnCoords()
+            coords=self.getOwnCoords()
             # indices=self.globalNodeIndices
-            indices=self.calcGlobalIndices(maxdepth,asDual)
-
+            indices=self.calcGlobalIndices(bbox, maxdepth)
         else:
-        #     coordList=[]
-        #     indexList=[]
-            
-        #     for ch in self.children:
-        #         c,i = ch.getCoordsRecursively(maxdepth,asDual)
-                
-        #         if len(coordList)==0:
-        #             coordList=c
-        #             indexList=i
-        #         else:
-        #             coordList.extend(c)
-        #             indexList.extend(i)
-            
-        #     indices,sel=np.unique(indexList,return_index=True)
-            
-        #     # self.globalNodeIndices=indices
-            
-        #     coords=np.array(coordList)[sel]
-        #     coords=coords.tolist()
-                
-        # # T.logCompletion()
-        # return coords, indices.tolist()
-        
-            indices=[]
+            coordList=[]
+            indexList=[]
             
             for ch in self.children:
-                i=ch.getCoordsRecursively(maxdepth,asDual)
-                indices.extend(i)
+                c,i = ch.getCoordsRecursively(bbox,maxdepth)
+                
+                if len(coordList)==0:
+                    coordList=c
+                    indexList=i
+                else:
+                    coordList.extend(c)
+                    indexList.extend(i)
             
-            # indices=np.unique(indexList)
+            indices,sel=np.unique(indexList,return_index=True)
             
-        return indices
-
+            # self.globalNodeIndices=indices
+            
+            coords=np.array(coordList)[sel]
+            coords=coords.tolist()
+                
+        # T.logCompletion()
+        return coords, indices.tolist()
+    
+    #TODO: deprecate unused def?
+    # def getIndicesRecursively(self):
+        
+    #     if self.isTerminal():
+    #         return np.arange(8,dtype=np.int64)
+        
+    #     else:
+    #         indices=[]
+    #         for ch in self.children:
+    #             indices.append(ch.getIndicesRecursively())
+    
+    #         return indices
     
     # @nb.njit(parallel=True)
     def refineByMetric(self,l0Function,maxDepth):

@@ -18,16 +18,10 @@ import Visualizers
 
 
 studyPath='/home/benoit/smb4k/ResearchData/Results/studyTst/algoDemo/'#+meshtype
-# fname='splitIllustration'
-fname='faceIllustration'
-dual=True
-
-
-
+fname='splitIllustration'
 showSrcCircuit=True
 lastGen=5
 fullCircle=True
-
 
 xmax=1
 sigma=np.ones(3)
@@ -85,10 +79,6 @@ for maxdepth in range(1,lastGen+1):
     l0Param=2**(-maxdepth*0.2)
     
     setup=study.newSimulation()
-    if dual:
-        setup.mesh.elementType='Face'
-    else:
-        setup.mesh.elementType='Admittance'
  
     def metric(coord):
         r=np.linalg.norm(coord)
@@ -184,13 +174,12 @@ if showSrcCircuit:
     
     eCol=edgeColors[edgeInSrc.astype(int)]
     
-    if not dual:
-        edgeArt=viewer.showEdges(colors=eCol)
-        nodeArt=viewer.showNodes(inSrc,colors=nodeColors[inSrc.astype(int)])
-        
-        title=Visualizers.animatedTitle(fig, 'Combine nodes inside source')
-        arts.append([nodeArt,edgeArt, title])
-        arts.append([nodeArt,edgeArt, title])
+    edgeArt=viewer.showEdges(colors=eCol)
+    nodeArt=viewer.showNodes(inSrc,colors=nodeColors[inSrc.astype(int)])
+    
+    title=Visualizers.animatedTitle(fig, 'Combine nodes inside source')
+    arts.append([nodeArt,edgeArt, title])
+    arts.append([nodeArt,edgeArt, title])
     
     
     # elCoords=setup.mesh.nodeCoords.copy()
