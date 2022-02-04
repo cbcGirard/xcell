@@ -57,6 +57,29 @@ def getHexIndices():
             
     return edges
 
+@nb.njit()
+def getFaceConductances(span,sigma):
+    if sigma.shape[0]==1:
+        sigma=sigma*np.ones(3)
+    else:
+        sigma=sigma
+        
+    k=np.roll(span,1)*np.roll(span,2)/span
+    g=sigma*k*2
+    return g.repeat(2)
+        
+        
+@nb.njit()
+def getFaceIndices():
+    subsets=np.array([
+        [2,3],
+        [3,4],
+        [1,3],
+        [3,5],
+        [0,3],
+        [3,6]
+        ],dtype=np.int64)
+    return subsets
 
 
 @nb.njit()

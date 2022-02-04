@@ -8,15 +8,13 @@ Main API for handling extracellular simulations
 
 import numpy as np
 import numba as nb
-import Elements
-import Meshes
+
 from numba import int64, float64
 import math
 import scipy
 from scipy.sparse.linalg import spsolve, cg
-from Visualizers import *
+# from Visualizers import *
 # from util import *
-import util
 import time
 import os
 import resource 
@@ -24,6 +22,11 @@ import pickle
 
 import matplotlib.ticker as tickr
 import matplotlib.pyplot as plt
+
+import util
+import Visualizers
+import Elements
+import Meshes
 
 
 nb.config.DISABLE_JIT=0
@@ -108,7 +111,8 @@ class Simulation:
         self.startTiming("Make elements")
         self.ptPerAxis=2**maxdepth+1
         self.meshtype='adaptive'
-        self.mesh=Meshes.Octree(self.mesh.bbox,maxdepth)
+        self.mesh=Meshes.Octree(self.mesh.bbox,maxdepth,
+                                elementType=self.mesh.elementType)
     
         self.mesh.refineByMetric(metric)
         self.logTime()
@@ -358,7 +362,7 @@ class Simulation:
         f.close()
         
         #TODO: doc better
-    def finalizeMesh(self,regularize=False):
+    def finalizeMesh(self,regularize=False,dualMesh=False):
         """
         Prepare mesh for simulation.
         
@@ -371,12 +375,14 @@ class Simulation:
 
         """
         self.startTiming('Finalize mesh')
-        self.mesh.finalize()
+        if dualMesh:
+            self.mesh.elementType='Face'
+        self.mesh.finalize(dualMesh=dualMesh)
         numEl=len(self.mesh.elements)
         self.logTime()
         
         print('%d elem'%numEl)
-        nNodes=len(self.mesh.nodeCoords)
+        nNodes=self.mesh.nodeCoords.shape[0]
         self.nodeRoleTable=np.zeros(nNodes,dtype=np.int64)
         self.nodeRoleVals=np.zeros(nNodes,dtype=np.int64)
         # self.insertSourcesInMesh()
@@ -433,8 +439,9 @@ class Simulation:
         else:
             # Get closest mesh node
             el=self.mesh.getContainingElement(source.coords)
-            #TODO: change deprecated
-            elIndices=util.sparse2denseIndex(el.globalNodeIndices, self.mesh.indexMap)
+            #TODO: inconsistent numbering logic?
+            # elIndices=util.sparse2denseIndex(el.globalNodeIndices, self.mesh.indexMap)
+            elIndices=el.globalNodeIndices
             elCoords=self.mesh.nodeCoords[elIndices]
             
             d=np.linalg.norm(source.coords-elCoords,axis=1)
@@ -891,7 +898,7 @@ class Simulation:
             
         return gAll
     
-    def getNodeConnectivity(self):
+    def getNodeConnectivity(self,deduplicate=False):
         """
         Calculate how many conductances terminate in each node.
         
@@ -909,7 +916,12 @@ class Simulation:
             Number of edges that terminate in each node.
 
         """
+        if deduplicate:
+            self.__dedupEdges()
         _,nConn=np.unique(self.edges.ravel(),return_counts=True)
+        
+        if deduplicate:
+            nConn[nConn>6]=6
         
         if self.mesh.nodeCoords.shape[0]!=nConn.shape[0]:
             raise ValueError('Length mismatch: %d nodes, but %d values\nIs a node unconnected?'%(
@@ -1095,39 +1107,49 @@ class Simulation:
     
     def getCoords(self,orderType='mesh',maskArray=None):
         if orderType=='mesh':
-            reorderCoords=self.mesh.nodeCoords
-            
-        if orderType=='dof':
-            ordering,_=self.getOrdering('dof')
-            dofCoords=self.mesh.nodeCoords[self.nodeRoleTable==0]
-            srcCoords=np.array([s.coords for s in self.currentSources])
-            reorderCoords=np.vstack((dofCoords, srcCoords))
-            
-        if orderType=='electrical':
-            ordering,(Nx,Nf,Ns,Nd)=self.getOrdering('electrical')
-            uniVals,valid=np.unique(ordering,return_index=True)
-            if maskArray is None:
-                coords=self.mesh.nodeCoords
-            else:
-                coords=np.ma.array(self.mesh.nodeCoords,
-                                   mask=~maskArray)
+            # reorderCoords=self.mesh.nodeCoords
+            reorderCoords,idxMap=self.mesh.getCoordsRecursively(asDual=False)
+        else:
+            asDual=self.mesh.elementType=='Face'
+            coords,idxMap=self.mesh.getCoordsRecursively(asDual=asDual)
+            if orderType=='dof':
+                ordering,_=self.getOrdering('dof')
+                dofCoords=coords[self.nodeRoleTable==0]
+                srcCoords=np.array([s.coords for s in self.currentSources])
+                reorderCoords=np.vstack((dofCoords, srcCoords))
                 
-            # nonSrc=ordering>=0
-            reorderCoords=np.empty((Nx+Nf+Ns,3))
-            # reorderCoords[:Nx+Nf]=coords[ordering[nonSrc]]
-            # for ii in nb.prange(len(self.currentSources)):
-            #     reorderCoords[Nx+Nf+ii]=self.currentSources[ii].coords
+            if orderType=='electrical':
+                ordering,(Nx,Nf,Ns,Nd)=self.getOrdering('electrical')
+                uniVals,valid=np.unique(ordering,return_index=True)
+                if maskArray is not None:
+                    coords=np.ma.array(self.mesh.nodeCoords,
+                                       mask=~maskArray)
+                    
+                # nonSrc=ordering>=0
+                reorderCoords=np.empty((Nx+Nf+Ns,3))
+                # reorderCoords[:Nx+Nf]=coords[ordering[nonSrc]]
+                # for ii in nb.prange(len(self.currentSources)):
+                #     reorderCoords[Nx+Nf+ii]=self.currentSources[ii].coords
+                
+                nonSrc=self.nodeRoleTable<2
+                reorderCoords[:Nx+Nf]=coords[nonSrc]
+                for ii in nb.prange(len(self.currentSources)):
+                    reorderCoords[Nx+Nf+ii]=self.currentSources[ii].coords
             
-            nonSrc=self.nodeRoleTable<2
-            reorderCoords[:Nx+Nf]=coords[nonSrc]
-            for ii in nb.prange(len(self.currentSources)):
-                reorderCoords[Nx+Nf+ii]=self.currentSources[ii].coords
-            
-        return reorderCoords
+        return reorderCoords,idxMap
         
     def getEdges(self,orderType='mesh',maskArray=None):
         if orderType=='mesh':
-            edges=self.edges
+            # edges=self.edges
+            elist=[]
+            for ii in nb.prange(len(self.mesh.elements)):
+                el=self.mesh.elements[ii]
+                elEdges=el.globalNodeIndices[Meshes.FEM.getAdmittanceIndices()]
+                elist.extend(elEdges)
+                
+            # eRenumber=util.sparse2denseIndex(np.array(elEdges),self.mesh.indexMap)
+            edges=np.array(elist)
+            
         if orderType=='electrical':
             ordering,(Nx,Nf,Ns,Nd)=self.getOrdering(orderType)
             isSrc=ordering<0
@@ -1148,8 +1170,18 @@ class Simulation:
             
             
         return edges
+
+    def getMeshGeometry(self):
+        coords,idxMap=self.getCoords('mesh')
         
+        elist=self.getEdges('mesh')
+        edges=util.sparse2denseIndex(elist,idxMap)
             
+        return coords,edges
+            
+            
+            
+        
             
     def getOrdering(self,orderType):#,maskArray):
         isSrc=self.nodeRoleTable==2
@@ -1246,7 +1278,7 @@ class SimStudy:
         
         
     def makeStandardPlots(self,savePlots=True,keepOpen=False):
-        plotfuns=[error2d, centerSlice]
+        plotfuns=[Visualizers.error2d, Visualizers.centerSlice]
         plotnames=['err2d','imgMesh']
         
         for f,n in zip(plotfuns,plotnames):
@@ -1292,12 +1324,12 @@ class SimStudy:
 
         """
         logfile=os.path.join(self.studyPath,'log.csv')
-        df,cats=importRunset(logfile)
+        df,cats=Visualizers.importRunset(logfile)
         return df,cats
         
     def plotTimes(self,xCat='Number of elements',sortCat=None):
         logfile=os.path.join(self.studyPath,'log.csv')
-        df,cats=importRunset(logfile)
+        df,cats=Visualizers.importRunset(logfile)
         
         if sortCat is not None:
             plotnames=df[sortCat].unique()
@@ -1305,18 +1337,18 @@ class SimStudy:
             plotnames=[None]
 
         for cat in plotnames:
-            importAndPlotTimes(logfile,onlyCat=sortCat,onlyVal=cat,xCat=xCat)
+            Visualizers.importAndPlotTimes(logfile,onlyCat=sortCat,onlyVal=cat,xCat=xCat)
             plt.title(cat)
             
     def plotAccuracyCost(self):
         logfile=os.path.join(self.studyPath,'log.csv')
-        groupedScatter(logfile, xcat='Total time', ycat='Error', groupcat='Mesh type')
+        Visualizers.groupedScatter(logfile, xcat='Total time', ycat='Error', groupcat='Mesh type')
       
         
 
     def getSavedSims(self,filterCategories=None,filterVals=None,sortCategory=None):
         logfile=os.path.join(self.studyPath,'log.csv')
-        df,cats=importRunset(logfile)
+        df,cats=Visualizers.importRunset(logfile)
             
         if filterCategories is not None:
             selector=np.ones(len(df),dtype=bool)
@@ -1332,7 +1364,7 @@ class SimStudy:
             
         return fnames
         
-        
+        #TODO: deprecate
     def animatePlot(self,plotfun,aniName=None,filterCategories=None,filterVals=None,sortCategory=None):
         # logfile=os.path.join(self.studyPath,'log.csv')
         # df,cats=importRunset(logfile)

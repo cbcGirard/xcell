@@ -15,13 +15,13 @@ import matplotlib.pyplot as plt
 meshtype='adaptive'
 # studyPath='Results/studyTst/miniCur/'#+meshtype
 datadir='/home/benoit/smb4k/ResearchData/Results/studyTst/'#+meshtype
-studyPath=datadir+'admVsFEM-Voltage/'
+studyPath=datadir+'uniVsAdapt/'
 
 xmax=1e-4
 sigma=np.ones(3)
 
 
-vMode=True
+vMode=False
 showGraphs=False
 generate=True
 saveGraphs=False
@@ -31,6 +31,7 @@ isrc=vsrc*4*np.pi*sigma*1e-6
 
 bbox=np.append(-xmax*np.ones(3),xmax*np.ones(3))
 
+# bbox=bbox+np.tile()
 
 study=xCell.SimStudy(studyPath,bbox)
 
@@ -38,24 +39,28 @@ l0Min=1e-6
 rElec=1e-6
 
 lastNumEl=0
+lastNx=0
 # meshTypes=["adaptive","uniform"]
-# tstVals=["adaptive","uniform"]
+tstVals=["adaptive","uniform"]
+elementType='Admittance'
 # tstVals=['adaptive','equal elements',r'equal $l_0$']
-# tstCat='Mesh type'
+tstCat='Mesh type'
 
 # tstVals=[False, True]
 # tstCat='Vsrc?'
 
-tstVals=['Admittance','FEM']
-tstCat='Element type'
+# tstVals=['Admittance','FEM']
+# tstVals=['Admittance','Face']
+# tstVals=['Face']
+# tstCat='Element type'
 
 if generate:
    
     # for var in np.linspace(0.1,0.7,15):
-    for maxdepth in range(2,12):
+    for maxdepth in range(2,20):
         for tstVal in tstVals:
-            # meshtype=tstVal
-            elementType=tstVal
+            meshtype=tstVal
+            # elementType=tstVal
         # for vMode in tstVals:
         # for maxdepth in range(2,10):
             # if meshtype=='uniform':
@@ -79,7 +84,8 @@ if generate:
                 setup.addCurrentSource(srcMag,np.zeros(3),rElec)
                 srcType='Current'
 
-            if meshtype=='equal elements':
+            # if meshtype=='equal elements':
+            if meshtype=='uniform':
                 newNx=int(np.ceil(lastNumEl**(1/3)))
                 nX=newNx+newNx%2
                 setup.makeUniformGrid(newNx+newNx%2)
@@ -104,18 +110,18 @@ if generate:
         
             # setup.startTiming("Make elements")
       
-            coords=setup.mesh.nodeCoords
-            
-            def boundaryFun(coord):
-                r=np.linalg.norm(coord)
-                return rElec/(r*np.pi*4)
+
             
                 
             # setup.logTime()
 
-            setup.finalizeMesh()
+            # setup.finalizeMesh(regularize=False,dualMesh=True)
             # setup.regularizeMesh()
-
+            coords=setup.mesh.nodeCoords
+            # 
+            def boundaryFun(coord):
+                r=np.linalg.norm(coord)
+                return rElec/(r*np.pi*4)
             # setup.insertSourcesInMesh()
             setup.setBoundaryNodes(boundaryFun)
             # setup.getEdgeCurrents()

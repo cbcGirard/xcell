@@ -125,7 +125,8 @@ class SliceViewer:
         
         
     def setPlane(self,normalAxis=2, normCoord=0):
-        ic=self.sim.intifyCoords(self.sim.getCoords(self.topoType))        
+        coords,_=self.sim.getCoords(self.topoType)
+        ic=self.sim.intifyCoords(coords)        
         self.intCoord=ic
         
         pointCart=np.zeros(3)
@@ -147,15 +148,17 @@ class SliceViewer:
     def __setmask(self):
         axNames=['x','y','z']
         axlist=np.arange(3)
+        
+        coords,_=self.sim.getCoords(self.topoType)
         otherAxes=axlist!=self.normAxis
       
         inPlane=self.intCoord[:,self.normAxis]==self.lvlIndex
-        zval=self.sim.getCoords(self.topoType)[inPlane,self.normAxis][0]
+        zval=coords[inPlane,self.normAxis][0]
         self.planeZ=zval
         self.nInPlane=inPlane
         
-        self.xyCoords=self.sim.getCoords(self.topoType)[:,otherAxes]
-        self.zCoords=self.sim.getCoords(self.topoType)[:,~otherAxes].squeeze()
+        self.xyCoords=coords[:,otherAxes]
+        self.zCoords=coords[:,~otherAxes].squeeze()
         self.pCoords=self.xyCoords[inPlane]
         
         #graph formatting
@@ -293,7 +296,7 @@ def discreteColors(values,legendStem='n='):
     return valColors, legEntries
               
     
-def discreteLegend(axis,data,legendStem='n='):
+def discreteLegend(axis,data,legendStem='n=',**kwargs):
     """
     Color-code data and generate corresponding legend.
 
@@ -313,7 +316,7 @@ def discreteLegend(axis,data,legendStem='n='):
 
     """
     colors,handles=discreteColors(data,legendStem)
-    axis.legend(handles=handles)
+    axis.legend(handles=handles,**kwargs)
     
     return colors
 
@@ -884,6 +887,14 @@ def patchworkImage(axis, maskedArrays, cMap, cNorm, extent):
 
     return imlist
 
+def showMesh(setup):
+    ax=new3dPlot(setup.mesh.bbox)
+    
+    showEdges(ax, setup.mesh.nodeCoords, setup.edges,
+              setup.conductances)
+    x,y,z=np.hsplit(setup.mesh.nodeCoords,3)
+    ax.scatter3D(x,y,z,color='k',alpha=0.5,marker='.')
+        
 
 def getPlanarEdgePoints(coords, edges, normalAxis=2, axisCoord=0):
 
@@ -1140,12 +1151,16 @@ class ErrorGraph(FigureAnimator):
         if prefs is None:
             prefs={
                 'showRelativeError':False,
-                'colorNodeConnectivity':True}
+                'colorNodeConnectivity':False,
+                'onlyDoF':False}
         super().__init__(fig, study, prefs)
 
     def setupFigure(self):
+        # axV = self.fig.add_subplot(5, 1, (1, 2))
+        # axErr = self.fig.add_subplot(5, 1, (3, 4))
+        # axL=self.fig.add_subplot(5,1,5)
         axV = self.fig.add_subplot(3, 1, 1)
-        axErr = self.fig.add_subplot(3, 1, 2)
+        axErr = self.fig.add_subplot(3, 1,2)
         axL=self.fig.add_subplot(3,1,3)
         axV.grid(True)
         axErr.grid(True)
@@ -1203,7 +1218,7 @@ class ErrorGraph(FigureAnimator):
           
         # check how connected nodes are
 
-        connGlobal = sim.getNodeConnectivity()
+        connGlobal = sim.getNodeConnectivity(True)
 
 
         lmin = np.log10(rElec/2)
@@ -1228,7 +1243,10 @@ class ErrorGraph(FigureAnimator):
         connsort = connGlobal[sorter]
 
         # filter non DoF
-        filt = isDoF[sorter]
+        if self.prefs['onlyDoF']:
+            filt = isDoF[sorter]
+        else:
+            filt=np.ones_like(sorter,dtype=bool)
 
         rFilt = rsort[filt]
         if self.prefs['showRelativeError']:
@@ -1260,21 +1278,25 @@ class ErrorGraph(FigureAnimator):
 
         self.axV.plot(self.analyticR, self.analytic, c='b', label='Analytical')
 
-        allconn = []
-        for d in self.rColors:
-            allconn.extend(d)
-        connNs = np.unique(allconn)
-        toN=np.zeros(max(connNs)+1,dtype=int)
-        toN[connNs]=np.arange(connNs.shape[0])
-        
-        colors=discreteLegend(self.axErr, connNs)
+        if self.prefs['colorNodeConnectivity']:
+            allconn = []
+            for d in self.rColors:
+                allconn.extend(d)
+            connNs = np.unique(allconn)
+            toN=np.zeros(max(connNs)+1,dtype=int)
+            toN[connNs]=np.arange(connNs.shape[0])
+            
+            colors=discreteLegend(self.axErr, connNs,loc='upper right')
+            # colors,legEntries=discreteColors(connNs)
+            # outsideLegend(axis=self.axErr,handles=legEntries)
 
         for ii in range(len(self.titles)):
             artists = []
             simLine = self.axV.plot(self.simR[ii], self.sims[ii],
                                     c='k', marker='.', label='Simulated')
             if ii == 0:
-                self.axV.legend()
+                self.axV.legend(loc='upper right')
+                # outsideLegend(axis=self.axV)
             # title=fig.suptitle('%d nodes, %d elements\nFVU= %g'%(nNodes,nElems,FVU))
             title = self.fig.text(0.5, 1.01,
                                   self.titles[ii],
@@ -1282,27 +1304,40 @@ class ErrorGraph(FigureAnimator):
                                   verticalalignment='bottom',
                                   transform=self.axV.transAxes)
 
-            nconn = toN[self.rColors[ii]]
+            if self.prefs['colorNodeConnectivity']:
+                nconn = toN[self.rColors[ii]]
+                nodeColors=colors[nconn]
+            else:
+                nodeColors='r'
             
             
             errLine = self.axErr.scatter(self.errR[ii], self.errors[ii],
-                                         c=colors[nconn], marker='.', linestyle='None')
+                                         c=nodeColors, marker='.', linestyle='None')
+            errArea=self.axErr.fill_between(self.errR[ii],
+                                           self.errors[ii],
+                                           color='r',
+                                           alpha=0.75)
 
-            ln=[
-                [[r-l/2, v], [r+l/2,v]] 
-                for r,l,v in zip(self.elemR[ii],
-                                 self.elemL[ii],
-                                 np.arange(self.elemR[ii].shape[0]))]
+
+            #Third pane: element sizes
+            # ln=[
+            #     [[r-l/2, v], [r+l/2,v]] 
+            #     for r,l,v in zip(self.elemR[ii],
+            #                      self.elemL[ii],
+            #                      np.arange(self.elemR[ii].shape[0]))]
             
-            l0line=mpl.collections.LineCollection(ln, colors=(0.,0.,0.))
-            self.axL.add_collection(l0line)
-            # l0line=self.axL.scatter(self.elemR[ii],self.elemL[ii],c='k')
+            # l0line=mpl.collections.LineCollection(ln, colors=(0.,0.,0.))
+            # self.axL.add_collection(l0line)
+            l0line=self.axL.scatter(self.elemR[ii],
+                                    self.elemL[ii],
+                                    c='k', marker='.')
 
             plt.tight_layout()
             artists.append(title)
             artists.append(errLine)
             artists.append(simLine[0])
             artists.append(l0line)
+            artists.append(errArea)
 
             artistSet.append(artists)
         return artistSet

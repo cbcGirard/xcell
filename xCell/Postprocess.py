@@ -18,18 +18,22 @@ datadir='/home/benoit/smb4k/ResearchData/Results/studyTst/'
 # filterCategories=["Regularized?"]
 # filterVals=[True]
 
-studyPath=datadir+'admVsFEM-Voltage'
+# studyPath=datadir+'admVsFEM-Voltage'
 # studyPath=datadir+'femVadmit'
-filterCategories=['Element type']
-filterVals=['Admittance', 'FEM']
+# filterCategories=['Element type']
+# filterVals=['Admittance', 'FEM']
 
 # studyPath=datadir+'vsrc'
 # filterCategories=['Source']
 # filterVals=['current','voltage']
 
-# studyPath=datadir+'dist1cm/'
-# filterCategories=["Mesh type"]
-# filterVals=["adaptive","uniform"]
+studyPath=datadir+'uniVsAdapt'
+filterCategories=["Mesh type"]
+filterVals=["adaptive","uniform"]
+
+# studyPath=datadir+"Face"
+# filterCategories=['Element type']
+# filterVals=['Face']
 
 xmax=1e-4
 sigma=np.ones(3)
@@ -68,15 +72,15 @@ meshTypes=["adaptive","uniform"]
 
 
 fig=plt.figure()
-plotters=[xCell.ErrorGraph,
-          xCell.SliceSet,
-          xCell.CurrentPlot,
-          xCell.CurrentPlot]
+plotters=[xCell.Visualizers.ErrorGraph]#,
+           # xCell.Visualizers.SliceSet,
+           # xCell.Visualizers.CurrentPlot,
+           # xCell.Visualizers.CurrentPlot]
 
-ptype=['ErrorGraph',
-        'SliceSet',
-        'CurrentShort',
-        'CurrentLong']
+ptype=['ErrorGraph']#,
+        # 'SliceSet',
+        # 'CurrentShort',
+        # 'CurrentLong']
 
 for fv in filterVals:
     for ii,p in enumerate(plotters):
@@ -117,7 +121,7 @@ for fv in filterVals:
 #                           filterVals=filterVals)
 # aniC=plotC.animateStudy('CurrentShort')
 
-xCell.groupedScatter(study.studyPath+'/log.csv',
+xCell.Visualizers.groupedScatter(study.studyPath+'/log.csv',
                      xcat='Number of elements',
                      ycat='Error',
                      groupcat=filterCategories[0])

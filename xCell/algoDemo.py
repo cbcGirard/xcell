@@ -18,10 +18,16 @@ import Visualizers
 
 
 studyPath='/home/benoit/smb4k/ResearchData/Results/studyTst/algoDemo/'#+meshtype
-fname='splitIllustration'
+# fname='splitIllustration'
+fname='faceIllustration'
+dual=True
+
+
+
 showSrcCircuit=True
 lastGen=5
 fullCircle=True
+
 
 xmax=1
 sigma=np.ones(3)
@@ -57,7 +63,7 @@ study=xCell.SimStudy(studyPath,bbox)
 
 arts=[]
 fig=plt.figure()
-cm=xCell.CurrentPlot(fig, study,fullarrow=True,showInset=False)
+cm=Visualizers.CurrentPlot(fig, study,fullarrow=True,showInset=False)
 ax=cm.fig.axes[0]
 
 
@@ -68,8 +74,9 @@ else:
 arcX=rElec*np.cos(tht)
 arcY=rElec*np.sin(tht)
 
-ax.plot(arcX,arcY,'r--',label='Source boundary')
-ax.legend()
+# ax.plot(arcX,arcY,'r--',label='Source boundary')
+src=ax.fill(arcX,arcY,color=mpl.cm.plasma(1.0),alpha=0.5,label='Source')
+ax.legend(handles=src)
 
 XX,YY=np.meshgrid([0,1],[0,1])
 r=np.sqrt(XX**2+YY**2)
@@ -78,6 +85,10 @@ for maxdepth in range(1,lastGen+1):
     l0Param=2**(-maxdepth*0.2)
     
     setup=study.newSimulation()
+    if dual:
+        setup.mesh.elementType='Face'
+    else:
+        setup.mesh.elementType='Admittance'
  
     def metric(coord):
         r=np.linalg.norm(coord)
@@ -91,13 +102,18 @@ for maxdepth in range(1,lastGen+1):
     setup.makeAdaptiveGrid(metric,maxdepth)
         
 
-    setup.finalizeMesh()
+    setup.finalizeMesh(regularize=False, dualMesh=False)
     edges,_=setup.mesh.getConductances()
+    coords=setup.mesh.nodeCoords
+    
+    # coords=setup.getCoords()
+    # edges=setup.getEdges()
+    # coords,edges=setup.getMeshGeometry()
 
 
 
 
-    edgePoints=Visualizers.getPlanarEdgePoints(setup.mesh.nodeCoords, edges)
+    edgePoints=Visualizers.getPlanarEdgePoints(coords, edges)
     
     art=Visualizers.showEdges2d(ax, edgePoints,edgeColors=(0.,0.,0.),alpha=1.)
     title=Visualizers.animatedTitle(fig, 'Split if l_0>%.2f r, depth %d'%(k,maxdepth))
@@ -132,7 +148,7 @@ if showSrcCircuit:
     
     setup.addCurrentSource(1, np.zeros(3),rElec)
     setup.insertSourcesInMesh()
-    setup.finalizeMesh()
+    setup.finalizeMesh(regularize=False, dualMesh=dual)
     
     setup.setBoundaryNodes()
     setup.iterativeSolve()
@@ -154,6 +170,7 @@ if showSrcCircuit:
     # sX,sY=np.hsplit(setup.mesh.nodeCoords[inSrc,:-1], 2)
     # nodeArt=plt.scatter(sX,sY,marker='.',c='r')
     
+
     nodeColors=np.array([
         [0,0,0,0],
         [1,0,0,1]],dtype=float)
@@ -167,12 +184,13 @@ if showSrcCircuit:
     
     eCol=edgeColors[edgeInSrc.astype(int)]
     
-    edgeArt=viewer.showEdges(colors=eCol)
-    nodeArt=viewer.showNodes(inSrc,colors=nodeColors[inSrc.astype(int)])
-    
-    title=Visualizers.animatedTitle(fig, 'Combine nodes inside source')
-    arts.append([nodeArt,edgeArt, title])
-    arts.append([nodeArt,edgeArt, title])
+    if not dual:
+        edgeArt=viewer.showEdges(colors=eCol)
+        nodeArt=viewer.showNodes(inSrc,colors=nodeColors[inSrc.astype(int)])
+        
+        title=Visualizers.animatedTitle(fig, 'Combine nodes inside source')
+        arts.append([nodeArt,edgeArt, title])
+        arts.append([nodeArt,edgeArt, title])
     
     
     # elCoords=setup.mesh.nodeCoords.copy()

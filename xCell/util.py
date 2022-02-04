@@ -23,6 +23,27 @@ nb.config.DEBUG_TYPEINFER=0
 # globalInSubIndices=(-ones()[boolMask])
 
 
+@nb.experimental.jitclass()
+class IndexMap:
+    def __init__(self,sparseIndices):
+        self.sparse=sparseIndices
+        
+    def __findMatch(self,value,lower,upper):
+        if lower==upper:
+            match= lower
+        else:
+            mid=(lower+upper)//2
+            if self.sparse[mid]>value:
+                match=self.__findMatch(value, lower, mid)
+            else:
+                match=self.__findMatch(value, mid, upper)
+        
+        return match
+            
+    def toDense(self,sparseIndex):
+        match=self.__findMatch(sparseIndex, 0, self.sparse.shape[0])
+        return match
+
 # @nb.njit(parallel=True)
 def eliminateRows(matrix):
     N=matrix.shape[0]
@@ -599,6 +620,24 @@ def getCurrentVector(interpolant,location):
 def toBitArray(val,nBits=3):
     return np.array([(val>>n)&1 for n in range(nBits)])
 
+@nb.njit()
+def fromBitArray(arr):
+    val=0
+    nbit=arr.shape[0]
+    for ii in nb.prange(nbit):
+        val+=arr[ii]*2**(nbit-ii-1)
+    return val
+
+@nb.njit()
+def idxListToXYZ(indices):
+    nvals=indices.shape[0]
+    xyz=np.empty((nvals,3),dtype=np.uint64)
+    for ii in nb.prange(nvals):
+        xyz[ii]=toBitArray(indices[ii])
+        
+    return xyz
+    
+    
 @nb.njit
 def anyMatch(searchArray,searchVals):
     """
@@ -637,3 +676,16 @@ def pos2index(pos,dX):
     tmp=np.dot(vals,pos)
     newNdx=int(np.rint(tmp))
     return newNdx
+
+@nb.njit(parallel=True)
+def indexToCoords(indices,span,maxDepth):
+    nX=2**(maxDepth)
+    nPt=indices.shape[0]
+    coords=np.empty((nPt,3),dtype=np.float64)
+    for ii in nb.prange(nPt):
+        ijk=index2pos(indices[ii], nX+1)
+        coords[ii]=span*ijk/nX
+        
+    return coords
+
+
