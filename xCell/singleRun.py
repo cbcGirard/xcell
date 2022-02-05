@@ -20,7 +20,7 @@ studyPath='Results/studyTst/dual/'
 elementType='Admittance'
 
 xmax=1e-4
-maxdepth=10
+maxdepth=20
 
 sigma=np.ones(3)
 
@@ -109,7 +109,7 @@ def boundaryFun(coord):
 
     
 
-setup.finalizeMesh(regularize=regularize,dualMesh=dual)
+setup.finalizeMesh(regularize=regularize)
 
 
 setup.setBoundaryNodes(boundaryFun)
@@ -127,11 +127,11 @@ setup.logTime()
 
 
 
-# xCell.Visualizers.showMesh(setup)
-eg=xCell.Visualizers.ErrorGraph(plt.figure(), study)
-eg.addSimulationData(setup)
-eg.getArtists()
+# # xCell.Visualizers.showMesh(setup)
+# eg=xCell.Visualizers.ErrorGraph(plt.figure(), study)
+# eg.addSimulationData(setup)
+# eg.getArtists()
 
-img=xCell.Visualizers.SliceSet(plt.figure(),study)
-img.addSimulationData(setup)
-img.getArtists()
+# img=xCell.Visualizers.SliceSet(plt.figure(),study)
+# img.addSimulationData(setup)
+# img.getArtists()

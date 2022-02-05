@@ -181,7 +181,7 @@ class Simulation:
         None.
 
         """
-        logger=Logger(stepName)
+        logger=util.Logger(stepName)
         self.stepLogs.append(logger)
         
     def logTime(self,logger=None):
@@ -219,12 +219,14 @@ class Simulation:
         return mem
     
     def printTotalTime(self):
-        t=0
+        tCPU=0
+        tWall=0
         for l in self.stepLogs:
-            t+=l.duration
+            tCPU+=l.durationCPU
+            tWall+=l.durationWall
             
         engFormat=tickr.EngFormatter()
-        print('\tTotal time: '+engFormat(t)+ " s")
+        print('\tTotal time: '+engFormat(tCPU)+ "s [CPU], "+engFormat(tWall)+'s [Wall]')
     
         
     def getEdgeCurrents(self):
@@ -733,109 +735,7 @@ class Simulation:
 
         return errSummary, err, vAna, sorter
     
-   #TODO: deprecate 
-    # def setRHS(self,nDoF):
-    #     """
-    #     Set right-hand-side of system of equations (as determined by simulation's boundary conditions)
 
-    #     Parameters
-    #     ----------
-    #     nDoF : int64
-    #         Number of degrees of freedom. Equal to number of nodes with unknown voltages plus number of nodes
-    #         with a fixed injected current
-    #     nodeSubset : TYPE
-    #         DESCRIPTION.
-
-    #     Returns
-    #     -------
-    #     b : float[:]
-    #         RHS of system Gv=b.
-
-    #     """
-    #     #set right-hand side
-    #     self.startTiming('Setting RHS')
-    #     nCurrent=len(self.currentSources)
-    #     b=np.zeros(nDoF+nCurrent,dtype=np.float64)
-        
-    #     # for n,val in zip(self.iSourceNodes,self.iSourceVals):
-    #     #     # b[global2subset(n,nDoF)]=val
-    #     #     nthDoF=nodeSubset[n]
-    #     #     b[nthDoF]=val
-        
-    #     for ii in nb.prange(nCurrent):
-    #         b[nDoF+ii]=self.currentSources[ii].value
-            
-    #     self.logTime()
-    #     self.RHS=b
-        
-    #     return b
-    
-    #TODO: deprecate
-    # def getMatrix(self):
-    #     """
-    #     Calculates conductivity matrix G for the current mesh.
-
-    #     Parameters
-    #     ----------
-
-    #     Returns
-    #     -------
-    #     G: sparse matrix
-    #         Conductance matrix G in system Gv=b.
-
-    #     """
-    #     self.startTiming("Filtering conductances")
-    #     #diagonal elements are -sum of row
-        
-    #     nCurrent=len(self.currentSources)
-    #     nDoF=sum(self.nodeRoleTable==0)+nCurrent
-        
-        
-    #     edges=self.edges
-    #     conductances=self.conductances
-    #     b=self.RHS
-        
-    #     nodeA=[]
-    #     nodeB=[]
-    #     cond=[]
-    #     for ii in nb.prange(len(conductances)):
-    #         edge=edges[ii]
-    #         g=conductances[ii]
-            
-    #         for nn in range(2):
-    #             this=np.arange(2)==nn
-    #             thisrole,thisDoF=self.__toDoF(edge[this][0])
-    #             thatrole,thatDoF=self.__toDoF(edge[~this][0])
-
-    #             if thisDoF is not None:
-    #                 # valid degree of freedom
-    #                 cond.append(g)
-    #                 nodeA.append(thisDoF)
-    #                 nodeB.append(thisDoF)
-                    
-    #                 if thatDoF is not None:
-    #                     # other node is DoF
-    #                     cond.append(-g)
-    #                     nodeA.append(thisDoF)
-    #                     nodeB.append(thatDoF)
-                        
-    #                 else:
-    #                     #other node is fixed voltage
-    #                     thatVoltage=self.nodeVoltages[edge[~this]]
-    #                     b[thisDoF]-=g*thatVoltage
-      
-    #     self.logTime()
-    
-    
-    #     self.startTiming("assembling system")
-
-    #     G=scipy.sparse.coo_matrix((cond,(nodeA,nodeB)),shape=(nDoF,nDoF))
-    #     G.sum_duplicates()
-        
-    #     self.logTime()
-    #     self.gMat=G
-    #     self.RHS=b
-    #     return G
 
     def __toDoF(self,globalIndex):
         role=self.nodeRoleTable[globalIndex]
@@ -1206,26 +1106,6 @@ class Simulation:
             
         return numbering, (Nx,Nf,Ns,Nd)
             
-
-class Logger():
-    def __init__(self,stepName,printStart=True):
-        self.name=stepName
-        if printStart:
-            print(stepName+" starting")
-        self.start=time.process_time()
-        self.duration=0
-        self.memory=0
-
-        
-    def logCompletion(self):
-        tend=time.process_time()
-        duration=tend-self.start
-        engFormat=tickr.EngFormatter()
-        print(self.name+": "+engFormat(duration)+ " seconds")
-        self.duration=duration       
-        self.memory=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        
-        
 
 
         

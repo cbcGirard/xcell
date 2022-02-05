@@ -116,6 +116,7 @@ if generate:
             # setup.logTime()
 
             # setup.finalizeMesh(regularize=False,dualMesh=True)
+            setup.finalizeMesh(regularize=False)
             # setup.regularizeMesh()
             coords=setup.mesh.nodeCoords
             # 

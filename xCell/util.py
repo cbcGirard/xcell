@@ -11,6 +11,10 @@ Utilities
 import numpy as np
 import numba as nb
 import scipy
+import time
+import resource
+import matplotlib.ticker as tickr
+
 
 
 
@@ -160,7 +164,7 @@ def condenseIndices(globalMask):
 
 # @nb.njit(parallel=True)
 @nb.njit
-def getIndexDict(globalMask):
+def getIndexDict(sparseIndices):
     """
     Get a dict of subsetIndex: globalIndex.
     
@@ -179,12 +183,9 @@ def getIndexDict(globalMask):
         Dictionary of subset:global indices.
 
     """
-    indexDict=dict()
-    globalInd=np.nonzero(globalMask)[0]
-    
-    for ii in nb.prange(globalInd.shape[0]):
-        ind=globalInd[ii]
-        indexDict[ind]=ii
+    indexDict={}
+    for ii in range(sparseIndices.shape[0]):
+        indexDict[sparseIndices[ii]]=ii
         
     return indexDict
 
@@ -689,3 +690,28 @@ def indexToCoords(indices,span,maxDepth):
     return coords
 
 
+
+class Logger():
+    def __init__(self,stepName,printStart=True):
+        self.name=stepName
+        if printStart:
+            print(stepName+" starting")
+        self.startWall=time.monotonic()
+        self.start=time.process_time()
+        self.durationCPU=0
+        self.durationWall=0
+        self.memory=0
+
+        
+    def logCompletion(self):
+        tWall=time.monotonic()
+        tend=time.process_time()
+        durationCPU=tend-self.start
+        durationWall=tWall-self.startWall
+        engFormat=tickr.EngFormatter()
+        print(self.name+": "+engFormat(durationCPU)+ "s [CPU], "+engFormat(durationWall)+'s [wall]')
+        self.durationCPU=durationCPU 
+        self.durationWall=durationWall
+        self.memory=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        
+        

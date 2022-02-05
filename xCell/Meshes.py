@@ -244,23 +244,29 @@ class Octree(Mesh):
 
         """
         octs=self.tree.getTerminalOctants()
-        # self.elements=octs
-        #TODO: slowdown here?
+
+        T=util.Logger('coords')
         self.nodeCoords=self.getCoordsRecursively()
-        # indices=self.indexMap
-        # mesh.nodeCoords=coords
+        T.logCompletion()
         
+        T=util.Logger('loop')
         
+        d=util.getIndexDict(self.indexMap)
 
         for ii in nb.prange(len(octs)):
             o=octs[ii]
             onodes=o.globalNodeIndices
-            #TODO: deprecated function
-            gnodes=util.sparse2denseIndex(onodes, self.indexMap)
-            self.addElement(o.origin,o.span,np.ones(3),gnodes)
-            # o.setGlobalIndices(gnodes)
+            
+            gnodes=np.array([d[n] for n in onodes])
+            # self.addElement(o.origin,o.span,np.ones(3),gnodes)
+            o.globalNodeIndices=gnodes
+            
+        T.logCompletion()
         
-        # T.logCompletion()
+        T=util.Logger('copy')
+        self.elements=octs
+        T.logCompletion()
+        
         return 
     
     def printStructure(self):
@@ -316,15 +322,20 @@ class Octree(Mesh):
             Cartesian coordinates of each mesh node.
 
         """
-        i=self.tree.getCoordsRecursively(self.maxDepth,asDual)
+        
+        #TODO: parallelize?
+        #around 2x element creation time (not bad)
+        #rest of function very fast
+        i=self.tree.getCoordsRecursively(self.bbox, self.maxDepth)
         
         indices=np.unique(i)
-        # self.indexMap=indice
+        self.indexMap=indices
         
-        c=util.indexToCoords(indices,self.span,self.maxDepth+int(asDual))
+
+        c=util.indexToCoords(indices,self.span,self.maxDepth)
         coords=c+self.bbox[:3]
 
-        return np.array(coords), indices
+        return coords
     
     def getBoundaryNodes(self):
         bnodes=[]
@@ -342,19 +353,21 @@ class Octree(Mesh):
 
 
 
+# octant_t=nb.deferred_type()
 
+# octantList_t=nb.deferred_type()
 
 # octantspec= [
 #     ('origin',nb.float64[:]),
 #     ('span',nb.float64[:]),
 #     ('center',nb.float64[:]),
 #     ('l0',nb.float64),
-#     ('children',List[Octant]),
+#     ('children',nb.optional(octantList_t)),
 #     ('depth',nb.int64),
-#     ('globalNodes',nb.int64[:]),
+#     ('globalNodeIndices',nb.int64[:]),
 #     ('nX',nb.int64),
-#     ('index',nb.int64),
-#     ('nodeIndices',nb.int64[:])
+#     ('index',nb.int64[:]),
+#     ('sigma',nb.float64[:])
 #     ]
 # @nb.experimental.jitclass(spec=octantspec)
 class Octant():
@@ -368,10 +381,11 @@ class Octant():
         self.depth=depth
         self.globalNodeIndices=np.empty(8,dtype=np.int64)
         self.nX=2
-        self.index=index        
+        self.index=index   
+        self.sigma=sigma
 
         
-    def calcGlobalIndices(self,globalBbox,maxdepth):
+    def calcGlobalIndices(self,maxdepth):
         # x0=globalBbox[:3]
         nX=2**maxdepth
         # dX=(globalBbox[3:]-x0)/(nX)
@@ -397,7 +411,7 @@ class Octant():
         indices=np.array([np.dot(ndxlist,toGlobal) for ndxlist in ownXYZ])
             
         self.globalNodeIndices=indices
-        return indices
+        return indices.tolist()
             
             
         
@@ -427,45 +441,33 @@ class Octant():
     def getCoordsRecursively(self,bbox,maxdepth):
         # T=Logger('depth  %d'%self.depth, printStart=False)
         if len(self.children)==0:
-            coords=self.getOwnCoords()
+            # coords=self.getOwnCoords()
             # indices=self.globalNodeIndices
-            indices=self.calcGlobalIndices(bbox, maxdepth)
+            indices=self.calcGlobalIndices(maxdepth)
         else:
-            coordList=[]
-            indexList=[]
+            # coordList=[]
+            indices=[]
             
             for ch in self.children:
-                c,i = ch.getCoordsRecursively(bbox,maxdepth)
-                
-                if len(coordList)==0:
-                    coordList=c
-                    indexList=i
-                else:
-                    coordList.extend(c)
-                    indexList.extend(i)
+                i = ch.getCoordsRecursively(bbox,maxdepth)
+                indices.extend(i)
+                # if len(coordList)==0:
+                #     coordList=c
+                #     indexList=i
+                # else:
+                #     coordList.extend(c)
+                #     indexList.extend(i)
             
-            indices,sel=np.unique(indexList,return_index=True)
+            # indices=np.unique(indexList,return_index=True)
             
             # self.globalNodeIndices=indices
             
-            coords=np.array(coordList)[sel]
-            coords=coords.tolist()
+            # coords=np.array(coordList)[sel]
+            # coords=coords.tolist()
                 
         # T.logCompletion()
-        return coords, indices.tolist()
-    
-    #TODO: deprecate unused def?
-    # def getIndicesRecursively(self):
-        
-    #     if self.isTerminal():
-    #         return np.arange(8,dtype=np.int64)
-        
-    #     else:
-    #         indices=[]
-    #         for ch in self.children:
-    #             indices.append(ch.getIndicesRecursively())
-    
-    #         return indices
+        return indices
+
     
     # @nb.njit(parallel=True)
     def refineByMetric(self,l0Function,maxDepth):
