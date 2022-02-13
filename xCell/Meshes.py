@@ -449,7 +449,7 @@ class Octree(Mesh):
                                                           neighbor.sigma)[step//2]
                         gB=gEl[step//2]/nNeighbors
                         
-                        gnet=(gA*gB)/(gA+gB)
+                        gnet=0.5*(gA*gB)/(gA+gB)
                         
                         conductances.append(gnet)
                         edges.append([elIndex,neighborIndex])

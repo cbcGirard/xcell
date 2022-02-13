@@ -15,9 +15,7 @@ import scipy
 from scipy.sparse.linalg import spsolve, cg
 # from Visualizers import *
 # from util import *
-import time
 import os
-import resource 
 import pickle
 
 import matplotlib.ticker as tickr

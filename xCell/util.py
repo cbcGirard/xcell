@@ -15,6 +15,7 @@ import time
 import resource
 import matplotlib.ticker as tickr
 
+import psutil
 
 
 
@@ -855,6 +856,7 @@ class Logger():
         print(self.name+": "+engFormat(durationCPU)+ "s [CPU], "+engFormat(durationWall)+'s [wall]')
         self.durationCPU=durationCPU 
         self.durationWall=durationWall
-        self.memory=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        # self.memory=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        self.memory=psutil.Process().memory_info().rss
         
         
