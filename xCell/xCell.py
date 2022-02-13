@@ -89,6 +89,7 @@ class Simulation:
         self.ptPerAxis=0
         
         self.iteration=0
+        self.asDual=False
         
         
     def makeAdaptiveGrid(self,metric,maxdepth):
@@ -299,10 +300,11 @@ class Simulation:
             "Number of elements",
             ]
         
-        for log in self.stepLogs:
-            cols.append(log.name)
+        for timeType in ['CPU','Wall']:
+            for log in self.stepLogs:
+                cols.append(log.name+' ['+timeType+']')
             
-        cols.extend(["Total time","Max memory"])
+        cols.extend(["Total time [CPU]", "Total time [Wall]","Max memory"])
         return ','.join(cols)
     
     def logAsTableEntry(self,csvFile,extraCols=None, extraVals=None):
@@ -346,14 +348,22 @@ class Simulation:
             self.mesh.nodeCoords.shape[0],
             len(self.mesh.elements),
             ]
-        dt=0
+        
         memory=0
+        cpuTimes=[]
+        wallTimes=[]
+        
         for log in self.stepLogs:
-            dt+=log.duration
-            data.append(log.duration)
+            cpuTimes.append(log.durationCPU)
+            wallTimes.append(log.durationWall)
             memory=max(memory,log.memory)
             
-        data.append(dt)
+        
+        data.extend(cpuTimes)
+        data.extend(wallTimes)
+            
+        data.append(sum(cpuTimes))
+        data.append(sum(wallTimes))
         
         f.write(','.join(map(str,data)))
         f.write(','+str(memory))
@@ -393,10 +403,30 @@ class Simulation:
         self.conductances=conductances
         self.logTime()
         
-        self.startTiming('Regularize mesh')
-        if regularize:
-            self.regularizeMesh()
+        #TODO: remove regularization step?
+        # self.startTiming('Regularize mesh')
+        # if regularize:
+        #     self.regularizeMesh()
+        # self.logTime()
+        
+    def finalizeDualMesh(self):
+        self.startTiming('Finalize mesh')
+        
+        coords, idxMap, edges, cond=self.mesh.getDualMesh()
+        self.mesh.nodeCoords=coords
+        self.mesh.indexMap=idxMap
+        self.mesh.inverseIdxMap=util.getIndexDict(idxMap)
         self.logTime()
+        
+        nNodes=self.mesh.nodeCoords.shape[0]
+        self.nodeRoleTable=np.zeros(nNodes,dtype=np.int64)
+        self.nodeRoleVals=np.zeros(nNodes,dtype=np.int64)
+        
+        self.startTiming('Calculate conductances')
+        self.edges=edges
+        self.conductances=cond
+        self.logTime()
+        self.asDual=True
         
     def addCurrentSource(self,value,coords,radius=0):
         self.currentSources.append(CurrentSource(value,coords,radius))
@@ -441,11 +471,16 @@ class Simulation:
             el=self.mesh.getContainingElement(source.coords)
             #TODO: inconsistent numbering logic?
             # elIndices=util.sparse2denseIndex(el.globalNodeIndices, self.mesh.indexMap)
-            elIndices=el.globalNodeIndices
-            elCoords=self.mesh.nodeCoords[elIndices]
-            
-            d=np.linalg.norm(source.coords-elCoords,axis=1)
-            index=elIndices[d==min(d)]
+            if self.asDual:
+                # index=util.octantListToIndex(np.array(el.index),
+                                             # self.mesh.maxDepth)
+                 index=np.array(self.mesh.inverseIdxMap[el.globalNodeIndices[0]])
+            else:
+                elIndices=el.globalNodeIndices
+                elCoords=self.mesh.nodeCoords[elIndices]
+                
+                d=np.linalg.norm(source.coords-elCoords,axis=1)
+                index=elIndices[d==min(d)]
             
        
         return index
@@ -467,7 +502,7 @@ class Simulation:
         None.
 
         """
-        bnodes=self.mesh.getBoundaryNodes()
+        bnodes=self.mesh.getBoundaryNodes(self.asDual)
         self.nodeVoltages=np.zeros(self.mesh.nodeCoords.shape[0])
         
     
@@ -1177,7 +1212,7 @@ class SimStudy:
         if not os.path.exists(basepath):
             os.makedirs(basepath)
         fname=os.path.join(basepath,fileName+ext)
-        plt.savefig(fname)
+        fig.savefig(fname)
         
     def loadLogfile(self):
         """

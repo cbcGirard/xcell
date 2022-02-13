@@ -18,10 +18,11 @@ import Visualizers
 
 
 studyPath='/home/benoit/smb4k/ResearchData/Results/studyTst/algoDemo/'#+meshtype
-fname='splitIllustration'
+fname='dual'
 showSrcCircuit=True
 lastGen=5
 fullCircle=True
+asDual=True
 
 xmax=1
 sigma=np.ones(3)
@@ -46,6 +47,9 @@ if fullCircle:
     bbox=np.append(-xmax*np.ones(3),xmax*np.ones(3))
 else:
     bbox=np.append(xmax*np.zeros(3),xmax*np.ones(3))
+    
+# if asDual:
+#     bbox+=rElec*np.array([1,1,0,1,1,0])
 
 
 study=xCell.SimStudy(studyPath,bbox)
@@ -57,7 +61,7 @@ study=xCell.SimStudy(studyPath,bbox)
 
 arts=[]
 fig=plt.figure()
-cm=Visualizers.CurrentPlot(fig, study,fullarrow=True,showInset=False)
+cm=Visualizers.CurrentPlot(fig, study,fullarrow=True,showInset=False,showAll=asDual)
 ax=cm.fig.axes[0]
 
 
@@ -92,7 +96,7 @@ for maxdepth in range(1,lastGen+1):
     setup.makeAdaptiveGrid(metric,maxdepth)
         
 
-    setup.finalizeMesh(regularize=False, dualMesh=False)
+    setup.finalizeMesh(regularize=False)
     edges,_=setup.mesh.getConductances()
     coords=setup.mesh.nodeCoords
     
@@ -131,6 +135,7 @@ for maxdepth in range(1,lastGen+1):
     
     
 if showSrcCircuit:
+    finalMesh=art
     #find nodes inside source, and map their location to center
     # inSrc=np.linalg.norm(setup.mesh.nodeCoords,axis=1)<=rElec
     
@@ -138,7 +143,11 @@ if showSrcCircuit:
     
     setup.addCurrentSource(1, np.zeros(3),rElec)
     setup.insertSourcesInMesh()
-    setup.finalizeMesh(regularize=False, dualMesh=dual)
+    
+    if asDual:
+        setup.finalizeDualMesh()
+    else:
+        setup.finalizeMesh(regularize=False)
     
     setup.setBoundaryNodes()
     setup.iterativeSolve()
@@ -164,6 +173,9 @@ if showSrcCircuit:
     nodeColors=np.array([
         [0,0,0,0],
         [1,0,0,1]],dtype=float)
+    
+    if asDual:
+        nodeColors[0,-1]=0.1
     edgeColors=np.array([
         [0, 0, 0, 0.05],
         [1,0.5, 0, 0.25],
@@ -171,15 +183,22 @@ if showSrcCircuit:
 
     viewer.edgeData=edgeInSrc
     viewer.nodeData=inSrc.astype(int)
+    viewer.setPlane(showAll=asDual)
     
     eCol=edgeColors[edgeInSrc.astype(int)]
     
-    edgeArt=viewer.showEdges(colors=eCol)
-    nodeArt=viewer.showNodes(inSrc,colors=nodeColors[inSrc.astype(int)])
+    nodeArt=viewer.showNodes(inSrc,colors=nodeColors[inSrc.astype(int)], marker='.')
     
     title=Visualizers.animatedTitle(fig, 'Combine nodes inside source')
-    arts.append([nodeArt,edgeArt, title])
-    arts.append([nodeArt,edgeArt, title])
+    artset=[nodeArt,title,finalMesh]
+    if not asDual:
+        edgeArt=viewer.showEdges(colors=eCol)
+        artset.append(edgeArt)
+    
+    arts.append(artset)
+    arts.append(artset)
+    
+
     
     
     # elCoords=setup.mesh.nodeCoords.copy()
@@ -202,16 +221,17 @@ if showSrcCircuit:
     # reArt=Visualizers.showEdges2d(ax, rePts, colors=equColor)
     
     viewer.topoType='electrical'
-    viewer.setPlane()
+    viewer.setPlane(showAll=asDual)
     reArt=viewer.showEdges(colors=equColor)
     title=Visualizers.animatedTitle(fig, 'Equivalent circuit')
-    arts.append([reArt,title])
-    arts.append([reArt,title])
+    arts.append([reArt,title,finalMesh])
+    arts.append([reArt,title,finalMesh])
 
 
     cm.addSimulationData(setup)
     endArts=cm.getArtists()
     endArts[0].append(Visualizers.animatedTitle(fig, 'Current distribution'))
+    endArts[0].append(finalMesh)
     arts.extend(endArts)
     
 ani=cm.animateStudy(fname,artists=arts)

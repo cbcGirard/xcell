@@ -20,7 +20,7 @@ studyPath='Results/studyTst/dual/'
 elementType='Admittance'
 
 xmax=1e-4
-maxdepth=20
+maxdepth=4
 
 sigma=np.ones(3)
 
@@ -37,8 +37,8 @@ vsrc=1.
 isrc=vsrc*4*np.pi*sigma*1e-6
 
 bbox=np.append(-xmax*np.ones(3),xmax*np.ones(3))
-if dual:
-    bbox+=xmax*2**(-maxdepth)
+# if dual:
+#     bbox+=xmax*2**(-maxdepth)
 
 
 study=xCell.SimStudy(studyPath,bbox)
@@ -110,21 +110,42 @@ def boundaryFun(coord):
     
 
 setup.finalizeMesh(regularize=regularize)
+mcoords=setup.mesh.nodeCoords
+medges=setup.edges
 
 
-setup.setBoundaryNodes(boundaryFun)
 
-# v=setup.solve()
-v=setup.iterativeSolve(None,1e-9)
 
-setup.getMemUsage(True)
-setup.printTotalTime()
+# setup.setBoundaryNodes(boundaryFun)
 
-setup.startTiming('Estimate error')
-errEst,_,_,_=setup.calculateErrors()#srcMag,srcType,showPlots=showGraphs)
-print('error: %g'%errEst)
-setup.logTime()
+# # v=setup.solve()
+# v=setup.iterativeSolve(None,1e-9)
 
+# setup.getMemUsage(True)
+# setup.printTotalTime()
+
+# setup.startTiming('Estimate error')
+# errEst,_,_,_=setup.calculateErrors()#srcMag,srcType,showPlots=showGraphs)
+# print('error: %g'%errEst)
+# setup.logTime()
+
+
+setup.finalizeDualMesh()
+
+# setup.edges=edges
+# setup.conductances=gvec
+# setup.mesh.nodeCoords=coords
+
+# xCell.Visualizers.showMesh(setup)
+# ax=plt.gca()
+ax=xCell.Visualizers.new3dPlot(study.bbox)
+
+# xCell.Visualizers.showNodes3d(ax, coords, imap,colors=plt.cm.get_cmap('tab10')(imap))
+xCell.Visualizers.showEdges(ax, mcoords, medges)
+xCell.Visualizers.showNodes3d(ax,
+                              setup.mesh.nodeCoords[setup.mesh.boundaryNodes],
+                              nodeVals=np.ones_like(setup.mesh.boundaryNodes),
+                              colors='r')
 
 
 # # xCell.Visualizers.showMesh(setup)

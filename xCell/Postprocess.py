@@ -27,37 +27,22 @@ datadir='/home/benoit/smb4k/ResearchData/Results/studyTst/'
 # filterCategories=['Source']
 # filterVals=['current','voltage']
 
-studyPath=datadir+'uniVsAdapt'
+# studyPath=datadir+'uniVsAdapt'
 filterCategories=["Mesh type"]
-filterVals=["adaptive","uniform"]
+# filterVals=["adaptive","uniform"]
+filterVals=['adaptive']
 
-# studyPath=datadir+"Face"
+studyPath=datadir+"dual"
 # filterCategories=['Element type']
-# filterVals=['Face']
+# filterVals=['adaptive']
 
 xmax=1e-4
-sigma=np.ones(3)
 
-
-vMode=False
-showGraphs=False
-generate=True
-saveGraphs=False
-
-vsrc=1.
-isrc=vsrc*4*np.pi*sigma*1e-6
 
 bbox=np.append(-xmax*np.ones(3),xmax*np.ones(3))
 
 
 study=xCell.SimStudy(studyPath,bbox)
-
-l0Min=1e-6
-rElec=1e-6
-
-lastNumEl=0
-meshTypes=["adaptive","uniform"]
-
 
 
     
@@ -72,15 +57,33 @@ meshTypes=["adaptive","uniform"]
 
 
 fig=plt.figure()
-plotters=[xCell.Visualizers.ErrorGraph]#,
-           # xCell.Visualizers.SliceSet,
-           # xCell.Visualizers.CurrentPlot,
-           # xCell.Visualizers.CurrentPlot]
+plotters=[xCell.Visualizers.ErrorGraph,
+            xCell.Visualizers.SliceSet,
+            xCell.Visualizers.CurrentPlot]#,
+            # xCell.Visualizers.CurrentPlot]
 
-ptype=['ErrorGraph']#,
-        # 'SliceSet',
-        # 'CurrentShort',
+ptype=['ErrorGraph',
+        'SliceSet',
+        'CurrentShort']#,
         # 'CurrentLong']
+
+
+xCell.Visualizers.groupedScatter(study.studyPath+'/log.csv',
+                     xcat='Number of elements',
+                     ycat='Error',
+                     groupcat=filterCategories[0])
+nufig=plt.gcf()
+study.savePlot(nufig, 'AccuracyCost', '.eps')
+study.savePlot(nufig, 'AccuracyCost', '.png')
+
+
+fstack,fratio=xCell.Visualizers.plotStudyPerformance(study)
+study.savePlot(fstack, 'Performance', '.eps')
+study.savePlot(fstack, 'Performance', '.png')
+
+study.savePlot(fratio, 'Ratio', '.eps')
+study.savePlot(fratio, 'Ratio', '.png')
+
 
 for fv in filterVals:
     for ii,p in enumerate(plotters):
@@ -121,10 +124,3 @@ for fv in filterVals:
 #                           filterVals=filterVals)
 # aniC=plotC.animateStudy('CurrentShort')
 
-xCell.Visualizers.groupedScatter(study.studyPath+'/log.csv',
-                     xcat='Number of elements',
-                     ycat='Error',
-                     groupcat=filterCategories[0])
-nufig=plt.gcf()
-study.savePlot(nufig, 'AccuracyCost', '.eps')
-study.savePlot(nufig, 'AccuracyCost', '.png')

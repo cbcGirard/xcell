@@ -24,6 +24,15 @@ import pandas
 # from util import uniformResample, edgeRoles, getquads, quadsToMaskedArrays, coords2MaskedArrays
 import util
 
+
+class TimingBar:
+    def __init__(self,figure,axis):
+        self.maxtime=np.inf
+        self.fig=figure
+        if axis is None:
+            self.ax=figure.add_subplot()
+
+
 class DataPrefs:
     def __init__(self, name,
                  dataSource=None,
@@ -124,8 +133,9 @@ class SliceViewer:
         self.setPlane(self.normAxis,self.planeZ)
         
         
-    def setPlane(self,normalAxis=2, normCoord=0):
-        coords,_=self.sim.getCoords(self.topoType)
+    def setPlane(self,normalAxis=2, normCoord=0,showAll=False):
+
+        coords=self.sim.getCoords(self.topoType)
         ic=self.sim.intifyCoords(coords)        
         self.intCoord=ic
         
@@ -138,21 +148,24 @@ class SliceViewer:
         self.nLevels=max(ic[:,normalAxis])
         
         self.normAxis=normalAxis
-        self.__setmask()
+        self.__setmask(showAll)
         
   
     def movePlane(self,stepAmount):
         self.lvlIndex+=stepAmount
         self.__setmask()
         
-    def __setmask(self):
+    def __setmask(self,showAll=False):
         axNames=['x','y','z']
         axlist=np.arange(3)
         
-        coords,_=self.sim.getCoords(self.topoType)
+        coords=self.sim.getCoords(self.topoType)
         otherAxes=axlist!=self.normAxis
       
-        inPlane=self.intCoord[:,self.normAxis]==self.lvlIndex
+        if showAll:
+            inPlane=np.ones(self.intCoord.shape[0],dtype=np.bool_)
+        else:
+            inPlane=self.intCoord[:,self.normAxis]==self.lvlIndex
         zval=coords[inPlane,self.normAxis][0]
         self.planeZ=zval
         self.nInPlane=inPlane
@@ -470,32 +483,72 @@ def importRunset(fname):
     return df, cats
 
 
-def importAndPlotTimes(fname, onlyCat=None, onlyVal=None, xCat='Number of elements'):
+def plotStudyPerformance(study,**kwargs):
+    fig1,axes=plt.subplots(2,1)
+    fn=study.studyPath+'/log.csv'
+    
+    for ax,ttype in zip(axes,['Wall','CPU']):
+        importAndPlotTimes(fn,ttype,ax,**kwargs)
+        
+    fig2,_=importAndPlotTimes(fn,timeType='Ratio',ax=None,**kwargs)
+      
+    return [fig1,fig2]
+
+
+def importAndPlotTimes(fname, timeType='Wall', ax=None, onlyCat=None, onlyVal=None, xCat='Number of elements'):
     df, cats = importRunset(fname)
     if onlyVal is not None:
         df = df[df[onlyCat] == onlyVal]
 
     xvals = df[xCat].to_numpy()
-    nSkip = np.argwhere(cats == 'Total time')[0][0]
+    
+    
+    if timeType=='Ratio':
+        cwall=[c for c in cats if c.find('Wall')>0]
+        cCPU=[c for c in cats if c.find('CPU')>0]
+        tcpu=df[cCPU].to_numpy().transpose()
+        twall=df[cwall].to_numpy().transpose()
+        
+        stepTimes=tcpu/twall
+        tcols=cCPU
+        
+    else:
+        tcols=[c for c in cats if c.find(timeType)>0 and c.find('Total')<0]
+        
+        stepTimes=df[tcols].to_numpy().transpose()
+    stepNames=[c[:c.find('[')-1] for c in tcols]
+    
 
-    def getTimes(df, cats):
-        cols = cats[6:nSkip]
-        return df[cols].to_numpy().transpose()
+    if ax is None:
+        fig=plt.figure()
+        ax = fig.add_subplot()
+    else:
+        fig=ax.figure
 
-    stepTimes = getTimes(df, cats)
-    stepNames = cats[6:nSkip]
+    if timeType=='Ratio':
+        for val,lbl in zip(stepTimes,stepNames):
+            ax.plot(xvals,val,label=lbl)
+            
+        ax.set_ylabel('Estimated parallel speedup')
+        ax.set_xlabel(xCat)
+        outsideLegend(ax)
+        ax.set_yscale('log')
+        ax.xaxis.set_major_formatter(mpl.ticker.EngFormatter())
 
-    ax = plt.figure().add_subplot()
+    else:
+        stackedTimePlot(ax, xvals, stepTimes, stepNames)
+        ax.set_xlabel(xCat)
+        ax.set_ylabel(timeType+" time [s]")
 
-    stackedTimePlot(ax, xvals, stepTimes, stepNames)
-    ax.set_xlabel(xCat)
-    ax.set_ylabel("Execution time [s]")
     ax.figure.tight_layout()
+    
+    return fig,ax
 
 
 def stackedTimePlot(axis, xvals, stepTimes, stepNames):
     axis.stackplot(xvals, stepTimes, baseline='zero', labels=stepNames)
-    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+    # plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+    outsideLegend(axis)
     # axis.figure.tight_layout()
     axis.xaxis.set_major_formatter(mpl.ticker.EngFormatter())
 
@@ -628,7 +681,13 @@ def getCmap(vals, forceBipolar=False, logscale=False):
     if (crosses and (ratio > 0.01)) or forceBipolar:
         #significant data on either side of zero; use symmetric
         amax = max(abs(mn), mx)
-        cMap = mpl.cm.seismic.copy()
+        # cMap = mpl.cm.seismic.copy()
+        clist=[[0.0, 0.0, 1.0, 1.0], 
+               [0.5, 0.5, 1.0, 1.0],
+               [1.0, 1.0, 1.0, 0.0], 
+               [1.0, 0.5, 0.5, 1.0],
+               [1.0, 0.0, 0.0, 1.0]]
+        cMap=mpl.colors.LinearSegmentedColormap.from_list('biBR', clist)
         if logscale:
             cNorm = mpl.colors.SymLogNorm(linthresh=knee,
                                           vmin=-amax,
@@ -1216,9 +1275,7 @@ class ErrorGraph(FigureAnimator):
             rElec=sim.voltageSources[0].radius
             self.rElec = rElec
           
-        # check how connected nodes are
 
-        connGlobal = sim.getNodeConnectivity(True)
 
 
         lmin = np.log10(rElec/2)
@@ -1240,7 +1297,8 @@ class ErrorGraph(FigureAnimator):
         rsort=r[sorter]
         rsort[0] = 10**lmin #for nicer plotting
         vsort=v[sorter]
-        connsort = connGlobal[sorter]
+        
+        
 
         # filter non DoF
         if self.prefs['onlyDoF']:
@@ -1256,13 +1314,13 @@ class ErrorGraph(FigureAnimator):
             errSort=err[sorter]
             
         errFilt = errSort[filt]
-        connFilt = connsort[filt]
+        
 
         self.titles.append('%s:%d nodes, %d elements, error %.2g' % (
             sim.meshtype, nNodes, nElems, ErrSum))
         self.errR.append(rFilt)
         self.errors.append(errFilt)
-        self.rColors.append(connFilt)
+
         self.simR.append(rsort)
         self.sims.append(vsort)
         
@@ -1272,6 +1330,13 @@ class ErrorGraph(FigureAnimator):
         
         self.elemL.append(l0)
         self.elemR.append(elR)
+        
+        if self.prefs['colorNodeConnectivity']:
+            # check how connected nodes are
+            connGlobal = sim.getNodeConnectivity(True)
+            connsort = connGlobal[sorter]
+            connFilt = connsort[filt]
+            self.rColors.append(connFilt)
 
     def getArtists(self):
         artistSet = []
@@ -1344,7 +1409,7 @@ class ErrorGraph(FigureAnimator):
 
 
 class CurrentPlot(FigureAnimator):
-    def __init__(self, fig, study, fullarrow=False,showInset=True,normalAxis=2,normalCoord=0.):
+    def __init__(self, fig, study, fullarrow=False,showInset=True,showAll=False,normalAxis=2,normalCoord=0.):
         super().__init__(fig, study)
 
         # inf lower bound needed for log colorbar
@@ -1370,6 +1435,7 @@ class CurrentPlot(FigureAnimator):
         self.iSrc = []
         self.fullarrow = fullarrow
         self.showInset=showInset
+        self.showAll=showAll
         
         self.normalAxis=normalAxis
         self.normalCoord=normalCoord
@@ -1404,8 +1470,11 @@ class CurrentPlot(FigureAnimator):
             centerCoord[self.normalAxis]=self.normalCoord
             level=sim.intifyCoords(centerCoord)[self.normalAxis]
             
-            ptInPlane = sim.intifyCoords()[:, self.normalAxis] == level
-            edgeInPlane = [np.all(ptInPlane[e]) for e in E]
+            if self.showAll:
+                edgeInPlane=np.ones_like(i,dtype=np.bool_)
+            else:
+                ptInPlane = sim.intifyCoords()[:, self.normalAxis] == level
+                edgeInPlane = [np.all(ptInPlane[e]) for e in E]
 
             eplane = E[edgeInPlane]
             iplane = i[edgeInPlane]

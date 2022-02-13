@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 meshtype='adaptive'
 # studyPath='Results/studyTst/miniCur/'#+meshtype
 datadir='/home/benoit/smb4k/ResearchData/Results/studyTst/'#+meshtype
-studyPath=datadir+'uniVsAdapt/'
+studyPath=datadir+'dual/'
 
 xmax=1e-4
 sigma=np.ones(3)
@@ -40,8 +40,9 @@ rElec=1e-6
 
 lastNumEl=0
 lastNx=0
-# meshTypes=["adaptive","uniform"]
-tstVals=["adaptive","uniform"]
+
+tstVals=['adaptive']
+# tstVals=["adaptive","uniform"]
 elementType='Admittance'
 # tstVals=['adaptive','equal elements',r'equal $l_0$']
 tstCat='Mesh type'
@@ -107,17 +108,11 @@ if generate:
                 
                 setup.makeAdaptiveGrid(metric,maxdepth)
             
+
         
-            # setup.startTiming("Make elements")
-      
+            # setup.finalizeMesh(regularize=False)
+            setup.finalizeDualMesh()
 
-            
-                
-            # setup.logTime()
-
-            # setup.finalizeMesh(regularize=False,dualMesh=True)
-            setup.finalizeMesh(regularize=False)
-            # setup.regularizeMesh()
             coords=setup.mesh.nodeCoords
             # 
             def boundaryFun(coord):

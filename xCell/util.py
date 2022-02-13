@@ -189,8 +189,9 @@ def getIndexDict(sparseIndices):
         
     return indexDict
 
+
 @nb.njit(parallel=True)
-def renumberIndices(edges,globalMask):
+def renumberIndices(sparseIndices,denseList):
     """
     Renumber indices according to a subset.
 
@@ -207,83 +208,75 @@ def renumberIndices(edges,globalMask):
         Edges contained in subset, according to subset ordering.
 
     """
-    hasValidNode=np.empty_like(edges,dtype=np.bool_)
-    # hasValidNode=globalMask[edges]
-    # for ii in range(2):
-    for ii in nb.prange(edges.shape[1]):
-        hasValidNode[:,ii]=globalMask[edges[:,ii]]
-        
-    if edges.shape[1]>1:
-        isValid=np.logical_and(hasValidNode[:,0],
-                           hasValidNode[:,1])
-    else:
-        isValid=hasValidNode[:,0]
+    renumbered=np.empty_like(sparseIndices,dtype=np.int64)
+    dic=getIndexDict(denseList)
     
-    validEdges=edges[isValid]
-    nValid=validEdges.shape[0]
-    subNumberedEdges=np.empty((nValid,edges.shape[1]),
-                              dtype=np.int64)
+    for ii in nb.prange(sparseIndices.shape[0]):
+        for jj in nb.prange(sparseIndices.shape[1]):
+            renumbered[ii,jj]=dic[sparseIndices[ii,jj]]
+            
+    return renumbered
+    
+    # hasValidNode=np.empty_like(sparseIndices,dtype=np.bool_)
+    # # hasValidNode=globalMask[edges]
+    # # for ii in range(2):
+    # for ii in nb.prange(sparseIndices.shape[1]):
+    #     hasValidNode[:,ii]=globalMask[sparseIndices[:,ii]]
+        
+    # if edges.shape[1]>1:
+    #     isValid=np.logical_and(hasValidNode[:,0],
+    #                        hasValidNode[:,1])
+    # else:
+    #     isValid=hasValidNode[:,0]
+    
+    # validEdges=edges[isValid]
+    # nValid=validEdges.shape[0]
+    # subNumberedEdges=np.empty((nValid,edges.shape[1]),
+    #                           dtype=np.int64)
 
 
-    ### dict-based approach, roughly 2x slower for 1e6 nodes,6e6 edges
-    # subsInGlobal=condenseIndices(globalMask)
+    # ### dict-based approach, roughly 2x slower for 1e6 nodes,6e6 edges
+    # subsInGlobal=getIndexDict(denseList)
     
     # for nn in nb.prange(nValid):
     #     for jj in nb.prange(2):
     #         n=validEdges[nn,jj]
     #         subNumberedEdges[nn,jj]=subsInGlobal[n]
     
-    
 
-    ### array-based approach; high memory usage
-    nodeDict=condenseIndices(globalMask)
     
-    for nn in nb.prange(validEdges.shape[0]):
-        for jj in nb.prange(validEdges.shape[1]):
-            n=validEdges[nn,jj]
-            subNumberedEdges[nn,jj]=nodeDict[n]
-        
-    
-    ####global search method; appears to crash...
-    # validIndex=np.nonzero(globalMask)[0]
-    # for nn in nb.prange(nValid):
-    #     for jj in nb.prange(2):
-    #         n=validEdges[nn,jj]
-    #         subNumberedEdges[nn,jj]=reindex(n,validIndex)
-    
-    
-    return subNumberedEdges
+    # return subNumberedEdges
 
 # @nb.njit(nb.int64[:](nb.int64[:],nb.int64[:]))
-@nb.njit(parallel=True)
-def sparse2denseIndex(sparseVals,denseVals):
-    """
-    Get the indices where each sparseVal are within DenseVals.
+# @nb.njit(parallel=True)
+# def sparse2denseIndex(sparseVals,denseVals):
+#     """
+#     Get the indices where each sparseVal are within DenseVals.
     
-    .. deprecated:: 0.0.1
-        Use 
-    Used for e.g. mapping a global node index to degree of freedom index
-    Assumes one-to-one mapping of every value
+#     .. deprecated:: 0.0.1
+#         Use 
+#     Used for e.g. mapping a global node index to degree of freedom index
+#     Assumes one-to-one mapping of every value
 
-    Parameters
-    ----------
-    sparseVals : int64[:]
-        List of nonconsecutive values to find.
-    denseVals : int64[:]
-        List of values to be searched.
+#     Parameters
+#     ----------
+#     sparseVals : int64[:]
+#         List of nonconsecutive values to find.
+#     denseVals : int64[:]
+#         List of values to be searched.
 
-    Returns
-    -------
-    int64[:]
-        Indices where each sparseVal occurs in denseVals.
+#     Returns
+#     -------
+#     int64[:]
+#         Indices where each sparseVal occurs in denseVals.
 
-    """
-    idxList=np.empty_like(sparseVals, dtype=np.int64)
-    for ii in nb.prange(sparseVals.shape[0]):
-        sval=sparseVals[ii]
-        idxList[ii]=reindex(sval,denseVals)
+#     """
+#     idxList=np.empty_like(sparseVals, dtype=np.int64)
+#     for ii in nb.prange(sparseVals.shape[0]):
+#         sval=sparseVals[ii]
+#         idxList[ii]=reindex(sval,denseVals)
         
-    return idxList
+#     return idxList
 
 @nb.njit(parallel=True)
 def octreeLoop_GetBoundaryNodesLoop(nX,indexMap):
@@ -630,11 +623,13 @@ def fromBitArray(arr):
     return val
 
 @nb.njit()
-def idxListToXYZ(indices):
+def idxListToXYZ(indices,maxdepth):
+
+    nx=2**maxdepth
     nvals=indices.shape[0]
-    xyz=np.empty((nvals,3),dtype=np.uint64)
+    xyz=np.zeros(3,dtype=np.uint64)
     for ii in nb.prange(nvals):
-        xyz[ii]=toBitArray(indices[ii])
+        xyz+=toBitArray(indices[ii])*2**(maxdepth-1-ii)
         
     return xyz
     
@@ -665,6 +660,22 @@ def anyMatch(searchArray,searchVals):
 
 @nb.njit()
 def index2pos(ndx,dX):
+    """
+    Convert scalar index to [x,y,z] indices.
+
+    Parameters
+    ----------
+    ndx : int64
+        Index to convert.
+    dX : int64
+        Number of points per axis.
+
+    Returns
+    -------
+    int64[:]
+        DESCRIPTION.
+
+    """
     arr=[]
     for ii in range(3):
         arr.append(ndx%dX)
@@ -673,6 +684,22 @@ def index2pos(ndx,dX):
 
 @nb.njit()
 def pos2index(pos,dX):
+    """
+    Convert [x,y,z] indices to a scalar index
+
+    Parameters
+    ----------
+    pos : int64[:]
+        [x,y,z] indices.
+    dX : int64
+        Number of points per axis.
+
+    Returns
+    -------
+    newNdx : int64
+        Scalar index equivalent to [x,y,z] triple.
+
+    """
     vals=np.array([dX**n for n in range(3)])
     tmp=np.dot(vals,pos)
     newNdx=int(np.rint(tmp))
@@ -689,7 +716,123 @@ def indexToCoords(indices,span,maxDepth):
         
     return coords
 
+# @nb.njit(parallel=True)
+@nb.njit()
+def octantListToXYZ(octList):
+    depth=octList.shape[0]
+    intval=octantListToIndex(octList,depth)
+    XYZ=np.zeros(3,dtype=np.int64)
+    # for ii in nb.prange(depth):
+    #     XYZ+=toBitArray(octList[ii])*2**(depth-ii-1)
+    
+    # for ii in nb.prange(depth):
+    #     shift=depth-ii-1
+    #     for jj in nb.prange(3):
+    #         XYZ[jj]|=((octList[ii]>>jj)&1)<<shift
+        
+    bitmask=2**depth-1
+    for jj in nb.prange(3):
+        XYZ[jj]=(intval>>(depth*jj))&bitmask
+        
+        # XYZ[jj]=(intval//(depth*jj))&bitmask
+        
+    return XYZ
 
+# @nb.njit(parallel=True)
+@nb.njit()
+def octantListToIndex(octList,maxdepth):
+    index=0
+    listdepth=octList.shape[0]
+    k=maxdepth-listdepth
+    
+    for ax in nb.prange(3):
+        shift=(ax+1)*maxdepth-1
+        for jj in nb.prange(listdepth):
+            bit=(octList[jj]>>ax)&1
+            index|=bit<<(shift-jj)
+            
+            # if (octList[jj]//(2**ax))%2:
+            #     index+=2**(shift-jj)
+    
+        
+    return index
+
+# @nb.njit(parallel=True)
+# @nb.njit()
+def octantNeighborIndexLists(ownIndexList):
+    ownDepth=ownIndexList.shape[0]
+    nX=2**ownDepth
+    nXYZ=octantListToXYZ(ownIndexList)
+    
+    neighborLists=[]
+    # keep Numba type inference happy
+    nullList=[np.int64(x) for x in range(0)]
+    
+    # bnds=[0,nX]
+    
+    for nn in nb.prange(6):
+        axis=nn//2
+        dx=nn%2
+        # if nXYZ[axis]==bnds[dx]:
+        if (nXYZ[axis]==0) or (nXYZ[axis]==(nX-1)):
+            neighborLists.append(nullList)
+        else:
+            dr=2*(dx)-1
+            xyz=nXYZ.copy()
+            xyz[axis]+=dr
+            
+            idxList=[]
+            for ii in nb.prange(ownDepth):
+                ind=0
+                #HERE
+                shift=ownDepth-ii-1
+                mask=1<<shift
+                for jj in nb.prange(3):
+                    bit=(xyz[jj]&mask)>>shift
+                    ind|=(bit<<jj)
+                    
+                # mask=2**shift
+                # for jj in nb.prange(3):                
+                #     bit=(xyz[jj]&mask)//shift
+                #     ind+=bit*2**jj
+                    
+                idxList.append(ind)
+            neighborLists.append(idxList)
+    
+            # if len(idxList)!=6:
+            #     print(nn)
+            #     # print(neighborLists)
+            #     # print("dammit")
+        
+    return neighborLists
+            
+    
+    
+    
+    # #adjust by +/- 1 according to direction
+    # dr=2*(direction%2)-1
+    # axis=direction//2
+    
+    # nXYZ[axis]+=dr
+    
+    # if np.any(np.less(nXYZ,0)) or np.any(np.greater_equal(nXYZ,nX)):
+    #     return None
+    # else:
+    #     # idxList=np.zeros(ownDepth,dtype=np.int8)
+    #     idxList=[]
+    #     for ii in nb.prange(ownDepth):
+    #         ind=0
+    #         shift=ownDepth-ii
+    #         mask=1<<(shift)
+    #         for jj in nb.prange(3):
+    #             # idxList[ii]|=(nXYZ[jj]>>jj)&1
+    #             # ind|=(nXYZ[jj]>>jj)&1
+    #             # ind+=(nXYZ[jj]%shift)<<jj
+    #             bit=(nXYZ[jj]&mask)>>shift
+    #             ind|=bit<<jj
+    #         idxList.append(ind)
+
+    #     return idxList
 
 class Logger():
     def __init__(self,stepName,printStart=True):
