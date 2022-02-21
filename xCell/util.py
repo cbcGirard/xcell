@@ -739,6 +739,9 @@ def octantListToXYZ(octList):
         
     return XYZ
 
+
+
+
 # @nb.njit(parallel=True)
 @nb.njit()
 def octantListToIndex(octList,maxdepth):
@@ -775,12 +778,18 @@ def octantNeighborIndexLists(ownIndexList):
         axis=nn//2
         dx=nn%2
         # if nXYZ[axis]==bnds[dx]:
-        if (nXYZ[axis]==0) or (nXYZ[axis]==(nX-1)):
+        # if (nXYZ[axis]==0) or (nXYZ[axis]==(nX-1)):
+        #     neighborLists.append(nullList)
+        # else:
+        #     dr=2*(dx)-1
+        #     xyz=nXYZ.copy()
+        #     xyz[axis]+=dr
+        dr=2*dx-1
+        xyz=nXYZ.copy()
+        xyz[axis]+=dr
+        if np.any(xyz<0) or np.any(xyz>nX):
             neighborLists.append(nullList)
         else:
-            dr=2*(dx)-1
-            xyz=nXYZ.copy()
-            xyz[axis]+=dr
             
             idxList=[]
             for ii in nb.prange(ownDepth):
@@ -808,33 +817,6 @@ def octantNeighborIndexLists(ownIndexList):
     return neighborLists
             
     
-    
-    
-    # #adjust by +/- 1 according to direction
-    # dr=2*(direction%2)-1
-    # axis=direction//2
-    
-    # nXYZ[axis]+=dr
-    
-    # if np.any(np.less(nXYZ,0)) or np.any(np.greater_equal(nXYZ,nX)):
-    #     return None
-    # else:
-    #     # idxList=np.zeros(ownDepth,dtype=np.int8)
-    #     idxList=[]
-    #     for ii in nb.prange(ownDepth):
-    #         ind=0
-    #         shift=ownDepth-ii
-    #         mask=1<<(shift)
-    #         for jj in nb.prange(3):
-    #             # idxList[ii]|=(nXYZ[jj]>>jj)&1
-    #             # ind|=(nXYZ[jj]>>jj)&1
-    #             # ind+=(nXYZ[jj]%shift)<<jj
-    #             bit=(nXYZ[jj]&mask)>>shift
-    #             ind|=bit<<jj
-    #         idxList.append(ind)
-
-    #     return idxList
-
 class Logger():
     def __init__(self,stepName,printStart=True):
         self.name=stepName

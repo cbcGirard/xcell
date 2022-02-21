@@ -974,11 +974,16 @@ def toEdgePoints(planeCoords, edges):
     return edgePts
 
 
+
+
+
 class FigureAnimator:
     def __init__(self, fig, study, prefs=None):
         self.fig = fig
         self.study = study
         self.axes = []
+        
+        self.artistLists=[]
 
         if prefs is None:
             self.prefs = dict()
@@ -1020,11 +1025,35 @@ class FigureAnimator:
         for name in fnames:
             self.addSimulationData(self.study.loadData(name))
 
+            # self.addSimulationData(self.study.loadData(name),dataLabel=dname)
+
+    def clearData(self):
+        pastArtists=self.artistLists
+        self.artistLists=[]
+        return pastArtists
+            
+
     def getArtists(self):
         pass
 
     def resetFigure(self):
-        pass
+        for axis in self.fig.axes:
+            undrawAxis(axis)
+        
+    
+    def animateMultipleStudies(self,otherStudies,fnames=None,**kwargs):
+        nArtists=[0]
+        nArtists.append(len(self.getArtists()))
+        
+        for study in otherStudies:
+            self.study=study
+            self.getStudyData(**kwargs)
+            allArtists=self.getArtists()
+            nArtists.append(len(allArtists))
+            
+        for ii in range(len(nArtists)-1):
+            artists=allArtists[nArtists[ii]:nArtists[ii+1]]
+            self.animateStudy(fnames[ii],artists=artists)
 
 
 class SliceSet(FigureAnimator):
@@ -1072,10 +1101,10 @@ class SliceSet(FigureAnimator):
         self.maskedErrArr = []
 
     def addSimulationData(self, sim):
-        isNodeInPlane = sim.mesh.nodeCoords[:, -1] == 0
-        intcoord = sim.intifyCoords()
-        pcoord = intcoord[:, :-1]
-        xyCoord = sim.mesh.nodeCoords[:, :-1]
+        # isNodeInPlane = sim.mesh.nodeCoords[:, -1] == 0
+        # intcoord = sim.intifyCoords()
+        # pcoord = intcoord[:, :-1]
+        # xyCoord = sim.mesh.nodeCoords[:, :-1]
 
         if len(sim.currentSources)>0:
             rElec = sim.currentSources[0].radius
@@ -1086,14 +1115,17 @@ class SliceSet(FigureAnimator):
             self.rElec = rElec
 
         _,err,_,_ = sim.calculateErrors()
-        err1d = err[isNodeInPlane]
+        # err1d = err[isNodeInPlane]
 
-        vArrays = util.coords2MaskedArrays(pcoord, sim.edges,
-                                      isNodeInPlane,
-                                      sim.nodeVoltages)
-        erArrays = util.coords2MaskedArrays(pcoord, sim.edges,
-                                       isNodeInPlane,
-                                       err)
+        # vArrays = util.coords2MaskedArrays(pcoord, sim.edges,
+        #                               isNodeInPlane,
+        #                               sim.nodeVoltages)
+        # erArrays = util.coords2MaskedArrays(pcoord, sim.edges,
+        #                                isNodeInPlane,
+        #                                err)
+
+        vArrays=sim.getValuesInPlane(data=None)
+        erArrays=sim.getValuesInPlane(data=err)
 
         self.maskedVArr.append(vArrays)
         self.maskedErrArr.append(erArrays)
@@ -1200,9 +1232,9 @@ class SliceSet(FigureAnimator):
 
         return artistSet
 
-    def resetFigure(self):
-        for ax in self.axes:
-            ax.cla()
+    # def resetFigure(self):
+    #     for ax in self.axes:
+    #         ax.cla()
 
 
 class ErrorGraph(FigureAnimator):
@@ -1590,8 +1622,6 @@ class ScaleRange:
         else:
             out = np.array([self.min, self.max])
         return out
-
-
 
 
 

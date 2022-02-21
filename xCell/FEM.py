@@ -71,13 +71,21 @@ def getFaceConductances(span,sigma):
         
 @nb.njit()
 def getFaceIndices():
+    # subsets=np.array([
+    #     [2,3],
+    #     [3,4],
+    #     [1,3],
+    #     [3,5],
+    #     [0,3],
+    #     [3,6]
+    #     ],dtype=np.int64)
     subsets=np.array([
-        [2,3],
-        [3,4],
-        [1,3],
-        [3,5],
-        [0,3],
-        [3,6]
+        [0,6],
+        [1,6],
+        [2,6],
+        [3,6],
+        [4,6],
+        [5,6]
         ],dtype=np.int64)
     return subsets
 
@@ -148,3 +156,126 @@ def getAdmittanceIndices():
     
     edges=np.vstack((nodesA,nodesA+offsets)).transpose()
     return edges
+
+
+# @nb.njit()
+def faceVtoVertexV(faceValues):
+    """
+    Interpolate voltage on element's vertices from values on its face.
+    
+    Assumes interpolating function of form V(x,y,z)=ax+by+cz+Ax^2+By^2+Cz^2
+
+    
+
+
+    Parameters
+    ----------
+    faceValues : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    vertexV : TYPE
+        DESCRIPTION.
+
+    """
+    
+    #coefficents like a=1/2(v1-v0), A=1/2(v1+v0)
+    
+    vpos=faceValues[1::2]
+    vneg=faceValues[0::2]
+    
+    coefs=np.hstack((vpos-vneg,vpos+vneg))/2
+    coords=__toFaceCoefOrder(HEX_VERTEX_COORDS)
+    
+    # vertexV=np.array([np.dot(coefs,coord) for coord in coords])
+    vertexV=np.dot(coords,coefs)
+    
+    return vertexV
+
+
+
+def interpolateFromFace(faceValues,localCoords):
+    coef=TRIP_INVERSE_MATRIX @ faceValues
+    cvals=__toFaceCoefOrder(localCoords)
+    
+    interpv=np.dot(cvals,coef)
+    return interpv
+    
+    
+def interpolateFromVerts(vertexValues,localCoords):
+    coef=TRIL_INVERSE_MATRIX @ vertexValues
+    
+    cvals=__toTrilinCoefOrder(localCoords)
+    
+    
+    interpV=np.dot(cvals,coef)
+    return interpV
+    
+#     Vxyz =	V000 (1 - x) (1 - y) (1 - z) +
+# V100 x (1 - y) (1 - z) +
+# V010 (1 - x) y (1 - z) +
+# V001 (1 - x) (1 - y) z +
+# V101 x (1 - y) z +
+# V011 (1 - x) y z +
+# V110 x y (1 - z) +
+# V111 x y z
+
+# @nb.njit()
+def toLocalCoords(globalCoords,center,span):
+    localCoords=np.empty_like(globalCoords)
+    
+    for ii in nb.prange(globalCoords.shape[0]):
+        localCoords[ii]=2*(globalCoords[ii]-center)/span
+        
+    return localCoords
+
+# @nb.njit()
+def __toTrilinCoefOrder(coords):
+    npts=coords.shape[0]
+    ordered=np.array([[1,
+              c[0],
+              c[1],
+              c[2],
+              c[0]*c[1],
+              c[0]*c[2],
+              c[1]*c[2],
+              c[0]*c[1]*c[2]]
+             for c in coords])
+    
+    return ordered
+
+# @nb.njit()
+def __toFaceCoefOrder(coords):
+    npts=coords.shape[0]
+    ordered=np.empty((npts,6))
+    for ii in nb.prange(npts):
+        ordered[ii,:3]=coords[ii]
+        ordered[ii,3:]=coords[ii]**2
+    return ordered
+
+
+
+
+HEX_VERTEX_COORDS=np.array([[-1,-1,-1],
+                            [1,-1,-1],
+                            [-1,1,-1],
+                            [1,1,-1],
+                            [-1,-1,1],
+                            [1,-1,1],
+                            [-1,1,1],
+                            [1,1,1]
+                            ], dtype=np.float64)
+
+HEX_FACE_COORDS=np.array([[-1,0,0],
+                          [1,0,0],
+                          [0,-1,0],
+                          [0,1,0],
+                          [0,0,-1],
+                          [0,0,1],
+                            [0,0,0]
+                            ], dtype=np.float64)
+
+TRIL_INVERSE_MATRIX=np.linalg.inv(__toTrilinCoefOrder(HEX_VERTEX_COORDS))
+
+TRIP_INVERSE_MATRIX=np.linalg.inv(__toFaceCoefOrder(HEX_FACE_COORDS[:-1]))

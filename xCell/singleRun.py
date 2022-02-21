@@ -20,7 +20,7 @@ studyPath='Results/studyTst/dual/'
 elementType='Admittance'
 
 xmax=1e-4
-maxdepth=4
+maxdepth=10
 
 sigma=np.ones(3)
 
@@ -109,46 +109,61 @@ def boundaryFun(coord):
 
     
 
-setup.finalizeMesh(regularize=regularize)
-mcoords=setup.mesh.nodeCoords
-medges=setup.edges
+# setup.finalizeMesh()
+# mcoords=setup.mesh.nodeCoords
+# medges=setup.edges
+
+
+setup.mesh.elementType='Face'
+setup.asDual=True
+setup.finalizeMesh()
+
+setup.setBoundaryNodes(boundaryFun)
+
+# v=setup.solve()
+v=setup.iterativeSolve(None,1e-9)
+
+setup.getMemUsage(True)
+setup.printTotalTime()
+
+setup.startTiming('Estimate error')
+errEst,_,_,_=setup.calculateErrors()#srcMag,srcType,showPlots=showGraphs)
+print('error: %g'%errEst)
+setup.logTime()
 
 
 
 
-# setup.setBoundaryNodes(boundaryFun)
+bnd=setup.mesh.bbox[[0,3,2,4]]
+arr=setup.getPointsInPlane()
+cMap,cNorm=xCell.Visualizers.getCmap(setup.nodeVoltages)
+xCell.Visualizers.patchworkImage(plt.figure().gca(), 
+                                 arr, cMap, cNorm, 
+                                 extent=bnd)
 
-# # v=setup.solve()
-# v=setup.iterativeSolve(None,1e-9)
+# setup.mesh.elementType='Admittance'
+# setup.finalizeMesh()
 
-# setup.getMemUsage(True)
-# setup.printTotalTime()
+# els=setup.getElementsInPlane()
+# eg,_=setup.mesh.getConductances(els)
+# medges=xCell.util.renumberIndices(eg,setup.mesh.indexMap)
+# mcoords=setup.mesh.nodeCoords
 
-# setup.startTiming('Estimate error')
-# errEst,_,_,_=setup.calculateErrors()#srcMag,srcType,showPlots=showGraphs)
-# print('error: %g'%errEst)
-# setup.logTime()
-
-
-setup.finalizeDualMesh()
-
-# setup.edges=edges
-# setup.conductances=gvec
-# setup.mesh.nodeCoords=coords
-
-# xCell.Visualizers.showMesh(setup)
-# ax=plt.gca()
-ax=xCell.Visualizers.new3dPlot(study.bbox)
+xCell.Visualizers.showMesh(setup)
+ax=plt.gca()
+# ax=xCell.Visualizers.new3dPlot(study.bbox)
 
 # xCell.Visualizers.showNodes3d(ax, coords, imap,colors=plt.cm.get_cmap('tab10')(imap))
 xCell.Visualizers.showEdges(ax, mcoords, medges)
+
+bnodes=setup.mesh.getBoundaryNodes()
 xCell.Visualizers.showNodes3d(ax,
-                              setup.mesh.nodeCoords[setup.mesh.boundaryNodes],
-                              nodeVals=np.ones_like(setup.mesh.boundaryNodes),
+                              setup.mesh.nodeCoords[bnodes],
+                              nodeVals=np.ones_like(bnodes),
                               colors='r')
 
 
-# # xCell.Visualizers.showMesh(setup)
+# # # xCell.Visualizers.showMesh(setup)
 # eg=xCell.Visualizers.ErrorGraph(plt.figure(), study)
 # eg.addSimulationData(setup)
 # eg.getArtists()

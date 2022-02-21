@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 meshtype='adaptive'
 # studyPath='Results/studyTst/miniCur/'#+meshtype
 datadir='/home/benoit/smb4k/ResearchData/Results/studyTst/'#+meshtype
-studyPath=datadir+'dual/'
+studyPath=datadir+'dualComp/'
 
 xmax=1e-4
 sigma=np.ones(3)
@@ -41,27 +41,28 @@ rElec=1e-6
 lastNumEl=0
 lastNx=0
 
-tstVals=['adaptive']
+# tstVals=['adaptive']
 # tstVals=["adaptive","uniform"]
-elementType='Admittance'
+# elementType='Admittance'
 # tstVals=['adaptive','equal elements',r'equal $l_0$']
-tstCat='Mesh type'
+# tstCat='Mesh type'
+
 
 # tstVals=[False, True]
 # tstCat='Vsrc?'
 
 # tstVals=['Admittance','FEM']
-# tstVals=['Admittance','Face']
+tstVals=['Admittance','Face']
 # tstVals=['Face']
-# tstCat='Element type'
+tstCat='Element type'
 
 if generate:
    
     # for var in np.linspace(0.1,0.7,15):
     for maxdepth in range(2,20):
         for tstVal in tstVals:
-            meshtype=tstVal
-            # elementType=tstVal
+            # meshtype=tstVal
+            elementType=tstVal
         # for vMode in tstVals:
         # for maxdepth in range(2,10):
             # if meshtype=='uniform':
@@ -109,9 +110,11 @@ if generate:
                 setup.makeAdaptiveGrid(metric,maxdepth)
             
 
-        
-            # setup.finalizeMesh(regularize=False)
-            setup.finalizeDualMesh()
+            setup.finalizeMesh()
+            # if asDual:
+            #     setup.finalizeDualMesh()
+            # else:
+            #     setup.finalizeMesh(regularize=False)
 
             coords=setup.mesh.nodeCoords
             # 

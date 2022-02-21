@@ -213,7 +213,7 @@ class Simulation:
         
         if printVal:
             engFormat=tickr.EngFormatter(unit='b')
-            print(engFormat(mem*1024)+" used")
+            print(engFormat(mem)+" used")
         
         return mem
     
@@ -390,15 +390,41 @@ class Simulation:
         self.logTime()
         
         print('%d elem'%numEl)
-        nNodes=self.mesh.nodeCoords.shape[0]
-        self.nodeRoleTable=np.zeros(nNodes,dtype=np.int64)
-        self.nodeRoleVals=np.zeros(nNodes,dtype=np.int64)
+
         # self.insertSourcesInMesh()
         
         self.startTiming("Calculate conductances")
         edges,conductances=self.mesh.getConductances()
-        self.edges=edges
+        # self.edges=edges
         self.conductances=conductances
+        self.logTime()
+        
+        self.startTiming('Renumber nodes')
+        ptIndices=np.unique(edges)
+        
+        
+        okPts=np.isin(self.mesh.indexMap,ptIndices,assume_unique=True)
+        
+        
+        # # Explicit exclusion of unconnected nodes
+        # self.mesh.indexMap=ptIndices
+        # self.mesh.inverseIdxMap=util.getIndexDict(ptIndices)
+        # self.mesh.nodeCoords=self.mesh.nodeCoords[okPts]
+        
+        # newEdges=util.renumberIndices(edges, ptIndices)
+        # self.edges=newEdges
+        # nNodes=ptIndices.shape[0]
+        
+        
+        self.edges=util.renumberIndices(edges,self.mesh.indexMap)
+        nNodes=self.mesh.nodeCoords.shape[0]
+        
+     
+        self.nodeRoleTable=np.zeros(nNodes,dtype=np.int64)
+        self.nodeRoleVals=np.zeros(nNodes,dtype=np.int64)
+        
+        self.nodeRoleTable[~okPts]=-1
+        
         self.logTime()
         
         #TODO: remove regularization step?
@@ -407,24 +433,24 @@ class Simulation:
         #     self.regularizeMesh()
         # self.logTime()
         
-    def finalizeDualMesh(self):
-        self.startTiming('Finalize mesh')
+    # def finalizeDualMesh(self):
+    #     self.startTiming('Finalize mesh')
         
-        coords, idxMap, edges, cond=self.mesh.getDualMesh()
-        self.mesh.nodeCoords=coords
-        self.mesh.indexMap=idxMap
-        self.mesh.inverseIdxMap=util.getIndexDict(idxMap)
-        self.logTime()
+    #     coords, idxMap, edges, cond=self.mesh.getDualMesh()
+    #     self.mesh.nodeCoords=coords
+    #     self.mesh.indexMap=idxMap
+    #     self.mesh.inverseIdxMap=util.getIndexDict(idxMap)
+    #     self.logTime()
         
-        nNodes=self.mesh.nodeCoords.shape[0]
-        self.nodeRoleTable=np.zeros(nNodes,dtype=np.int64)
-        self.nodeRoleVals=np.zeros(nNodes,dtype=np.int64)
+    #     nNodes=self.mesh.nodeCoords.shape[0]
+    #     self.nodeRoleTable=np.zeros(nNodes,dtype=np.int64)
+    #     self.nodeRoleVals=np.zeros(nNodes,dtype=np.int64)
         
-        self.startTiming('Calculate conductances')
-        self.edges=edges
-        self.conductances=cond
-        self.logTime()
-        self.asDual=True
+    #     self.startTiming('Calculate conductances')
+    #     self.edges=edges
+    #     self.conductances=cond
+    #     self.logTime()
+    #     self.asDual=True
         
     def addCurrentSource(self,value,coords,radius=0):
         self.currentSources.append(CurrentSource(value,coords,radius))
@@ -468,17 +494,25 @@ class Simulation:
             # Get closest mesh node
             el=self.mesh.getContainingElement(source.coords)
             #TODO: inconsistent numbering logic?
-            # elIndices=util.sparse2denseIndex(el.globalNodeIndices, self.mesh.indexMap)
-            if self.asDual:
-                # index=util.octantListToIndex(np.array(el.index),
-                                             # self.mesh.maxDepth)
-                 index=np.array(self.mesh.inverseIdxMap[el.globalNodeIndices[0]])
-            else:
-                elIndices=el.globalNodeIndices
-                elCoords=self.mesh.nodeCoords[elIndices]
+            # # elIndices=util.sparse2denseIndex(el.globalNodeIndices, self.mesh.indexMap)
+            # if self.asDual:
+            #     # index=util.octantListToIndex(np.array(el.index),
+            #                                  # self.mesh.maxDepth)
+            #      index=np.array(self.mesh.inverseIdxMap[el.globalNodeIndices[0]])
+            # else:
+            #     elIndices=el.globalNodeIndices
+            #     elCoords=self.mesh.nodeCoords[elIndices]
                 
-                d=np.linalg.norm(source.coords-elCoords,axis=1)
-                index=elIndices[d==min(d)]
+            #     d=np.linalg.norm(source.coords-elCoords,axis=1)
+            #     index=elIndices[d==min(d)]
+            
+            elIndices=np.array([
+                self.mesh.inverseIdxMap[n] 
+                for n in el.globalNodeIndices])
+            elCoords=self.mesh.nodeCoords[elIndices]
+            
+            d=np.linalg.norm(source.coords-elCoords,axis=1)
+            index=elIndices[d==min(d)]
             
        
         return index
@@ -500,7 +534,7 @@ class Simulation:
         None.
 
         """
-        bnodes=self.mesh.getBoundaryNodes(self.asDual)
+        bnodes=self.mesh.getBoundaryNodes()
         self.nodeVoltages=np.zeros(self.mesh.nodeCoords.shape[0])
         
     
@@ -854,9 +888,9 @@ class Simulation:
         if deduplicate:
             nConn[nConn>6]=6
         
-        if self.mesh.nodeCoords.shape[0]!=nConn.shape[0]:
-            raise ValueError('Length mismatch: %d nodes, but %d values\nIs a node unconnected?'%(
-                self.mesh.nodeCoords.shape[0], nConn.shape[0]))
+        # if self.mesh.nodeCoords.shape[0]!=nConn.shape[0]:
+        #     raise ValueError('Length mismatch: %d nodes, but %d values\nIs a node unconnected?'%(
+        #         self.mesh.nodeCoords.shape[0], nConn.shape[0]))
             
         return nConn
     
@@ -1138,7 +1172,116 @@ class Simulation:
             numbering[isSrc]=-1-numbering[isSrc]
             
         return numbering, (Nx,Nf,Ns,Nd)
+    
+    
+    def getElementsInPlane(self,axis=2, point=0.):
+        arrays=[]        
+        Gmax=self.mesh.maxDepth+1
+
+        closestPlane=int((point-self.mesh.bbox[axis])/self.mesh.span[axis])
+        # originIdx=util.pos2index(np.array([0,0,closestPlane]),
+        #                          2**Gmax+1)
+        origin=self.mesh.bbox[:3]
+        origin[axis]=point
+        
+        elements=self.mesh.getIntersectingElements(axis, coordinate=point)
+
+        return elements
+    
+    def getValuesInPlane(self,axis=2,point=0.,data=None):
+        
+        if data is None:
+            data=self.nodeVoltages
+        
+        elements=self.getElementsInPlane(axis,point)
+        
+        depths=np.array([el.depth for el in elements])
+        Gmax=self.mesh.maxDepth+1
+        
+        dcats=np.unique(depths)
+        nDcats=dcats.shape[0]
+        
+        elLists=(max(dcats)+1)*[[]]
+        
+        for el,d in zip(elements,depths):
+            elLists[d].append(el)
+                
+        
+        
+        whichInds=np.array([[0,2,4,6],
+                            [0,1,4,5],
+                            [0,1,2,3]])
+        selInd=whichInds[axis]
+        
+        # pts=[]
+        # vals=[]
+        
+        # for ii in nb.prange(len(elements)):
+        #     el=elements[ii]
+        #     # nodes=util.renumberIndices(el.globalNodeIndices,self.mesh.indexMap)
+        #     nodes=[self.mesh.inverseIdxMap[n] for n in el.globalNodeIndices]
+        #     interp=el.getPlanarValues(self.nodeVoltages[nodes],axis=axis,coord=point)
             
+        #     pts.extend(nodes)
+        #     vals.extend(interp)
+        
+
+        # allPts=np.unique([el.globalNodeIndices[selInd] for el in elements])
+        
+        # xyzs=np.array([util.index2pos(n) for n in allPts])
+        notAx=[ax!=axis for ax in range(3)]
+        
+        maskArrays=[]
+        for ii in nb.prange(nDcats):            
+            els=elLists[ii]
+            if len(els)==0:
+                continue
+            
+            nX=2**(dcats[ii])+1
+            # arr0=np.nan*np.empty((nX,nX))
+            arr=np.ma.masked_all((nX,nX))
+
+            
+            pts=[]
+            vals=[]
+            xx=[]
+            yy=[]
+            
+            for ee in nb.prange(len(elements)):
+                el=elements[ee]
+                if el.depth!=dcats[ii]:
+                    continue
+        
+                nodes=[self.mesh.inverseIdxMap[n] for n in el.globalNodeIndices]
+                interp=el.getPlanarValues(data[nodes],axis=axis,coord=point)
+                
+                xy0=util.octantListToXYZ(np.array(el.index))[notAx]
+                
+                xys=np.array([xy0+np.array([x,y]) for y in [0,1] for x in [0,1]])
+                pts.extend(nodes)
+                vals.extend(interp)
+                # xy.extend(xys)
+                
+                x,y=np.hsplit(xys, 2)
+                # arr0[x,y]=interp
+                xx.extend(x)
+                yy.extend(y)
+                
+                if np.any(xy0>=nX):
+                    print()
+                
+                
+                for i,j,v in zip(x,y,interp):
+                    arr[i,j]=v
+                
+            # arr=scipy.sparse.coo_matrix((vals,(xx,yy)))
+            # marr=np.ma.masked
+                
+            # maskArrays.append(np.ma.masked_invalid(arr0))
+            maskArrays.append(arr)
+        
+        return maskArrays
+
 
 
         
