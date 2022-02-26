@@ -702,24 +702,71 @@ def pos2index(pos,dX):
 
     """
     vals=np.array([dX**n for n in range(3)])
-    tmp=np.dot(vals,pos)
-    newNdx=int(np.rint(tmp))
+    # tmp=np.dot(vals,pos)
+    # newNdx=int(np.rint(tmp))
+    
+    newNdx=intdot(pos,vals)
+
+    
     return newNdx
 
+@nb.njit()
+def intdot(a,b):
+    dot=np.empty(a.shape[0],dtype=np.int64)
+    
+    for ii in nb.prange(a.shape[0]):
+        dot[ii]=np.sum(a[ii]*b)
+    
+    return dot
+
 @nb.njit(parallel=True)
-def indexToCoords(indices,span,maxDepth):
-    nX=2**(maxDepth)
+def indexToCoords(indices,origin,span,maxDepth):
+    """
+    
+
+    Parameters
+    ----------
+    indices : TYPE
+        DESCRIPTION.
+    origin : TYPE
+        DESCRIPTION.
+    span : TYPE
+        DESCRIPTION.
+    maxDepth : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    coords : TYPE
+        DESCRIPTION.
+
+    """
+    nX=2**(maxDepth+1)
     nPt=indices.shape[0]
     coords=np.empty((nPt,3),dtype=np.float64)
     for ii in nb.prange(nPt):
         ijk=index2pos(indices[ii], nX+1)
-        coords[ii]=span*ijk/nX
+        coords[ii]=span*ijk/nX+origin
         
     return coords
 
 # @nb.njit(parallel=True)
 @nb.njit()
 def octantListToXYZ(octList):
+    """
+    
+
+    Parameters
+    ----------
+    octList : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    XYZ : TYPE
+        DESCRIPTION.
+
+    """
     depth=octList.shape[0]
     intval=octantListToIndex(octList,depth)
     XYZ=np.zeros(3,dtype=np.int64)
@@ -745,6 +792,22 @@ def octantListToXYZ(octList):
 # @nb.njit(parallel=True)
 @nb.njit()
 def octantListToIndex(octList,maxdepth):
+    '''
+    
+
+    Parameters
+    ----------
+    octList : TYPE
+        DESCRIPTION.
+    maxdepth : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    index : TYPE
+        DESCRIPTION.
+
+    '''
     index=0
     listdepth=octList.shape[0]
     k=maxdepth-listdepth
@@ -764,6 +827,20 @@ def octantListToIndex(octList,maxdepth):
 # @nb.njit(parallel=True)
 # @nb.njit()
 def octantNeighborIndexLists(ownIndexList):
+    '''
+    
+
+    Parameters
+    ----------
+    ownIndexList : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    neighborLists : TYPE
+        DESCRIPTION.
+
+    '''
     ownDepth=ownIndexList.shape[0]
     nX=2**ownDepth
     nXYZ=octantListToXYZ(ownIndexList)
@@ -842,3 +919,11 @@ class Logger():
         self.memory=psutil.Process().memory_info().rss
         
         
+
+
+def unravelArraySet(maskedArrays):
+    vals=[]
+    for arr in maskedArrays:
+        vals.extend(getUnmasked(arr).ravel())
+    
+    return np.array(vals)

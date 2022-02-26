@@ -20,7 +20,7 @@ studyPath='Results/studyTst/dual/'
 elementType='Admittance'
 
 xmax=1e-4
-maxdepth=10
+maxdepth=11
 
 sigma=np.ones(3)
 
@@ -132,14 +132,38 @@ print('error: %g'%errEst)
 setup.logTime()
 
 
+setup.applyTransforms()
+
+pt,val=setup.getUniversalPoints()
+coords=xCell.util.indexToCoords(pt, study.bbox[:3],study.span, maxdepth)
+
+setup.mesh.nodeCoords=coords
+setup.nodeVoltages=val
+
+ax=plt.gca()
+sv=xCell.Visualizers.SliceViewer(ax, setup)
+sv.nodeData=pt
 
 
-bnd=setup.mesh.bbox[[0,3,2,4]]
-arr=setup.getPointsInPlane()
-cMap,cNorm=xCell.Visualizers.getCmap(setup.nodeVoltages)
-xCell.Visualizers.patchworkImage(plt.figure().gca(), 
-                                 arr, cMap, cNorm, 
-                                 extent=bnd)
+
+ax=xCell.Visualizers.new3dPlot(study.bbox)
+cmap,cnorm=xCell.Visualizers.getCmap(val,forceBipolar=True)
+xCell.Visualizers.showNodes3d(ax, coords, val,cMap=cmap,cNorm=cnorm)
+
+
+
+# bnd=setup.mesh.bbox[[0,3,2,4]]
+# arr,_=setup.getValuesInPlane()
+# cMap,cNorm=xCell.Visualizers.getCmap(setup.nodeVoltages)
+# xCell.Visualizers.patchworkImage(plt.figure().gca(), 
+#                                  arr, cMap, cNorm, 
+#                                  extent=bnd)
+
+ptr=xCell.Visualizers.ErrorGraph(plt.figure(),study)
+
+# ptr=xCell.Visualizers.SliceSet(plt.figure(),study)
+pdata=ptr.addSimulationData(setup)
+ptr.getArtists(0,pdata)
 
 # setup.mesh.elementType='Admittance'
 # setup.finalizeMesh()
@@ -149,24 +173,24 @@ xCell.Visualizers.patchworkImage(plt.figure().gca(),
 # medges=xCell.util.renumberIndices(eg,setup.mesh.indexMap)
 # mcoords=setup.mesh.nodeCoords
 
-xCell.Visualizers.showMesh(setup)
-ax=plt.gca()
-# ax=xCell.Visualizers.new3dPlot(study.bbox)
+# xCell.Visualizers.showMesh(setup)
+# ax=plt.gca()
+# # ax=xCell.Visualizers.new3dPlot(study.bbox)
 
-# xCell.Visualizers.showNodes3d(ax, coords, imap,colors=plt.cm.get_cmap('tab10')(imap))
-xCell.Visualizers.showEdges(ax, mcoords, medges)
+# # xCell.Visualizers.showNodes3d(ax, coords, imap,colors=plt.cm.get_cmap('tab10')(imap))
+# xCell.Visualizers.showEdges(ax, mcoords, medges)
 
-bnodes=setup.mesh.getBoundaryNodes()
-xCell.Visualizers.showNodes3d(ax,
-                              setup.mesh.nodeCoords[bnodes],
-                              nodeVals=np.ones_like(bnodes),
-                              colors='r')
+# bnodes=setup.mesh.getBoundaryNodes()
+# xCell.Visualizers.showNodes3d(ax,
+#                               setup.mesh.nodeCoords[bnodes],
+#                               nodeVals=np.ones_like(bnodes),
+#                               colors='r')
 
 
-# # # xCell.Visualizers.showMesh(setup)
-# eg=xCell.Visualizers.ErrorGraph(plt.figure(), study)
-# eg.addSimulationData(setup)
-# eg.getArtists()
+# # # # xCell.Visualizers.showMesh(setup)
+# # eg=xCell.Visualizers.ErrorGraph(plt.figure(), study)
+# # eg.addSimulationData(setup)
+# # eg.getArtists()
 
 # img=xCell.Visualizers.SliceSet(plt.figure(),study)
 # img.addSimulationData(setup)

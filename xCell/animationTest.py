@@ -128,6 +128,8 @@ if generate:
             # v=setup.solve()
             v=setup.iterativeSolve(None,1e-9)
             
+            setup.applyTransforms()
+            
             setup.getMemUsage(True)
             errEst,_,_,_=setup.calculateErrors()#srcMag,srcType,showPlots=showGraphs)
             print('error: %g'%errEst)

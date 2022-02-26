@@ -25,6 +25,7 @@ import util
 import Visualizers
 import Elements
 import Meshes
+import Geometry
 
 
 nb.config.DISABLE_JIT=0
@@ -42,6 +43,8 @@ class CurrentSource:
         self.value=value
         self.coords=coords
         self.radius=radius
+        
+
 
 # @nb.experimental.jitclass([
 #     ('value',float64),
@@ -394,7 +397,7 @@ class Simulation:
         # self.insertSourcesInMesh()
         
         self.startTiming("Calculate conductances")
-        edges,conductances=self.mesh.getConductances()
+        edges,conductances,transforms=self.mesh.getConductances()
         # self.edges=edges
         self.conductances=conductances
         self.logTime()
@@ -404,7 +407,7 @@ class Simulation:
         
         
         okPts=np.isin(self.mesh.indexMap,ptIndices,assume_unique=True)
-        
+        self.transforms=transforms
         
         # # Explicit exclusion of unconnected nodes
         # self.mesh.indexMap=ptIndices
@@ -426,6 +429,16 @@ class Simulation:
         self.nodeRoleTable[~okPts]=-1
         
         self.logTime()
+        
+        
+    def applyTransforms(self):
+        targetPts=[self.mesh.inverseIdxMap[xf.pop()] for xf in self.transforms]
+        
+        for ii,xf in zip(targetPts,self.transforms):
+            pts=np.array([self.mesh.inverseIdxMap[nn] for nn in xf])
+            self.nodeVoltages[ii]=np.mean(self.nodeVoltages[pts])
+            
+            
         
         #TODO: remove regularization step?
         # self.startTiming('Regularize mesh')
@@ -1175,25 +1188,45 @@ class Simulation:
     
     
     def getElementsInPlane(self,axis=2, point=0.):
-        arrays=[]        
-        Gmax=self.mesh.maxDepth+1
+        otherAx=np.array([n!=axis for n in range(3)])
+        # arrays=[]        
+        # Gmax=self.mesh.maxDepth+1
 
-        closestPlane=int((point-self.mesh.bbox[axis])/self.mesh.span[axis])
+        # closestPlane=int((point-self.mesh.bbox[axis])/self.mesh.span[axis])
         # originIdx=util.pos2index(np.array([0,0,closestPlane]),
         #                          2**Gmax+1)
         origin=self.mesh.bbox[:3]
         origin[axis]=point
         
         elements=self.mesh.getIntersectingElements(axis, coordinate=point)
+        
+        coords=[]
+        edgePts=[]
+        for ii,el in enumerate(elements):
+            ori=el.origin[otherAx]
+            ext=el.span[otherAx]+ori
+            q=[ori,ext]
+            
+            elCoords=np.array([[q[b][0], q[a][1]] for a in range(2) for b in range(2)])
+            
+            edges=np.array([[0,1],
+                           [0,2],
+                           [1,3],
+                           [2,3]])
+            edgePts.extend(elCoords[edges])
+            coords.extend(elCoords)
+            
+        
 
-        return elements
+
+        return elements,np.array(coords),np.array(edgePts)
     
     def getValuesInPlane(self,axis=2,point=0.,data=None):
         
         if data is None:
             data=self.nodeVoltages
         
-        elements=self.getElementsInPlane(axis,point)
+        elements,coords,_=self.getElementsInPlane(axis,point)
         
         depths=np.array([el.depth for el in elements])
         Gmax=self.mesh.maxDepth+1
@@ -1280,9 +1313,35 @@ class Simulation:
             # maskArrays.append(np.ma.masked_invalid(arr0))
             maskArrays.append(arr)
         
-        return maskArrays
+        return maskArrays, coords
 
 
+    def getUniversalPoints(self):
+        
+        universalIndices=[]
+        universalVals=[]
+        for ii in nb.prange(len(self.mesh.elements)):
+            el=self.mesh.elements[ii]
+            vals=[self.nodeVoltages[self.mesh.inverseIdxMap[nn]] 
+                  for nn in el.globalNodeIndices]
+            uVal,uInd=el.getUniversalVals(vals)
+            
+            universalIndices.extend(uInd.tolist())
+            universalVals.extend(uVal.tolist())
+            
+            
+            
+            
+        uniInd,invmap=np.unique(universalIndices,return_index=True)
+        
+        uniV=np.array(universalVals)[invmap]
+        
+        # for ii,nn in enumerate(uniInd):
+        #     if nn in self.mesh.inverseIdxMap:
+        #         inv=self.mesh.inverseIdxMap[nn]
+        #         uniV[ii]=self.nodeVoltages[inv]
+        
+        return uniInd,uniV
 
         
 class SimStudy:
@@ -1391,22 +1450,53 @@ class SimStudy:
         
 
     def getSavedSims(self,filterCategories=None,filterVals=None,sortCategory=None):
+        """
+        
+
+        Parameters
+        ----------
+        filterCategories : TYPE, optional
+            DESCRIPTION. The default is None.
+        filterVals : TYPE, optional
+            DESCRIPTION. The default is None.
+        sortCategory : TYPE, optional
+            DESCRIPTION. The default is None.
+
+        Returns
+        -------
+        fnames : TYPE
+            DESCRIPTION.
+        categories : TYPE
+            DESCRIPTION.
+
+        """
+        
         logfile=os.path.join(self.studyPath,'log.csv')
         df,cats=Visualizers.importRunset(logfile)
-            
+
+        selector=np.ones(len(df),dtype=bool)            
         if filterCategories is not None:
-            selector=np.ones(len(df),dtype=bool)
             for cat,val in zip(filterCategories,filterVals):
                 selector&=df[cat]==val
-                
-            fnames=df['File name'][selector]
-        else:
-            fnames=df['File name']
             
         if sortCategory is not None:
             sortcats=df[sortCategory]
+            sortvals=sortcats.unique()
             
-        return fnames
+            fnames=[]
+            categories=[]
+            for val in sortvals:
+                sorter=df[sortCategory]==val
+                fnames.append(df['File name'][sorter&selector])
+                
+                categories.append(val)
+                
+     
+        else:
+            fnames=[df['File name'][selector]]
+            categories=[None]
+           
+        return fnames,categories
         
         #TODO: deprecate
     def animatePlot(self,plotfun,aniName=None,filterCategories=None,filterVals=None,sortCategory=None):

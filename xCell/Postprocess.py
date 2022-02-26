@@ -34,7 +34,7 @@ datadir='/home/benoit/smb4k/ResearchData/Results/studyTst/'
 
 studyPath=datadir+"dualComp"
 filterCategories=['Element type']
-filterVals=['Admittance','Face']
+filterVals=['Face','Admittance']
 
 xmax=1e-4
 
@@ -55,70 +55,86 @@ study=xCell.SimStudy(studyPath,bbox)
 # aniImg2=study.animatePlot(xCell.centerSlice,'img_uniform',['Mesh type'],['uniform'])
 
 
-
+# staticPlots=True
+staticPlots=False
 
 # plotters=[xCell.Visualizers.ErrorGraph,
 #             xCell.Visualizers.SliceSet,
-#             xCell.Visualizers.CurrentPlot]#,
-#             # xCell.Visualizers.CurrentPlot]
+#             xCell.Visualizers.CurrentPlot]
 
-# ptype=['ErrorGraph',
-#         'SliceSet',
-#         'CurrentShort']#,
-#         # 'CurrentLong']
 
 plotters=[xCell.Visualizers.ErrorGraph]
 
-xCell.Visualizers.groupedScatter(study.studyPath+'/log.csv',
-                     xcat='Number of elements',
-                     ycat='Error',
-                     groupcat=filterCategories[0])
-nufig=plt.gcf()
-study.savePlot(nufig, 'AccuracyCost', '.eps')
-study.savePlot(nufig, 'AccuracyCost', '.png')
+# ptr=xCell.Visualizers.ErrorGraph(plt.figure(), study)
+
+# # ptr=xCell.Visualizers.SliceSet(plt.figure(), study)
+# ptr.getStudyData(sortCategory=filterCategories[0])
+# ani=ptr.animateStudy()
 
 
-# fstack,fratio=xCell.Visualizers.plotStudyPerformance(study)
-# study.savePlot(fstack, 'Performance', '.eps')
-# study.savePlot(fstack, 'Performance', '.png')
-
-# study.savePlot(fratio, 'Ratio', '.eps')
-# study.savePlot(fratio, 'Ratio', '.png')
-
-
-for fv in filterVals:
+if staticPlots:    
+    xCell.Visualizers.groupedScatter(study.studyPath+'/log.csv',
+                         xcat='Number of elements',
+                         ycat='Error',
+                         groupcat=filterCategories[0])
+    nufig=plt.gcf()
+    study.savePlot(nufig, 'AccuracyCost', '.eps')
+    study.savePlot(nufig, 'AccuracyCost', '.png')
     
-    fstack,fratio=xCell.Visualizers.plotStudyPerformance(study,
-                                                         onlyCat=filterCategories[0],
-                                                         onlyVal=fv)
-    fstem='_'+filterCategories[0]+str(fv)
+    for fv in filterVals:
+        
+        fstack,fratio=xCell.Visualizers.plotStudyPerformance(study,
+                                                             onlyCat=filterCategories[0],
+                                                             onlyVal=fv)
+        fstem='_'+filterCategories[0]+str(fv)
+        
+        study.savePlot(fstack, 'Performance'+fstem, '.eps')
+        study.savePlot(fstack, 'Performance'+fstem, '.png')
     
-    study.savePlot(fstack, 'Performance'+fstem, '.eps')
-    study.savePlot(fstack, 'Performance'+fstem, '.png')
-
-    study.savePlot(fratio, 'Ratio'+fstem, '.eps')
-    study.savePlot(fratio, 'Ratio'+fstem, '.png')
-    
-    
+        study.savePlot(fratio, 'Ratio'+fstem, '.eps')
+        study.savePlot(fratio, 'Ratio'+fstem, '.png')
+        
+        
 
         
         
-fig=plt.figure()
+
+# #THIS WORKS
+# for ii,p in enumerate(plotters):
+
+#     for fv in filterVals:
+#         fname=p.__name__+'_'+str(fv)
+        
+        
+#         plotr=p(plt.figure(),study)
+
+
+#         plotr.getStudyData(filterCategories=filterCategories,
+#                   filterVals=[fv])
+#         plotr.animateStudy(fname=fname)
+
+        
 
 for ii,p in enumerate(plotters):
-    plt.clf()        
-    plotr=p(fig,study)
-    artistSets=[]
-    fileNames=[]
-
+    
+    plots=[]
+    names=[]
+    ranges=None
     for fv in filterVals:
+        fname=p.__name__+'_'+str(fv)
+        plotr=p(plt.figure(),study)
+
         plotr.getStudyData(filterCategories=filterCategories,
-                          filterVals=[fv])
+                  filterVals=[fv])
         
-        artistSets.append(plotr.getArtists())
-        fileNames.append(p.__name__+'_'+str(fv))
+        plots.append(plotr)
+        names.append(fname)
         
-    for name,art in zip(fileNames,artistSets):
-        ani=plotr.animateStudy(fname=name,artists=art)
+        if ranges is not None:
+            plotr.unifyScales(ranges)
+        ranges=plotr.dataScales
         
-        # ani=plotr.animateStudy(name)
+    for plot,name in zip(plots,names):
+        plot.dataScales=ranges
+        
+        plot.animateStudy(fname=name)

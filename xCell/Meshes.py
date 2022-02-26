@@ -38,25 +38,43 @@ class Mesh:
                'span':el.span,
                'l0':el.l0,
                'sigma':el.sigma,
-               'nodeIndices':el.globalNodeIndices}
+               'nodeIndices':el.globalNodeIndices,
+               'index':el.index}
             elInfo.append(d)
             
         state['elements']=elInfo
         state['inverseIdxMap']={}
         if 'tree' in state:
-            state['tree']=None
+            dtree={'origin':self.tree.origin,
+                   'span':self.tree.span,
+                   'sigma':self.tree.sigma,
+                   'index':self.tree.index
+                   }
+            state['tree']=dtree
         return state
     
     def __setstate__(self,state):
         self.__dict__.update(state)
         elDicts=self.elements.copy()
+        
         self.elements=[]
         
         for ii,el in enumerate(elDicts):
             self.addElement(el['origin'], el['span'],
-                            el['sigma'], el['nodeIndices'])
+                            el['sigma'], el['index'],
+                            el['nodeIndices'])
             
         self.inverseIdxMap=util.getIndexDict(self.indexMap)
+        
+        if 'tree' in state:
+            treeDict=self.tree.copy()
+            tree=Octant(self.maxDepth,
+                        origin=treeDict['origin'],
+                             span=treeDict['span'],
+                             sigma=treeDict['sigma'],
+                             index=treeDict['index'])
+            tree._Octant__recreateTree(self.elements)
+            self.tree=tree
         
     def getContainingElement(self,coords):
         """
@@ -103,7 +121,7 @@ class Mesh:
     def finalize(self):
        pass
        
-    def addElement(self,origin, extents,sigma,nodeIndices):
+    def addElement(self,origin, extents,sigma,index,nodeIndices):
         """
         Insert element into the mesh.
 
@@ -128,8 +146,8 @@ class Mesh:
         # elif self.elementType=='FEM':
         #     newEl=Elements.FEMHex(origin,extents,sigma)
             
-        newEl=Octant(origin, extents,sigma=sigma,index=nodeIndices)
-        # newEl.setGlobalIndices(nodeIndices)
+        newEl=Octant(self.maxDepth,origin, extents,sigma=sigma,index=index)
+        newEl.globalNodeIndices=nodeIndices
         self.elements.append(newEl)
         
     def getConductances(self,elements=None):
@@ -162,6 +180,7 @@ class Mesh:
         
         clist=[]
         elist=[]
+        transforms=[]
         
         for nn in nb.prange(nElem):
             
@@ -189,15 +208,23 @@ class Mesh:
                         elEdges.append(rawEdge[ii])
                         
                     else:
-                        neiNode=ii+(-1)**ii
+                        #faces are shared; split original edge
+                        origNode=rawEdge[ii,0]
+                        xform=[]
+                        neiNodeIdx=ii+(-1)**ii
                         for jj in nb.prange(nNei):
                             elConds.append(rawCond[ii]/nNei)
                             
                             neighbor=neighbors[jj]
+                            neiNode=neighbor.globalNodeIndices[neiNodeIdx]
                             
-                            edge=np.array([neighbor.globalNodeIndices[neiNode],
+                            edge=np.array([neiNode,
                                            rawEdge[ii,1]])
                             elEdges.append(edge)
+                            xform.append(neiNode)
+                            
+                        xform.append(origNode)
+                        transforms.append(xform)
                         
             
             # conductances[nn*nElemEdge:(nn+1)*nElemEdge]=elConds
@@ -211,7 +238,7 @@ class Mesh:
         edgeIndices=np.array(elist)
         conductances=np.array(clist)
         
-        return edgeIndices,conductances
+        return edgeIndices,conductances,transforms
     
     def getL0Min(self):
         """
@@ -254,7 +281,7 @@ class Octree(Mesh):
         
         coord0=self.center-self.span/2
         
-        self.tree=Octant(coord0,self.span)
+        self.tree=Octant(maxDepth,coord0,self.span)
         
     def getContainingElement(self, coords):
         
@@ -294,28 +321,10 @@ class Octree(Mesh):
         """
         octs=self.tree.getTerminalOctants()
 
-
-        # T=util.Logger('coords')
         self.nodeCoords=self.getCoordsRecursively()
-        # T.logCompletion()
         
-        # T=util.Logger('loop')
-        
-        
-        #TODO: Unify mapping logic; fails for dual mesh?
         d=util.getIndexDict(self.indexMap)
 
-        # for ii in nb.prange(len(octs)):
-        #     o=octs[ii]
-        #     onodes=o.globalNodeIndices
-            
-        #     gnodes=np.array([d[n] for n in onodes])
-        #     # self.addElement(o.origin,o.span,np.ones(3),gnodes)
-        #     o.globalNodeIndices=gnodes
-            # 
-        # T.logCompletion()
-        
-        # T=util.Logger('copy')
         self.elements=octs
         
         
@@ -324,7 +333,6 @@ class Octree(Mesh):
         
         
         self.inverseIdxMap=d
-        # T.logCompletion()
         
         return 
     
@@ -358,12 +366,12 @@ class Octree(Mesh):
         """
         head=indexList.pop(0)
         
-        #debug
+        # #debug
         
-        if (head<0) or (head>8):
-            print()
+        # if (head<0) or (head>8):
+        #     print()
         
-        #enddebug
+        # #enddebug
         
         if octant is None:
             octant=self.tree
@@ -410,8 +418,10 @@ class Octree(Mesh):
         self.indexMap=indices
         
 
-        c=util.indexToCoords(indices,self.span,self.maxDepth+int(asdual))
-        coords=c+self.bbox[:3]
+        # c=util.indexToCoords(indices,self.span,self.maxDepth+int(asdual))
+        # coords=c+self.bbox[:3]
+        coords=util.indexToCoords(indices,self.bbox[:3],self.span,self.maxDepth+int(asdual))
+        
 
         return coords
     
@@ -523,76 +533,7 @@ class Octree(Mesh):
         
         return coords, idxMap, corrEdges, np.array(conductances)
             
-                    
-    def getDualMesh2(self):
-        octs=self.tree.getTerminalOctants()
-        self.elements=octs
-        numel=len(self.elements)
-        
-        coords=np.empty((numel,3),dtype=np.float64)
-        edges=[]
-        conductances=[]
-        nodeIdx=[]
-        bnodes=[]
-        
-        temp=[]
-        for ii in nb.prange(numel):
-            el=self.elements[ii]
-            elIndex=util.octantListToIndex(np.array(el.index),
-                                           self.maxDepth)
-            el.globalNodeIndices[0]=elIndex
-            coords[ii]=el.center
-            nodeIdx.append(elIndex)
-            
-            gEl=FEM.getFaceConductances(el.span, el.sigma)
-            
-            neighborList=util.octantNeighborIndexLists(np.array(el.index))
-         
-            isBnd=False
-
-            
-            for step in nb.prange(6):
-                neighborI=neighborList[step]
-                if len(neighborI)==0:
-                    isBnd=True
-                else:
-                    #neighbor exists
-                    tstNeighbor=self.octantByList(neighborI)
-                    nNeighbors=len(tstNeighbor)
-                    
-                    if nNeighbors>1:
-                        ax=step//2
-                        dr=step%2
-                        neighbors=[n for n in tstNeighbor if util.toBitArray(n.index[-1])[ax]^dr]
-                        nNeighbors=len(neighbors)
-                    else:
-                        neighbors=tstNeighbor
-                    
-                    for neighbor in neighbors:
-                        neighborIndex=util.octantListToIndex(np.array(neighbor.index), 
-                                                             self.maxDepth)
-                        
-                        gA=FEM.getFaceConductances(neighbor.span,
-                                                          neighbor.sigma)[step//2]
-                        gB=gEl[step//2]/nNeighbors
-                        
-                        gnet=0.5*(gA*gB)/(gA+gB)
-                        
-                        conductances.append(gnet)
-                        edges.append([elIndex,neighborIndex])
-
-            if isBnd:
-                bnodes.append(elIndex)
-                
-        idxMap=np.array(nodeIdx)
-        
-        corrEdges=util.renumberIndices(np.array(edges),idxMap)
-        self.boundaryNodes=util.renumberIndices(np.array(bnodes,ndmin=2),
-                                                idxMap).squeeze()
-        
-        return coords, idxMap, corrEdges, np.array(conductances)
-                    
-            
+                   
     def getElementAdjacencies(self):
         numel=len(self.elements)
         
@@ -643,7 +584,7 @@ class Octree(Mesh):
 #     ]
 # @nb.experimental.jitclass(spec=octantspec)
 class Octant():
-    def __init__(self,origin, span,depth=0,sigma=np.ones(3),index=[]):
+    def __init__(self,maxdepth,origin, span,depth=0,sigma=np.ones(3),index=[]):
         # super().__init__(origin, span, sigma)
         self.origin=origin
         self.span=span
@@ -651,6 +592,7 @@ class Octant():
         self.l0=np.prod(span)**(1/3)
         self.children=[]
         self.depth=depth
+        self.maxdepth=maxdepth
         self.globalNodeIndices=np.empty(8,dtype=np.int64)
         self.nX=2
         self.index=index   
@@ -658,48 +600,98 @@ class Octant():
         
         self.neighbors=6*[[]]
         
-    def calcVertexTags(self,maxdepth):
-        # x0=globalBbox[:3]
-        nX=2**maxdepth
-        # dX=(globalBbox[3:]-x0)/(nX)
-        # coords=self.getOwnCoords()
-        
-        toGlobal=np.array([(nX+1)**n for n in range(3)])
-        
-        # for N,c in enumerate(coords):
-        #     idxArray=(c-x0)/dX
-        #     ndx=np.dot(ndxOffsets,idxArray)
-        #     self.globalNodeIndices[N]=ndx
+
+
+
+    def __recreateTree(self,elements):
+        # childLists=8*[[]]
+        # for el in elements:
+        #     if el.depth==self.depth+1:
+        #         #existing child
+        #         self.children.append(el)
+        #     else:
+        #         elOct=el.index[self.depth]
+        #         childLists[elOct].append(el)
+                
+        # if len(self.children)==8:
+        #     chList=self.children
+        #     chOrder=[ch.index[-1] for ch in chList]
+        #     self.children=[ch for ch in chList for ii in chOrder if ch.index[-1]==ii]
+        # else:
+        #     for ii,ch in enumerate(self.children):
+        #         ch.__recreateTree(childLists[ii])
+        childLists=[]
+        D=self.depth
+        for ind in range(8):
+            childList=[el for el in elements if el.index[D]==ind]
+            childLists.append(childList)
             
-        # return self.globalNodeIndices
-        xyz=np.zeros(3,dtype=np.int64)
-        for ii,idx in enumerate(self.index):
-            ldepth=maxdepth-ii-1
-            step=2**ldepth
-            xyz+=step*util.toBitArray(idx)
-            
-        ownstep=2**(maxdepth-self.depth)
+        self.split()
+        for ii,ch in enumerate(self.children):
+            clist=childLists[ii]
+            if len(clist)==1:
+                el=clist[0]
+                el.depth=len(el.index)
+                self.children[ii]=el
+            else:
+                ch.__recreateTree(clist)
+                
         
-        ownXYZ=[xyz+ownstep*util.toBitArray(i) for i in range(8)]
-        indices=np.array([np.dot(ndxlist,toGlobal) for ndxlist in ownXYZ])
-            
-        self.globalNodeIndices=indices
-        return indices.tolist()
-    
-    def calcFaceTags(self,maxdepth):
-        nX=2**(maxdepth+1)+1
-        nInt=2**(maxdepth-self.depth)+1
-        scale=2**(maxdepth-self.depth)
         
-        # origin=np.zeros(3,dtype=np.int64)
+    def calcVertexTags(self):#,maxdepth):
+        # #old numbering scheme
+        # maxdepth=self.maxdepth
+        # nX=2**maxdepth
+     
+        # toGlobal=np.array([(nX+1)**n for n in range(3)])
+        
+        # xyz=np.zeros(3,dtype=np.int64)
         # for ii,idx in enumerate(self.index):
-        #     ldepth=maxdepth-ii+1
+        #     ldepth=maxdepth-ii-1
         #     step=2**ldepth
-        #     origin+=step*util.toBitArray(idx)
-        origin=util.octantListToXYZ(np.array(self.index))*(scale<<1)
+        #     xyz+=step*util.toBitArray(idx)
             
-        ownstep=2**(maxdepth-self.depth+1)
-        xyzScale=np.array([nX**n for n in range(3)])
+        # ownstep=2**(maxdepth-self.depth)
+        
+        # ownXYZ=[xyz+ownstep*util.toBitArray(i) for i in range(8)]
+        # indices=np.array([np.dot(ndxlist,toGlobal) for ndxlist in ownXYZ])
+            
+        # self.globalNodeIndices=indices
+        
+        # universal numbering scheme
+        nX=2**(self.maxdepth+1)+1
+        elScale=2**(self.maxdepth-self.depth+1)
+        axesScale=np.array([nX**n for n in range(3)])
+        
+        origin=self.__originXYZ()
+        # origin=util.octantListToXYZ(np.array(self.index))*(elScale<<1)
+        
+        steps=[elScale*util.toBitArray(n) for n in range(8)]
+        
+        # indices=[np.dot(origin+step,axesScale) for step in steps]
+        indices=util.pos2index(steps+origin, nX)
+        
+        self.globalNodeIndices=indices
+               
+        return indices
+    
+    def __originXYZ(self):
+        M=self.maxdepth
+        xyz=np.zeros(3,dtype=np.int64)
+        
+        for ii,n in enumerate(self.index):
+            xyz+=util.toBitArray(n)*2**(M-ii)
+            
+        return xyz
+    
+    def calcFaceTags(self):#,maxdepth):
+        nX=2**(self.maxdepth+1)+1
+        elScale=2**(self.maxdepth-self.depth)
+        
+        origin=self.__originXYZ()
+        # origin=util.octantListToXYZ(np.array(self.index))*(scale<<1)
+            
+        axesScale=np.array([nX**n for n in range(3)])
         
         steps=np.array([[0,1,1],
                         [2,1,1],
@@ -708,12 +700,13 @@ class Octant():
                         [1,1,0],
                         [1,1,2],
                         [1,1,1]
-                        ])*scale
+                        ])*elScale
         
-        ptXYZ=[origin+step for step in steps]
-        indices=np.array([np.dot(ndxlist,xyzScale) for ndxlist in ptXYZ])
+        # ptXYZ=[origin+step for step in steps]
+        # indices=[np.dot(origin+step,axesScale) for step in steps]
+        indices=util.pos2index(steps+origin, nX)
             
-        self.globalNodeIndices=indices
+        self.globalNodeIndices=np.array(indices)
         
         return indices
             
@@ -734,7 +727,7 @@ class Octant():
             newOrigin=self.origin+offset
             newIndex=self.index.copy()
             newIndex.append(ii)
-            self.children.append(Octant(newOrigin,newSpan,self.depth+1,index=newIndex))
+            self.children.append(Octant(self.maxdepth,newOrigin,newSpan,self.depth+1,index=newIndex))
             
         # return self.children
     def getOwnCoords(self):
@@ -748,9 +741,9 @@ class Octant():
             # indices=self.globalNodeIndices
             
             if asDual:
-                indices=self.calcFaceTags(maxdepth)
+                indices=self.calcFaceTags()
             else:
-                indices=self.calcVertexTags(maxdepth)
+                indices=self.calcVertexTags()
             # indices=self.calcFaceTags(maxdepth)
         else:
             indices=[]
@@ -886,6 +879,53 @@ class Octant():
         
         return interp
     
+    #TODO: fix hack of changing node indices
+    def getUniversalVals(self,knownValues):
+        
+        oldInds=self.globalNodeIndices
+        
+        allVals=np.empty(15,dtype=np.float64)
+        allInds=np.empty(15,dtype=np.int64)
+        
+        vertOrder=np.array([0, 1, 3, 4, 10, 11, 13, 14])
+        faceOrder=np.array([6, 8, 5, 9, 2, 12, 7])
+        
+        indV=self.calcVertexTags()
+        indF=self.calcFaceTags()
+        
+        if oldInds.shape[0]==8:
+            vVert=knownValues
+            vFace=FEM.interpolateFromVerts(knownValues, 
+                                            FEM.HEX_FACE_COORDS)
+        else:
+            vFace=knownValues
+            vVert=FEM.interpolateFromFace(knownValues, 
+                                           FEM.HEX_VERTEX_COORDS)
+            
+        # allInds[vertOrder]=indV
+        # allVals[vertOrder]=vVert
+        
+        # allInds[faceOrder]=indF
+        # allVals[faceOrder]=vFace
+        
+        allInds=np.concatenate((indV,indF))
+        allVals=np.concatenate((vVert,vFace))
+        
+        self.globalNodeIndices=oldInds
+        
+        # import Visualizers
+        # # import matplotlib.pyplot as plt
+        # ax=Visualizers.new3dPlot(np.concatenate((-np.ones(3),np.ones(3))))
+        # cset=np.vstack((FEM.HEX_FACE_COORDS,FEM.HEX_VERTEX_COORDS))
+        # cval=np.concatenate((vFace,vVert))
+        # # x,y,z=np.hsplit(cset, 3)
+        # # pt=ax.scatter3D(x,y,z,cval)
+        # # plt.colorbar(pt)
+        # Visualizers.showNodes3d(ax, cset, cval)
+        
+        return allVals,allInds
+                
+    
     def getPlanarValues(self,globalValues,axis=2,coord=0.):
         zcoord=(coord-self.center[axis])/self.span[axis]
         
@@ -896,6 +936,6 @@ class Octant():
         if self.globalNodeIndices.shape[0]==8:
             planeVals=FEM.interpolateFromVerts(globalValues, localCoords)
         else:
-            planeVals=FEM.interpolateFromFace(globalValues[:6], localCoords)
+            planeVals=FEM.interpolateFromFace(globalValues, localCoords)
             
         return planeVals
