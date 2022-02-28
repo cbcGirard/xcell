@@ -146,18 +146,12 @@ def getAdmittanceIndices():
     nodesA=np.array([0,2,4,6,0,1,4,5,0,1,2,3],dtype=np.int64)
     offsets=np.array([2**np.floor(ii/4) for ii in range(12)],dtype=np.int64)
     
-    # edges=np.array([[self.globalNodeIndices[a],self.globalNodeIndices[a+o]] for a,o in zip(nodesA,offsets)])
-    # edges=np.empty((12,2),dtype=np.int64)
-    # for ii in range(12):
-    #     nodeA=nodesA[ii]
-    #     nodeB=nodeA+offsets[ii]
-    #     edges[ii,0]=self.globalNodeIndices[nodeA]
-    #     edges[ii,1]=self.globalNodeIndices[nodeB]
-    
     edges=np.vstack((nodesA,nodesA+offsets)).transpose()
     return edges
 
-
+ADMITTANCE_EDGES=getAdmittanceIndices()
+TET_EDGES=getTetIndices()
+FACE_EDGES=getFaceIndices()
 # # @nb.njit()
 # def faceVtoVertexV(faceValues):
 #     """

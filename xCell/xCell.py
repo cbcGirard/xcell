@@ -26,6 +26,7 @@ import Visualizers
 import Elements
 import Meshes
 import Geometry
+from FEM import ADMITTANCE_EDGES
 
 
 nb.config.DISABLE_JIT=0
@@ -506,22 +507,16 @@ class Simulation:
         else:
             # Get closest mesh node
             el=self.mesh.getContainingElement(source.coords)
-            #TODO: inconsistent numbering logic?
-            # # elIndices=util.sparse2denseIndex(el.globalNodeIndices, self.mesh.indexMap)
-            # if self.asDual:
-            #     # index=util.octantListToIndex(np.array(el.index),
-            #                                  # self.mesh.maxDepth)
-            #      index=np.array(self.mesh.inverseIdxMap[el.globalNodeIndices[0]])
-            # else:
-            #     elIndices=el.globalNodeIndices
-            #     elCoords=self.mesh.nodeCoords[elIndices]
-                
-            #     d=np.linalg.norm(source.coords-elCoords,axis=1)
-            #     index=elIndices[d==min(d)]
+            
+            if self.mesh.elementType=='Face':
+                elUinds=el.faces
+            else:
+                elUinds=el.vertices
+
             
             elIndices=np.array([
                 self.mesh.inverseIdxMap[n] 
-                for n in el.globalNodeIndices])
+                for n in elUinds])
             elCoords=self.mesh.nodeCoords[elIndices]
             
             d=np.linalg.norm(source.coords-elCoords,axis=1)
@@ -1140,11 +1135,22 @@ class Simulation:
         return edges
 
     def getMeshGeometry(self):
-        coords,idxMap=self.getCoords('mesh')
-        
-        elist=self.getEdges('mesh')
-        edges=util.sparse2denseIndex(elist,idxMap)
+        verts=[]
+        rawEdges=[]
+        for el in self.mesh.elements:
+            vert=el.vertices
+            edge=vert[ADMITTANCE_EDGES]
+            verts.extend(vert.tolist())
+            rawEdges.extend(edge)
             
+        inds=np.unique(np.array(verts,dtype=np.uint64))
+        coords=util.indexToCoords(inds, 
+                                  self.mesh.bbox[:3], 
+                                  self.mesh.span)   
+        
+        edges=util.renumberIndices(np.array(rawEdges,dtype=np.uint64), 
+                                   inds)
+        
         return coords,edges
             
             
@@ -1284,8 +1290,13 @@ class Simulation:
                 el=elements[ee]
                 if el.depth!=dcats[ii]:
                     continue
+                
+                if self.mesh.elementType=='Face':
+                    elUind=el.faces
+                else:
+                    elUind=el.vertices
         
-                nodes=[self.mesh.inverseIdxMap[n] for n in el.globalNodeIndices]
+                nodes=[self.mesh.inverseIdxMap[n] for n in elUind]
                 interp=el.getPlanarValues(data[nodes],axis=axis,coord=point)
                 
                 xy0=util.octantListToXYZ(np.array(el.index))[notAx]
@@ -1322,8 +1333,14 @@ class Simulation:
         universalVals=[]
         for ii in nb.prange(len(self.mesh.elements)):
             el=self.mesh.elements[ii]
-            vals=[self.nodeVoltages[self.mesh.inverseIdxMap[nn]] 
-                  for nn in el.globalNodeIndices]
+            
+            if self.mesh.elementType=='Face':
+                elUind=el.faces
+            else:
+                elUind=el.vertices
+            
+            vals=np.array([self.nodeVoltages[self.mesh.inverseIdxMap[nn]] 
+                  for nn in elUind])
             uVal,uInd=el.getUniversalVals(vals)
             
             universalIndices.extend(uInd.tolist())

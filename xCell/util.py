@@ -18,6 +18,9 @@ import matplotlib.ticker as tickr
 import psutil
 
 
+# Atrocious typing hack to force use of uint64 
+MAXDEPTH=np.array(20,dtype=np.uint64)[()]
+MAXPT=np.array(2**(MAXDEPTH+1)+1,dtype=np.uint64)[()]
 
 # nb.config.DISABLE_JIT=0
 nb.config.DEBUG_TYPEINFER=0
@@ -623,18 +626,6 @@ def fromBitArray(arr):
         val+=arr[ii]*2**(nbit-ii-1)
     return val
 
-@nb.njit()
-def idxListToXYZ(indices,maxdepth):
-
-    nx=2**maxdepth
-    nvals=indices.shape[0]
-    xyz=np.zeros(3,dtype=np.uint64)
-    for ii in nb.prange(nvals):
-        xyz+=toBitArray(indices[ii])*2**(maxdepth-1-ii)
-        
-    return xyz
-    
-    
 @nb.njit
 def anyMatch(searchArray,searchVals):
     """
@@ -666,9 +657,9 @@ def index2pos(ndx,dX):
 
     Parameters
     ----------
-    ndx : int64
+    ndx : uint64
         Index to convert.
-    dX : int64
+    dX : uint64
         Number of points per axis.
 
     Returns
@@ -677,11 +668,20 @@ def index2pos(ndx,dX):
         DESCRIPTION.
 
     """
-    arr=[]
+    arr=np.empty(3,dtype=np.uint64)
     for ii in range(3):
-        arr.append(ndx%dX)
-        ndx=ndx//dX
-    return np.array(arr)
+        a,b=divmod(ndx,dX)
+        arr[ii]=b
+        ndx=a
+        
+        # factor=dX**(2-ii)
+        
+        # val=
+        # i,r=divmod(ndx,factor)
+        # arr[2-ii]=i
+        # ndx-=r*factor
+        
+    return arr
 
 @nb.njit()
 def pos2index(pos,dX):
@@ -701,7 +701,7 @@ def pos2index(pos,dX):
         Scalar index equivalent to [x,y,z] triple.
 
     """
-    vals=np.array([dX**n for n in range(3)])
+    vals=np.array([dX**n for n in range(3)],dtype=np.uint64)
     # tmp=np.dot(vals,pos)
     # newNdx=int(np.rint(tmp))
     
@@ -712,15 +712,59 @@ def pos2index(pos,dX):
 
 @nb.njit()
 def intdot(a,b):
-    dot=np.empty(a.shape[0],dtype=np.int64)
+    dot=np.empty(a.shape[0],dtype=np.uint64)
     
     for ii in nb.prange(a.shape[0]):
         dot[ii]=np.sum(a[ii]*b)
     
     return dot
 
+
+@nb.njit()
+def indicesWithinOctant(elList,relativePos):
+    # origin=octantListToXYZ(elList)
+    
+    # npt=relativePos.shape[0]
+    # depth=20-elList.shape[0]
+    # scale=2**depth
+    
+    # indices=np.empty(npt,dtype=np.int64)
+        
+
+    # for ii in nb.prange(npt):
+    #     pos=origin+scale*relativePos[ii]
+    #     indices[ii]=pos2index(pos,nX)
+
+    # absPos=np.empty_like(relativePos,dtype=np.uint64)
+    # for ii in nb.prange(npt):
+    #     for jj in nb.prange(3):
+    #         absPos[ii,jj]=origin[jj]+scale*relativePos[ii,jj]
+    
+    absPos=xyzWithinOctant(elList,relativePos)
+    
+    # np.array([origin+scale*pos for pos in relativePos])
+    indices=pos2index(absPos,MAXPT)
+    
+    return indices
+
+@nb.njit()
+def xyzWithinOctant(elList,relativePos):
+    origin=octantListToXYZ(elList)
+    
+    npt=relativePos.shape[0]
+    depth=MAXDEPTH-elList.shape[0]
+    scale=2**depth
+
+
+    absPos=np.empty_like(relativePos,dtype=np.uint64)
+    for ii in nb.prange(npt):
+        for jj in nb.prange(3):
+            absPos[ii,jj]=origin[jj]+scale*relativePos[ii,jj]
+            
+    return absPos
+
 @nb.njit(parallel=True)
-def indexToCoords(indices,origin,span,maxDepth):
+def indexToCoords(indices,origin,span):
     """
     
 
@@ -741,12 +785,12 @@ def indexToCoords(indices,origin,span,maxDepth):
         DESCRIPTION.
 
     """
-    nX=2**(maxDepth+1)
+    
     nPt=indices.shape[0]
     coords=np.empty((nPt,3),dtype=np.float64)
     for ii in nb.prange(nPt):
-        ijk=index2pos(indices[ii], nX+1)
-        coords[ii]=span*ijk/nX+origin
+        ijk=index2pos(indices[ii], MAXPT)
+        coords[ii]=span*ijk/(MAXPT-1)+origin
         
     return coords
 
@@ -768,64 +812,58 @@ def octantListToXYZ(octList):
 
     """
     depth=octList.shape[0]
-    intval=octantListToIndex(octList,depth)
-    XYZ=np.zeros(3,dtype=np.int64)
-    # for ii in nb.prange(depth):
-    #     XYZ+=toBitArray(octList[ii])*2**(depth-ii-1)
-    
-    # for ii in nb.prange(depth):
-    #     shift=depth-ii-1
-    #     for jj in nb.prange(3):
-    #         XYZ[jj]|=((octList[ii]>>jj)&1)<<shift
+    xyz=np.zeros(3,dtype=np.uint64)
+    for ii in nb.prange(depth):
+        scale=2**(MAXDEPTH-ii)
+        ind=octList[ii]
+        for ax in nb.prange(3):
+            if (ind>>ax)&1:
+                xyz[ax]+=scale
         
-    bitmask=2**depth-1
-    for jj in nb.prange(3):
-        XYZ[jj]=(intval>>(depth*jj))&bitmask
-        
-        # XYZ[jj]=(intval//(depth*jj))&bitmask
-        
-    return XYZ
+    return xyz
 
 
-
-
-# @nb.njit(parallel=True)
 @nb.njit()
-def octantListToIndex(octList,maxdepth):
-    '''
+def uIndexToXYZ(index):
     
-
-    Parameters
-    ----------
-    octList : TYPE
-        DESCRIPTION.
-    maxdepth : TYPE
-        DESCRIPTION.
-
-    Returns
-    -------
-    index : TYPE
-        DESCRIPTION.
-
-    '''
-    index=0
-    listdepth=octList.shape[0]
-    k=maxdepth-listdepth
     
-    for ax in nb.prange(3):
-        shift=(ax+1)*maxdepth-1
-        for jj in nb.prange(listdepth):
-            bit=(octList[jj]>>ax)&1
-            index|=bit<<(shift-jj)
-            
-            # if (octList[jj]//(2**ax))%2:
-            #     index+=2**(shift-jj)
-    
-        
-    return index
+    return index2pos(index, MAXPT)
 
 # @nb.njit(parallel=True)
 # @nb.njit()
+# def octantListToIndex(octList):
+#     '''
+    
+
+#     Parameters
+#     ----------
+#     octList : TYPE
+#         DESCRIPTION.
+
+#     Returns
+#     -------
+#     index : TYPE
+#         DESCRIPTION.
+
+#     '''
+#     index=0
+#     listdepth=octList.shape[0]
+#     k=21-listdepth
+    
+#     for ax in nb.prange(3):
+#         shift=(ax+1)*21-1
+#         for jj in nb.prange(listdepth):
+#             bit=(octList[jj]>>ax)&1
+#             index|=bit<<(shift-jj)
+            
+#             # if (octList[jj]//(2**ax))%2:
+#             #     index+=2**(shift-jj)
+    
+        
+#     return index
+
+# @nb.njit(parallel=True)
+@nb.njit()
 def octantNeighborIndexLists(ownIndexList):
     '''
     
@@ -843,8 +881,8 @@ def octantNeighborIndexLists(ownIndexList):
     '''
     ownDepth=ownIndexList.shape[0]
     nX=2**ownDepth
-    nXYZ=octantListToXYZ(ownIndexList)
-    
+    # nXYZ=octantListToXYZ(ownIndexList)
+    nXYZ=__oListReverseXYZ(ownIndexList)
     neighborLists=[]
     # keep Numba type inference happy
     nullList=[np.int64(x) for x in range(0)]
@@ -864,27 +902,30 @@ def octantNeighborIndexLists(ownIndexList):
         dr=2*dx-1
         xyz=nXYZ.copy()
         xyz[axis]+=dr
-        if np.any(xyz<0) or np.any(xyz>nX):
-            neighborLists.append(nullList)
-        else:
+        
+        neighborLists.append(__xyzToOList(xyz, ownDepth))
+        
+        # if np.any(xyz<0) or np.any(xyz>nX):
+        #     neighborLists.append(nullList)
+        # else:
             
-            idxList=[]
-            for ii in nb.prange(ownDepth):
-                ind=0
-                #HERE
-                shift=ownDepth-ii-1
-                mask=1<<shift
-                for jj in nb.prange(3):
-                    bit=(xyz[jj]&mask)>>shift
-                    ind|=(bit<<jj)
+        #     idxList=[]
+        #     for ii in nb.prange(ownDepth):
+        #         ind=0
+        #         #HERE
+        #         shift=ownDepth-ii-1
+        #         mask=1<<shift
+        #         for jj in nb.prange(3):
+        #             bit=(xyz[jj]&mask)>>shift
+        #             ind|=(bit<<jj)
                     
-                # mask=2**shift
-                # for jj in nb.prange(3):                
-                #     bit=(xyz[jj]&mask)//shift
-                #     ind+=bit*2**jj
+        #         # mask=2**shift
+        #         # for jj in nb.prange(3):                
+        #         #     bit=(xyz[jj]&mask)//shift
+        #         #     ind+=bit*2**jj
                     
-                idxList.append(ind)
-            neighborLists.append(idxList)
+        #         idxList.append(ind)
+        #     neighborLists.append(idxList)
     
             # if len(idxList)!=6:
             #     print(nn)
@@ -892,7 +933,37 @@ def octantNeighborIndexLists(ownIndexList):
             #     # print("dammit")
         
     return neighborLists
+
+@nb.njit()
+def __oListReverseXYZ(octantList):
+    depth=octantList.shape[0]
+    
+    xyz=np.zeros(3,dtype=np.int64)
+    for nn in nb.prange(depth):
+        for jj in nb.prange(3):
+            bit=(octantList[nn]>>jj)&1
+            xyz[jj]+=bit<<nn
+    
+    return xyz
             
+@nb.njit()
+def __xyzToOList(xyz,depth):
+    # keep Numba type inference happy
+    nullList=[np.int64(x) for x in nb.prange(0)]
+    xMax=2**depth-1
+    
+    if np.any(xyz>xMax) or np.any(xyz<0):
+        return nullList
+    else:
+        olist=[]
+        XYZ=xyz.astype(np.uint32)
+        for nn in nb.prange(depth):
+            k=0
+            for jj in nb.prange(3):
+                bit=(XYZ[jj]>>nn)&1
+                k+=bit<<jj
+            olist.append(k)
+        return olist
     
 class Logger():
     def __init__(self,stepName,printStart=True):

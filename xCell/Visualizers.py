@@ -952,10 +952,13 @@ def patchworkImage(axis, maskedArrays, cMap, cNorm, extent):
 def showMesh(setup):
     ax=new3dPlot(setup.mesh.bbox)
     
-    showEdges(ax, setup.mesh.nodeCoords, setup.edges,
-              setup.conductances)
-    x,y,z=np.hsplit(setup.mesh.nodeCoords,3)
-    ax.scatter3D(x,y,z,color='k',alpha=0.5,marker='.')
+    mcoord,medge=setup.getMeshGeometry()
+    
+    showEdges(ax, mcoord, medge)
+    
+    # x,y,z=np.hsplit(setup.mesh.nodeCoords,3)
+    # ax.scatter3D(x,y,z,color='k',alpha=0.5,marker='.')
+    return ax
         
 
 def getPlanarEdgePoints(coords, edges, normalAxis=2, axisCoord=0):
@@ -1355,8 +1358,7 @@ class ErrorGraph(FigureAnimator):
             pts,v=sim.getUniversalPoints()
             coords=util.indexToCoords(pts,
                                       sim.mesh.bbox[:3],
-                                      sim.mesh.span,
-                                      sim.mesh.maxDepth)
+                                      sim.mesh.span)
             sim.nodeVoltages=v
         else:
             v=sim.nodeVoltages

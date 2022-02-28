@@ -135,7 +135,7 @@ setup.logTime()
 setup.applyTransforms()
 
 pt,val=setup.getUniversalPoints()
-coords=xCell.util.indexToCoords(pt, study.bbox[:3],study.span, maxdepth)
+coords=xCell.util.indexToCoords(pt, study.bbox[:3],study.span)
 
 setup.mesh.nodeCoords=coords
 setup.nodeVoltages=val
