@@ -466,9 +466,7 @@ class Octree(Mesh):
         temp=[]
         for ii in nb.prange(numel):
             el=self.elements[ii]
-            # if ii==879:
-            #     print()
-            # elIndex=util.octantListToXYZ(np.array(el.index))
+
             elIndex=util.octantListToIndex(np.array(el.index),
                                            self.maxDepth)
             el.globalNodeIndices[0]=elIndex

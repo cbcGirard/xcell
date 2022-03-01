@@ -133,7 +133,7 @@ print('error: %g'%errEst)
 setup.logTime()
 
 
-# setup.applyTransforms()
+setup.applyTransforms()
 
 
 
@@ -154,17 +154,17 @@ setup.logTime()
 # xCell.Visualizers.showNodes3d(ax, coords, val,cMap=cmap,cNorm=cnorm)
 
 
+# 2d image
+bnd=setup.mesh.bbox[[0,3,2,4]]
+arr,_=setup.getValuesInPlane()
+cMap,cNorm=xCell.Visualizers.getCmap(setup.nodeVoltages)
+xCell.Visualizers.patchworkImage(plt.figure().gca(), 
+                                  arr, cMap, cNorm, 
+                                  extent=bnd)
 
-# bnd=setup.mesh.bbox[[0,3,2,4]]
-# arr,_=setup.getValuesInPlane()
-# cMap,cNorm=xCell.Visualizers.getCmap(setup.nodeVoltages)
-# xCell.Visualizers.patchworkImage(plt.figure().gca(), 
-#                                   arr, cMap, cNorm, 
-#                                   extent=bnd)
+
 
 ptr=xCell.Visualizers.ErrorGraph(plt.figure(),study)
-
-# ptr=xCell.Visualizers.SliceSet(plt.figure(),study)
 pdata=ptr.addSimulationData(setup)
 ptr.getArtists(0,pdata)
 

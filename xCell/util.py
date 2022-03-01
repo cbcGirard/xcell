@@ -882,7 +882,7 @@ def octantNeighborIndexLists(ownIndexList):
     ownDepth=ownIndexList.shape[0]
     nX=2**ownDepth
     # nXYZ=octantListToXYZ(ownIndexList)
-    nXYZ=__oListReverseXYZ(ownIndexList)
+    nXYZ=octListReverseXYZ(ownIndexList)
     neighborLists=[]
     # keep Numba type inference happy
     nullList=[np.int64(x) for x in range(0)]
@@ -935,7 +935,7 @@ def octantNeighborIndexLists(ownIndexList):
     return neighborLists
 
 @nb.njit()
-def __oListReverseXYZ(octantList):
+def octListReverseXYZ(octantList):
     depth=octantList.shape[0]
     
     xyz=np.zeros(3,dtype=np.int64)

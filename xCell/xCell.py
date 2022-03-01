@@ -413,11 +413,20 @@ class Simulation:
         self.transforms=transforms
         
         # # Explicit exclusion of unconnected nodes
-        self.mesh.indexMap=connInds
-        self.mesh.inverseIdxMap=util.getIndexDict(connInds)
-        self.mesh.nodeCoords=util.indexToCoords(connInds,
+        # self.mesh.indexMap=connInds
+        # self.mesh.inverseIdxMap=util.getIndexDict(connInds)
+        # self.mesh.nodeCoords=util.indexToCoords(connInds,
+        #                                         self.mesh.bbox[:3],
+        #                                         self.mesh.span)
+        
+        self.mesh.indexMap=allInds
+        self.mesh.inverseIdxMap=util.getIndexDict(allInds)
+        self.mesh.nodeCoords=util.indexToCoords(allInds,
                                                 self.mesh.bbox[:3],
                                                 self.mesh.span)
+        
+        
+        
         
         # newEdges=util.renumberIndices(edges, connInds)
         # self.edges=newEdges
@@ -1323,9 +1332,10 @@ class Simulation:
                 nodes=[self.mesh.inverseIdxMap[n] for n in elUind]
                 interp=el.getPlanarValues(data[nodes],axis=axis,coord=point)
                 
-                xy0=util.octantListToXYZ(np.array(el.index))[notAx]
-                
-                xys=np.array([xy0+np.array([x,y]) for y in [0,1] for x in [0,1]])
+                # xy0=util.octantListToXYZ(np.array(el.index))[notAx]
+                xy0=util.octListReverseXYZ(np.array(el.index))[notAx]
+
+                xys=np.array([xy0.astype(np.int_)+np.array([x,y]) for y in [0,1] for x in [0,1]])
                 pts.extend(nodes)
                 vals.extend(interp)
                 # xy.extend(xys)
