@@ -1023,12 +1023,14 @@ class FigureAnimator:
             self.prefs = dict()
         else:
             self.prefs = prefs
-
-        self.setupFigure()
-        
+            
         self.dataSets=[]
         self.dataCat=[]
         self.dataScales={}
+        
+        self.setupFigure()
+        
+
         
 
     def setupFigure(self):
@@ -1202,8 +1204,8 @@ class SliceSet(FigureAnimator):
             dataSet=[data]
         
         
-        vmap, vnorm = getCmap(self.vbounds.get())
-        emap, enorm = getCmap(self.errbounds.get(),
+        vmap, vnorm = getCmap(self.dataScales['vbounds'].get())
+        emap, enorm = getCmap(self.dataScales['errbounds'].get(),
                               forceBipolar=True)
         artistSet = []
 

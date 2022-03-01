@@ -32,9 +32,14 @@ datadir='/home/benoit/smb4k/ResearchData/Results/studyTst/'
 # filterVals=["adaptive","uniform"]
 # filterVals=['adaptive']
 
-studyPath=datadir+"dualComp"
+# studyPath=datadir+"dualComp"
+# filterCategories=['Element type']
+# filterVals=['Face','Admittance']
+
+studyPath=datadir+"reset"
 filterCategories=['Element type']
-filterVals=['Face','Admittance']
+filterVals=['Admittance']
+
 
 xmax=1e-4
 
@@ -62,8 +67,8 @@ staticPlots=False
 #             xCell.Visualizers.SliceSet,
 #             xCell.Visualizers.CurrentPlot]
 
-
-plotters=[xCell.Visualizers.ErrorGraph]
+plotters=[xCell.Visualizers.SliceSet]
+# plotters=[xCell.Visualizers.ErrorGraph]
 
 # ptr=xCell.Visualizers.ErrorGraph(plt.figure(), study)
 
