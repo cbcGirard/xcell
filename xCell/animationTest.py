@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 meshtype='adaptive'
 # studyPath='Results/studyTst/miniCur/'#+meshtype
 datadir='/home/benoit/smb4k/ResearchData/Results/studyTst/'#+meshtype
-studyPath=datadir+'dualComp/'
+studyPath=datadir+'post-renumber/'
 
 xmax=1e-4
 sigma=np.ones(3)
@@ -52,8 +52,8 @@ lastNx=0
 # tstCat='Vsrc?'
 
 # tstVals=['Admittance','FEM']
-tstVals=['Admittance','Face']
-# tstVals=['Face']
+# tstVals=['Admittance','Face']
+tstVals=['Admittance']
 tstCat='Element type'
 
 if generate:

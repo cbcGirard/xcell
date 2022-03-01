@@ -1027,12 +1027,11 @@ class FigureAnimator:
         else:
             self.prefs = prefs
 
-        self.setupFigure()
-        
         self.dataSets=[]
         self.dataCat=[]
         self.dataScales={}
         
+        self.setupFigure()
 
     def setupFigure(self):
         pass
@@ -1735,3 +1734,44 @@ class ScaleRange:
         return out
 
 
+def hideBorders(axis,hidex=False):
+    axis.yaxis.set_visible(False)
+    [axis.spines[k].set_visible(False) for k in axis.spines]
+    if hidex:
+        axis.xaxis.set_visible(False)
+
+
+
+class SingleSlice(FigureAnimator):
+    def __init__(self, fig, study):
+        self.bnds=self.study.bbox[[0,3,2,4]]
+        super().__init__(fig,study)
+        self.dataScales={
+            'spaceV':ScaleRange()
+            }
+            
+        
+    def getArtists(self):
+        pass
+        
+    def addSimulationData(self, sim):
+        
+        cMap,cNorm=getCmap(self.dataScales['spaceV'].get())
+        
+        for data in self.dataSets:
+            patchworkImage(self.ax, 
+                           data['spaceV'], cMap, cNorm, 
+                           self.bnds)
+        
+    def setupFigure(self):
+        fig, axes=plt.subplots(2, 2, gridspec_kw={'height_ratios': [9, 1], 'width_ratios':[9,1]})
+        ax=axes[0,0]
+        tax=axes[1,0]
+        cax=axes[0,1]
+        nonax=axes[1,1]
+        tax.set_xlabel('Time [ms]')
+        tax.yaxis.set_visible(False)
+        [tax.spines[k].set_visible(False) for k in tax.spines]
+
+        self.axes=[ax,cax,tax]
+        self.fig=fig

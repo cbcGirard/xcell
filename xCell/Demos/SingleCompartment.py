@@ -229,15 +229,16 @@ for tval,ival,vval in zip(tvec,ivec,vvec):
         v=setup.iterativeSolve()
         lastI=ival
         lastNumEl=numEl
-    
+        
+        study.newLogEntry()
+        # study.saveData(setup,'_'+str(setup.iteration))
     else:
         # vdof=setup.getDoFs()
         # v=setup.iterativeSolve(vGuess=vdof)
         v=setup.nodeVoltages*(ival/lastI)
         setup.nodeVoltages=v
     
-    study.newLogEntry()
-    study.saveData(setup,'_'+str(setup.iteration))
+
     
     setup.iteration+=1
     setup.stepLogs=[]

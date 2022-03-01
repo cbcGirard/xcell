@@ -20,7 +20,7 @@ studyPath='Results/studyTst/dual/'
 elementType='Admittance'
 
 xmax=1e-4
-maxdepth=4
+maxdepth=11
 
 sigma=np.ones(3)
 
@@ -36,8 +36,8 @@ regularize=False
 vsrc=1.
 isrc=vsrc*4*np.pi*sigma*1e-6
 
-# bbox=np.append(-xmax*np.ones(3),xmax*np.ones(3))
-bbox=np.append(np.zeros(3),xmax*np.ones(3))
+bbox=np.append(-xmax*np.ones(3),xmax*np.ones(3))
+# bbox=np.append(np.zeros(3),xmax*np.ones(3))
 # if dual:
 #     bbox+=xmax*2**(-maxdepth)
 
@@ -102,7 +102,7 @@ else:
     setup.makeAdaptiveGrid(metric,maxdepth)
 
 
-  
+
 
 def boundaryFun(coord):
     r=np.linalg.norm(coord)
@@ -159,8 +159,8 @@ setup.logTime()
 # arr,_=setup.getValuesInPlane()
 # cMap,cNorm=xCell.Visualizers.getCmap(setup.nodeVoltages)
 # xCell.Visualizers.patchworkImage(plt.figure().gca(), 
-#                                  arr, cMap, cNorm, 
-#                                  extent=bnd)
+#                                   arr, cMap, cNorm, 
+#                                   extent=bnd)
 
 ptr=xCell.Visualizers.ErrorGraph(plt.figure(),study)
 
@@ -168,7 +168,7 @@ ptr=xCell.Visualizers.ErrorGraph(plt.figure(),study)
 pdata=ptr.addSimulationData(setup)
 ptr.getArtists(0,pdata)
 
-# setup.mesh.elementType='Admittance'
+# # setup.mesh.elementType='Admittance'
 # setup.finalizeMesh()
 
 # els=setup.getElementsInPlane()
@@ -176,14 +176,14 @@ ptr.getArtists(0,pdata)
 # medges=xCell.util.renumberIndices(eg,setup.mesh.indexMap)
 # mcoords=setup.mesh.nodeCoords
 
-ax=xCell.Visualizers.showMesh(setup)
-# ax=plt.gca()
-# # ax=xCell.Visualizers.new3dPlot(study.bbox)
+# ax=xCell.Visualizers.showMesh(setup)
+# # ax=plt.gca()
+# # # ax=xCell.Visualizers.new3dPlot(study.bbox)
 
-xCell.Visualizers.showEdges(ax, 
-                            setup.mesh.nodeCoords, 
-                            setup.edges,
-                            setup.conductances)
+# xCell.Visualizers.showEdges(ax, 
+#                             setup.mesh.nodeCoords, 
+#                             setup.edges,
+#                             setup.conductances)
 
 # bnodes=setup.mesh.getBoundaryNodes()
 # xCell.Visualizers.showNodes3d(ax,

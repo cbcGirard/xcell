@@ -966,7 +966,7 @@ def __xyzToOList(xyz,depth):
                 k+=bit<<jj
             olist.append(k)
             
-        # olist.reverse()
+        olist.reverse()
         return olist
     
 class Logger():

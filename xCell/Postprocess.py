@@ -36,9 +36,13 @@ datadir='/home/benoit/smb4k/ResearchData/Results/studyTst/'
 # filterCategories=['Element type']
 # filterVals=['Face','Admittance']
 
-studyPath=datadir+'NEURON'
+# studyPath=datadir+'NEURON'
+# filterCategories=None
+# filterVals=None
+
+studyPath=datadir+'post-renumber'
 filterCategories=None
-filterVals=None
+filterVals=[None]
 
 xmax=1e-4
 
@@ -62,12 +66,12 @@ study=xCell.SimStudy(studyPath,bbox)
 # staticPlots=True
 staticPlots=False
 
-# plotters=[xCell.Visualizers.ErrorGraph,
-#             xCell.Visualizers.SliceSet,
-#             xCell.Visualizers.CurrentPlot]
+plotters=[xCell.Visualizers.ErrorGraph,
+            xCell.Visualizers.SliceSet,
+            xCell.Visualizers.CurrentPlot]
 
 
-plotters=[xCell.Visualizers.ErrorGraph]
+# plotters=[xCell.Visualizers.ErrorGraph]
 
 # ptr=xCell.Visualizers.ErrorGraph(plt.figure(), study)
 
