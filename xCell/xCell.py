@@ -404,20 +404,26 @@ class Simulation:
         self.logTime()
         
         self.startTiming('Renumber nodes')
-        ptIndices=np.unique(edges)
+        connInds=np.unique(edges)
+        floatInds=np.array([xf[-1] for xf in transforms],dtype=np.uint64)
+        allInds=np.concatenate((connInds,floatInds))
         
-        
-        okPts=np.isin(self.mesh.indexMap,ptIndices,assume_unique=True)
+        #label points lacking a corresponding edge (floaters in transform)
+        okPts=np.isin(self.mesh.indexMap,connInds,assume_unique=True)
         self.transforms=transforms
         
         # # Explicit exclusion of unconnected nodes
-        # self.mesh.indexMap=ptIndices
-        # self.mesh.inverseIdxMap=util.getIndexDict(ptIndices)
-        # self.mesh.nodeCoords=self.mesh.nodeCoords[okPts]
+        self.mesh.indexMap=connInds
+        self.mesh.inverseIdxMap=util.getIndexDict(connInds)
+        self.mesh.nodeCoords=util.indexToCoords(connInds,
+                                                self.mesh.bbox[:3],
+                                                self.mesh.span)
         
-        # newEdges=util.renumberIndices(edges, ptIndices)
+        # newEdges=util.renumberIndices(edges, connInds)
         # self.edges=newEdges
-        # nNodes=ptIndices.shape[0]
+        
+        
+        
         
         
         self.edges=util.renumberIndices(edges,self.mesh.indexMap)
@@ -427,7 +433,8 @@ class Simulation:
         self.nodeRoleTable=np.zeros(nNodes,dtype=np.int64)
         self.nodeRoleVals=np.zeros(nNodes,dtype=np.int64)
         
-        self.nodeRoleTable[~okPts]=-1
+        #tag floaters from exclusion in system of equations
+        # self.nodeRoleTable[connInds.shape[0]:]=-1
         
         self.logTime()
         
@@ -600,6 +607,23 @@ class Simulation:
         
         self.nodeVoltages=voltages
         return voltages
+
+    def getDoFs(self):
+        isDoF=self.nodeRoleTable==0
+        ndof=np.nonzero(isDoF)[0].shape[0]
+        nsrc=len(self.currentSources)
+        
+        vDoF=np.empty(nsrc+ndof)
+        
+        vDoF[:ndof]=self.nodeVoltages[isDoF]
+        
+        for nn in range(nsrc):
+            sel=np.nonzero(self.__selByDoF(nn+ndof))[0][0]
+            vDoF[ndof+nn]=self.nodeRoleTable[sel]
+            
+        return vDoF
+        
+        
 
 
     def iterativeSolve(self,vGuess=None,tol=1e-5):
@@ -1411,10 +1435,10 @@ class SimStudy:
                     plt.close(fig)
         
         
-    def saveData(self,simulation):
+    def saveData(self,simulation,addedTags=''):
         data={}
         
-        fname=os.path.join(self.studyPath,simulation.name+'.p')
+        fname=os.path.join(self.studyPath,simulation.name+addedTags+'.p')
         pickle.dump(simulation,open(fname,'wb'))
         
     def loadData(self,simName):

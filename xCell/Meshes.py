@@ -184,6 +184,8 @@ class Mesh:
         for nn in nb.prange(nElem):
             
             elem=elements[nn]
+            
+
             # elConds=elem.getConductanceVals()
             # elEdges=elem.getConductanceIndices()
             if self.elementType=='Admittance':
@@ -210,7 +212,12 @@ class Mesh:
                         #faces are shared; split original edge
                         origNode=rawEdge[ii,0]
                         xform=[]
+                        
+                        # neiNodeIdx=ii
                         neiNodeIdx=ii+(-1)**ii
+                        
+                        # if elem.depth==11:
+                        #     print()
                         for jj in nb.prange(nNei):
                             elConds.append(rawCond[ii]/nNei)
                             
@@ -321,9 +328,9 @@ class Octree(Mesh):
         """
         octs=self.tree.getTerminalOctants()
 
-        self.nodeCoords=self.getCoordsRecursively()
+        # self.nodeCoords=self.getCoordsRecursively()
         
-        d=util.getIndexDict(self.indexMap)
+        # d=util.getIndexDict(self.indexMap)
 
         self.elements=octs
         
@@ -332,7 +339,7 @@ class Octree(Mesh):
             self.getElementAdjacencies()
         
         
-        self.inverseIdxMap=d
+        # self.inverseIdxMap=d
         
         return 
     
@@ -423,6 +430,8 @@ class Octree(Mesh):
         coords=util.indexToCoords(indices,self.bbox[:3],self.span)
         
 
+
+
         return coords
     
     def getBoundaryNodes(self,asdual=False):
@@ -432,11 +441,11 @@ class Octree(Mesh):
         # else:
         #     nX=1+2**self.maxDepth
         
-        nX=1+2**(self.maxDepth+1)
+        # nX=1+2**(self.maxDepth+1)
         for ii in nb.prange(self.indexMap.shape[0]):
             nn=self.indexMap[ii]
-            xyz=util.index2pos(nn,nX)
-            if np.any(xyz==0) or np.any(xyz==(nX-1)):
+            xyz=util.index2pos(nn,util.MAXPT)
+            if np.any(xyz==0) or np.any(xyz==util.MAXPT-1):
                 bnodes.append(ii)
         
         return np.array(bnodes)
@@ -552,7 +561,14 @@ class Octree(Mesh):
                     if len(tstEl)>1:
                         ax=nn//2
                         dr=nn%2
+                        
+                        # select elements on opposite side of 
+                        # sameFace=[((n>>ax)&1) for n in range(6)]
+                        # neighbors=[tstEl[n] for n in sameFace]
+                        
                         neighbors=[n for n in tstEl if util.toBitArray(n.index[-1])[ax]^dr]
+                        # neighbors=[n for n in tstEl if util.toBitArray(n.index[-1])[ax]]
+
                     else:
                         neighbors=tstEl
                         

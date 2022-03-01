@@ -863,7 +863,7 @@ def uIndexToXYZ(index):
 #     return index
 
 # @nb.njit(parallel=True)
-@nb.njit()
+# @nb.njit()
 def octantNeighborIndexLists(ownIndexList):
     '''
     
@@ -942,17 +942,18 @@ def __oListReverseXYZ(octantList):
     for nn in nb.prange(depth):
         for jj in nb.prange(3):
             bit=(octantList[nn]>>jj)&1
-            xyz[jj]+=bit<<nn
-    
+            # xyz[jj]+=bit<<nn
+            xyz[jj]+=bit<<(depth-nn-1)
+
     return xyz
             
-@nb.njit()
+# @nb.njit()
 def __xyzToOList(xyz,depth):
     # keep Numba type inference happy
     nullList=[np.int64(x) for x in nb.prange(0)]
-    xMax=2**depth-1
+    xMax=2**depth
     
-    if np.any(xyz>xMax) or np.any(xyz<0):
+    if np.any(xyz>=xMax) or np.any(xyz<0):
         return nullList
     else:
         olist=[]
@@ -961,8 +962,11 @@ def __xyzToOList(xyz,depth):
             k=0
             for jj in nb.prange(3):
                 bit=(XYZ[jj]>>nn)&1
+                # k+=bit<<(nn-jj)
                 k+=bit<<jj
             olist.append(k)
+            
+        # olist.reverse()
         return olist
     
 class Logger():

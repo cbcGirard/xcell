@@ -32,9 +32,13 @@ datadir='/home/benoit/smb4k/ResearchData/Results/studyTst/'
 # filterVals=["adaptive","uniform"]
 # filterVals=['adaptive']
 
-studyPath=datadir+"dualComp"
-filterCategories=['Element type']
-filterVals=['Face','Admittance']
+# studyPath=datadir+"dualComp"
+# filterCategories=['Element type']
+# filterVals=['Face','Admittance']
+
+studyPath=datadir+'NEURON'
+filterCategories=None
+filterVals=None
 
 xmax=1e-4
 

@@ -1111,7 +1111,7 @@ class SliceSet(FigureAnimator):
             'vbounds':ScaleRange(),
             'errbounds':ScaleRange()}
 
-    def setupFigure(self, resetBounds=True):
+    def setupFigure(self, resetBounds=False):
         self.bnds = self.study.bbox[[0, 3, 2, 4]]
         self.grid = AxesGrid(self.fig, 211,  # similar to subplot(144)
                              nrows_ncols=(1, 2),
@@ -1296,7 +1296,7 @@ class ErrorGraph(FigureAnimator):
                 'showRelativeError':False,
                 'colorNodeConnectivity':False,
                 'onlyDoF':False,
-                'universalPts':True}
+                'universalPts':False}
         super().__init__(fig, study, prefs)
         
         self.dataScales={
