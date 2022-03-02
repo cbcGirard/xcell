@@ -12,7 +12,7 @@ import xCell
 
 
 
-from neuron import h, gui
+from neuron import h#, gui
 from neuron.units import ms, mV
 
 h.load_file('stdrun.hoc')
@@ -187,15 +187,15 @@ setup.addCurrentSource(1.,
                        np.zeros(3), 
                        1e-6)
 
-# img=xCell.Visualizers.SliceSet(plt.figure(),study)
-
-ivec=ring.cells[0].ivec.as_numpy()
-tvec=t.as_numpy()
-vvec=ring.cells[0].soma_v.as_numpy()
+ivec=ring.cells[0].ivec.as_numpy()*1e-9
+tvec=t.as_numpy()*1e-3
+vvec=ring.cells[0].soma_v.as_numpy()*1e-3
 
 imax=max(abs(ivec))
 tmax=tvec[-1]
 
+
+# img=xCell.Visualizers.SingleSlice(plt.figure(),study,tvec)
 
 lastNumEl=0
 lastI=0
@@ -204,22 +204,18 @@ for tval,ival,vval in zip(tvec,ivec,vvec):
     setup.currentSources[0].value=ival
     setup.currentTime=tval
     
-    if abs((lastI-ival)/ival)>0.5:
         
-        k=2**(-maxdepth*0.2)*(1-abs(ival)/imax)
-        
-        print(k)
-        
-        def metric(coord,kest=k):
-            r=np.linalg.norm(coord)
-            val=kest*r
-            
-            if (r+val)<1e-7:
-                val=1e-7
-            return val
-        
-        
-        setup.makeAdaptiveGrid(metric, maxdepth)
+    density=0.2+0.3*(abs(ival)/imax)
+    print('density:%.2g'%density)
+    
+    metric=xCell.makeExplicitLinearMetric(maxdepth, density)
+    
+    changed=setup.makeAdaptiveGrid(metric, maxdepth)
+    
+    
+    
+    if changed:
+        setup.meshnum+=1
         setup.finalizeMesh()
         
         numEl=len(setup.mesh.elements)
@@ -229,9 +225,9 @@ for tval,ival,vval in zip(tvec,ivec,vvec):
         v=setup.iterativeSolve()
         lastI=ival
         lastNumEl=numEl
+        setup.iteration+=1
         
-        study.newLogEntry()
-        # study.saveData(setup,'_'+str(setup.iteration))
+        study.saveData(setup,str(setup.iteration))
     else:
         # vdof=setup.getDoFs()
         # v=setup.iterativeSolve(vGuess=vdof)
@@ -239,8 +235,8 @@ for tval,ival,vval in zip(tvec,ivec,vvec):
         setup.nodeVoltages=v
     
 
-    
-    setup.iteration+=1
+    study.newLogEntry(['Timestep','Meshnum'],[setup.currentTime, setup.meshnum])
+
     setup.stepLogs=[]
     
 

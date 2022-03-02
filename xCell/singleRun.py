@@ -75,17 +75,35 @@ if meshtype=='uniform':
     setup.makeUniformGrid(newNx+newNx%2)
     print('uniform, %d per axis'%nX)
 else:
-    def metric(coord,l0Param=l0Param):
-        r=np.linalg.norm(coord)
-        val=l0Param*r #1/r dependence
-        # val=(l0Param*r**2)**(1/3) #current continuity
-        # val=(l0Param*r**4)**(1/3) #dirichlet energy continutity
-        # if val<rElec:
-        #     val=rElec
+    
+    
+    # l0min=2e-6
+    # l0max=5e-5
+    
+    # def metric(coord):
+    #     r=np.linalg.norm(coord)
+    #     val=l0min +r*l0max/xmax
         
-        if (r+val)<rElec:
-            val=rElec/2
-        return val
+    #     return val
+    
+    # metric=xCell.makeBoundedLinearMetric(l0min=2e-6,
+    #                                      l0max=1e-5,
+    #                                      domainX=xmax)
+    
+    maxdepth=11
+    metric=xCell.makeExplicitLinearMetric(maxdepth, 0.2)
+    
+    # def metric(coord,l0Param=l0Param):
+    #     r=np.linalg.norm(coord)
+    #     val=l0Param*r #1/r dependence
+    #     # val=(l0Param*r**2)**(1/3) #current continuity
+    #     # val=(l0Param*r**4)**(1/3) #dirichlet energy continutity
+    #     # if val<rElec:
+    #     #     val=rElec
+        
+    #     if (r+val)<rElec:
+    #         val=rElec/2
+    #     return val
     
     # def metric(coord):
     #     r=np.linalg.norm(coord)
@@ -154,17 +172,22 @@ setup.applyTransforms()
 # xCell.Visualizers.showNodes3d(ax, coords, val,cMap=cmap,cNorm=cnorm)
 
 
-# 2d image
-bnd=setup.mesh.bbox[[0,3,2,4]]
-arr,_=setup.getValuesInPlane()
-cMap,cNorm=xCell.Visualizers.getCmap(setup.nodeVoltages)
-xCell.Visualizers.patchworkImage(plt.figure().gca(), 
-                                  arr, cMap, cNorm, 
-                                  extent=bnd)
+# # 2d image
+# bnd=setup.mesh.bbox[[0,3,2,4]]
+# arr,_=setup.getValuesInPlane()
+# cMap,cNorm=xCell.Visualizers.getCmap(setup.nodeVoltages,forceBipolar=True)
+# xCell.Visualizers.patchworkImage(plt.figure().gca(), 
+#                                   arr, cMap, cNorm, 
+#                                   extent=bnd)
+
+# _,_,edgePoints=setup.getElementsInPlane()
+# xCell.Visualizers.showEdges2d(plt.gca(), edgePoints)
+
 
 
 
 ptr=xCell.Visualizers.ErrorGraph(plt.figure(),study)
+ptr.prefs['universalPts']=True
 pdata=ptr.addSimulationData(setup)
 ptr.getArtists(0,pdata)
 

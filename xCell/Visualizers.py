@@ -32,6 +32,17 @@ class TimingBar:
         self.fig=figure
         if axis is None:
             self.ax=figure.add_subplot()
+        else:
+            self.ax=axis
+            
+        self.ax.set_xlabel('Time [ms]')
+        self.ax.yaxis.set_visible(False)
+        [self.ax.spines[k].set_visible(False) for k in self.ax.spines]
+            
+    def getArt(self,time):
+        art=self.ax.vlines(time,0,1)
+        return art
+        
 
 
 class DataPrefs:
@@ -1170,8 +1181,8 @@ class SliceSet(FigureAnimator):
         # self.maskedVArr.append(vArrays)
         # self.maskedErrArr.append(erArrays)
 
-        # self.vbounds.update(v1d)
-        # self.errbounds.update(err1d)
+        self.dataScales['vbounds'].update(v1d)
+        self.dataScales['errbounds'].update(err1d)
         
         
         
@@ -1743,35 +1754,71 @@ def hideBorders(axis,hidex=False):
 
 
 class SingleSlice(FigureAnimator):
-    def __init__(self, fig, study):
-        self.bnds=self.study.bbox[[0,3,2,4]]
+    def __init__(self, fig, study,timevec=[]):
+        self.bnds=study.bbox[[0,3,2,4]]
         super().__init__(fig,study)
         self.dataScales={
             'spaceV':ScaleRange()
             }
+        
+        self.timevec=timevec
             
-        
-    def getArtists(self):
-        pass
-        
-    def addSimulationData(self, sim):
-        
-        cMap,cNorm=getCmap(self.dataScales['spaceV'].get())
-        
-        for data in self.dataSets:
-            patchworkImage(self.ax, 
-                           data['spaceV'], cMap, cNorm, 
-                           self.bnds)
-        
     def setupFigure(self):
         fig, axes=plt.subplots(2, 2, gridspec_kw={'height_ratios': [9, 1], 'width_ratios':[9,1]})
         ax=axes[0,0]
         tax=axes[1,0]
         cax=axes[0,1]
         nonax=axes[1,1]
-        tax.set_xlabel('Time [ms]')
-        tax.yaxis.set_visible(False)
-        [tax.spines[k].set_visible(False) for k in tax.spines]
+        fig.delaxes(nonax)
+        
+        self.tbar=TimingBar(fig, tax)
+        
+        # tax.set_xlabel('Time [ms]')
 
+        formatXYAxis(ax,self.bnds)
+        self.ax=ax
+        self.cax=cax
+        self.tax=tax
         self.axes=[ax,cax,tax]
         self.fig=fig
+        
+    def getArtists(self):
+        cMap,cNorm=getCmap(self.dataScales['spaceV'].get())
+        
+        mapper=mpl.cm.ScalarMappable(norm=cNorm,cmap=cMap)
+        self.fig.colorbar(mapper,cax=self.cax)
+        
+        artists=[]
+        
+        for ii,data in enumerate(self.dataSets):
+            art=patchworkImage(self.ax, 
+                           data['spaceV'], cMap, cNorm, 
+                           self.bnds)
+            
+            art.append(showEdges2d(self.ax, 
+                                   data['meshPts']))
+            art.append(self.tbar.getArt(self.timevec[ii]))
+            
+            artists.append(art)
+            
+        return artists
+            
+            
+        
+    def addSimulationData(self, sim):
+        
+        vArrays,_ = sim.getValuesInPlane()
+        _,_,edgePts=sim.getElementsInPlane()
+        
+        v1d=util.unravelArraySet(vArrays)
+        
+        
+        self.dataScales['spaceV'].update(v1d)
+        
+        data={
+            'spaceV':vArrays,
+            'meshPts':edgePts}
+        
+        self.dataSets.append(data)
+        
+        

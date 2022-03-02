@@ -66,12 +66,12 @@ study=xCell.SimStudy(studyPath,bbox)
 # staticPlots=True
 staticPlots=False
 
-plotters=[xCell.Visualizers.ErrorGraph,
-            xCell.Visualizers.SliceSet,
-            xCell.Visualizers.CurrentPlot]
+# plotters=[xCell.Visualizers.ErrorGraph,
+#             xCell.Visualizers.SliceSet,
+#             xCell.Visualizers.CurrentPlot]
 
 
-# plotters=[xCell.Visualizers.ErrorGraph]
+plotters=[xCell.Visualizers.ErrorGraph]
 
 # ptr=xCell.Visualizers.ErrorGraph(plt.figure(), study)
 
@@ -131,6 +131,7 @@ for ii,p in enumerate(plotters):
     for fv in filterVals:
         fname=p.__name__+'_'+str(fv)
         plotr=p(plt.figure(),study)
+        plotr.prefs['universalPts']=True
 
         plotr.getStudyData(filterCategories=filterCategories,
                   filterVals=[fv])

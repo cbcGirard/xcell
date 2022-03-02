@@ -73,7 +73,9 @@ class Simulation:
         
         self.mesh=Meshes.Mesh(bbox)
         self.currentTime=0.
-        
+        self.iteration=0
+        self.meshnum=0
+
         self.stepLogs=[]
         self.stepTime=[]
         self.memUsage=0
@@ -90,7 +92,6 @@ class Simulation:
         
         self.ptPerAxis=0
         
-        self.iteration=0
         self.asDual=False
         
         
@@ -108,17 +109,22 @@ class Simulation:
 
         Returns
         -------
-        None.
+        changed : bool
+            Whether adaptation results in a different mesh topology
 
         """
         self.startTiming("Make elements")
         self.ptPerAxis=2**maxdepth+1
         self.meshtype='adaptive'
-        self.mesh=Meshes.Octree(self.mesh.bbox,maxdepth,
-                                elementType=self.mesh.elementType)
+        
+        if type(self.mesh)!=Meshes.Octree:
+            self.mesh=Meshes.Octree(self.mesh.bbox,maxdepth,
+                                    elementType=self.mesh.elementType)
     
-        self.mesh.refineByMetric(metric)
+        changed=self.mesh.refineByMetric(metric)
         self.logTime()
+        
+        return changed
         
     def makeUniformGrid(self,nX,sigma=np.array([1.,1.,1.])):
         """
@@ -1426,6 +1432,28 @@ class SimStudy:
         
         return sim
     
+    
+    def saveMesh(self,simulation=None):
+        if simulation is None:
+            simulation=self.currentSim
+            
+        mesh=simulation.mesh
+        num=str(simulation.meshnum)
+        
+        fname=os.path.join(self.studyPath, 'mesh'+num+'.p')
+        pickle.dump(mesh,open(fname,'wb'))
+        
+        
+    def reloadMesh(self,meshnum):
+        fstem='mesh'+str(meshnum)+'.p'
+        fname=os.path.join(self.studyPath,fstem)
+        
+        mesh=pickle.load(open(fname,'rb'))
+        
+        self.currentSim.mesh=mesh
+        
+        return mesh
+    
     def newLogEntry(self,extraCols=None, extraVals=None):
         fname=os.path.join(self.studyPath,'log.csv')
         self.currentSim.logAsTableEntry(fname,extraCols=extraCols,extraVals=extraVals)
@@ -1448,14 +1476,31 @@ class SimStudy:
     def saveData(self,simulation,addedTags=''):
         data={}
         
+        meshpath=os.path.join(self.studyPath,
+                              str(simulation.meshnum)+'.p')
+        
+        if ~os.path.exists(meshpath):
+            self.saveMesh(simulation)
+        else:
+            simulation.mesh=None
+        
         fname=os.path.join(self.studyPath,simulation.name+addedTags+'.p')
         pickle.dump(simulation,open(fname,'wb'))
         
     def loadData(self,simName):
-        fname=os.path.join(self.studyPath,simName+'.p')
+        fname=self.getfile(simName)
         data=pickle.load( open(fname,'rb'))
+        if data.mesh is None:
+            meshpath=self.getfile('mesh'+str(data.meshnum))
+            mesh=pickle.load(open(meshpath,'rb'))
+            data.mesh=mesh
 
         return data
+    
+    
+    def getfile(self,name,extension='.p'):
+        filepath=os.path.join(self.studyPath,name+extension)
+        return  filepath
         
     def savePlot(self,fig,fileName,ext):
         basepath=os.path.join(self.studyPath)
@@ -1599,3 +1644,25 @@ class SimStudy:
             ani.save(os.path.join(self.studyPath,aniName+'.mp4'),fps=1)
             
         return ani
+    
+    
+
+def makeBoundedLinearMetric(l0min,l0max,domainX):
+    @nb.njit()
+    def metric(coord,a=l0min,k=l0max/domainX):
+        r=np.linalg.norm(coord)
+        val=a+r*k
+        return val
+    
+    return metric
+
+
+def makeExplicitLinearMetric(maxdepth,meshdensity):
+    param=2**(-maxdepth*meshdensity)#-1)*3**(0.5)
+    @nb.njit()
+    def metric(coord):
+        r=np.linalg.norm(coord)
+        val=r*param
+        return val
+    
+    return metric

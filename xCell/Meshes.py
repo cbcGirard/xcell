@@ -284,6 +284,7 @@ class Octree(Mesh):
         self.indexMap=np.empty(0,dtype=np.uint64)
         self.inverseIdxMap={}
         
+        self.changed=True
         
         # coord0=self.center-self.span/2
         
@@ -311,11 +312,14 @@ class Octree(Mesh):
 
         Returns
         -------
-        None.
+        changed : bool
+            Adaptation resulted in new topology
 
         """
-        self.tree.refineByMetric(l0Function, self.maxDepth)
-
+        changed=self.tree.refineByMetric(l0Function, self.maxDepth)
+        self.changed=changed
+        
+        return changed
         
     def finalize(self):
         """
@@ -340,6 +344,7 @@ class Octree(Mesh):
         
         
         # self.inverseIdxMap=d
+        self.changed=False
         
         return 
     
@@ -762,13 +767,17 @@ class Octant():
     # @nb.njit(parallel=True)
     def refineByMetric(self,l0Function,maxDepth):
         l0Target=l0Function(self.center)
+        changed=False
 
         if (self.l0>l0Target) and (self.depth<maxDepth):
-
-            self.split()
+            if len(self.children)==0:
+                changed=True
+                self.split()
             for ii in nb.prange(8):
-                self.children[ii].refineByMetric(l0Function,maxDepth)
+                changed|=self.children[ii].refineByMetric(l0Function,maxDepth)
                 
+        return changed
+    
     def printStructure(self):
         """
         Print out octree structure.
