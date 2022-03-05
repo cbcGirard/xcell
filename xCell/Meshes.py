@@ -734,12 +734,12 @@ class Octant():
             newOrigin=self.origin+offset
             newIndex=self.index.copy()
             newIndex.append(ii)
-            oxyz=np.array(self.oXYZ+scale*util.OCT_INDEX_BITS[ii],dtype=np.int32)
+            # oxyz=np.array(self.oXYZ+scale*util.OCT_INDEX_BITS[ii],dtype=np.int32)
             self.children.append(Octant(origin=newOrigin,
                                         span=newSpan,
                                         depth=self.depth+1,
-                                        index=newIndex,
-                                        oXYZ=oxyz))
+                                        index=newIndex))
+                                        # oXYZ=oxyz))
             
         # return self.children
     def getOwnCoords(self):
