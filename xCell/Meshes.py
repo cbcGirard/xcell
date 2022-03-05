@@ -614,7 +614,7 @@ class Octant():
         self.depth=depth
         self.index=index   
 
-        
+
         self.vertices=self.calcVertexTags()
         self.faces=self.calcFaceTags()
 
@@ -681,7 +681,8 @@ class Octant():
         # self.globalNodeIndices=indices
         
         # universal numbering scheme
-        steps=np.array([2*util.toBitArray(n) for n in range(8)])
+        steps=np.array([2*util.OCT_INDEX_BITS[n] for n in range(8)])
+        # steps=FEM.HEX_VERTEX_COORDS+1
         indices=util.indicesWithinOctant(np.array(self.index,dtype=np.int_),steps)
         
         self.vertices=indices
@@ -693,7 +694,9 @@ class Octant():
         xyz=np.zeros(3,dtype=np.uint32)
         
         for ii,n in enumerate(self.index):
-            xyz+=util.toBitArray(n)*2**(21-ii)
+            # xyz+=util.toBitArray(n)*2**(21-ii)
+            xyz+=util.OCT_INDEX_BITS[n]*2**(util.MAXDEPTH+1-ii)
+
             
         return xyz
     
@@ -723,17 +726,20 @@ class Octant():
     # @nb.njit(parallel=True)
     def split(self,division=np.array([0.5,0.5,0.5])):
         newSpan=self.span*division
-        
+        scale=np.array(2**(util.MAXDEPTH-len(self.index)),dtype=np.int32)
         
         for ii in nb.prange(8):
-            offset=util.toBitArray(ii)*newSpan
+            offset=newSpan*util.OCT_INDEX_BITS[ii]
+            # offset=util.toBitArray(ii)*newSpan
             newOrigin=self.origin+offset
             newIndex=self.index.copy()
             newIndex.append(ii)
+            oxyz=np.array(self.oXYZ+scale*util.OCT_INDEX_BITS[ii],dtype=np.int32)
             self.children.append(Octant(origin=newOrigin,
                                         span=newSpan,
                                         depth=self.depth+1,
-                                        index=newIndex))
+                                        index=newIndex,
+                                        oXYZ=oxyz))
             
         # return self.children
     def getOwnCoords(self):
@@ -775,8 +781,41 @@ class Octant():
                 self.split()
             for ii in nb.prange(8):
                 changed|=self.children[ii].refineByMetric(l0Function,maxDepth)
+        else:
+            #ripup logic
+            changed|=self.coarsenByMetric(l0Function)
+            
                 
         return changed
+    
+    def coarsenByMetric(self,metric):
+        #TODO: coarsening factor control
+        # oversize=False
+        oversize=self.l0<metric(self.center-self.l0)
+        # oversize=self.l0<(metric(self.center)/2)
+        
+        if oversize:
+            self.prune()
+            self.children=[]
+
+        # if len(self.children)!=0:
+        #     #delete children if all oversized
+        #     overCh=True
+        #     for ch in self.children:
+        #         overCh&=ch.coarsenByMetric(metric)
+                
+        #     if overCh:
+        #         #delete, then check if itself oversized
+        #         for ch in self.children:
+        #             del ch
+        #         # oversize=self.l0<metric(self.center-self.l0)
+                
+        return oversize
+    
+    def prune(self):
+        for ch in self.children:
+            ch.prune()
+            del ch
     
     def printStructure(self):
         """

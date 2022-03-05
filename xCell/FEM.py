@@ -274,6 +274,8 @@ HEX_FACE_COORDS=np.array([[-1,0,0],
                             [0,0,0]
                             ], dtype=np.float64)
 
+HEX_POINT_INDICES=np.vstack((1+HEX_VERTEX_COORDS,1+HEX_FACE_COORDS)).astype(np.int32)
+
 TRIL_INVERSE_MATRIX=np.linalg.inv(__toTrilinCoefOrder(HEX_VERTEX_COORDS))
 
 TRIP_INVERSE_MATRIX=np.linalg.inv(__toFaceCoefOrder(HEX_FACE_COORDS))

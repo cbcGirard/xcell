@@ -57,8 +57,8 @@ l0Param=2**(-maxdepth*0.2)
 setup=study.newSimulation()
 setup.mesh.elementType=elementType
 setup.meshtype=meshtype
-setup.mesh.minl0=2*xmax/(2**maxdepth)
-setup.ptPerAxis=1+2**maxdepth
+# setup.mesh.minl0=2*xmax/(2**maxdepth)
+# setup.ptPerAxis=1+2**maxdepth
 
 if vMode:
     setup.addVoltageSource(1,np.zeros(3),rElec)
@@ -90,7 +90,7 @@ else:
     #                                      l0max=1e-5,
     #                                      domainX=xmax)
     
-    maxdepth=11
+    maxdepth=20
     metric=xCell.makeExplicitLinearMetric(maxdepth, 0.2)
     
     # def metric(coord,l0Param=l0Param):

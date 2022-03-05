@@ -1240,7 +1240,7 @@ class Simulation:
         # closestPlane=int((point-self.mesh.bbox[axis])/self.mesh.span[axis])
         # originIdx=util.pos2index(np.array([0,0,closestPlane]),
         #                          2**Gmax+1)
-        origin=self.mesh.bbox[:3]
+        origin=self.mesh.bbox.copy()[:3]
         origin[axis]=point
         
         elements=self.mesh.getIntersectingElements(axis, coordinate=point)
@@ -1419,16 +1419,19 @@ class SimStudy:
         self.vSourceCoords=[]
         self.vSourceVals=[]
         
-    def newSimulation(self,simName=None):
+    def newSimulation(self,simName=None,keepMesh=False):
         self.nSims+=1
         
         if simName is None:
             simName='sim%d'%self.nSims
             
         sim=Simulation(simName,bbox=self.bbox)
+        if keepMesh:
+            sim.mesh=self.currentSim.mesh
         # sim.mesh.extents=self.span
         
         self.currentSim=sim
+        
         
         return sim
     
@@ -1473,7 +1476,7 @@ class SimStudy:
                     plt.close(fig)
         
         
-    def saveData(self,simulation,addedTags=''):
+    def saveData(self,simulation,baseName=None,addedTags=''):
         data={}
         
         meshpath=os.path.join(self.studyPath,
@@ -1483,8 +1486,11 @@ class SimStudy:
             self.saveMesh(simulation)
         else:
             simulation.mesh=None
+            
+        if baseName is None:
+            baseName=simulation.name
         
-        fname=os.path.join(self.studyPath,simulation.name+addedTags+'.p')
+        fname=os.path.join(self.studyPath,baseName+addedTags+'.p')
         pickle.dump(simulation,open(fname,'wb'))
         
     def loadData(self,simName):

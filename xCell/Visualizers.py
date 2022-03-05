@@ -9,7 +9,7 @@ Visualization routines for meshes
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d as p3d
 import matplotlib as mpl
-from matplotlib.animation import ArtistAnimation
+from matplotlib.animation import ArtistAnimation, FFMpegWriter
 import numpy as np
 import numba as nb
 # from scipy.interpolate import interp2d
@@ -27,7 +27,7 @@ import util
 
 
 class TimingBar:
-    def __init__(self,figure,axis):
+    def __init__(self,figure,axis,data=None):
         self.maxtime=np.inf
         self.fig=figure
         if axis is None:
@@ -35,12 +35,22 @@ class TimingBar:
         else:
             self.ax=axis
             
+            
         self.ax.set_xlabel('Time [ms]')
-        self.ax.yaxis.set_visible(False)
+       
         [self.ax.spines[k].set_visible(False) for k in self.ax.spines]
             
+        if data is not None:
+            self.ax.plot(data['x'],data['y'])
+            self.ax.set_ylabel(data['ylabel'])
+        else:
+            self.ax.yaxis.set_visible(False)
+        
     def getArt(self,time):
-        art=self.ax.vlines(time,0,1)
+        ymin,ymax=self.ax.get_ylim()
+        art=self.ax.vlines(time,ymin,ymax,
+                           colors=(0.,0.,0.,0.5),
+                           linewidths=.5)
         return art
         
 
@@ -687,7 +697,10 @@ def getCmap(vals, forceBipolar=False, logscale=False):
     mn = min(vals)
     mx = max(vals)
     va = abs(vals)
-    knee = min(va[va > 0])
+    if any(va>0):
+        knee = min(va[va > 0])
+    else:
+        knee=0
     ratio=abs(mn/mx)
     
     crosses=(mx/mn)<0
@@ -1734,7 +1747,8 @@ class ScaleRange:
             va = abs(newVals)
             self.min = min(self.min, min(newVals))
             self.max = max(self.max, max(newVals))
-            self.knee = min(self.knee, min(va[va > 0]))
+            if any(va>0):
+                self.knee = min(self.knee, min(va[va > 0]))
 
     def get(self):
         isBipolar = (self.min < 0) & (self.max > 0)
@@ -1754,8 +1768,9 @@ def hideBorders(axis,hidex=False):
 
 
 class SingleSlice(FigureAnimator):
-    def __init__(self, fig, study,timevec=[]):
+    def __init__(self, fig, study,timevec=[],tdata=None):
         self.bnds=study.bbox[[0,3,2,4]]
+        self.tdata=tdata
         super().__init__(fig,study)
         self.dataScales={
             'spaceV':ScaleRange()
@@ -1764,46 +1779,58 @@ class SingleSlice(FigureAnimator):
         self.timevec=timevec
             
     def setupFigure(self):
-        fig, axes=plt.subplots(2, 2, gridspec_kw={'height_ratios': [9, 1], 'width_ratios':[9,1]})
+        
+        fig, axes=plt.subplots(2, 2, 
+                               # gridspec_kw={
+                               #     'height_ratios': [9, 1],
+                               #     'width_ratios':[9,1]})
+                               gridspec_kw={
+                                   'height_ratios': [7,3],
+                                   'width_ratios': [9,1]})
+                               
         ax=axes[0,0]
         tax=axes[1,0]
         cax=axes[0,1]
         nonax=axes[1,1]
         fig.delaxes(nonax)
         
-        self.tbar=TimingBar(fig, tax)
+        formatXYAxis(ax,self.bnds)
+        self.tbar=TimingBar(fig, tax,self.tdata)
         
+        plt.tight_layout()
+
         # tax.set_xlabel('Time [ms]')
 
-        formatXYAxis(ax,self.bnds)
         self.ax=ax
         self.cax=cax
         self.tax=tax
         self.axes=[ax,cax,tax]
         self.fig=fig
         
-    def getArtists(self):
+    def getArtists(self,setnum,data=None):
+
+        
+        if data is None:
+            data=self.dataSets[setnum]
+
+        
         cMap,cNorm=getCmap(self.dataScales['spaceV'].get())
         
         mapper=mpl.cm.ScalarMappable(norm=cNorm,cmap=cMap)
         self.fig.colorbar(mapper,cax=self.cax)
         
-        artists=[]
+        artists=patchworkImage(self.ax, 
+                       data['spaceV'], cMap, cNorm, 
+                       self.bnds)
         
-        for ii,data in enumerate(self.dataSets):
-            art=patchworkImage(self.ax, 
-                           data['spaceV'], cMap, cNorm, 
-                           self.bnds)
-            
-            art.append(showEdges2d(self.ax, 
-                                   data['meshPts']))
-            art.append(self.tbar.getArt(self.timevec[ii]))
-            
-            artists.append(art)
+        artists.append(showEdges2d(self.ax, 
+                               data['meshPts']))
+        artists.append(self.tbar.getArt(self.timevec[setnum]))
+        
             
         return artists
             
-            
+
         
     def addSimulationData(self, sim):
         
@@ -1822,3 +1849,58 @@ class SingleSlice(FigureAnimator):
         self.dataSets.append(data)
         
         
+    def animateStudy(self,fname=None,artists=None):
+        animations=[]
+        
+        
+            
+        # if fname is None:
+        #     artists=[]
+        #     for ii in range(len(self.dataSets)):
+        #         art=self.getArtists(ii)
+        #         artists.append(art)
+                
+        #     animation=ArtistAnimation(self.fig, artists,
+        #                               interval=20,
+        #                               repeat_delay=2000,
+        #                               blit=True)
+        #     plt.show()
+        # else:
+        #     writer = FFMpegWriter(fps=50)
+        #     fpath=os.path.join(
+        #         self.study.studyPath, fname+'.mp4')
+            
+        #     with writer.saving(self.fig,fpath,dpi=None):
+        #         for ii in range(len(self.dataSets)):
+        #             self.getArtists(ii)
+        #             writer.grab_frame()
+        #             # self.resetFigure()
+        #     animation=None
+        
+ 
+        artists=[]
+        for ii in range(len(self.dataSets)):
+            art=self.getArtists(ii)
+            artists.append(art)
+            
+        animation=ArtistAnimation(self.fig, artists,
+                                  interval=20,
+                                  repeat_delay=2000,
+                                  blit=True)
+        if fname is None:
+            plt.show()
+        else:
+            # writer = FFMpegWriter(fps=50)
+            fpath=os.path.join(
+                self.study.studyPath, fname+'.mp4')
+            animation.save(fpath,fps=30)
+            
+            # with writer.saving(self.fig,fpath,dpi=None):
+            #     for ii in range(len(self.dataSets)):
+            #         self.getArtists(ii)
+            #         writer.grab_frame()
+            #         # self.resetFigure()
+            # animation=None
+            
+        return animation
+                

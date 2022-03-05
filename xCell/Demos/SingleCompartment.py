@@ -143,33 +143,24 @@ class Ring:
         
 
 
-ring=Ring(N=1,r=0)
+generate=True
 
-
-
-
-t = h.Vector().record(h._ref_t)
-h.finitialize(-65 * mV)
-h.continuerun(25)
-
-plt.scatter(t,ring.cells[0].ivec)
 
 
 
 elementType='Admittance'
 
 xmax=1e-4
-maxdepth=8
+maxdepth=6
 
 sigma=np.ones(3)
 
 
 vMode=False
 showGraphs=False
-generate=False
 saveGraphs=False
 
-dual=True
+# dual=True
 regularize=False
 
 vsrc=1.
@@ -180,12 +171,13 @@ bbox=np.append(-xmax*np.ones(3),xmax*np.ones(3))
 #     bbox+=xmax*2**(-maxdepth)
 
 
-study=xCell.SimStudy(studyPath,bbox)
-setup=study.newSimulation()
+ring=Ring(N=1,r=0,stim_t=1)
 
-setup.addCurrentSource(1.,
-                       np.zeros(3), 
-                       1e-6)
+t = h.Vector().record(h._ref_t)
+h.finitialize(-65 * mV)
+h.continuerun(15)
+
+# plt.scatter(t,ring.cells[0].ivec)
 
 ivec=ring.cells[0].ivec.as_numpy()*1e-9
 tvec=t.as_numpy()*1e-3
@@ -193,57 +185,78 @@ vvec=ring.cells[0].soma_v.as_numpy()*1e-3
 
 imax=max(abs(ivec))
 tmax=tvec[-1]
-
-
-# img=xCell.Visualizers.SingleSlice(plt.figure(),study,tvec)
-
-lastNumEl=0
-lastI=0
-for tval,ival,vval in zip(tvec,ivec,vvec):
     
-    setup.currentSources[0].value=ival
-    setup.currentTime=tval
+tdata={
+       'x':tvec,
+       'y':vvec,
+       'ylabel':'Membrane potential [V]'}
+
+study=xCell.SimStudy(studyPath,bbox)
+img=xCell.Visualizers.SingleSlice(None,study,
+                                  tvec,tdata)
+
+
+# img.tax.plot(tvec,vvec)
+# img.tax.set_ylabel('Membrane potential [V]')
+
+
+if generate:
     
+    setup=study.newSimulation()
+    setup.meshnum=-1
+    
+    setup.addCurrentSource(1.,
+                           np.zeros(3), 
+                           1e-6)
+    
+    
+    lastNumEl=0
+    lastI=0
+    for tval,ival,vval in zip(tvec,ivec,vvec):
         
-    density=0.2+0.3*(abs(ival)/imax)
-    print('density:%.2g'%density)
-    
-    metric=xCell.makeExplicitLinearMetric(maxdepth, density)
-    
-    changed=setup.makeAdaptiveGrid(metric, maxdepth)
-    
-    
-    
-    if changed:
-        setup.meshnum+=1
-        setup.finalizeMesh()
+        setup.currentSources[0].value=ival
+        setup.currentTime=tval
         
-        numEl=len(setup.mesh.elements)
+            
+        density=0.2+0.3*(abs(ival)/imax)
+        print('density:%.2g'%density)
         
-        setup.setBoundaryNodes()
+        metric=xCell.makeExplicitLinearMetric(maxdepth, density)
         
-        v=setup.iterativeSolve()
-        lastI=ival
-        lastNumEl=numEl
-        setup.iteration+=1
+        changed=setup.makeAdaptiveGrid(metric, maxdepth)
         
-        study.saveData(setup,str(setup.iteration))
-    else:
-        # vdof=setup.getDoFs()
-        # v=setup.iterativeSolve(vGuess=vdof)
-        v=setup.nodeVoltages*(ival/lastI)
-        setup.nodeVoltages=v
+        
+        
+        if changed:
+            setup.meshnum+=1
+            setup.finalizeMesh()
+            
+            numEl=len(setup.mesh.elements)
+            
+            setup.setBoundaryNodes()
+            
+            v=setup.solve()
+            lastI=ival
+            lastNumEl=numEl
+            setup.iteration+=1
+            
+            study.saveData(setup,baseName=str(setup.iteration))
+        else:
+            # vdof=setup.getDoFs()
+            # v=setup.iterativeSolve(vGuess=vdof)
+            v=setup.nodeVoltages*abs(ival/lastI)
+            setup.nodeVoltages=v
+        
+    
+        study.newLogEntry(['Timestep','Meshnum'],[setup.currentTime, setup.meshnum])
+    
+        setup.stepLogs=[]
+        
+    
+        print('%d percent done'%(int(100*tval/tmax)))
+        img.addSimulationData(setup)
+else:
+    img.getStudyData()
     
 
-    study.newLogEntry(['Timestep','Meshnum'],[setup.currentTime, setup.meshnum])
-
-    setup.stepLogs=[]
-    
-
-    print('%d percent done'%(int(100*tval/tmax)))
-    # img.addSimulationData(setup)
-    
-    
-# art=img.getArtists(0)
-
-# img.animateStudy(None,art)
+ani=img.animateStudy('init')

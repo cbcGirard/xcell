@@ -6,14 +6,19 @@ Created on Sat Feb 26 11:43:57 2022
 @author: benoit
 """
 
+import numba as nb
+nb.config.DISABLE_JIT=0
+
 import xCell
 import numpy as np
+
+
 
 nX=xCell.util.MAXPT
 
 origin=np.zeros(3)
 span=np.ones(3)
-maxdepth=6
+maxdepth=10
 bbox=np.concatenate((origin,span))
 
 MAXDEPTH=xCell.util.MAXDEPTH
@@ -71,27 +76,31 @@ def testSyntheticElement():
 
 
 
-
-
-def metric(coords):
-    r=np.linalg.norm(coords)/16
-    return r
-
-setup=xCell.Simulation("", bbox)
-setup.makeAdaptiveGrid(metric, maxdepth)
-
-# setup.mesh.elementType='Face'
-
-setup.finalizeMesh()
-
-for el in setup.mesh.elements:
-    indV=el.vertices
-    coordV=xCell.util.indexToCoords(indV, origin, span)
-    assert np.equal(coordV[0],el.origin).all()
-    assert np.equal(coordV[-1],el.origin+el.span).all()
+def testSyntheticMesh(maxdepth):
     
-    indF=el.faces
-    coordF=xCell.util.indexToCoords(indF, origin, span)
+    metric=xCell.makeExplicitLinearMetric(maxdepth, 0.2)
     
+    setup=xCell.Simulation("", bbox)
+    setup.makeAdaptiveGrid(metric, maxdepth)
     
-    assert np.equal(coordF[-1],el.center).all(), str(coordF[-1])+'=/='+str(el.center)
+    # setup.mesh.elementType='Face'
+    
+    setup.finalizeMesh()
+    
+    # for el in setup.mesh.elements:
+    #     indV=el.vertices
+    #     coordV=xCell.util.indexToCoords(indV, origin, span)
+    #     assert np.equal(coordV[0],el.origin).all()
+    #     assert np.equal(coordV[-1],el.origin+el.span).all()
+        
+    #     indF=el.faces
+    #     coordF=xCell.util.indexToCoords(indF, origin, span)
+        
+        
+    #     assert np.equal(coordF[-1],el.center).all(), str(coordF[-1])+'=/='+str(el.center)
+        
+    return setup
+    
+maxdepth=20
+# testSyntheticElement()
+setup=testSyntheticMesh(maxdepth)
