@@ -8,7 +8,7 @@ Regularization tests
 
 
 import numpy as np
-import numba as nb
+# import numba as nb
 import xCell
 import matplotlib.pyplot as plt
 
@@ -20,7 +20,7 @@ studyPath='Results/studyTst/dual/'
 elementType='Admittance'
 
 xmax=1e-4
-maxdepth=11
+maxdepth=16
 
 sigma=np.ones(3)
 
@@ -132,7 +132,7 @@ def boundaryFun(coord):
 # medges=setup.edges
 
 
-setup.mesh.elementType='Face'
+# setup.mesh.elementType='Face'
 # setup.asDual=True
 setup.finalizeMesh()
 
@@ -144,13 +144,15 @@ v=setup.iterativeSolve(None,1e-9)
 setup.getMemUsage(True)
 setup.printTotalTime()
 
+
+setup.applyTransforms()
 setup.startTiming('Estimate error')
 errEst,_,_,_=setup.calculateErrors()#srcMag,srcType,showPlots=showGraphs)
 print('error: %g'%errEst)
 setup.logTime()
 
 
-setup.applyTransforms()
+
 
 
 
@@ -184,11 +186,14 @@ setup.applyTransforms()
 
 
 
-
+##### ERROR GRAPH
 ptr=xCell.Visualizers.ErrorGraph(plt.figure(),study)
 ptr.prefs['universalPts']=True
 pdata=ptr.addSimulationData(setup)
 ptr.getArtists(0,pdata)
+
+
+
 
 # # setup.mesh.elementType='Admittance'
 # setup.finalizeMesh()

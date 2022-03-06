@@ -16,14 +16,12 @@ import resource
 import matplotlib.ticker as tickr
 
 import psutil
-
+from FEM import HEX_POINT_INDICES
 
 # Atrocious typing hack to force use of uint64 
 MAXDEPTH=np.array(20,dtype=np.uint64)[()]
 MAXPT=np.array(2**(MAXDEPTH+1)+1,dtype=np.uint64)[()]
 
-# nb.config.DISABLE_JIT=0
-# nb.config.DEBUG_TYPEINFER=0
 
 # insert subset in global: main[subIndices]=subValues
 # get subset: subVals=main[boolMask]
@@ -168,7 +166,7 @@ def condenseIndices(globalMask):
     return whereSubset
 
 # @nb.njit(parallel=True)
-@nb.njit(cache=True)
+@nb.njit()
 def getIndexDict(sparseIndices):
     """
     Get a dict of subsetIndex: globalIndex.
@@ -614,7 +612,7 @@ def getCurrentVector(interpolant,location):
     return vecVals
 
 
-@nb.njit(cache=True)#,parallel=True)
+@nb.njit()#,parallel=True)
 # @nb.njit(['int64[:](int64, int64)', 'int64[:](int64, Omitted(int64))'])
 def toBitArray(val,nBits=3):
     return np.array([(val>>n)&1 for n in range(nBits)])
@@ -655,7 +653,7 @@ def anyMatch(searchArray,searchVals):
     
     return False
 
-@nb.njit(cache=True)
+@nb.njit()
 def index2pos(ndx,dX):
     """
     Convert scalar index to [x,y,z] indices.
@@ -688,7 +686,7 @@ def index2pos(ndx,dX):
         
     return arr
 
-@nb.njit(cache=True)
+@nb.njit()
 def pos2index(pos,dX):
     """
     Convert [x,y,z] indices to a scalar index
@@ -715,7 +713,7 @@ def pos2index(pos,dX):
     
     return newNdx
 
-@nb.njit(cache=True)#,parallel=True)
+@nb.njit()#,parallel=True)
 def intdot(a,b):
     dot=np.empty(a.shape[0],dtype=np.uint64)
     
@@ -725,7 +723,7 @@ def intdot(a,b):
     return dot
 
 
-@nb.njit(cache=True)
+@nb.njit()
 def indicesWithinOctant(elList,relativePos):
     # origin=octantListToXYZ(elList)
     
@@ -752,7 +750,19 @@ def indicesWithinOctant(elList,relativePos):
     
     return indices
 
-@nb.njit(cache=True,parallel=True)
+
+# @nb.njit(parallel=True)
+# def bulkCalcOctantIndices(elLists,elDepths):
+#     numel=elLists.shape[0]
+#     inds=np.empty((numel,15),dtype=np.uint64)
+#     for nel in nb.prange(numel):
+#         elList=elLists[nel,:elDepths[nel]]
+#         inds[nel,:]=indicesWithinOctant(elList,
+#                                        HEX_POINT_INDICES)
+        
+#     return inds
+    
+@nb.njit(parallel=True)
 def xyzWithinOctant(elList,relativePos):
     origin=octantListToXYZ(elList)
     
@@ -768,7 +778,7 @@ def xyzWithinOctant(elList,relativePos):
             
     return absPos
 
-@nb.njit(cache=True,parallel=True,)
+@nb.njit(parallel=True,)
 def indexToCoords(indices,origin,span):
     """
     
@@ -800,7 +810,7 @@ def indexToCoords(indices,origin,span):
     return coords
 
 # @nb.njit(parallel=True)
-@nb.njit(cache=True)#,parallel=True)
+@nb.njit()#,parallel=True)
 def octantListToXYZ(octList):
     """
     
@@ -828,7 +838,7 @@ def octantListToXYZ(octList):
     return xyz
 
 
-@nb.njit(cache=True)
+@nb.njit()
 def uIndexToXYZ(index):
     
     
@@ -868,7 +878,7 @@ def uIndexToXYZ(index):
 #     return index
 
 # @nb.njit(parallel=True)
-# @nb.njit(cache=True,parallel=True)
+# @nb.njit(parallel=True)
 def octantNeighborIndexLists(ownIndexList):
     '''
     
@@ -939,7 +949,7 @@ def octantNeighborIndexLists(ownIndexList):
         
     return neighborLists
 
-@nb.njit(cache=True)#,parallel=True)
+@nb.njit()#,parallel=True)
 def octListReverseXYZ(octantList):
     depth=octantList.shape[0]
     
@@ -952,7 +962,7 @@ def octListReverseXYZ(octantList):
 
     return xyz
             
-@nb.njit(cache=True)#,parallel=True)
+@nb.njit()#,parallel=True)
 def __xyzToOList(xyz,depth):
     # keep Numba type inference happy
     nullList=[np.int64(x) for x in nb.prange(0)]

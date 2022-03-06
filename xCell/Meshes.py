@@ -603,7 +603,7 @@ class Octree(Mesh):
 #     ]
 # @nb.experimental.jitclass(spec=octantspec)
 class Octant():
-    def __init__(self,origin, span,depth=0,sigma=np.ones(3),index=[]):
+    def __init__(self,origin, span,depth=0,sigma=np.ones(3),index=[],oXYZ=np.zeros(3,dtype=np.int32)):
         # super().__init__(origin, span, sigma)
         self.origin=origin
         self.span=span
@@ -613,14 +613,17 @@ class Octant():
         self.children=[]
         self.depth=depth
         self.index=index   
-
-
-        self.vertices=self.calcVertexTags()
-        self.faces=self.calcFaceTags()
+        
+        rdepth=util.MAXDEPTH-depth
+        
+        #don't calculate indices here, since we might split later
+        self.vertices=[]
+        self.faces=[]
 
         self.sigma=sigma
         
         self.neighbors=6*[[]]
+        self.oXYZ=oXYZ
         
 
 
@@ -658,63 +661,7 @@ class Octant():
             else:
                 ch.__recreateTree(clist)
                 
-        
-        
-    def calcVertexTags(self):#,maxdepth):
-        # #old numbering scheme
-        # maxdepth=self.maxdepth
-        # nX=2**maxdepth
-     
-        # toGlobal=np.array([(nX+1)**n for n in range(3)])
-        
-        # xyz=np.zeros(3,dtype=np.int64)
-        # for ii,idx in enumerate(self.index):
-        #     ldepth=maxdepth-ii-1
-        #     step=2**ldepth
-        #     xyz+=step*util.toBitArray(idx)
-            
-        # ownstep=2**(maxdepth-self.depth)
-        
-        # ownXYZ=[xyz+ownstep*util.toBitArray(i) for i in range(8)]
-        # indices=np.array([np.dot(ndxlist,toGlobal) for ndxlist in ownXYZ])
-            
-        # self.globalNodeIndices=indices
-        
-        # universal numbering scheme
-        steps=np.array([2*util.OCT_INDEX_BITS[n] for n in range(8)])
-        # steps=FEM.HEX_VERTEX_COORDS+1
-        indices=util.indicesWithinOctant(np.array(self.index,dtype=np.int32),steps)
-        
-        self.vertices=indices
-               
-        return indices
-    
-    def __originXYZ(self):
-        # M=self.maxdepth
-        xyz=np.zeros(3,dtype=np.uint32)
-        
-        for ii,n in enumerate(self.index):
-            # xyz+=util.toBitArray(n)*2**(21-ii)
-            xyz+=util.OCT_INDEX_BITS[n]*2**(util.MAXDEPTH+1-ii)
-
-            
-        return xyz
-    
-    def calcFaceTags(self):#,maxdepth):
-        steps=np.array([[0,1,1],
-                        [2,1,1],
-                        [1,0,1],
-                        [1,2,1],
-                        [1,1,0],
-                        [1,1,2],
-                        [1,1,1]
-                        ])
-        
-        indices=util.indicesWithinOctant(np.array(self.index, dtype=np.int32),steps)
-        
-        self.faces=indices
-        
-        return indices
+       
             
         
     def countElements(self):
@@ -726,7 +673,7 @@ class Octant():
     # @nb.njit(parallel=True)
     def split(self,division=np.array([0.5,0.5,0.5])):
         newSpan=self.span*division
-        scale=np.array(2**(util.MAXDEPTH-len(self.index)),dtype=np.int32)
+        # scale=np.array(2**(util.MAXDEPTH-len(self.index)),dtype=np.int32)
         
         for ii in nb.prange(8):
             offset=newSpan*util.OCT_INDEX_BITS[ii]
@@ -742,8 +689,8 @@ class Octant():
                                         # oXYZ=oxyz))
             
         # return self.children
-    def getOwnCoords(self):
-        return [self.origin+self.span*util.toBitArray(n) for n in range(8)]
+    # def getOwnCoords(self):
+    #     return [self.origin+self.span*util.toBitArray(n) for n in range(8)]
 
     
     def getCoordsRecursively(self,maxdepth,asDual=False):
@@ -859,6 +806,24 @@ class Octant():
 
         """
         if len(self.children)==0:
+            # oxyz=np.zeros(3,dtype=np.int32)
+            # for ii,v in enumerate(self.index):
+            #     oxyz+=2**(FEM.MAXDEPTH-ii)*util.OCT_INDEX_BITS[ii]
+                
+            # scale=2**(FEM.MAXDEPTH-self.depth)
+            
+            # xyz=oxyz+scale*FEM.HEX_POINT_INDICES
+            # pts=[]
+            # for inds in xyz:
+            #     for 
+                
+                
+            elList=np.array(self.index,dtype=np.int8)
+            inds=util.indicesWithinOctant(elList,FEM.HEX_POINT_INDICES)
+            self.vertices=inds[:8]
+            self.faces=inds[8:]
+            # self.vertices=self.calcVertexTags()
+            # self.faces=self.calcFaceTags()
             return [self]
         else:
             
@@ -941,8 +906,11 @@ class Octant():
         vertOrder=np.array([0, 1, 3, 4, 10, 11, 13, 14])
         faceOrder=np.array([6, 8, 5, 9, 2, 12, 7])
         
-        indV=self.calcVertexTags()
-        indF=self.calcFaceTags()
+        # indV=self.calcVertexTags()
+        # indF=self.calcFaceTags()
+        
+        indV=self.vertices
+        indF=self.faces
         
         if knownValues.shape[0]==8:
             vVert=knownValues
