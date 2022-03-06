@@ -90,7 +90,6 @@ else:
     #                                      l0max=1e-5,
     #                                      domainX=xmax)
     
-    maxdepth=20
     metric=xCell.makeExplicitLinearMetric(maxdepth, 0.2)
     
     # def metric(coord,l0Param=l0Param):

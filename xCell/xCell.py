@@ -29,8 +29,8 @@ import Geometry
 from FEM import ADMITTANCE_EDGES
 
 
-nb.config.DISABLE_JIT=0
-nb.config.DEBUG_TYPEINFER=0
+# nb.config.DISABLE_JIT=0
+# nb.config.DEBUG_TYPEINFER=0
 
 
 

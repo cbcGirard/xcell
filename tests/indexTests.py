@@ -45,37 +45,6 @@ def testSyntheticElement():
             assert np.equal(nupos,pos*scale+elOrigin).all()
         
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def testSyntheticMesh(maxdepth):
     
     metric=xCell.makeExplicitLinearMetric(maxdepth, 0.2)
@@ -87,20 +56,20 @@ def testSyntheticMesh(maxdepth):
     
     setup.finalizeMesh()
     
-    # for el in setup.mesh.elements:
-    #     indV=el.vertices
-    #     coordV=xCell.util.indexToCoords(indV, origin, span)
-    #     assert np.equal(coordV[0],el.origin).all()
-    #     assert np.equal(coordV[-1],el.origin+el.span).all()
+    for el in setup.mesh.elements:
+        indV=el.vertices
+        coordV=xCell.util.indexToCoords(indV, origin, span)
+        assert np.equal(coordV[0],el.origin).all()
+        assert np.equal(coordV[-1],el.origin+el.span).all()
         
-    #     indF=el.faces
-    #     coordF=xCell.util.indexToCoords(indF, origin, span)
+        indF=el.faces
+        coordF=xCell.util.indexToCoords(indF, origin, span)
         
         
-    #     assert np.equal(coordF[-1],el.center).all(), str(coordF[-1])+'=/='+str(el.center)
+        assert np.equal(coordF[-1],el.center).all(), str(coordF[-1])+'=/='+str(el.center)
         
     return setup
     
-maxdepth=20
+maxdepth=5
 # testSyntheticElement()
 setup=testSyntheticMesh(maxdepth)

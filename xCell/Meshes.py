@@ -683,7 +683,7 @@ class Octant():
         # universal numbering scheme
         steps=np.array([2*util.OCT_INDEX_BITS[n] for n in range(8)])
         # steps=FEM.HEX_VERTEX_COORDS+1
-        indices=util.indicesWithinOctant(np.array(self.index,dtype=np.int_),steps)
+        indices=util.indicesWithinOctant(np.array(self.index,dtype=np.int32),steps)
         
         self.vertices=indices
                
@@ -710,7 +710,7 @@ class Octant():
                         [1,1,1]
                         ])
         
-        indices=util.indicesWithinOctant(np.array(self.index, dtype=np.int_),steps)
+        indices=util.indicesWithinOctant(np.array(self.index, dtype=np.int32),steps)
         
         self.faces=indices
         
