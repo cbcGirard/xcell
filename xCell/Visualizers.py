@@ -1063,7 +1063,7 @@ class FigureAnimator:
     def addSimulationData(self, sim):
         pass
 
-    def animateStudy(self, fname=None,artists=None):
+    def animateStudy(self, fname=None,artists=None,fps=1.0):
         
         animations=[]
 
@@ -1072,7 +1072,7 @@ class FigureAnimator:
     
             animation = ArtistAnimation(self.fig,
                                         artists,
-                                        interval=1000,
+                                        interval=1000/fps,
                                         repeat_delay=2000,
                                         blit=False)
     
@@ -1084,7 +1084,7 @@ class FigureAnimator:
                 animation.save(os.path.join(
                     self.study.studyPath, fname+'.mp4'),
                     # writer=writer)
-                    fps=1.0)
+                    fps=fps)
             animations.append(animation)
 
         return animations
@@ -1484,7 +1484,7 @@ class ErrorGraph(FigureAnimator):
             self.rColors.append(connFilt)
             data['rColors']=connFilt
         
-        
+        self.dataSets.append(data)
         return data
 
     def getArtists(self,setnum,data=None):

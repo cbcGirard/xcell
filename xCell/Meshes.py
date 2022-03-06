@@ -806,24 +806,8 @@ class Octant():
 
         """
         if len(self.children)==0:
-            # oxyz=np.zeros(3,dtype=np.int32)
-            # for ii,v in enumerate(self.index):
-            #     oxyz+=2**(FEM.MAXDEPTH-ii)*util.OCT_INDEX_BITS[ii]
-                
-            # scale=2**(FEM.MAXDEPTH-self.depth)
-            
-            # xyz=oxyz+scale*FEM.HEX_POINT_INDICES
-            # pts=[]
-            # for inds in xyz:
-            #     for 
-                
-                
-            elList=np.array(self.index,dtype=np.int8)
-            inds=util.indicesWithinOctant(elList,FEM.HEX_POINT_INDICES)
-            self.vertices=inds[:8]
-            self.faces=inds[8:]
-            # self.vertices=self.calcVertexTags()
-            # self.faces=self.calcFaceTags()
+            self.calcIndices()
+
             return [self]
         else:
             
@@ -837,7 +821,21 @@ class Octant():
         return descendants
     
 
-    
+    def calcIndices(self):
+            # scale=2**(util.MAXDEPTH-self.depth)
+            
+            # xyz=self.oXYZ+scale*FEM.HEX_POINT_INDICES
+            # inds=util.pos2index(xyz, util.MAXPT)
+                
+                
+            elList=np.array(self.index,dtype=np.int8)
+            inds=util.indicesWithinOctant(elList,FEM.HEX_POINT_INDICES)
+            
+            
+            self.vertices=inds[:8]
+            self.faces=inds[8:]
+            # self.vertices=self.calcVertexTags()
+            # self.faces=self.calcFaceTags()
     
     def getContainingElement(self,coords):
         if len(self.children)==0:

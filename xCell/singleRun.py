@@ -132,7 +132,7 @@ def boundaryFun(coord):
 # medges=setup.edges
 
 
-# setup.mesh.elementType='Face'
+setup.mesh.elementType='Face'
 # setup.asDual=True
 setup.finalizeMesh()
 
@@ -186,11 +186,11 @@ setup.logTime()
 
 
 
-##### ERROR GRAPH
-ptr=xCell.Visualizers.ErrorGraph(plt.figure(),study)
-ptr.prefs['universalPts']=True
-pdata=ptr.addSimulationData(setup)
-ptr.getArtists(0,pdata)
+# ##### ERROR GRAPH
+# ptr=xCell.Visualizers.ErrorGraph(plt.figure(),study)
+# ptr.prefs['universalPts']=True
+# pdata=ptr.addSimulationData(setup)
+# ptr.getArtists(0,pdata)
 
 
 
