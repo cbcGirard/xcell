@@ -151,7 +151,12 @@ generate=True
 elementType='Admittance'
 
 xmax=1e-4
+
+# maxdepth=5
 maxdepth=6
+
+dmin=3
+dmax=16
 
 sigma=np.ones(3)
 
@@ -171,7 +176,8 @@ bbox=np.append(-xmax*np.ones(3),xmax*np.ones(3))
 #     bbox+=xmax*2**(-maxdepth)
 
 
-ring=Ring(N=1,r=0,stim_t=1)
+ring=Ring(N=1,r=0,stim_delay=1)
+# ring=Ring(N=5,stim_delay=1)
 
 t = h.Vector().record(h._ref_t)
 h.finitialize(-65 * mV)
@@ -183,18 +189,26 @@ ivec=ring.cells[0].ivec.as_numpy()*1e-9
 tvec=t.as_numpy()*1e-3
 vvec=ring.cells[0].soma_v.as_numpy()*1e-3
 
+ivec=ivec[::5]
+tvec=tvec[::5]
+vvec=vvec[::5]
+
 imax=max(abs(ivec))
 tmax=tvec[-1]
     
 tdata={
        'x':tvec,
        'y':vvec,
-       'ylabel':'Membrane potential [V]'}
+       'ylabel':'Membrane potential',
+       'unit':'V'}
 
 study=xCell.SimStudy(studyPath,bbox)
 img=xCell.Visualizers.SingleSlice(None,study,
                                   tvec,tdata)
 
+err=xCell.Visualizers.SingleSlice(None, study,
+                                  tvec,tdata,
+                                  datasrc='absErr')
 
 # img.tax.plot(tvec,vvec)
 # img.tax.set_ylabel('Membrane potential [V]')
@@ -218,10 +232,19 @@ if generate:
         setup.currentTime=tval
         
             
-        density=0.2+0.3*(abs(ival)/imax)
+        ################ k-param strategy
+        density=0.6*(abs(ival)/imax)
         print('density:%.2g'%density)
         
         metric=xCell.makeExplicitLinearMetric(maxdepth, density)
+        
+        # ##################### Depth strategy
+        # maxdepth=dmin+int(np.floor((dmax-dmin)*abs(ival)/imax))
+        # print('depth:%d'%maxdepth)             
+        
+        # metric=xCell.makeExplicitLinearMetric(maxdepth, 0.2)
+        
+     
         
         changed=setup.makeAdaptiveGrid(metric, maxdepth)
         
@@ -255,8 +278,10 @@ if generate:
     
         print('%d percent done'%(int(100*tval/tmax)))
         img.addSimulationData(setup)
+        err.addSimulationData(setup)
 else:
     img.getStudyData()
     
 
-ani=img.animateStudy('init')
+ani=img.animateStudy('init',fps=10.)
+erAni=err.animateStudy('error',fps=10.)

@@ -112,20 +112,6 @@ def __eliminateRowsLoop(rowIdx, colIdx, count):
     # return tup
     
 
-def getLinearMetric(minl0,maxl0,domainSize):
-    rmin=np.sqrt(3)*minl0/2
-    rmax=np.sqrt(3)*(domainSize-maxl0/2)
-    k=(maxl0-minl0)/(rmax-rmin)
-    b=minl0-k*rmin
-    
-    @nb.njit()
-    def metric(coord):
-        r=np.linalg.norm(coord)
-        return k*r+b
-    
-    return metric
-
-
 def deduplicateEdges(edges,conductances):
     N=max(edges.ravel())+1
     mat=scipy.sparse.coo_matrix((conductances,
@@ -192,8 +178,15 @@ def getIndexDict(sparseIndices):
         
     return indexDict
 
+def getPyDict(sparseIndices):
+    dic={}
+    for ii,v in enumerate(sparseIndices):
+        dic[v]=ii
+    return dic
+
 
 @nb.njit(parallel=True)
+# @nb.vectorize([nb.int64(nb.int64, nb.int64)])
 def renumberIndices(sparseIndices,denseList):
     """
     Renumber indices according to a subset.
@@ -211,76 +204,23 @@ def renumberIndices(sparseIndices,denseList):
         Edges contained in subset, according to subset ordering.
 
     """
-    renumbered=np.empty_like(sparseIndices,dtype=np.int64)
+    renumbered=np.empty_like(sparseIndices,dtype=np.uint64)
     dic=getIndexDict(denseList)
     
-    for ii in nb.prange(sparseIndices.shape[0]):
-        for jj in nb.prange(sparseIndices.shape[1]):
-            renumbered[ii,jj]=dic[sparseIndices[ii,jj]]
-            
+    if sparseIndices.ndim==1:
+        for ii in nb.prange(sparseIndices.shape[0]):
+            renumbered[ii]=dic[sparseIndices[ii]]
+    else:
+        for ii in nb.prange(sparseIndices.shape[0]):
+            for jj in nb.prange(sparseIndices.shape[1]):
+                renumbered[ii,jj]=dic[sparseIndices[ii,jj]]
+                    
     return renumbered
     
-    # hasValidNode=np.empty_like(sparseIndices,dtype=np.bool_)
-    # # hasValidNode=globalMask[edges]
-    # # for ii in range(2):
-    # for ii in nb.prange(sparseIndices.shape[1]):
-    #     hasValidNode[:,ii]=globalMask[sparseIndices[:,ii]]
-        
-    # if edges.shape[1]>1:
-    #     isValid=np.logical_and(hasValidNode[:,0],
-    #                        hasValidNode[:,1])
-    # else:
-    #     isValid=hasValidNode[:,0]
+    # dic=getIndexDict(denseList)
+    # renumbered=dic[sparseIndices]
     
-    # validEdges=edges[isValid]
-    # nValid=validEdges.shape[0]
-    # subNumberedEdges=np.empty((nValid,edges.shape[1]),
-    #                           dtype=np.int64)
-
-
-    # ### dict-based approach, roughly 2x slower for 1e6 nodes,6e6 edges
-    # subsInGlobal=getIndexDict(denseList)
-    
-    # for nn in nb.prange(nValid):
-    #     for jj in nb.prange(2):
-    #         n=validEdges[nn,jj]
-    #         subNumberedEdges[nn,jj]=subsInGlobal[n]
-    
-
-    
-    # return subNumberedEdges
-
-# @nb.njit(nb.int64[:](nb.int64[:],nb.int64[:]))
-# @nb.njit(parallel=True)
-# def sparse2denseIndex(sparseVals,denseVals):
-#     """
-#     Get the indices where each sparseVal are within DenseVals.
-    
-#     .. deprecated:: 0.0.1
-#         Use 
-#     Used for e.g. mapping a global node index to degree of freedom index
-#     Assumes one-to-one mapping of every value
-
-#     Parameters
-#     ----------
-#     sparseVals : int64[:]
-#         List of nonconsecutive values to find.
-#     denseVals : int64[:]
-#         List of values to be searched.
-
-#     Returns
-#     -------
-#     int64[:]
-#         Indices where each sparseVal occurs in denseVals.
-
-#     """
-#     idxList=np.empty_like(sparseVals, dtype=np.int64)
-#     for ii in nb.prange(sparseVals.shape[0]):
-#         sval=sparseVals[ii]
-#         idxList[ii]=reindex(sval,denseVals)
-        
-#     return idxList
-
+    # return renumbered
 @nb.njit(parallel=True)
 def octreeLoop_GetBoundaryNodesLoop(nX,indexMap):
     bnodes=[]
@@ -985,9 +925,10 @@ def __xyzToOList(xyz,depth):
         return olist
     
 class Logger():
-    def __init__(self,stepName,printStart=True):
+    def __init__(self,stepName,printout=False):
         self.name=stepName
-        if printStart:
+        self.printout=printout
+        if printout:
             print(stepName+" starting")
         self.startWall=time.monotonic()
         self.start=time.process_time()
@@ -1001,8 +942,10 @@ class Logger():
         tend=time.process_time()
         durationCPU=tend-self.start
         durationWall=tWall-self.startWall
-        engFormat=tickr.EngFormatter()
-        print(self.name+": "+engFormat(durationCPU)+ "s [CPU], "+engFormat(durationWall)+'s [wall]')
+        
+        if self.printout:
+            engFormat=tickr.EngFormatter()
+            print(self.name+": "+engFormat(durationCPU)+ "s [CPU], "+engFormat(durationWall)+'s [wall]')
         self.durationCPU=durationCPU 
         self.durationWall=durationWall
         # self.memory=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss

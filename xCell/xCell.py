@@ -55,7 +55,7 @@ class VoltageSource:
         self.radius=radius
 
 class Simulation:
-    def __init__(self,name,bbox):
+    def __init__(self,name,bbox,printSteps=False):
         
         self.currentSources=[]
         self.voltageSources=[]
@@ -75,6 +75,7 @@ class Simulation:
         self.stepLogs=[]
         self.stepTime=[]
         self.memUsage=0
+        self.print=printSteps
         
         self.nodeVoltages=np.empty(0)
         self.edges=[[]]
@@ -186,7 +187,7 @@ class Simulation:
         None.
 
         """
-        logger=util.Logger(stepName)
+        logger=util.Logger(stepName,self.print)
         self.stepLogs.append(logger)
         
     def logTime(self,logger=None):
@@ -422,7 +423,8 @@ class Simulation:
         #                                         self.mesh.span)
         
         self.mesh.indexMap=allInds
-        self.mesh.inverseIdxMap=util.getIndexDict(allInds)
+        idic=util.getPyDict(allInds)
+        self.mesh.inverseIdxMap=idic
         self.mesh.nodeCoords=util.indexToCoords(allInds,
                                                 self.mesh.bbox[:3],
                                                 self.mesh.span)
@@ -432,7 +434,6 @@ class Simulation:
         
         # newEdges=util.renumberIndices(edges, connInds)
         # self.edges=newEdges
-        
         
         
         
@@ -825,7 +826,12 @@ class Simulation:
         coords=self.mesh.nodeCoords
         
         if rvec is None:
-            r=np.linalg.norm(coords,axis=1)
+            # r=np.linalg.norm(coords,axis=1)
+            ind,v=self.getUniversalPoints()
+            coord=util.indexToCoords(ind, 
+                                     origin=self.mesh.bbox[:3], 
+                                     span=self.mesh.span)
+            r=np.linalg.norm(coord,axis=1)
         else:
             r=rvec
         
@@ -1363,11 +1369,14 @@ class Simulation:
         return maskArrays, coords
 
 
-    def getUniversalPoints(self):
+    def getUniversalPoints(self,elements=None):
         
+        if elements is None:
+            elements=self.mesh.elements
+            
         universalIndices=[]
         universalVals=[]
-        for ii in nb.prange(len(self.mesh.elements)):
+        for ii in nb.prange(len(elements)):
             el=self.mesh.elements[ii]
             
             if self.mesh.elementType=='Face':
@@ -1395,6 +1404,43 @@ class Simulation:
         #         uniV[ii]=self.nodeVoltages[inv]
         
         return uniInd,uniV
+    
+    def getCurrentsInPlane(self,axis=2,point=0.):
+        els,coords,mesh=self.getElementsInPlane(axis,point)
+        
+        if self.mesh.elementType=='Face':
+            inds=np.unique([el.faces for el in els])
+        else:
+            inds=np.unique([el.vertices for el in els])
+            
+            
+        dic=util.getPyDict(self.mesh.indexMap)
+        gInds=[dic[i] for i in inds]
+        # gInds=util.renumberIndices(inds,self.mesh.indexMap)
+        
+        inPlane=np.all(np.isin(self.edges,gInds),axis=1)
+        
+        dv=np.diff(self.nodeVoltages[self.edges[inPlane]],
+                   axis=1)
+        
+        i=self.conductances[inPlane]*dv.squeeze()
+        
+        ineg=i<0
+        
+        currents=i.copy()
+        currents[ineg]=-currents[ineg]
+        
+        otherAx=[n!=axis for n in range(3)]
+        pcoord=self.mesh.nodeCoords[:,otherAx]
+        
+        corEdge=self.mesh.edges[inPlane]
+        corEdge[ineg,:]=np.fliplr(corEdge[ineg,:])
+        
+        
+        currentPts=pcoord[corEdge]
+        
+        return currents,currentPts, mesh
+        
 
         
 class SimStudy:

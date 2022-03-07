@@ -17,10 +17,12 @@ meshtype='adaptive'
 # studyPath='Results/studyTst/miniCur/'#+meshtype
 studyPath='Results/studyTst/dual/'
 
-elementType='Admittance'
+# elementType='Admittance'
+
+elementType='Face'
 
 xmax=1e-4
-maxdepth=16
+maxdepth=12
 
 sigma=np.ones(3)
 
@@ -75,46 +77,12 @@ if meshtype=='uniform':
     setup.makeUniformGrid(newNx+newNx%2)
     print('uniform, %d per axis'%nX)
 else:
-    
-    
-    # l0min=2e-6
-    # l0max=5e-5
-    
-    # def metric(coord):
-    #     r=np.linalg.norm(coord)
-    #     val=l0min +r*l0max/xmax
-        
-    #     return val
-    
+
     # metric=xCell.makeBoundedLinearMetric(l0min=2e-6,
     #                                      l0max=1e-5,
     #                                      domainX=xmax)
     
     metric=xCell.makeExplicitLinearMetric(maxdepth, 0.2)
-    
-    # def metric(coord,l0Param=l0Param):
-    #     r=np.linalg.norm(coord)
-    #     val=l0Param*r #1/r dependence
-    #     # val=(l0Param*r**2)**(1/3) #current continuity
-    #     # val=(l0Param*r**4)**(1/3) #dirichlet energy continutity
-    #     # if val<rElec:
-    #     #     val=rElec
-        
-    #     if (r+val)<rElec:
-    #         val=rElec/2
-    #     return val
-    
-    # def metric(coord):
-    #     r=np.linalg.norm(coord)
-    #     # val=l0Param*r #1/r dependence
-    #     val=(1e-7*r**2)**(1/3) #current continuity
-    #     # val=(l0Param*r**4)**(1/3) #dirichlet energy continutity
-    #     # if val<rElec:
-    #     #     val=rElec
-        
-    #     if (r+val)<rElec:
-    #         val=rElec/2
-    #     return val
     
     setup.makeAdaptiveGrid(metric,maxdepth)
 
@@ -126,26 +94,18 @@ def boundaryFun(coord):
     return rElec/(r*np.pi*4)
 
     
-
-# setup.finalizeMesh()
-# mcoords=setup.mesh.nodeCoords
-# medges=setup.edges
-
-
-setup.mesh.elementType='Face'
-# setup.asDual=True
 setup.finalizeMesh()
 
 setup.setBoundaryNodes(boundaryFun)
 
 # v=setup.solve()
 v=setup.iterativeSolve(None,1e-9)
-
+setup.applyTransforms()
 setup.getMemUsage(True)
 setup.printTotalTime()
 
 
-setup.applyTransforms()
+
 setup.startTiming('Estimate error')
 errEst,_,_,_=setup.calculateErrors()#srcMag,srcType,showPlots=showGraphs)
 print('error: %g'%errEst)
@@ -203,14 +163,14 @@ setup.logTime()
 # medges=xCell.util.renumberIndices(eg,setup.mesh.indexMap)
 # mcoords=setup.mesh.nodeCoords
 
-# ax=xCell.Visualizers.showMesh(setup)
-# # ax=plt.gca()
-# # # ax=xCell.Visualizers.new3dPlot(study.bbox)
 
-# xCell.Visualizers.showEdges(ax, 
-#                             setup.mesh.nodeCoords, 
-#                             setup.edges,
-#                             setup.conductances)
+##### TOPOLOGY/connectivity
+ax=xCell.Visualizers.showMesh(setup)
+
+xCell.Visualizers.showEdges(ax, 
+                            setup.mesh.nodeCoords, 
+                            setup.edges,
+                            setup.conductances)
 
 # bnodes=setup.mesh.getBoundaryNodes()
 # xCell.Visualizers.showNodes3d(ax,

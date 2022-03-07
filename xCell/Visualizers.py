@@ -9,6 +9,7 @@ Visualization routines for meshes
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d as p3d
 import matplotlib as mpl
+from matplotlib.ticker import EngFormatter as eform
 from matplotlib.animation import ArtistAnimation, FFMpegWriter
 import numpy as np
 import numba as nb
@@ -36,19 +37,21 @@ class TimingBar:
             self.ax=axis
             
             
-        self.ax.set_xlabel('Time [ms]')
+        # self.ax.set_xlabel('Time [ms]')
+        self.ax.xaxis.set_major_formatter(eform('s'))
        
         [self.ax.spines[k].set_visible(False) for k in self.ax.spines]
             
         if data is not None:
             self.ax.plot(data['x'],data['y'])
             self.ax.set_ylabel(data['ylabel'])
+            self.ax.yaxis.set_major_formatter(eform(data['unit']))
         else:
             self.ax.yaxis.set_visible(False)
         
     def getArt(self,time):
         ymin,ymax=self.ax.get_ylim()
-        art=self.ax.vlines(time,ymin,ymax,
+        art=self.ax.vlines(time,.8*ymin,.8*ymax,
                            colors=(0.,0.,0.,0.5),
                            linewidths=.5)
         return art
@@ -1066,28 +1069,28 @@ class FigureAnimator:
     def animateStudy(self, fname=None,artists=None,fps=1.0):
         
         animations=[]
-
+        artists=[]
         for ii in range(len(self.dataSets)):
-            artists = self.getArtists(ii)
+            artists.append(self.getArtists(ii))
     
-            animation = ArtistAnimation(self.fig,
-                                        artists,
-                                        interval=1000/fps,
-                                        repeat_delay=2000,
-                                        blit=False)
-    
-            if fname is None:
-                plt.show()
+        animation = ArtistAnimation(self.fig,
+                                    artists,
+                                    interval=1000/fps,
+                                    repeat_delay=2000,
+                                    blit=False)
 
-            else:
-                # writer=mpl.animation.FFMpegFileWriter(fps=30)
-                animation.save(os.path.join(
-                    self.study.studyPath, fname+'.mp4'),
-                    # writer=writer)
-                    fps=fps)
-            animations.append(animation)
+        if fname is None:
+            plt.show()
 
-        return animations
+        else:
+            # writer=mpl.animation.FFMpegFileWriter(fps=30)
+            animation.save(os.path.join(
+                self.study.studyPath, fname+'.mp4'),
+                # writer=writer)
+                fps=fps)
+        animations.append(animation)
+
+        return animation
 
     def getStudyData(self, **kwargs):
         
@@ -1101,8 +1104,8 @@ class FigureAnimator:
                 dset.append(self.addSimulationData(sim))
                 dcat.append(cat)
                 
-            self.dataSets.append(dset)
-            self.dataCat.append(dcat)
+            self.dataSets=dset
+            self.dataCat=dcat
             
             
 
@@ -1222,16 +1225,22 @@ class SliceSet(FigureAnimator):
 
     def getArtists(self,setnum,data=None):
         
+        # if data is None:
+        #     dataSet=self.dataSets[setnum]
+        # else:
+        #     dataSet=[data]
+        
         if data is None:
-            dataSet=self.dataSets[setnum]
-        else:
-            dataSet=[data]
+            data=self.dataSets[setnum]
         
         
-        vmap, vnorm = getCmap(self.vbounds.get())
-        emap, enorm = getCmap(self.errbounds.get(),
+        vbounds=self.dataScales['vbounds']
+        errbounds=self.dataScales['errbounds']
+        
+        vmap, vnorm = getCmap(vbounds.get())
+        emap, enorm = getCmap(errbounds.get(),
                               forceBipolar=True)
-        artistSet = []
+
 
         vmappr = mpl.cm.ScalarMappable(norm=vnorm, cmap=vmap)
         # vmappr.set_clim((vnorm.vmin, vnorm.vmax))
@@ -1251,61 +1260,61 @@ class SliceSet(FigureAnimator):
                 insets.append(inset)
 
         # for ii in range(len(self.maskedVArr)):
-        for data in dataSet:
-            artists = []
+        # for data in dataSet:
+        artists = []
 
-            
-            # edgePoints = self.meshEdges[ii]
-            # sourceEdge = self.sourceEdges[ii]
+        
+        # edgePoints = self.meshEdges[ii]
+        # sourceEdge = self.sourceEdges[ii]
 
-            
-            vArt = patchworkImage(self.grid[0],
-                                  data['vArrays'],
-                                  vmap, vnorm,
-                                  extent=self.bnds)
-            errArt = patchworkImage(self.grid[1],
-                                    # self.maskedErrArr[ii],
-                                    data['errArrays'],
-                                    emap, enorm,
-                                    extent=self.bnds)
-            artists.extend(vArt)
-            artists.extend(errArt)
+        
+        vArt = patchworkImage(self.grid[0],
+                              data['vArrays'],
+                              vmap, vnorm,
+                              extent=self.bnds)
+        errArt = patchworkImage(self.grid[1],
+                                # self.maskedErrArr[ii],
+                                data['errArrays'],
+                                emap, enorm,
+                                extent=self.bnds)
+        artists.extend(vArt)
+        artists.extend(errArt)
 
-            # errArt=self.grid[1].imshow(err, origin='lower', extent=self.bnds,
-            #             cmap=emap, norm=enorm,interpolation='bilinear')
-            # self.grid.cbar_axes[1].colorbar(errArt)
+        # errArt=self.grid[1].imshow(err, origin='lower', extent=self.bnds,
+        #             cmap=emap, norm=enorm,interpolation='bilinear')
+        # self.grid.cbar_axes[1].colorbar(errArt)
 
-            if len(insets) > 0:
-                # artists.append(insets[0].imshow(vInterp, origin='lower', extent=self.bnds,
-                #             cmap=vmap, norm=vnorm,interpolation='bilinear'))
-                # artists.append(insets[1].imshow(err, origin='lower', extent=self.bnds,
-                #             cmap=emap, norm=enorm,interpolation='bilinear'))
-                artists.extend(patchworkImage(insets[0],
-                                              # self.maskedVArr[ii],
-                                              data['vArrays'],
-                                              vmap, vnorm,
-                                              extent=self.bnds))
-                artists.extend(patchworkImage(insets[1],
-                                              # self.maskedErrArr[ii],
-                                              data['errArrays'],
-                                              emap, enorm,
-                                              extent=self.bnds))
+        if len(insets) > 0:
+            # artists.append(insets[0].imshow(vInterp, origin='lower', extent=self.bnds,
+            #             cmap=vmap, norm=vnorm,interpolation='bilinear'))
+            # artists.append(insets[1].imshow(err, origin='lower', extent=self.bnds,
+            #             cmap=emap, norm=enorm,interpolation='bilinear'))
+            artists.extend(patchworkImage(insets[0],
+                                          # self.maskedVArr[ii],
+                                          data['vArrays'],
+                                          vmap, vnorm,
+                                          extent=self.bnds))
+            artists.extend(patchworkImage(insets[1],
+                                          # self.maskedErrArr[ii],
+                                          data['errArrays'],
+                                          emap, enorm,
+                                          extent=self.bnds))
 
-            for ax in self.grid:
-                artists.append(showEdges2d(ax, data['meshPoints']))
+        for ax in self.grid:
+            artists.append(showEdges2d(ax, data['meshPoints']))
 
-            for ax in insets:
-                artists.append(showEdges2d(ax, data['meshPoints']))
-                artists.append(showEdges2d(
-                    ax, data['sourcePoints'], edgeColors=(.5, .5, .5), alpha=.25, linestyles=':'))
+        for ax in insets:
+            artists.append(showEdges2d(ax, data['meshPoints']))
+            artists.append(showEdges2d(
+                ax, data['sourcePoints'], edgeColors=(.5, .5, .5), alpha=.25, linestyles=':'))
 
-            self.axes.extend(insets)
+        self.axes.extend(insets)
 
             # artists.append(errArt)
             # artists.append(vArt)
-            artistSet.append(artists)
+            # artistSet.append(artists)
 
-        return artistSet
+        return artists
 
     # def resetFigure(self):
     #     for ax in self.axes:
@@ -1484,16 +1493,17 @@ class ErrorGraph(FigureAnimator):
             self.rColors.append(connFilt)
             data['rColors']=connFilt
         
-        self.dataSets.append(data)
+        # self.dataSets.append(data)
         return data
 
     def getArtists(self,setnum,data=None):
         artistSet = []
         
         if data is None:
-            dataset=self.dataSets[setnum]
-        else:
-            dataset=[data]
+        #     dataset=[self.dataSets[setnum]]
+        # else:
+        #     dataset=[data]
+            data=self.dataSets[setnum]
 
         self.axV.plot(self.analyticR, self.analytic, c='b', label='Analytical')
         
@@ -1516,61 +1526,61 @@ class ErrorGraph(FigureAnimator):
             # outsideLegend(axis=self.axErr,handles=legEntries)
 
         # for ii in range(len(self.titles)):
-        for data in dataset:
+        # for data in dataset:
             
-            artists = []
-            simLine = self.axV.plot(
-                # self.simR[ii], self.sims[ii],
-                data['simR'], data['simV'],
-                                    c='k', marker='.', label='Simulated')
-            # if ii == 0:
-            #     self.axV.legend(loc='upper right')
-            
-                # outsideLegend(axis=self.axV)
-            # title=fig.suptitle('%d nodes, %d elements\nFVU= %g'%(nNodes,nElems,FVU))
-            # title = self.fig.text(0.5, 1.01,
-            #                       self.titles[ii],
-            #                       horizontalalignment='center',
-            #                       verticalalignment='bottom',
-            #                       transform=self.axV.transAxes)
-            title=animatedTitle(self.fig, #self.titles[ii])
-                                data['title'])
-                                
-            if self.prefs['colorNodeConnectivity']:
-                rcol=data['rColors']
-                nconn = toN[rcol]
-                nodeColors=colors[nconn]
-            else:
-                nodeColors='r'
-            
-            
-            errLine = self.axErr.scatter(#self.errR[ii], self.errors[ii],
-                                         data['errR'], data['errors'],
-                                         c=nodeColors, marker='.', linestyle='None')
-            errArea=self.axErr.fill_between(data['errR'],
-                                            data['errors'],
-                                           #  self.errR[ii],
-                                           # self.errors[ii],
-                                           color='r',
-                                           alpha=0.75)
+        artists = []
+        simLine = self.axV.plot(
+            # self.simR[ii], self.sims[ii],
+            data['simR'], data['simV'],
+                                c='k', marker='.', label='Simulated')
+        # if ii == 0:
+        #     self.axV.legend(loc='upper right')
+        
+            # outsideLegend(axis=self.axV)
+        # title=fig.suptitle('%d nodes, %d elements\nFVU= %g'%(nNodes,nElems,FVU))
+        # title = self.fig.text(0.5, 1.01,
+        #                       self.titles[ii],
+        #                       horizontalalignment='center',
+        #                       verticalalignment='bottom',
+        #                       transform=self.axV.transAxes)
+        title=animatedTitle(self.fig, #self.titles[ii])
+                            data['title'])
+                            
+        if self.prefs['colorNodeConnectivity']:
+            rcol=data['rColors']
+            nconn = toN[rcol]
+            nodeColors=colors[nconn]
+        else:
+            nodeColors='r'
+        
+        
+        errLine = self.axErr.scatter(#self.errR[ii], self.errors[ii],
+                                     data['errR'], data['errors'],
+                                     c=nodeColors, marker='.', linestyle='None')
+        errArea=self.axErr.fill_between(data['errR'],
+                                        data['errors'],
+                                       #  self.errR[ii],
+                                       # self.errors[ii],
+                                       color='r',
+                                       alpha=0.75)
 
 
-            #Third pane: element sizes
-            l0line=self.axL.scatter(data['elemR'],
-                                    data['elemL'],
-                # self.elemR[ii],
-                #                     self.elemL[ii],
-                                    c='k', marker='.')
+        #Third pane: element sizes
+        l0line=self.axL.scatter(data['elemR'],
+                                data['elemL'],
+            # self.elemR[ii],
+            #                     self.elemL[ii],
+                                c='k', marker='.')
 
-            # plt.tight_layout()
-            artists.append(title)
-            artists.append(errLine)
-            artists.append(simLine[0])
-            artists.append(l0line)
-            artists.append(errArea)
+        # plt.tight_layout()
+        artists.append(title)
+        artists.append(errLine)
+        artists.append(simLine[0])
+        artists.append(l0line)
+        artists.append(errArea)
 
-            artistSet.append(artists)
-        return artistSet
+            # artistSet.append(artists)
+        return artists
     
 
 
@@ -1582,6 +1592,9 @@ class CurrentPlot(FigureAnimator):
         self.crange = ScaleRange()
         self.cvals = []
         self.pts = []
+        
+        
+        self.inset=None
         if fig is None:
             self.ax = new3dPlot(study.bbox)
             self.dim = 3
@@ -1591,6 +1604,10 @@ class CurrentPlot(FigureAnimator):
                 self.ax = plt.subplot2grid((3, 3), (0, 1),
                                            colspan=2, rowspan=2,
                                            fig=fig)
+                # self.inset=addInset(self.ax,
+                #                  3*self.rElec,
+                #                  self.study.bbox[3],
+                #                  (-.2, -.2))
             else:
                 self.ax = fig.add_subplot()
                 
@@ -1605,15 +1622,18 @@ class CurrentPlot(FigureAnimator):
         
         self.normalAxis=normalAxis
         self.normalCoord=normalCoord
+        
+        self.dataScales={
+            'iRange':ScaleRange()}
 
     def addSimulationData(self, sim):
-        i, E = sim.getEdgeCurrents()
+        # i, E = sim.getEdgeCurrents()
 
-        coords = sim.mesh.nodeCoords
-        isSrc = sim.nodeRoleTable == 2
-        whichSrc = sim.nodeRoleVals[isSrc]
-        srcCoords = np.array([s.coords for s in sim.currentSources])
-        coords[isSrc] = srcCoords[whichSrc]
+        # coords = sim.mesh.nodeCoords
+        # isSrc = sim.nodeRoleTable == 2
+        # whichSrc = sim.nodeRoleVals[isSrc]
+        # srcCoords = np.array([s.coords for s in sim.currentSources])
+        # coords[isSrc] = srcCoords[whichSrc]
 
 
         if len(sim.currentSources)>0:
@@ -1626,112 +1646,145 @@ class CurrentPlot(FigureAnimator):
 
         self.iSrc.append(sim.currentSources[0].value)
 
-        if self.dim == 3:
-            eplane = E
-            iplane = i
+        # if self.dim == 3:
+        #     eplane = E
+        #     iplane = i
 
-        else:
-            #only get points in specified plane
-            centerCoord=np.zeros(3)
-            centerCoord[self.normalAxis]=self.normalCoord
-            level=sim.intifyCoords(centerCoord)[self.normalAxis]
+        # else:
+        #     #only get points in specified plane
+        #     centerCoord=np.zeros(3)
+        #     centerCoord[self.normalAxis]=self.normalCoord
+        #     level=sim.intifyCoords(centerCoord)[self.normalAxis]
             
-            if self.showAll:
-                edgeInPlane=np.ones_like(i,dtype=np.bool_)
-            else:
-                ptInPlane = sim.intifyCoords()[:, self.normalAxis] == level
-                edgeInPlane = [np.all(ptInPlane[e]) for e in E]
+        #     if self.showAll:
+        #         edgeInPlane=np.ones_like(i,dtype=np.bool_)
+        #     else:
+        #         ptInPlane = sim.intifyCoords()[:, self.normalAxis] == level
+        #         edgeInPlane = [np.all(ptInPlane[e]) for e in E]
 
-            eplane = E[edgeInPlane]
-            iplane = i[edgeInPlane]
+        #     eplane = E[edgeInPlane]
+        #     iplane = i[edgeInPlane]
 
-        # discard zero currents
-        isok = iplane > 0
-        iOK = iplane[isok]
-        ptOK = coords[eplane[isok]]
+
+        # #reworked projection
+        # el,_,meshpt=sim.getElementsInPlane()
+
+        
+
+
+
+        # # discard zero currents
+        # isok = iplane > 0
+        # iOK = iplane[isok]
+        # ptOK = coords[eplane[isok]]
+        
+        
+        iOK,ptOK,meshpt=sim.getCurrentsInPlane()
+        # _,_,meshpt=sim.getElementsInPlane()
+        
+        data={
+            'mesh':meshpt,
+            'currents':iOK,
+            'pts':ptOK,
+            'iSrc':sim.currentSources[0].value
+                }
 
         self.cvals.append(iOK)
         self.pts.append(ptOK)
 
-        self.crange.update(iOK)
+        self.dataScales['iRange'].update(iOK)
+        
+        return data
 
-    def getArtists(self):
+    def getArtists(self,setnum):
         # include injected currents in scaling
-        self.crange.update(np.array(self.iSrc))
-        cmap, cnorm = getCmap(self.crange.get(), logscale=True)
+        dscale=self.dataScales['iRange']
+        dscale.update(np.array(self.iSrc))
+        
+        cmap, cnorm = getCmap(dscale.get(), logscale=True)
         # cmap=mpl.cm.YlOrBr
         # cnorm=mpl.colors.LogNorm(vmin=self.crange[0],
         #                           vmax=self.crange[1])
-        plt.colorbar(mpl.cm.ScalarMappable(norm=cnorm, cmap=cmap),
+       
+        if setnum==0: 
+            plt.colorbar(mpl.cm.ScalarMappable(norm=cnorm, cmap=cmap),
                      ax=self.ax)
-        plt.title('Edge currents')
-        inset = None
-        if self.showInset & (self.rElec > 0) & (self.dim != 3):
-            inset = addInset(self.ax,
-                             3*self.rElec,
-                             self.study.bbox[3],
-                             (-.2, -.2))
-            showSourceBoundary([self.ax, inset],
-                               self.rElec)
+            plt.title('Edge currents')
+            inset = None
+            if self.showInset & (self.rElec > 0) & (self.dim != 3):
+                self.inset = addInset(self.ax,
+                                  3*self.rElec,
+                                  self.study.bbox[3],
+                                  (-.2, -.2))
+                showSourceBoundary([self.ax, self.inset],
+                                   self.rElec)
 
         artists = []
-        for ii in range(len(self.pts)):
-            pt = self.pts[ii]
-            cv = self.cvals[ii]
-            colors = cmap(cnorm(cv))
+        
+        data=self.dataSets[setnum]
+        
+        # for data in range(len(self.dataSets)):
+            # pt = self.pts[ii]
+            # cv = self.cvals[ii]
+        pt=data['pts']
+        cv=data['currents']
+        colors = cmap(cnorm(cv))
 
-            x0 = pt[:, 0, :].squeeze()
-            d0 = pt[:, 1, :].squeeze()-x0
-            m0 = x0+0.5*d0
-            mags = d0/np.linalg.norm(d0, axis=1, keepdims=True)
+        x0 = pt[:, 0, :].squeeze()
+        d0 = pt[:, 1, :].squeeze()-x0
+        m0 = x0+0.5*d0
+        mags = d0/np.linalg.norm(d0, axis=1, keepdims=True)
 
-            x, y, z = np.hsplit(x0, 3)
-            a, b, c = np.hsplit(d0, 3)
-            m1, m2, m3 = np.hsplit(m0, 3)
-            v1, v2, v3 = np.hsplit(mags, 3)
-            if self.dim == 3:
-                artists.append([
-                    self.ax.quiver3D(x, y, z, a, b, c,
-                                     colors=colors)
-                ])
+        x, y, z = np.hsplit(x0, 3)
+        a, b, c = np.hsplit(d0, 3)
+        m1, m2, m3 = np.hsplit(m0, 3)
+        v1, v2, v3 = np.hsplit(mags, 3)
+        if self.dim == 3:
+            artists.append([
+                self.ax.quiver3D(x, y, z, a, b, c,
+                                 colors=colors)
+            ])
 
-            else:
-                axes = [self.ax]
-                art = []
-                if inset is not None:
-                    axes.append(inset)
+        else:
+            axes = [self.ax]
+            art = []
+            if self.inset is not None:
+                axes.append(self.inset)
 
-                for ax in axes:
-                    if self.fullarrow:
-                        art.append(ax.quiver(x, y, a, b,
-                                             color=colors,
-                                             angles='xy',
-                                             scale_units='xy',
-                                             scale=1))#,
-                                             # headlength=15,
-                                             # headwidth=10))
-                    else:
-                        #TODO: hack to get edges; assumes xy plane at z=0
-                        art.append(showEdges2d(ax, 
-                                               pt[:,:,:-1],
-                                               edgeColors=(0.,0.,0.),
-                                               alpha=0.25))
-                        art.append(ax.quiver(m1, m2,
-                                             a/2, b/2,
-                                             color=colors,
-                                             pivot='mid',
-                                             angles='xy',
-                                             scale_units='xy',
-                                             scale=1))
-                        # headlength=15,
-                        # headwidth=10))
+            for ax in axes:
+                edgecol=mpl.collections.LineCollection(data['mesh'], 
+                                                       color=(0.,0.,0.,0.1))
+                art.append(ax.add_collection(edgecol))
+                if self.fullarrow:
+                    art.append(ax.quiver(x, y, a, b,
+                                         color=colors,
+                                         angles='xy',
+                                         scale_units='xy',
+                                         scale=1))#,
+                                         # headlength=15,
+                                         # headwidth=10))
+                else:
+                    #TODO: hack to get edges; assumes xy plane at z=0
+                    # art.append(showEdges2d(ax, 
+                    #                        pt[:,:,:-1],
+                    #                        edgeColors=(0.,0.,0.),
+                    #                        alpha=0.25))
+                    art.append(ax.quiver(m1, m2,
+                                         a/2, b/2,
+                                         color=colors,
+                                         pivot='mid',
+                                         angles='xy',
+                                         scale_units='xy',
+                                         scale=1))
+                    # headlength=15,
+                    # headwidth=10))
 
-                    art.append(ax.scatter(0, 0,
-                                          color=cmap(cnorm(self.iSrc[ii]))))
+                art.append(ax.scatter(0, 0,
+                                      color=cmap(cnorm(data['iSrc']))))
 
-                artists.append(art)
+            # artists.append(art)
 
-        return artists
+        return art
 
 
 class ScaleRange:
@@ -1768,12 +1821,15 @@ def hideBorders(axis,hidex=False):
 
 
 class SingleSlice(FigureAnimator):
-    def __init__(self, fig, study,timevec=[],tdata=None):
+    def __init__(self, fig, study,timevec=[],tdata=None,datasrc='spaceV'):
         self.bnds=study.bbox[[0,3,2,4]]
         self.tdata=tdata
+        self.dataSrc=datasrc
         super().__init__(fig,study)
         self.dataScales={
-            'spaceV':ScaleRange()
+            'spaceV':ScaleRange(),
+            'absErr':ScaleRange(),
+            'relErr':ScaleRange()
             }
         
         self.timevec=timevec
@@ -1785,7 +1841,7 @@ class SingleSlice(FigureAnimator):
                                #     'height_ratios': [9, 1],
                                #     'width_ratios':[9,1]})
                                gridspec_kw={
-                                   'height_ratios': [7,3],
+                                   'height_ratios': [9,3],
                                    'width_ratios': [9,1]})
                                
         ax=axes[0,0]
@@ -1797,7 +1853,8 @@ class SingleSlice(FigureAnimator):
         formatXYAxis(ax,self.bnds)
         self.tbar=TimingBar(fig, tax,self.tdata)
         
-        plt.tight_layout()
+
+        # plt.tight_layout()
 
         # tax.set_xlabel('Time [ms]')
 
@@ -1814,13 +1871,25 @@ class SingleSlice(FigureAnimator):
             data=self.dataSets[setnum]
 
         
-        cMap,cNorm=getCmap(self.dataScales['spaceV'].get())
+        cMap,cNorm=getCmap(self.dataScales[self.dataSrc].get())
         
+        
+        # if setnum==0:
         mapper=mpl.cm.ScalarMappable(norm=cNorm,cmap=cMap)
-        self.fig.colorbar(mapper,cax=self.cax)
+        
+        if self.dataSrc=='spaceV' or self.dataSrc=='absErr':
+            cbarFormat=eform('V')
+        else:
+            cbarFormat=mpl.ticker.PercentFormatter(xmax=1.,
+                                                   decimals=2)
+            self.cax.set_ylabel('Relative error')
+        self.fig.colorbar(mapper,cax=self.cax,
+                          format=cbarFormat)
+        if setnum==0:
+            plt.tight_layout()
         
         artists=patchworkImage(self.ax, 
-                       data['spaceV'], cMap, cNorm, 
+                       data[self.dataSrc], cMap, cNorm, 
                        self.bnds)
         
         artists.append(showEdges2d(self.ax, 
@@ -1833,23 +1902,33 @@ class SingleSlice(FigureAnimator):
 
         
     def addSimulationData(self, sim):
+        vest,_=sim.analyticalEstimate()
+        
+        absErr=sim.nodeVoltages-vest[0]
+        relErr=absErr/np.abs(vest[0])
         
         vArrays,_ = sim.getValuesInPlane()
+        absArr,_=sim.getValuesInPlane(data=absErr)
+        
         _,_,edgePts=sim.getElementsInPlane()
         
         v1d=util.unravelArraySet(vArrays)
         
-        
         self.dataScales['spaceV'].update(v1d)
+        # self.dataScales['relErr'].update(relErr)
+        self.dataScales['absErr'].update(absErr)
+        
         
         data={
             'spaceV':vArrays,
+            # 'relErr':errArrays,
+            'absErr':absArr,
             'meshPts':edgePts}
         
         self.dataSets.append(data)
         
         
-    def animateStudy(self,fname=None,artists=None):
+    def animateStudy(self,fname=None,artists=None,fps=30.):
         animations=[]
         
         
@@ -1884,7 +1963,7 @@ class SingleSlice(FigureAnimator):
             artists.append(art)
             
         animation=ArtistAnimation(self.fig, artists,
-                                  interval=20,
+                                  interval=1000/fps,
                                   repeat_delay=2000,
                                   blit=True)
         if fname is None:
@@ -1893,7 +1972,7 @@ class SingleSlice(FigureAnimator):
             # writer = FFMpegWriter(fps=50)
             fpath=os.path.join(
                 self.study.studyPath, fname+'.mp4')
-            animation.save(fpath,fps=30)
+            animation.save(fpath,fps=fps)
             
             # with writer.saving(self.fig,fpath,dpi=None):
             #     for ii in range(len(self.dataSets)):

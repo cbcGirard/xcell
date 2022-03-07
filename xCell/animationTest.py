@@ -16,7 +16,7 @@ meshtype='adaptive'
 # studyPath='Results/studyTst/miniCur/'#+meshtype
 datadir='/home/benoit/smb4k/ResearchData/Results/studyTst/'#+meshtype
 # studyPath=datadir+'post-renumber/'
-studyPath=datadir+'dualComp'
+studyPath=datadir+'dualComp2'
 
 xmax=1e-4
 sigma=np.ones(3)
@@ -60,7 +60,7 @@ tstCat='Element type'
 if generate:
    
     # for var in np.linspace(0.1,0.7,15):
-    for maxdepth in range(3,20):
+    for meshnum,maxdepth in enumerate(range(3,8)):
         for tstVal in tstVals:
             # meshtype=tstVal
             elementType=tstVal
@@ -75,8 +75,7 @@ if generate:
             setup=study.newSimulation()
             setup.mesh.elementType=elementType
             setup.meshtype=meshtype
-            setup.mesh.minl0=2*xmax/(2**maxdepth)
-            setup.ptPerAxis=1+2**maxdepth
+            setup.meshnum=meshnum
             
             if vMode:
                 setup.addVoltageSource(1,np.zeros(3),rElec)
@@ -96,21 +95,13 @@ if generate:
             elif meshtype==r'equal $l_0$':
                 setup.makeUniformGrid(lastNx)
             else:
-                def metric(coord,l0Param=l0Param):
-                    r=np.linalg.norm(coord)
-                    val=l0Param*r #1/r dependence
-                    # val=(l0Param*r**2)**(1/3) #current continuity
-                    # val=(l0Param*r**4)**(1/3) #dirichlet energy continutity
-                    # if val<rElec:
-                    #     val=rElec
-                    
-                    if (r+val)<rElec:
-                        val=rElec/2
-                    return val
+                metric=xCell.makeExplicitLinearMetric(maxdepth, 
+                                                      meshdensity=0.2)
                 
                 setup.makeAdaptiveGrid(metric,maxdepth)
             
 
+            setup.mesh.elementType=elementType
             setup.finalizeMesh()
             # if asDual:
             #     setup.finalizeDualMesh()

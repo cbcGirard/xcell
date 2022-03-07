@@ -38,8 +38,8 @@ class Mesh:
                'span':el.span,
                'l0':el.l0,
                'sigma':el.sigma,
-               # 'vertices':el.vertices,
-               # 'faces':el.faces
+                'vertices':el.vertices,
+                'faces':el.faces,
                'index':el.index}
             elInfo.append(d)
             
@@ -63,6 +63,9 @@ class Mesh:
         for ii,el in enumerate(elDicts):
             self.addElement(el['origin'], el['span'],
                             el['sigma'], el['index'])
+            self.elements[-1].faces=el['faces']
+            self.elements[-1].vertices=el['vertices']
+            
             
         self.inverseIdxMap=util.getIndexDict(self.indexMap)
         
@@ -737,14 +740,17 @@ class Octant():
     
     def coarsenByMetric(self,metric):
         #TODO: coarsening factor control
-        # oversize=False
-        oversize=self.l0<metric(self.center-self.l0)
-        # oversize=self.l0<(metric(self.center)/2)
+        
+        
+        ### This always prunes, even if mesh is the same    
+        oversize=self.l0<(metric(self.center)/3**(1/3))
         
         if oversize:
             self.prune()
             self.children=[]
-
+        
+        ## This never prunes
+        # oversize=False
         # if len(self.children)!=0:
         #     #delete children if all oversized
         #     overCh=True
@@ -755,7 +761,7 @@ class Octant():
         #         #delete, then check if itself oversized
         #         for ch in self.children:
         #             del ch
-        #         # oversize=self.l0<metric(self.center-self.l0)
+        #         oversize=self.l0<metric(self.center-self.l0)
                 
         return oversize
     

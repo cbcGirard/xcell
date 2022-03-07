@@ -32,7 +32,7 @@ datadir='/home/benoit/smb4k/ResearchData/Results/studyTst/'
 # filterVals=["adaptive","uniform"]
 # filterVals=['adaptive']
 
-studyPath=datadir+"dualComp"
+studyPath=datadir+"dualComp2"
 filterCategories=['Element type']
 filterVals=['Face','Admittance']
 
@@ -63,15 +63,17 @@ study=xCell.SimStudy(studyPath,bbox)
 # aniImg2=study.animatePlot(xCell.centerSlice,'img_uniform',['Mesh type'],['uniform'])
 
 
-# staticPlots=True
-staticPlots=False
+staticPlots=True
+# staticPlots=False
 
-# plotters=[xCell.Visualizers.ErrorGraph,
-#             xCell.Visualizers.SliceSet,
-#             xCell.Visualizers.CurrentPlot]
+plotters=[
+    xCell.Visualizers.ErrorGraph,
+    xCell.Visualizers.SliceSet,
+    # xCell.Visualizers.CurrentPlot
+            ]
 
 
-plotters=[xCell.Visualizers.ErrorGraph]
+# plotters=[xCell.Visualizers.ErrorGraph]
 
 # ptr=xCell.Visualizers.ErrorGraph(plt.figure(), study)
 
@@ -131,7 +133,8 @@ for ii,p in enumerate(plotters):
     for fv in filterVals:
         fname=p.__name__+'_'+str(fv)
         plotr=p(plt.figure(),study)
-        plotr.prefs['universalPts']=True
+        if 'universalPts' in plotr.prefs:
+            plotr.prefs['universalPts']=True
 
         plotr.getStudyData(filterCategories=filterCategories,
                   filterVals=[fv])
