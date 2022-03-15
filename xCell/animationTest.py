@@ -60,7 +60,7 @@ tstCat='Element type'
 if generate:
    
     # for var in np.linspace(0.1,0.7,15):
-    for meshnum,maxdepth in enumerate(range(3,8)):
+    for meshnum,maxdepth in enumerate(range(3,18)):
         for tstVal in tstVals:
             # meshtype=tstVal
             elementType=tstVal

@@ -320,6 +320,12 @@ class Octree(Mesh):
 
         """
         changed=self.tree.refineByMetric(l0Function, self.maxDepth)
+        pruned,_=self.tree.coarsenByMetric(l0Function)
+        
+        if pruned:
+            print()
+            changed|=pruned
+        
         self.changed=changed
         
         return changed
@@ -731,10 +737,10 @@ class Octant():
                 self.split()
             for ii in nb.prange(8):
                 changed|=self.children[ii].refineByMetric(l0Function,maxDepth)
-        else:
-            #ripup logic
-            changed|=self.coarsenByMetric(l0Function)
-            
+        # else:
+        #     #ripup logic
+        #     allUnder=self.coarsenByMetric(l0Function)
+        #     changed|=allUnder
                 
         return changed
     
@@ -743,11 +749,13 @@ class Octant():
         
         
         ### This always prunes, even if mesh is the same    
-        oversize=self.l0<(metric(self.center)/3**(1/3))
+        # oversize=self.l0<(metric(self.center)/3**(1/3))
         
-        if oversize:
-            self.prune()
-            self.children=[]
+        # oversize=self.l0<(metric(self.center)/2)
+        
+        # if oversize:
+        #     self.prune()
+        #     self.children=[]
         
         ## This never prunes
         # oversize=False
@@ -761,9 +769,36 @@ class Octant():
         #         #delete, then check if itself oversized
         #         for ch in self.children:
         #             del ch
-        #         oversize=self.l0<metric(self.center-self.l0)
+        #         oversize=self.l0<metric(self.center)/2
                 
-        return oversize
+        # else:
+        #     #is terminal octant; check size
+        #     oversize=self.l0<(metric(self.center)/2)
+            
+            
+            
+        ###### pseudocode
+        # delete children if all too small
+        
+        undersize=self.l0<metric(self.center)
+        changed=False
+        if len(self.children)==0:
+            pass
+        else:
+            for ch in self.children:
+                chChange,chUnder=ch.coarsenByMetric(metric)
+                
+                undersize&=chUnder
+                changed|=chChange
+            
+            if undersize:
+                changed=True
+                for ch in self.children:
+                    del ch
+                self.children=[]
+            
+        
+        return changed, undersize
     
     def prune(self):
         for ch in self.children:

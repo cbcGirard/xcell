@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import xCell
 
-
+import pickle
 
 from neuron import h#, gui
 from neuron.units import ms, mV
@@ -19,8 +19,8 @@ h.load_file('stdrun.hoc')
 h.CVode().use_fast_imem(1)
 
 
-datadir='/home/benoit/smb4k/ResearchData/Results/studyTst/'#+meshtype
-studyPath=datadir+'NEURON/'
+datadir='/home/benoit/smb4k/ResearchData/Results/NEURON/'#+meshtype
+studyPath=datadir+'compSrc/'
 
 
 class Cell:
@@ -160,14 +160,6 @@ dmax=16
 
 sigma=np.ones(3)
 
-
-vMode=False
-showGraphs=False
-saveGraphs=False
-
-# dual=True
-regularize=False
-
 vsrc=1.
 isrc=vsrc*4*np.pi*sigma*1e-6
 
@@ -196,11 +188,17 @@ vvec=vvec[::5]
 imax=max(abs(ivec))
 tmax=tvec[-1]
     
+# tdata={
+#        'x':tvec,
+#        'y':vvec,
+#        'ylabel':'Membrane potential',
+#        'unit':'V'}
 tdata={
        'x':tvec,
        'y':vvec,
-       'ylabel':'Membrane potential',
-       'unit':'V'}
+       'ylabel':'Membrane\npotential',
+       'unit':'V',
+       'style':'sweep'}
 
 study=xCell.SimStudy(studyPath,bbox)
 img=xCell.Visualizers.SingleSlice(None,study,
@@ -233,7 +231,7 @@ if generate:
         
             
         ################ k-param strategy
-        density=0.6*(abs(ival)/imax)
+        density=0.4*(abs(ival)/imax)
         print('density:%.2g'%density)
         
         metric=xCell.makeExplicitLinearMetric(maxdepth, density)
@@ -263,7 +261,7 @@ if generate:
             lastNumEl=numEl
             setup.iteration+=1
             
-            study.saveData(setup,baseName=str(setup.iteration))
+            study.saveData(setup)#,baseName=str(setup.iteration))
         else:
             # vdof=setup.getDoFs()
             # v=setup.iterativeSolve(vGuess=vdof)
@@ -277,11 +275,12 @@ if generate:
         
     
         print('%d percent done'%(int(100*tval/tmax)))
-        img.addSimulationData(setup)
-        err.addSimulationData(setup)
+        img.addSimulationData(setup,append=True)
+        err.addSimulationData(setup,append=True)
 else:
     img.getStudyData()
     
 
 ani=img.animateStudy('init',fps=10.)
 erAni=err.animateStudy('error',fps=10.)
+

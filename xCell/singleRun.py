@@ -17,17 +17,17 @@ meshtype='adaptive'
 # studyPath='Results/studyTst/miniCur/'#+meshtype
 studyPath='Results/studyTst/dual/'
 
-# elementType='Admittance'
+elementType='Admittance'
 
-elementType='Face'
+# elementType='Face'
 
 xmax=1e-4
-maxdepth=12
+maxdepth=4
 
 sigma=np.ones(3)
 
 
-vMode=False
+vMode=True
 showGraphs=False
 generate=False
 saveGraphs=False
@@ -146,11 +146,11 @@ setup.logTime()
 
 
 
-# ##### ERROR GRAPH
-# ptr=xCell.Visualizers.ErrorGraph(plt.figure(),study)
-# ptr.prefs['universalPts']=True
-# pdata=ptr.addSimulationData(setup)
-# ptr.getArtists(0,pdata)
+##### ERROR GRAPH
+ptr=xCell.Visualizers.ErrorGraph(plt.figure(),study)
+ptr.prefs['universalPts']=True
+pdata=ptr.addSimulationData(setup)
+ptr.getArtists(0,pdata)
 
 
 
@@ -164,13 +164,13 @@ setup.logTime()
 # mcoords=setup.mesh.nodeCoords
 
 
-##### TOPOLOGY/connectivity
-ax=xCell.Visualizers.showMesh(setup)
+# ##### TOPOLOGY/connectivity
+# ax=xCell.Visualizers.showMesh(setup)
 
-xCell.Visualizers.showEdges(ax, 
-                            setup.mesh.nodeCoords, 
-                            setup.edges,
-                            setup.conductances)
+# xCell.Visualizers.showEdges(ax, 
+#                             setup.mesh.nodeCoords, 
+#                             setup.edges,
+#                             setup.conductances)
 
 # bnodes=setup.mesh.getBoundaryNodes()
 # xCell.Visualizers.showNodes3d(ax,

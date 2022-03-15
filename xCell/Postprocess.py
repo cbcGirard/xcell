@@ -63,11 +63,11 @@ study=xCell.SimStudy(studyPath,bbox)
 # aniImg2=study.animatePlot(xCell.centerSlice,'img_uniform',['Mesh type'],['uniform'])
 
 
-staticPlots=True
-# staticPlots=False
+# staticPlots=True
+staticPlots=False
 
 plotters=[
-    xCell.Visualizers.ErrorGraph,
+    # xCell.Visualizers.ErrorGraph,
     xCell.Visualizers.SliceSet,
     # xCell.Visualizers.CurrentPlot
             ]

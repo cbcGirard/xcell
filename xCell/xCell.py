@@ -20,6 +20,8 @@ import pickle
 
 import matplotlib.ticker as tickr
 import matplotlib.pyplot as plt
+plt.style.use('dark_background')
+plt.style.use('./xcell.mplstyle')
 
 import util
 import Visualizers
@@ -739,17 +741,6 @@ class Simulation:
         srcV=[]
   
           
-        def __analytic(rad,V,I,r):
-            inside=r<rad
-            voltage=np.empty_like(r)
-            voltage[inside]=V
-            voltage[~inside]=I/(4*np.pi*r[~inside])
-            
-            #integral
-            integral=V*rad #inside
-            integral+=(I*4*np.pi)*(np.log(max(r))-np.log(rad))
-            return voltage, integral
-        
 
         for ii in nb.prange(len(self.currentSources)):
             I=self.currentSources[ii].value
@@ -783,13 +774,17 @@ class Simulation:
             else:
                 r=rvec
 
-            vEst,intEst=__analytic(srcRadii[ii], srcV[ii], srcI[ii], r)
+            vEst,intEst=_analytic(srcRadii[ii], srcV[ii], srcI[ii], r)
             
             vAna.append(vEst)
             intAna.append(intEst)
             
         return vAna, intAna
         
+
+        
+   
+    
     def calculateErrors(self,rvec=None):
         """
         Estimate error in solution.
@@ -1714,3 +1709,15 @@ def makeExplicitLinearMetric(maxdepth,meshdensity):
         return val
     
     return metric
+
+
+def _analytic(rad,V,I,r):
+    inside=r<rad
+    voltage=np.empty_like(r)
+    voltage[inside]=V
+    voltage[~inside]=I/(4*np.pi*r[~inside])
+    
+    #integral
+    integral=V*rad #inside
+    integral+=rad*(np.log(max(r))-np.log(rad))
+    return voltage, integral
