@@ -34,6 +34,6 @@ text.color : dcd4c7
 xtick.color : dcd4c7
 ytick.color : dcd4c7
 
-grid.alpha : 0.75
+grid.alpha : 0.5
 
 

@@ -22,12 +22,12 @@ elementType='Admittance'
 # elementType='Face'
 
 xmax=1e-4
-maxdepth=4
+maxdepth=12
 
 sigma=np.ones(3)
 
 
-vMode=True
+vMode=False
 showGraphs=False
 generate=False
 saveGraphs=False
@@ -81,9 +81,9 @@ else:
     # metric=xCell.makeBoundedLinearMetric(l0min=2e-6,
     #                                      l0max=1e-5,
     #                                      domainX=xmax)
-    
+
     metric=xCell.makeExplicitLinearMetric(maxdepth, 0.2)
-    
+
     setup.makeAdaptiveGrid(metric,maxdepth)
 
 
@@ -93,7 +93,7 @@ def boundaryFun(coord):
     r=np.linalg.norm(coord)
     return rElec/(r*np.pi*4)
 
-    
+
 setup.finalizeMesh()
 
 setup.setBoundaryNodes(boundaryFun)
@@ -107,7 +107,7 @@ setup.printTotalTime()
 
 
 setup.startTiming('Estimate error')
-errEst,_,_,_=setup.calculateErrors()#srcMag,srcType,showPlots=showGraphs)
+errEst,_,_,_,_=setup.calculateErrors()#srcMag,srcType,showPlots=showGraphs)
 print('error: %g'%errEst)
 setup.logTime()
 
@@ -137,8 +137,8 @@ setup.logTime()
 # bnd=setup.mesh.bbox[[0,3,2,4]]
 # arr,_=setup.getValuesInPlane()
 # cMap,cNorm=xCell.Visualizers.getCmap(setup.nodeVoltages,forceBipolar=True)
-# xCell.Visualizers.patchworkImage(plt.figure().gca(), 
-#                                   arr, cMap, cNorm, 
+# xCell.Visualizers.patchworkImage(plt.figure().gca(),
+#                                   arr, cMap, cNorm,
 #                                   extent=bnd)
 
 # _,_,edgePoints=setup.getElementsInPlane()
@@ -167,8 +167,8 @@ ptr.getArtists(0,pdata)
 # ##### TOPOLOGY/connectivity
 # ax=xCell.Visualizers.showMesh(setup)
 
-# xCell.Visualizers.showEdges(ax, 
-#                             setup.mesh.nodeCoords, 
+# xCell.Visualizers.showEdges(ax,
+#                             setup.mesh.nodeCoords,
 #                             setup.edges,
 #                             setup.conductances)
 
@@ -187,3 +187,26 @@ ptr.getArtists(0,pdata)
 # img=xCell.Visualizers.SliceSet(plt.figure(),study)
 # img.addSimulationData(setup)
 # img.getArtists()
+
+
+_,basicAna,basicErr,_=setup.estimateVolumeError(basic=True)
+_,advAna,advErr,_=setup.estimateVolumeError(basic=False)
+
+errBasic=sum(basicErr)/sum(basicAna)
+errAdv=sum(advErr)/sum(advAna)
+
+
+es,err,ana,sr,r=setup.calculateErrors()
+
+print('Error metrics:\nbasic vol:%g\nadv vol:%g\narea%g'%(errBasic,errAdv,es))
+
+r[r==min(r)]=rElec/2
+
+plt.figure()
+
+ax=plt.gca()
+ax.set_xscale('log')
+ax.set_yscale('log')
+
+plt.plot(r,ana)
+plt.plot(r,abs(err))

@@ -16,7 +16,7 @@ meshtype='adaptive'
 # studyPath='Results/studyTst/miniCur/'#+meshtype
 datadir='/home/benoit/smb4k/ResearchData/Results/studyTst/'#+meshtype
 # studyPath=datadir+'post-renumber/'
-studyPath=datadir+'power'
+studyPath=datadir+'errorMetrics'
 
 xmax=1e-4
 sigma=np.ones(3)
@@ -41,21 +41,6 @@ rElec=1e-6
 
 lastNumEl=0
 lastNx=0
-
-# tstVals=['adaptive']
-# tstVals=["adaptive","uniform"]
-# elementType='Admittance'
-# tstVals=['adaptive','equal elements',r'equal $l_0$']
-# tstCat='Mesh type'
-
-
-# tstVals=[False, True]
-# tstCat='Vsrc?'
-
-# # tstVals=['Admittance','FEM']
-# tstVals=['Admittance','Face']
-# # tstVals=['Admittance']
-# tstCat='Element type'
 
 tstVals=[None]
 tstCat='Power'
@@ -129,16 +114,38 @@ if generate:
             setup.applyTransforms()
 
             setup.getMemUsage(True)
-            errEst,_,_,_=setup.calculateErrors()#srcMag,srcType,showPlots=showGraphs)
+            errEst,errVec,vAna,sorter,r=setup.calculateErrors()
             print('error: %g'%errEst)
 
+            sse=np.sum(errVec**2)
+            sstot=np.sum((v-np.mean(v))**2)
+            ss=np.sum((vAna-np.mean(vAna))**2)
+            FVU=sse/sstot
 
-            tstVal=setup.getPower()
-            print('power: '+str(tstVal))
-            study.newLogEntry(['Error','k','Depth',tstCat],[errEst,l0Param,maxdepth,tstVal])
+            _,basicAna,basicErr,_=setup.estimateVolumeError(basic=True)
+            _,advAna,advErr,_=setup.estimateVolumeError(basic=False)
+
+            errBasic=sum(basicErr)/sum(basicAna)
+            errAdv=sum(advErr)/sum(advAna)
+
+
+
+            power=setup.getPower()
+            print('power: '+str(power))
+            study.newLogEntry(['AreaError',
+                               'basicVol',
+                               'advVol',
+                               'SSE',
+                               'SStot',
+                               'SS',
+                               'FVU',
+                               'power'],
+                              [errEst,
+                               errBasic,
+                               errAdv,
+                               sse,
+                               sstot,
+                               ss,
+                               FVU,
+                               power])
             study.saveData(setup)
-            if meshtype=='adaptive':
-                lastNumEl=len(setup.mesh.elements)
-
-                lastNx=setup.ptPerAxis-1
-
