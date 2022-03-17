@@ -22,7 +22,7 @@ h.CVode().use_fast_imem(1)
 
 
 datadir='/home/benoit/smb4k/ResearchData/Results/NEURON/'#+meshtype
-studyPath=datadir+'compSrc/'
+studyPath=datadir+'strategies/'
 
 
 class Cell:
@@ -200,9 +200,9 @@ study=xCell.SimStudy(studyPath,bbox)
 img=xCell.Visualizers.SingleSlice(None,study,
                                   tvec,tdata)
 
-# err=xCell.Visualizers.SingleSlice(None, study,
-#                                   tvec,tdata,
-#                                   datasrc='absErr')
+err=xCell.Visualizers.SingleSlice(None, study,
+                                  tvec,tdata,
+                                  datasrc='absErr')
 
 # img.tax.plot(tvec,vvec)
 # img.tax.set_ylabel('Membrane potential [V]')
@@ -224,6 +224,7 @@ if generate:
 
     dmin=3
     dmax=8
+    strat='d2'
 
 
 
@@ -246,7 +247,16 @@ if generate:
         'Eavg':[],
         'Esum':[],
         'IntAna':[],
-        'IntErr':[]}
+        'IntErr':[],
+        'FVU':[],
+        'FVU2':[],
+        'vol':[],
+        'volAna':[],
+        'volErr':[]
+        }
+
+
+    errdicts=[]
 
     for tval,ival,vval in zip(tvec,ivec,vvec):
 
@@ -254,20 +264,28 @@ if generate:
         setup.currentTime=tval
 
 
-        # ################ k-param strategy
-        # density=0.4*(abs(ival)/imax)
-        # print('density:%.2g'%density)
+        if strat=='k':
+            ################ k-param strategy
+            density=0.4*(abs(ival)/imax)
+            print('density:%.2g'%density)
 
+        elif strat=='depth' or strat=='d2':
+            ##################### Depth strategy
+            scale=(dmax-dmin)*abs(ival)/imax
+            dint,dfrac=divmod(scale, 1)
+            maxdepth=dmin+int(dint)
+            print('depth:%d'%maxdepth)
 
-        ##################### Depth strategy
-        maxdepth=dmin+int(np.floor((dmax-dmin)*abs(ival)/imax))
-        print('depth:%d'%maxdepth)
-        density=0.25
+            # density=0.25
+            if strat=='d2':
+                density=0.5
+            else:
+                density=0.2+0.2*dfrac
 
-
-        # ################### Static mesh
-        # maxdepth=6
-        # density=0.2
+        elif strat=='fixed':
+            ################### Static mesh
+            maxdepth=dmax
+            density=0.2
 
 
         metric=xCell.makeExplicitLinearMetric(maxdepth, density)
@@ -276,6 +294,7 @@ if generate:
 
 
         changed=setup.makeAdaptiveGrid(metric, maxdepth)
+
 
 
 
@@ -292,7 +311,6 @@ if generate:
             setup.setBoundaryNodes(bfun)
 
             v=setup.solve()
-            lastI=ival
             lastNumEl=numEl
             setup.iteration+=1
 
@@ -300,9 +318,14 @@ if generate:
         else:
             # vdof=setup.getDoFs()
             # v=setup.iterativeSolve(vGuess=vdof)
-            v=setup.nodeVoltages*abs(ival/lastI)
+            scale=ival/lastI
+            # print(scale)
+            v=setup.nodeVoltages*scale
             setup.nodeVoltages=v
 
+
+
+        lastI=ival
 
         study.newLogEntry(['Timestep','Meshnum'],[setup.currentTime, setup.meshnum])
 
@@ -310,47 +333,118 @@ if generate:
         numels.append(lastNumEl)
 
         print('%d percent done'%(int(100*tval/tmax)))
+
+
+
+
+
+        # esum,err,vAna,sortr,r=setup.calculateErrors()
+
+        # sse=np.sum(err**2)
+        # sstot=np.sum((v-np.mean(v))**2)
+        # ss=np.sum((vAna-np.mean(vAna))**2)
+        # FVU=sse/sstot
+        # FVU2=sse/ss
+
+        # elV,elAna,elErr,_=setup.estimateVolumeError(basic=True)
+
+        # volErr=sum(elErr)
+        # volAna=sum(elAna)
+        # vol=volErr/volAna
+
+        # lists['Emax'].append(max(err))
+        # lists['Emin'].append(min(err))
+        # lists['Eavg'].append(np.mean(err))
+        # lists['Esum'].append(esum)
+        # lists['densities'].append(density)
+        # lists['depths'].append(maxdepth)
+
+        # lists['IntAna'].append(misc.iSourceIntegral(ival,
+        #                                             1e-6,
+        #                                             np.sqrt(3)*xmax,
+        #                                             1))
+
+        # # r=np.linalg.norm(setup.mesh.nodeCoords,axis=1)[sortr]
+        # lists['IntErr'].append(np.trapz(np.abs(err[sortr]),
+        #                                 r))
+        # lists['numels'].append(lastNumEl)
+        # lists['FVU'].append(FVU)
+        # lists['FVU2'].append(FVU2)
+        # lists['vol'].append(vol)
+        # lists['volAna'].append(volAna)
+        # lists['volErr'].append(volErr)
+
+        errdict=xCell.misc.getErrorEstimates(setup)
+        errdict['densities']=density
+        errdict['depths']=maxdepth
+        errdict['numels']=lastNumEl
+        errdicts.append(errdict)
+
+
+
+        err.addSimulationData(setup,append=True)
         img.addSimulationData(setup,append=True)
 
-        esum,err,_,sortr,r=setup.calculateErrors()
-        lists['Emax'].append(max(err))
-        lists['Emin'].append(min(err))
-        lists['Eavg'].append(np.mean(err))
-        lists['Esum'].append(esum)
-        lists['densities'].append(density)
-        lists['depths'].append(maxdepth)
-
-        lists['IntAna'].append(misc.iSourceIntegral(ival,
-                                                    1e-6,
-                                                    np.sqrt(3)*xmax,
-                                                    1))
-
-        # r=np.linalg.norm(setup.mesh.nodeCoords,axis=1)[sortr]
-        lists['IntErr'].append(np.trapz(np.abs(err[sortr]),
-                                        r))
-        lists['numels'].append(lastNumEl)
-
-
-        # err.addSimulationData(setup,append=True)
+    lists=xCell.misc.transposeDicts(errdicts)
+    pickle.dump(lists, open(studyPath+strat+'.p','wb'))
 else:
     img.getStudyData()
+    err.getStudyData()
+    lists=pickle.load(open(studyPath+strat+'.p','rb'))
 
 
-f,axes=plt.subplots(3,1,sharex=True,gridspec_kw={'height_ratios':[5,5,2]})
 
 
-axes[0].fill_between(tvec,
-                     lists['Emax'],
-                     lists['Emin'],
-                     color='r',alpha=0.75)
-axes[0].plot(tvec,lists['Eavg'],'r')
-axes[1].plot(tvec,lists['Esum'])
+f,axes=plt.subplots(3,1,sharex=True,gridspec_kw={'height_ratios':[5,2,2]})
+
+f.suptitle('Adaptation: '+strat)
+
+
+# axes[0].fill_between(tvec,
+#                      lists['Emax'],
+#                      lists['Emin'],
+#                      color='r',alpha=0.75)
+# axes[0].plot(tvec,lists['Eavg'],'r')
+# axes[1].plot(tvec,abs(erat))
+# axes[1].plot(tvec,lists['Esum'])
+for mets in ['FVU','FVU2','powerError','int1','int3']:
+    axes[0].plot(tvec,lists[mets],label=mets)
+
+axes[0].legend()
+axes[0].set_ylabel('Error metric')
+
+axes[1].plot(tvec,vvec,label='Voltage')
+a2=plt.twinx(axes[1])
+a2.plot(tvec,ivec,color='C1',label='Current')
+
+a2.set_ylabel('Current',color='C1')
+axes[1].set_ylabel('Voltage',color='C0')
+# a2.yaxis.set_major_formatter(xCell.Visualizers.eform('A'))
+# a2.grid(axis='y',color='C1')
+# axes[1].grid(axis='y',color='C0')
+
+#adjust vals
+
+def nicen(val):
+    exp=np.floor(np.log10(val))
+    return np.ceil(val/(10**exp))*10**exp
+
+
+vbnd=nicen(max(abs(vvec)))
+ibnd=nicen(imax)
+a2.set_ylim(-ibnd,ibnd)
+axes[1].set_ylim(-vbnd,vbnd)
+
 axes[2].plot(tvec,lists['numels'])
 axes[2].xaxis.set_major_formatter(xCell.Visualizers.eform('s'))
 
 axes[2].set_yscale('log')
 
+axes[2].set_ylabel('Number of\nElements')
+
+study.savePlot(f, strat, '.png')
+study.savePlot(f, strat, '.eps')
 
 
-ani=img.animateStudy('init',fps=30.)
-# erAni=err.animateStudy('error',fps=30.)
+ani=img.animateStudy('volt-'+strat,fps=30.)
+erAni=err.animateStudy('error-'+strat,fps=30.)

@@ -9,6 +9,12 @@ xCell/Results
 xCell/examples
 docs/build
 
+
+#misc spyder cruft
+*.Result
+*.txt
+*/.spyproject/*
+
 # Node artifact files
 node_modules/
 dist/

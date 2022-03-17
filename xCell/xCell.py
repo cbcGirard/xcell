@@ -34,6 +34,7 @@ import Elements
 import Meshes
 import Geometry
 from FEM import ADMITTANCE_EDGES
+import misc
 
 
 
@@ -793,6 +794,26 @@ class Simulation:
 
 
     def estimateVolumeError(self,basic=False):
+        """
+
+
+        Parameters
+        ----------
+        basic : TYPE, optional
+            DESCRIPTION. The default is False.
+
+        Returns
+        -------
+        elVints : TYPE
+            DESCRIPTION.
+        elAnaInts : TYPE
+            DESCRIPTION.
+        elErrInts : TYPE
+            DESCRIPTION.
+        analyticInt : TYPE
+            DESCRIPTION.
+
+        """
         elVints=[]
         elAnaInts=[]
         elErrInts=[]
@@ -1242,7 +1263,59 @@ class Simulation:
         return coords,edges
 
 
+    def interpolateAt(self,coords):
+        coordsLeft=np.ma.array(coords)
 
+
+        # vals=np.empty(coords.shape[0])
+        # for el in self.mesh.elements:
+        #     print(el)
+
+        #     upper=np.greater_equal(coordsLeft,el.origin)
+        #     lower=np.less_equal(coordsLeft,el.origin+el.span)
+        #     inside=np.all(np.logical_and(upper,lower),axis=1)
+
+
+        #     if self.mesh.elementType=='Face':
+        #         inds=el.faces
+        #     else:
+        #         inds=el.vertices
+
+        #     simInds=np.array([self.mesh.inverseIdxMap[n] for n in inds])
+        #     elValues=self.nodeVoltages[simInds]
+
+        #     intCoords=coordsLeft[inside]
+        #     if intCoords.shape[0]>0:
+        #         interpVals=el.interpolateWithin(intCoords,
+        #                                         elValues)
+
+        #         vals[inside]=interpVals
+
+        #         coordsLeft[inside,:]=np.ma.masked
+        vals=np.empty(coords.shape[0])
+        for el in self.mesh.elements:
+            upper=np.greater_equal(coords,el.origin)
+            lower=np.less_equal(coords,el.origin+el.span)
+            inside=np.all(np.logical_and(upper,lower),axis=1)
+
+
+            if self.mesh.elementType=='Face':
+                inds=el.faces
+            else:
+                inds=el.vertices
+
+            simInds=np.array([self.mesh.inverseIdxMap[n] for n in inds])
+            elValues=self.nodeVoltages[simInds]
+
+            intCoords=coords[inside]
+            if intCoords.shape[0]>0:
+                interpVals=el.interpolateWithin(intCoords,
+                                                elValues)
+
+                vals[inside]=interpVals
+
+                # coordsLeft[inside,:]=np.ma.masked
+        return vals
 
 
     def getOrdering(self,orderType):#,maskArray):
@@ -1340,22 +1413,7 @@ class Simulation:
                             [0,1,2,3]])
         selInd=whichInds[axis]
 
-        # pts=[]
-        # vals=[]
 
-        # for ii in nb.prange(len(elements)):
-        #     el=elements[ii]
-        #     # nodes=util.renumberIndices(el.globalNodeIndices,self.mesh.indexMap)
-        #     nodes=[self.mesh.inverseIdxMap[n] for n in el.globalNodeIndices]
-        #     interp=el.getPlanarValues(self.nodeVoltages[nodes],axis=axis,coord=point)
-
-        #     pts.extend(nodes)
-        #     vals.extend(interp)
-
-
-        # allPts=np.unique([el.globalNodeIndices[selInd] for el in elements])
-
-        # xyzs=np.array([util.index2pos(n) for n in allPts])
         notAx=[ax!=axis for ax in range(3)]
 
         maskArrays=[]
@@ -1593,18 +1651,36 @@ class SimStudy:
 
         return data
 
+    def save(self,obj,fname,ext='.p'):
+        fpath=self.__makepath(fname, ext)
+        pickle.dump(obj,open(fpath,'wb'))
+
+    def load(self,fname,ext='.p'):
+        fpath=self.getfile(fname,ext)
+        obj=pickle.load(open(fpath,'rb'))
+        return obj
+
 
     def getfile(self,name,extension='.p'):
         filepath=os.path.join(self.studyPath,name+extension)
         return  filepath
 
     def savePlot(self,fig,fileName,ext):
+        fname=self.__makepath(fileName, ext)
+        fig.savefig(fname)
+
+
+    def __makepath(self,fileName,ext):
         basepath=os.path.join(self.studyPath)
 
         if not os.path.exists(basepath):
             os.makedirs(basepath)
-        fname=os.path.join(basepath,fileName+ext)
-        fig.savefig(fname)
+        fpath=os.path.join(basepath,fileName+ext)
+        return fpath
+
+    def saveAnimation(self,animator,filename):
+        fname=self.__makepath(filename, '.adata')
+        pickle.dump(animator,open(fname,'wb'))
 
     def loadLogfile(self):
         """

@@ -10,29 +10,26 @@ import numpy as np
 import numba as nb
 import xCell
 import matplotlib.pyplot as plt
-
+import pickle
 
 meshtype='adaptive'
 # studyPath='Results/studyTst/miniCur/'#+meshtype
 datadir='/home/benoit/smb4k/ResearchData/Results/studyTst/'#+meshtype
 # studyPath=datadir+'post-renumber/'
-studyPath=datadir+'errorMetrics'
 
-xmax=1e-4
 sigma=np.ones(3)
+
+X=1000
+V=1
+studyPath=datadir+'errorMetrics/%du-%dV'%(X,V)
+
+xmax=X*1e-6
 
 
 vMode=False
-showGraphs=False
 generate=True
-saveGraphs=False
-
-vsrc=1.
-isrc=vsrc*4*np.pi*sigma*1e-6
 
 bbox=np.append(-xmax*np.ones(3),xmax*np.ones(3))
-
-# bbox=bbox+np.tile()
 
 study=xCell.SimStudy(studyPath,bbox)
 
@@ -45,10 +42,12 @@ lastNx=0
 tstVals=[None]
 tstCat='Power'
 
+errdicts=[]
+
 if generate:
 
     # for var in np.linspace(0.1,0.7,15):
-    for meshnum,maxdepth in enumerate(range(3,18)):
+    for meshnum,maxdepth in enumerate(range(3,16)):
         for tstVal in tstVals:
             # meshtype=tstVal
             # elementType=tstVal
@@ -73,7 +72,7 @@ if generate:
                 srcMag=1.
                 srcType='Voltage'
             else:
-                srcMag=4*np.pi*sigma[0]*rElec
+                srcMag=4*np.pi*sigma[0]*rElec*10
                 setup.addCurrentSource(srcMag,np.zeros(3),rElec)
                 srcType='Current'
 
@@ -128,6 +127,7 @@ if generate:
             errBasic=sum(basicErr)/sum(basicAna)
             errAdv=sum(advErr)/sum(advAna)
 
+            numel=len(setup.mesh.elements)
 
 
             power=setup.getPower()
@@ -149,3 +149,26 @@ if generate:
                                FVU,
                                power])
             study.saveData(setup)
+
+            errdict=xCell.misc.getErrorEstimates(setup)
+            # errdict['densities']=density
+            errdict['depths']=maxdepth
+            errdict['numels']=numel
+            errdicts.append(errdict)
+
+    dlist=xCell.misc.transposeDicts(errdicts)
+    pickle.dump(dlist,open(studyPath+'errMets.p','wb'))
+
+
+else:
+    dlist=pickle.load(open(studyPath+'errMets.p','rb'))
+
+
+for met in ['FVU','FVU2','powerError','int1','int3']:
+    plt.loglog(dlist['numels'],dlist[met],label=met)
+
+plt.legend()
+plt.xlabel('Number of elements')
+plt.title('%dum domain, %dV-equivalent source'%(X,V))
+study.savePlot(plt.gcf(), '%du-%dv'%(X,V), '.png')
+study.savePlot(plt.gcf(), '%du-%dv'%(X,V), '.eps')

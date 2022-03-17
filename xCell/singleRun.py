@@ -21,8 +21,8 @@ elementType='Admittance'
 
 # elementType='Face'
 
-xmax=1e-4
-maxdepth=12
+xmax=1e-3
+maxdepth=8
 
 sigma=np.ones(3)
 
@@ -113,7 +113,11 @@ setup.logTime()
 
 
 
-
+############### Tweaking error metrics
+# setup.nodeVoltages=np.zeros_like(setup.nodeVoltages)
+# r=np.linalg.norm(setup.mesh.nodeCoords,axis=1)
+# va,_=setup.analyticalEstimate(r)
+# setup.nodeVoltages=.2*va[0]
 
 
 # pt,val=setup.getUniversalPoints()
@@ -148,7 +152,7 @@ setup.logTime()
 
 ##### ERROR GRAPH
 ptr=xCell.Visualizers.ErrorGraph(plt.figure(),study)
-ptr.prefs['universalPts']=True
+ptr.prefs['universalPts']=False
 pdata=ptr.addSimulationData(setup)
 ptr.getArtists(0,pdata)
 
@@ -197,6 +201,8 @@ errAdv=sum(advErr)/sum(advAna)
 
 
 es,err,ana,sr,r=setup.calculateErrors()
+
+
 
 print('Error metrics:\nbasic vol:%g\nadv vol:%g\narea%g'%(errBasic,errAdv,es))
 

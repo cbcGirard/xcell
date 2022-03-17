@@ -54,7 +54,11 @@ class TimingBar:
         self.data = data
         if data is not None:
             if data['style'] != 'sweep':
-                self.ax.plot(data['x'], data['y'], color='C0')
+                if data['style']=='dot':
+                    alpha=0.5
+                else:
+                    alpha=1
+                self.ax.plot(data['x'], data['y'], color='C0',alpha=alpha)
             self.ax.set_ylabel(data['ylabel'])
             self.ax.yaxis.set_major_formatter(eform(data['unit']))
             self.ax.set_yticks([0])
@@ -449,8 +453,15 @@ def formatXYAxis(axis, bounds=None, symlog=False, lindist=None, axlabels=False, 
 
     axis.grid(False)
     if bounds is not None:
-        axis.set_xlim(bounds[0], bounds[1])
-        axis.set_ylim(bounds[2], bounds[3])
+        xbnd=[bounds[0], bounds[1]]
+        ybnd=[bounds[2], bounds[3]]
+        axis.set_xlim(xbnd[0],xbnd[1])
+        axis.set_ylim(ybnd[0],ybnd[1])
+
+        xbnd.append(0.)
+        ybnd.append(0.)
+        axis.xaxis.set_ticks(xbnd)
+        axis.yaxis.set_ticks(ybnd)
 
     if symlog:
         axis.set_xscale('symlog', linthresh=lindist)
@@ -1119,7 +1130,6 @@ class FigureAnimator:
 
     def animateStudy(self, fname=None, artists=None, fps=1.0):
 
-        animations = []
         artists = []
         for ii in range(len(self.dataSets)):
             artists.append(self.getArtists(ii))
@@ -1140,8 +1150,9 @@ class FigureAnimator:
             animation.save(fstem+'.mp4',
                            # writer=writer)
                            fps=fps)
-            pickle.dump(self.__dict__, open(fstem+'.aData', 'wb'))
-        animations.append(animation)
+            # pickle.dump(self.__dict__, open(fstem+'.aData', 'wb'))
+            self.study.save(self,fname,'.adata')
+
 
         return animation
 
