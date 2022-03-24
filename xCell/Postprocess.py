@@ -32,9 +32,10 @@ datadir='/home/benoit/smb4k/ResearchData/Results/studyTst/'
 # filterVals=["adaptive","uniform"]
 # filterVals=['adaptive']
 
-studyPath=datadir+"dualComp2"
-filterCategories=['Element type']
-filterVals=['Face','Admittance']
+# studyPath=datadir+"dualComp2"
+# filterCategories=['Element type']
+# filterVals=['Face','Admittance']
+# filterVals=['Admittance']
 
 # studyPath=datadir+'NEURON'
 # filterCategories=None
@@ -43,6 +44,14 @@ filterVals=['Face','Admittance']
 # studyPath=datadir+'post-renumber'
 # filterCategories=None
 # filterVals=[None]
+
+# studyPath=datadir+'quickie'
+# filterCategories=None
+# filterVals=[None]
+
+studyPath=datadir+'Boundary_large'
+filterCategories=['Boundary']
+filterVals=['Analytic','Ground']
 
 xmax=1e-4
 
@@ -63,13 +72,14 @@ study=xCell.SimStudy(studyPath,bbox)
 # aniImg2=study.animatePlot(xCell.centerSlice,'img_uniform',['Mesh type'],['uniform'])
 
 
-# staticPlots=True
-staticPlots=False
+staticPlots=True
+# staticPlots=False
 
 plotters=[
-    # xCell.Visualizers.ErrorGraph,
-    xCell.Visualizers.SliceSet,
-    # xCell.Visualizers.CurrentPlot
+#     xCell.Visualizers.ErrorGraph,
+#     xCell.Visualizers.SliceSet,
+    # xCell.Visualizers.CurrentPlot,
+    xCell.Visualizers.LogError
             ]
 
 
@@ -82,7 +92,7 @@ plotters=[
 # ani=ptr.animateStudy()
 
 
-if staticPlots:    
+if staticPlots:
     xCell.Visualizers.groupedScatter(study.studyPath+'/log.csv',
                          xcat='Number of elements',
                          ycat='Error',
@@ -90,32 +100,32 @@ if staticPlots:
     nufig=plt.gcf()
     study.savePlot(nufig, 'AccuracyCost', '.eps')
     study.savePlot(nufig, 'AccuracyCost', '.png')
-    
+
     for fv in filterVals:
-        
+
         fstack,fratio=xCell.Visualizers.plotStudyPerformance(study,
                                                              onlyCat=filterCategories[0],
                                                              onlyVal=fv)
         fstem='_'+filterCategories[0]+str(fv)
-        
+
         study.savePlot(fstack, 'Performance'+fstem, '.eps')
         study.savePlot(fstack, 'Performance'+fstem, '.png')
-    
+
         study.savePlot(fratio, 'Ratio'+fstem, '.eps')
         study.savePlot(fratio, 'Ratio'+fstem, '.png')
-        
-        
 
-        
-        
+
+
+
+
 
 # #THIS WORKS
 # for ii,p in enumerate(plotters):
 
 #     for fv in filterVals:
 #         fname=p.__name__+'_'+str(fv)
-        
-        
+
+
 #         plotr=p(plt.figure(),study)
 
 
@@ -123,10 +133,10 @@ if staticPlots:
 #                   filterVals=[fv])
 #         plotr.animateStudy(fname=fname)
 
-        
+
 
 for ii,p in enumerate(plotters):
-    
+
     plots=[]
     names=[]
     ranges=None
@@ -138,15 +148,15 @@ for ii,p in enumerate(plotters):
 
         plotr.getStudyData(filterCategories=filterCategories,
                   filterVals=[fv])
-        
+
         plots.append(plotr)
         names.append(fname)
-        
+
         if ranges is not None:
             plotr.unifyScales(ranges)
         ranges=plotr.dataScales
-        
+
     for plot,name in zip(plots,names):
         plot.dataScales=ranges
-        
+
         plot.animateStudy(fname=name)

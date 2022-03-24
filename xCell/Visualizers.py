@@ -25,7 +25,7 @@ import pickle
 import pandas
 # from util import uniformResample, edgeRoles, getquads, quadsToMaskedArrays, coords2MaskedArrays
 import util
-
+import misc
 
 # Dark mode
 FAINT = (1., 1., 1., 0.05)
@@ -88,7 +88,8 @@ class TimingBar:
                 art.append(self.ax.scatter(self.data['x'][step],
                                            self.data['y'][step],
                                            marker='o',
-                                           color='C1'))
+                                           color='C0',
+                                           s=2.))
 
         else:
             art.append(self.ax.vlines(time, .8*ymin, .8*ymax,
@@ -808,10 +809,18 @@ def new3dPlot(boundingBox, *args, fig=None):
     return axis
 
 
-def animatedTitle(figure, text):
-    title = figure.text(0.5, .95, text,
+def animatedTitle(figure, text,axis=None):
+    kwargs={}
+    if figure is None:
+        dest=axis
+        kwargs['transform']=axis.transAxes
+    else:
+        dest=figure
+
+    title = dest.text(0.5, .95, text,
                         horizontalalignment='center',
-                        verticalalignment='bottom')
+                        verticalalignment='bottom',
+                        **kwargs)
     return title
 
 
@@ -1094,6 +1103,10 @@ def toEdgePoints(planeCoords, edges):
 
 class FigureAnimator:
     def __init__(self, fig, study, prefs=None):
+        if fig is None:
+            fig=plt.figure()
+
+
         self.fig = fig
         self.study = study
         self.axes = []
@@ -1916,50 +1929,68 @@ class SingleSlice(FigureAnimator):
         if data is None:
             data = self.dataSets[setnum]
 
-        cMap, cNorm = getCmap(self.dataScales[self.dataSrc].get())
 
-        # if setnum==0:
-        mapper = mpl.cm.ScalarMappable(norm=cNorm, cmap=cMap)
-
-        if self.dataSrc == 'spaceV' or self.dataSrc == 'absErr':
-            cbarFormat = eform('V')
+        if data[self.dataSrc] is None:
+            artists=[]
+            meshAlpha=1.
+            if self.cax is not None:
+                self.fig.delaxes(self.cax)
+                self.cax=None
+                plt.tight_layout()
         else:
-            cbarFormat = mpl.ticker.PercentFormatter(xmax=1.,
-                                                     decimals=2)
-            self.cax.set_ylabel('Relative error')
-        self.fig.colorbar(mapper, cax=self.cax,
-                          format=cbarFormat)
-        if setnum == 0:
-            plt.tight_layout()
+            meshAlpha=0.025
+            cMap, cNorm = getCmap(self.dataScales[self.dataSrc].get())
 
-        artists = patchworkImage(self.ax,
-                                 data[self.dataSrc], cMap, cNorm,
-                                 self.bnds)
+            # if setnum==0:
+            mapper = mpl.cm.ScalarMappable(norm=cNorm, cmap=cMap)
+
+            if self.dataSrc == 'spaceV' or self.dataSrc == 'absErr':
+                cbarFormat = eform('V')
+            else:
+                cbarFormat = mpl.ticker.PercentFormatter(xmax=1.,
+                                                         decimals=2)
+                self.cax.set_ylabel('Relative error')
+            self.fig.colorbar(mapper, cax=self.cax,
+                              format=cbarFormat)
+            if setnum == 0:
+                plt.tight_layout()
+
+            artists = patchworkImage(self.ax,
+                                     data[self.dataSrc], cMap, cNorm,
+                                     self.bnds)
 
         artists.append(showEdges2d(self.ax,
                                    data['meshPts'],
-                                   alpha=0.025))
+                                   alpha=meshAlpha))
         artists.extend(self.tbar.getArt(self.timevec[setnum],
                                         setnum))
 
         return artists
 
     def addSimulationData(self, sim, append=False):
-        vest, _ = sim.analyticalEstimate()
 
-        absErr = sim.nodeVoltages-vest[0]
-        relErr = absErr/np.abs(vest[0])
+        if sim.nodeVoltages.shape[0]==0:
+            vArrays=None
+            absArr=None
+        else:
+            vest, _ = sim.analyticalEstimate()
 
-        vArrays, _ = sim.getValuesInPlane()
-        absArr, _ = sim.getValuesInPlane(data=absErr)
+            absErr = sim.nodeVoltages-vest[0]
+            relErr = absErr/np.abs(vest[0])
+
+            vArrays, _ = sim.getValuesInPlane()
+            absArr, _ = sim.getValuesInPlane(data=absErr)
+
+
+            v1d = util.unravelArraySet(vArrays)
+
+            self.dataScales['spaceV'].update(v1d)
+            # self.dataScales['relErr'].update(relErr)
+            self.dataScales['absErr'].update(absErr)
 
         _, _, edgePts = sim.getElementsInPlane()
 
-        v1d = util.unravelArraySet(vArrays)
 
-        self.dataScales['spaceV'].update(v1d)
-        # self.dataScales['relErr'].update(relErr)
-        self.dataScales['absErr'].update(absErr)
 
         data = {
             'spaceV': vArrays,
@@ -2002,3 +2033,73 @@ class SingleSlice(FigureAnimator):
                                          fps=fps)
 
         return animation
+
+
+class LogError(FigureAnimator):
+    def __init__(self, fig, study):
+
+        super().__init__(fig, study)
+        if len(self.fig.axes)==0:
+            ax=self.fig.add_subplot()
+            self.axes.append(ax)
+
+            ax.xaxis.set_major_formatter(eform('m'))
+            ax.yaxis.set_major_formatter(eform('V'))
+            # ax.set_title(" ")
+            # plt.title('')
+            # plt.tight_layout()
+
+
+    def addSimulationData(self, sim, append=False):
+        err1d,err,ana,sr,r=sim.calculateErrors()
+
+        FVU=misc.FVU(ana,err)
+        rmin=min([cs.radius for cs in sim.currentSources])
+        r[r<rmin]=rmin/2
+
+        nsrc=np.nonzero(sim.nodeRoleTable==2)[0].shape[0]
+
+        rAna=np.array([rmin/2,rmin,max(r)])
+        absAna=abs(ana)
+
+        vAna=np.array([max(absAna),max(absAna),min(absAna)])
+
+        data={
+            'r':r[sr],
+            'ana':vAna,
+            'rAna':rAna,
+            'err':abs(err[sr]),
+            'err1d':err1d,
+            'FVU':FVU,
+            'srcPts':nsrc}
+
+        if append:
+            self.dataSets.append(data)
+
+    def getArtists(self, setnum,data=None):
+
+        if data is None:
+            data=self.dataSets[setnum]
+
+
+        artists=[]
+        ax=self.fig.axes[0]
+
+        er1=ax.loglog(data['rAna'],data['ana'],label='Analytic',color=BASE)
+        er2=ax.loglog(data['r'],data['err'],label='Error',color='r')
+
+        titlestr="FVU=%.2g, int1=%.2g, %d points in source"%(data['FVU'],data['err1d'],data['srcPts'])
+
+        title=animatedTitle(None, titlestr,ax)
+        # title=animatedTitle(None, "FVU=%g, int1=%g, %d points in source"%(data['FVU'],data['err1d'],data['srcPts']), axis=ax)
+        # title=ax.set_title("FVU=%g, int1=%g, %d points in source"%(data['FVU'],data['err1d'],data['srcPts']))
+
+        if setnum==0:
+            self.axes[0].legend(loc='upper right')
+            # ax.text()
+
+        artists.extend(er1)
+        artists.extend(er2)
+        artists.append(title)
+
+        return artists

@@ -320,13 +320,13 @@ class Octree(Mesh):
 
         """
         changed=self.tree.refineByMetric(l0Function, self.maxDepth)
-        pruned,_=self.tree.coarsenByMetric(l0Function)
+        pruned,_=self.tree.coarsenByMetric(l0Function,self.maxDepth)
 
-        if pruned:
-            print()
-            changed|=pruned
+        # if pruned:
+        #     print()
+        #     changed|=pruned
 
-        self.changed=changed
+        self.changed=changed|pruned
 
         return changed
 
@@ -623,7 +623,7 @@ class Octant():
         self.depth=depth
         self.index=index
 
-        rdepth=util.MAXDEPTH-depth
+        # rdepth=util.MAXDEPTH-depth
 
         #don't calculate indices here, since we might split later
         self.vertices=[]
@@ -744,7 +744,7 @@ class Octant():
 
         return changed
 
-    def coarsenByMetric(self,metric):
+    def coarsenByMetric(self,metric,maxdepth):
         #TODO: coarsening factor control
 
 
@@ -780,13 +780,13 @@ class Octant():
         ###### pseudocode
         # delete children if all too small
 
-        undersize=self.l0<metric(self.center)
+        undersize=self.l0<metric(self.center) or self.depth>maxdepth
         changed=False
         if len(self.children)==0:
             pass
         else:
             for ch in self.children:
-                chChange,chUnder=ch.coarsenByMetric(metric)
+                chChange,chUnder=ch.coarsenByMetric(metric,maxdepth)
 
                 undersize&=chUnder
                 changed|=chChange

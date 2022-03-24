@@ -16,9 +16,9 @@ meshtype='adaptive'
 # studyPath='Results/studyTst/miniCur/'#+meshtype
 datadir='/home/benoit/smb4k/ResearchData/Results/studyTst/'#+meshtype
 # studyPath=datadir+'post-renumber/'
-studyPath=datadir+'power'
+studyPath=datadir+'Boundary_large'
 
-xmax=1e-4
+xmax=1e-2
 sigma=np.ones(3)
 
 
@@ -57,8 +57,11 @@ lastNx=0
 # # tstVals=['Admittance']
 # tstCat='Element type'
 
-tstVals=[None]
-tstCat='Power'
+# tstVals=[None]
+# tstCat='Power'
+
+tstVals=['Analytic','Ground']
+tstCat='Boundary'
 
 if generate:
 
@@ -120,7 +123,11 @@ if generate:
                 r=np.linalg.norm(coord)
                 return rElec/(r*np.pi*4)
             # setup.insertSourcesInMesh()
-            setup.setBoundaryNodes(boundaryFun)
+
+            if tstVal=='Analytic':
+                setup.setBoundaryNodes(boundaryFun)
+            else:
+                setup.setBoundaryNodes()
             # setup.getEdgeCurrents()
 
             # v=setup.solve()
@@ -129,13 +136,18 @@ if generate:
             setup.applyTransforms()
 
             setup.getMemUsage(True)
-            errEst,_,_,_=setup.calculateErrors()#srcMag,srcType,showPlots=showGraphs)
+            errEst,err,ana,_,_=setup.calculateErrors()
+            FVU=xCell.misc.FVU(ana, err)
+
+
             print('error: %g'%errEst)
 
 
-            tstVal=setup.getPower()
-            print('power: '+str(tstVal))
-            study.newLogEntry(['Error','k','Depth',tstCat],[errEst,l0Param,maxdepth,tstVal])
+            # tstVal=setup.getPower()
+            # print('power: '+str(tstVal))
+
+
+            study.newLogEntry(['Error','FVU',tstCat],[errEst,FVU,tstVal])
             study.saveData(setup)
             if meshtype=='adaptive':
                 lastNumEl=len(setup.mesh.elements)

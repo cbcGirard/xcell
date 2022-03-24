@@ -126,6 +126,7 @@ class Simulation:
             self.mesh=Meshes.Octree(self.mesh.bbox,maxdepth,
                                     elementType=self.mesh.elementType)
 
+        self.mesh.maxDepth=maxdepth
         changed=self.mesh.refineByMetric(metric)
         self.logTime()
 
@@ -1443,6 +1444,12 @@ class Simulation:
                     elUind=el.vertices
 
                 nodes=[self.mesh.inverseIdxMap[n] for n in elUind]
+                if len(nodes)==0:
+                    print('empty element:')
+                    print(el.index)
+                    print('verts: '+str(el.vertices))
+                    print('faces: '+str(el.faces))
+                    continue
                 interp=el.getPlanarValues(data[nodes],axis=axis,coord=point)
 
                 # xy0=util.octantListToXYZ(np.array(el.index))[notAx]
@@ -1831,7 +1838,7 @@ def makeBoundedLinearMetric(l0min,l0max,domainX):
 
 def makeExplicitLinearMetric(maxdepth,meshdensity):
     param=2**(-maxdepth*meshdensity)#-1)*3**(0.5)
-    @nb.njit()
+    # @nb.njit()
     def metric(coord):
         r=np.linalg.norm(coord)
         val=r*param

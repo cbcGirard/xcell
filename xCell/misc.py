@@ -84,5 +84,12 @@ def transposeDicts(dictList):
     return arrayDict
 
 
+def FVU(analyticVals,err):
+    # err=simVals-analyticVals
 
+    SSE=np.sum(err**2)
+    SSTot=np.sum((analyticVals-np.mean(analyticVals))**2)
 
+    FVU=SSE/SSTot
+
+    return FVU

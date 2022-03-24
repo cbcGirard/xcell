@@ -145,9 +145,11 @@ class Ring:
 
 
 
-generate=True
+generate=False
 
+vids=False
 
+strat='depth'
 
 
 elementType='Admittance'
@@ -197,12 +199,14 @@ tdata={
        'style':'dot'}
 
 study=xCell.SimStudy(studyPath,bbox)
-img=xCell.Visualizers.SingleSlice(None,study,
-                                  tvec,tdata)
 
-err=xCell.Visualizers.SingleSlice(None, study,
-                                  tvec,tdata,
-                                  datasrc='absErr')
+if vids:
+    img=xCell.Visualizers.SingleSlice(None,study,
+                                      tvec,tdata)
+
+    err=xCell.Visualizers.SingleSlice(None, study,
+                                      tvec,tdata,
+                                      datasrc='absErr')
 
 # img.tax.plot(tvec,vvec)
 # img.tax.set_ylabel('Membrane potential [V]')
@@ -224,7 +228,6 @@ if generate:
 
     dmin=3
     dmax=8
-    strat='d2'
 
 
 
@@ -280,7 +283,7 @@ if generate:
             if strat=='d2':
                 density=0.5
             else:
-                density=0.2+0.2*dfrac
+                density=0.2#+0.2*dfrac
 
         elif strat=='fixed':
             ################### Static mesh
@@ -381,15 +384,16 @@ if generate:
         errdicts.append(errdict)
 
 
-
-        err.addSimulationData(setup,append=True)
-        img.addSimulationData(setup,append=True)
+        if vids:
+            err.addSimulationData(setup,append=True)
+            img.addSimulationData(setup,append=True)
 
     lists=xCell.misc.transposeDicts(errdicts)
     pickle.dump(lists, open(studyPath+strat+'.p','wb'))
 else:
-    img.getStudyData()
-    err.getStudyData()
+    if vids:
+        img.getStudyData()
+        err.getStudyData()
     lists=pickle.load(open(studyPath+strat+'.p','rb'))
 
 
@@ -400,25 +404,31 @@ f,axes=plt.subplots(3,1,sharex=True,gridspec_kw={'height_ratios':[5,2,2]})
 f.suptitle('Adaptation: '+strat)
 
 
-# axes[0].fill_between(tvec,
-#                      lists['Emax'],
-#                      lists['Emin'],
-#                      color='r',alpha=0.75)
-# axes[0].plot(tvec,lists['Eavg'],'r')
-# axes[1].plot(tvec,abs(erat))
-# axes[1].plot(tvec,lists['Esum'])
-for mets in ['FVU','FVU2','powerError','int1','int3']:
-    axes[0].plot(tvec,lists[mets],label=mets)
 
-axes[0].legend()
+# for mets in ['FVU','FVU2','powerError','int1','int3']:
+#     axes[0].plot(tvec,lists[mets],label=mets)
+
+# axes[0].legend()
 axes[0].set_ylabel('Error metric')
 
-axes[1].plot(tvec,vvec,label='Voltage')
-a2=plt.twinx(axes[1])
-a2.plot(tvec,ivec,color='C1',label='Current')
 
-a2.set_ylabel('Current',color='C1')
-axes[1].set_ylabel('Voltage',color='C0')
+met='int3'
+axes[0].plot(tvec,lists[met],label='fixed')
+axes[0].plot(tvec,ldep[met],label='depth')
+axes[0].plot(tvec,lk[met],label='density')
+axes[0].set_ylabel(met)
+axes[0].set_yscale('log')
+
+
+cvolt='C4'
+ccurr='C5'
+
+axes[1].plot(tvec,vvec,label='Voltage',color=cvolt)
+a2=plt.twinx(axes[1])
+a2.plot(tvec,ivec,color=ccurr,label='Current')
+
+a2.set_ylabel('Current',color=ccurr)
+axes[1].set_ylabel('Voltage',color=cvolt)
 # a2.yaxis.set_major_formatter(xCell.Visualizers.eform('A'))
 # a2.grid(axis='y',color='C1')
 # axes[1].grid(axis='y',color='C0')
@@ -435,16 +445,23 @@ ibnd=nicen(imax)
 a2.set_ylim(-ibnd,ibnd)
 axes[1].set_ylim(-vbnd,vbnd)
 
+
+
 axes[2].plot(tvec,lists['numels'])
+axes[2].plot(tvec,ldep['numels'])
+axes[2].plot(tvec,lk['numels'])
+
+
+axes[2].set_ylabel('Number of\nElements')
 axes[2].xaxis.set_major_formatter(xCell.Visualizers.eform('s'))
 
 axes[2].set_yscale('log')
 
-axes[2].set_ylabel('Number of\nElements')
-
-study.savePlot(f, strat, '.png')
-study.savePlot(f, strat, '.eps')
 
 
-ani=img.animateStudy('volt-'+strat,fps=30.)
-erAni=err.animateStudy('error-'+strat,fps=30.)
+# study.savePlot(f, strat, '.png')
+# study.savePlot(f, strat, '.eps')
+
+if vids:
+    ani=img.animateStudy('volt-'+strat,fps=30.)
+    erAni=err.animateStudy('error-'+strat,fps=30.)

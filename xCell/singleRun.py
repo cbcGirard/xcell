@@ -21,8 +21,8 @@ elementType='Admittance'
 
 # elementType='Face'
 
-xmax=1e-3
-maxdepth=8
+xmax=1e-4
+maxdepth=3
 
 sigma=np.ones(3)
 
@@ -206,13 +206,7 @@ es,err,ana,sr,r=setup.calculateErrors()
 
 print('Error metrics:\nbasic vol:%g\nadv vol:%g\narea%g'%(errBasic,errAdv,es))
 
-r[r==min(r)]=rElec/2
 
-plt.figure()
-
-ax=plt.gca()
-ax.set_xscale('log')
-ax.set_yscale('log')
-
-plt.plot(r,ana)
-plt.plot(r,abs(err))
+P=xCell.Visualizers.LogError(None,study)
+P.addSimulationData(setup,True)
+P.getArtists(0)
