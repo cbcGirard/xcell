@@ -49,9 +49,11 @@ datadir='/home/benoit/smb4k/ResearchData/Results/studyTst/'
 # filterCategories=None
 # filterVals=[None]
 
-studyPath=datadir+'Boundary_large'
+studyPath=datadir+'Boundary_large/rubik0'
 filterCategories=['Boundary']
-filterVals=['Analytic','Ground']
+# filterVals=['Analytic','Ground','Rubik0']
+filterVals=['Analytic']#,'Ground','Rubik0']
+
 
 xmax=1e-4
 
@@ -72,14 +74,14 @@ study=xCell.SimStudy(studyPath,bbox)
 # aniImg2=study.animatePlot(xCell.centerSlice,'img_uniform',['Mesh type'],['uniform'])
 
 
-staticPlots=True
-# staticPlots=False
+# staticPlots=True
+staticPlots=False
 
 plotters=[
-#     xCell.Visualizers.ErrorGraph,
+    xCell.Visualizers.ErrorGraph,
 #     xCell.Visualizers.SliceSet,
     # xCell.Visualizers.CurrentPlot,
-    xCell.Visualizers.LogError
+    # xCell.Visualizers.LogError
             ]
 
 
@@ -95,7 +97,7 @@ plotters=[
 if staticPlots:
     xCell.Visualizers.groupedScatter(study.studyPath+'/log.csv',
                          xcat='Number of elements',
-                         ycat='Error',
+                         ycat='FVU',
                          groupcat=filterCategories[0])
     nufig=plt.gcf()
     study.savePlot(nufig, 'AccuracyCost', '.eps')

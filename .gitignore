@@ -7,6 +7,7 @@ getdpFiles/
 xCell/__pycache__
 xCell/Results
 xCell/examples
+xCell/x86_64
 docs/build
 
 
@@ -14,6 +15,10 @@ docs/build
 *.Result
 *.txt
 */.spyproject/*
+
+# other
+*.o
+
 
 # Node artifact files
 node_modules/

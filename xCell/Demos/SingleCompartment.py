@@ -16,13 +16,14 @@ from neuron import h#, gui
 from neuron.units import ms, mV
 
 import misc
+import time
 
 h.load_file('stdrun.hoc')
 h.CVode().use_fast_imem(1)
 
 
 datadir='/home/benoit/smb4k/ResearchData/Results/NEURON/'#+meshtype
-studyPath=datadir+'strategies/'
+studyPath=datadir+'tmp/coarse/'
 
 
 class Cell:
@@ -145,18 +146,25 @@ class Ring:
 
 
 
-generate=False
+# generate=True
+# vids=True
+# post=True
 
+
+generate=False
 vids=False
+post=True
 
 strat='depth'
 
 
 elementType='Admittance'
 
-xmax=1e-4
+xmax=1e-3
 
-sigma=np.ones(3)
+#2.6 ohm-m .384/m
+#6.4 ohm-m, 0.156
+sigma=0.156*np.ones(3)
 
 vsrc=1.
 isrc=vsrc*4*np.pi*sigma*1e-6
@@ -175,13 +183,13 @@ h.continuerun(12)
 
 # plt.scatter(t,ring.cells[0].ivec)
 
-ivec=ring.cells[0].ivec.as_numpy()*1e-9
+ivec=-ring.cells[0].ivec.as_numpy()*1e-9
 tvec=t.as_numpy()*1e-3
 vvec=ring.cells[0].soma_v.as_numpy()*1e-3
 
-ivec=ivec[::5]
-tvec=tvec[::5]
-vvec=vvec[::5]
+# ivec=ivec[::5]
+# tvec=tvec[::5]
+# vvec=vvec[::5]
 
 imax=max(abs(ivec))
 tmax=tvec[-1]
@@ -219,14 +227,14 @@ if generate:
 
     setup.addCurrentSource(1.,
                            np.zeros(3),
-                           1e-6)
+                           1e-6*ring.cells[0].soma.diam3d(0)/2)
 
 
 
     # maxdepth=5
     maxdepth=6
 
-    dmin=3
+    dmin=6
     dmax=8
 
 
@@ -255,7 +263,8 @@ if generate:
         'FVU2':[],
         'vol':[],
         'volAna':[],
-        'volErr':[]
+        'volErr':[],
+        'vMax':[]
         }
 
 
@@ -263,7 +272,8 @@ if generate:
 
     for tval,ival,vval in zip(tvec,ivec,vvec):
 
-        setup.currentSources[0].value=ival
+        t0=time.monotonic()
+        setup.currentSources[0].value=-ival
         setup.currentTime=tval
 
 
@@ -287,7 +297,7 @@ if generate:
 
         elif strat=='fixed':
             ################### Static mesh
-            maxdepth=dmax
+            maxdepth=5
             density=0.2
 
 
@@ -313,20 +323,26 @@ if generate:
 
             setup.setBoundaryNodes(bfun)
 
-            v=setup.solve()
+            v=setup.iterativeSolve()
             lastNumEl=numEl
             setup.iteration+=1
 
             study.saveData(setup)#,baseName=str(setup.iteration))
         else:
-            # vdof=setup.getDoFs()
-            # v=setup.iterativeSolve(vGuess=vdof)
-            scale=ival/lastI
-            # print(scale)
-            v=setup.nodeVoltages*scale
-            setup.nodeVoltages=v
+
+            vdof=setup.getDoFs()
+            v=setup.iterativeSolve(vGuess=vdof)
+
+            # #Shortcut for single source
+            # scale=ival/lastI
+            # # print(scale)
+            # v=setup.nodeVoltages*scale
+            # setup.nodeVoltages=v
+
+            # v=setup.solve()
 
 
+        dt=time.monotonic()-t0
 
         lastI=ival
 
@@ -341,46 +357,13 @@ if generate:
 
 
 
-        # esum,err,vAna,sortr,r=setup.calculateErrors()
-
-        # sse=np.sum(err**2)
-        # sstot=np.sum((v-np.mean(v))**2)
-        # ss=np.sum((vAna-np.mean(vAna))**2)
-        # FVU=sse/sstot
-        # FVU2=sse/ss
-
-        # elV,elAna,elErr,_=setup.estimateVolumeError(basic=True)
-
-        # volErr=sum(elErr)
-        # volAna=sum(elAna)
-        # vol=volErr/volAna
-
-        # lists['Emax'].append(max(err))
-        # lists['Emin'].append(min(err))
-        # lists['Eavg'].append(np.mean(err))
-        # lists['Esum'].append(esum)
-        # lists['densities'].append(density)
-        # lists['depths'].append(maxdepth)
-
-        # lists['IntAna'].append(misc.iSourceIntegral(ival,
-        #                                             1e-6,
-        #                                             np.sqrt(3)*xmax,
-        #                                             1))
-
-        # # r=np.linalg.norm(setup.mesh.nodeCoords,axis=1)[sortr]
-        # lists['IntErr'].append(np.trapz(np.abs(err[sortr]),
-        #                                 r))
-        # lists['numels'].append(lastNumEl)
-        # lists['FVU'].append(FVU)
-        # lists['FVU2'].append(FVU2)
-        # lists['vol'].append(vol)
-        # lists['volAna'].append(volAna)
-        # lists['volErr'].append(volErr)
 
         errdict=xCell.misc.getErrorEstimates(setup)
         errdict['densities']=density
         errdict['depths']=maxdepth
         errdict['numels']=lastNumEl
+        errdict['dt']=dt
+        errdict['vMax']=max(np.abs(v))
         errdicts.append(errdict)
 
 
@@ -397,71 +380,167 @@ else:
     lists=pickle.load(open(studyPath+strat+'.p','rb'))
 
 
+if post:
+    ldep=pickle.load(open(studyPath+'depth.p','rb'))
 
+    lk=pickle.load(open(studyPath+'k.p','rb'))
 
-f,axes=plt.subplots(3,1,sharex=True,gridspec_kw={'height_ratios':[5,2,2]})
+    lists=pickle.load(open(studyPath+'fixed'+'.p','rb'))
+    f,axes=plt.subplots(3,1,sharex=True,gridspec_kw={'height_ratios':[5,1,1]})
 
-f.suptitle('Adaptation: '+strat)
-
-
-
-# for mets in ['FVU','FVU2','powerError','int1','int3']:
-#     axes[0].plot(tvec,lists[mets],label=mets)
-
-# axes[0].legend()
-axes[0].set_ylabel('Error metric')
-
-
-met='int3'
-axes[0].plot(tvec,lists[met],label='fixed')
-axes[0].plot(tvec,ldep[met],label='depth')
-axes[0].plot(tvec,lk[met],label='density')
-axes[0].set_ylabel(met)
-axes[0].set_yscale('log')
-
-
-cvolt='C4'
-ccurr='C5'
-
-axes[1].plot(tvec,vvec,label='Voltage',color=cvolt)
-a2=plt.twinx(axes[1])
-a2.plot(tvec,ivec,color=ccurr,label='Current')
-
-a2.set_ylabel('Current',color=ccurr)
-axes[1].set_ylabel('Voltage',color=cvolt)
-# a2.yaxis.set_major_formatter(xCell.Visualizers.eform('A'))
-# a2.grid(axis='y',color='C1')
-# axes[1].grid(axis='y',color='C0')
-
-#adjust vals
-
-def nicen(val):
-    exp=np.floor(np.log10(val))
-    return np.ceil(val/(10**exp))*10**exp
-
-
-vbnd=nicen(max(abs(vvec)))
-ibnd=nicen(imax)
-a2.set_ylim(-ibnd,ibnd)
-axes[1].set_ylim(-vbnd,vbnd)
+    # f.suptitle('Adaptation: '+strat)
 
 
 
-axes[2].plot(tvec,lists['numels'])
-axes[2].plot(tvec,ldep['numels'])
-axes[2].plot(tvec,lk['numels'])
+    # for mets in ['FVU','FVU2','powerError','int1','int3']:
+    #     axes[0].plot(tvec,lists[mets],label=mets)
+
+    # axes[0].set_ylabel('Error metric')
 
 
-axes[2].set_ylabel('Number of\nElements')
-axes[2].xaxis.set_major_formatter(xCell.Visualizers.eform('s'))
-
-axes[2].set_yscale('log')
+    # met='max'
 
 
+    # met='int1'
+    # lists['SSE']/np.sum(lists['SStot'])
 
-# study.savePlot(f, strat, '.png')
-# study.savePlot(f, strat, '.eps')
+    for dset,lbl in zip([lists,ldep,lk],['fixed','depth','density']):
+        if dset['FVU']==[]:
+            continue
+        # met='nSSE'
+        # dval=dset['SSE']/np.sum(dset['SSTot'])
+
+
+
+        # # met='raw int1'
+        # met='Relative intErr'
+        # dval=np.abs(dset['intErr'])/np.abs(lists['intErr'])
+
+        met='late-normalized int1'
+        # intAna=np.abs(np.array(dset['intErr'])/np.abs(dset['int1']))
+
+        dval=np.abs(dset['intErr'])/sum(dset['intAna'])
+
+
+        # # met='SSE-seconds'
+        # met = 'int1-seconds'
+        # dval=dval*np.array(dset['dt'])
+
+
+        # met='dt'
+        # dval=np.array(dset[met])
+
+        # dval=dset[met]*np.array(dset['dt'])
+        axes[0].plot(tvec,dval,label=lbl)
+
+
+
+        # axes[0].plot(tvec,np.abs(dset[met]),label=lbl)
+        # axes[0].plot(tvec,dset[met]*abs(ivec)*dset['dt'],label=lbl)
+
+    # axes[0].plot(tvec,lists[met],label='fixed')
+    # axes[0].plot(tvec,ldep[met],label='depth')
+    # axes[0].plot(tvec,lk[met],label='density')
+    axes[0].set_ylabel(met)
+    axes[0].set_yscale('log')
+
+
+    axes[0].legend(loc='upper left')
+
+
+
+    # a2.yaxis.set_major_formatter(xCell.Visualizers.eform('A'))
+    # a2.grid(axis='y',color='C1')
+    # axes[1].grid(axis='y',color='C0')
+
+    #adjust vals
+
+    def nicen(val):
+        exp=np.floor(np.log10(val))
+        return np.ceil(val/(10**exp))*10**exp
+
+
+
+    # for aa in [a2,axes[1]]:
+    #     aa.yaxis.set_ticks([0])
+
+
+
+    axes[1].plot(tvec,lists['numels'])
+    axes[1].plot(tvec,ldep['numels'])
+    axes[1].plot(tvec,lk['numels'])
+
+
+    axes[1].set_ylabel('Number of\nElements')
+    axes[1].xaxis.set_major_formatter(xCell.Visualizers.eform('s'))
+
+    axes[1].set_yscale('log')
+
+    cvolt='C4'
+    ccurr='C5'
+
+    axes[2].plot(tvec,vvec,label='Voltage',color=cvolt)
+    a2=plt.twinx(axes[2])
+
+    vbnd=nicen(max(abs(vvec)))
+    ibnd=nicen(imax)
+    a2.set_ylim(-ibnd,ibnd)
+    axes[2].set_ylim(-vbnd,vbnd)
+    a2.plot(tvec,ivec,color=ccurr,label='Current')
+
+    a2.set_ylabel('Current',color=ccurr)
+    axes[2].set_ylabel('Voltage',color=cvolt)
+
+    # study.savePlot(f, strat, '.png')
+    # study.savePlot(f, strat, '.eps')
+
+
+
+    plt.figure()
+    A=plt.gca()
+
+    # A.set_xlabel('Total time [seconds]')
+    A.set_ylabel('Total error [int1]')
+    # A.set_ylabel('Total error [FVU]')
+
+    totT=[]
+    totE=[]
+    for data,lbl in zip([lists,ldep,lk],['fixed','depth','k']):
+        if data['FVU']==[]:
+            continue
+        # E=sum(data['SSE'])/sum(data['SSTot'])
+        E=sum(np.abs(data['intErr']))/sum(np.abs(data['intAna']))
+        T=sum(data['dt'])
+        totE.append(E)
+        totT.append(T)
+        A.scatter(T,E,label=lbl,s=10,marker='*')
+
+        #
+        # A.plot(data['dt'],np.abs(data['int1']), label=lbl)
+
+    A.legend(loc='center')
+    A.set_yscale('log')
+    A.set_xscale('log')
+
+    # bwidth=0.35
+    # fbar=plt.figure()
+    # bax1=fbar.add_subplot(111)
+    # bax2=bax1.twinx()
+
+    # bax1.bar(np.arange(3)-bwidth/2, totE, bwidth,color='C0')
+    # bax2.bar(np.arange(3)+bwidth/2, totT, bwidth, color='C1')
+    # plt.gca().set_xticks(np.arange(3), ['fixed','depth','k'])
+    # # plt.legend()
+    # bax1.set_ylabel('Error', color='C0')
+    # bax2.set_ylabel('Sim time', color='C1')
+
+
+
+
+
 
 if vids:
     ani=img.animateStudy('volt-'+strat,fps=30.)
     erAni=err.animateStudy('error-'+strat,fps=30.)
+
+

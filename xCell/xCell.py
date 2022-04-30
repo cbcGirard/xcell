@@ -21,12 +21,7 @@ import pickle
 import matplotlib.ticker as tickr
 import matplotlib.pyplot as plt
 # plt.style.use('dark_background')
-try:
-    plt.style.use('../scope.mplstyle')
-    plt.style.use('../xcell.mplstyle')
-except:
-    plt.style.use('./scope.mplstyle')
-    plt.style.use('./xcell.mplstyle')
+
 
 import util
 import Visualizers
@@ -100,7 +95,7 @@ class Simulation:
         self.asDual=False
 
 
-    def makeAdaptiveGrid(self,metric,maxdepth):
+    def makeAdaptiveGrid(self,metric,maxdepth,autoExpand=False):
         """
         Fast utility to construct an octree-based mesh of the domain.
 
@@ -122,8 +117,15 @@ class Simulation:
         self.ptPerAxis=2**maxdepth+1
         self.meshtype='adaptive'
 
-        if type(self.mesh)!=Meshes.Octree:
-            self.mesh=Meshes.Octree(self.mesh.bbox,maxdepth,
+        if (type(self.mesh)!=Meshes.Octree) or autoExpand:
+            xdom=min(self.mesh.span)
+            scale=xdom/metric(np.array([xdom,0.,0.]))
+            p2=np.ceil(np.log2(scale))
+            bbox=np.tile(self.mesh.center,2)
+            tmp=np.concatenate((-np.ones(3),np.ones(3)))
+            bbox+=tmp*(2**p2)*np.tile(self.mesh.span,2)
+
+            self.mesh=Meshes.Octree(bbox,maxdepth,
                                     elementType=self.mesh.elementType)
 
         self.mesh.maxDepth=maxdepth
@@ -506,6 +508,7 @@ class Simulation:
         self.voltageSources.append(VoltageSource(value,coords,radius))
 
     def insertSourcesInMesh(self,snaplength=0):
+        self.nodeCurrents=np.zeros_like(self.nodeVoltages)
         for ii in nb.prange(len(self.voltageSources)):
             src=self.voltageSources[ii]
 
@@ -518,13 +521,37 @@ class Simulation:
             # self.vSourceVals.extend(src.value*np.ones(len(indices)))
             self.nodeVoltages[indices]=src.value
 
+        nComposite=0
+        srcLists=[]
         for ii in nb.prange(len(self.currentSources)):
             src=self.currentSources[ii]
 
-            indices=self.__nodesInSource(src)
+            try:
+                indices=np.nonzero(src.geometry.isInside(self.mesh.nodeCoords))[0]
+            except:
+                indices=self.__nodesInSource(src)
 
-            self.nodeRoleTable[indices]=2
-            self.nodeRoleVals[indices]=ii
+
+            self.nodeCurrents[indices]+=src.value
+            for idx in indices:
+                if self.nodeRoleTable[idx]==0:
+                    self.nodeRoleTable[idx]=2
+                    self.nodeRoleVals[idx]=ii
+                else:
+                    #shared node
+                    self.nodeRoleTable[idx]=3
+                    self.nodeRoleVals[idx]=nComposite
+
+                    srcLists[nComposite].append(idx)
+
+                    nComposite+=1
+
+
+            # self.srcLists=srcLists
+
+
+
+
 
 
     def __nodesInSource(self, source):
@@ -558,7 +585,7 @@ class Simulation:
 
         return index
 
-    def setBoundaryNodes(self,boundaryFun=None):
+    def setBoundaryNodes(self,boundaryFun=None,expand=None,sigma=None):
         """
         Set potential of nodes at simulation boundary.
 
@@ -576,20 +603,52 @@ class Simulation:
 
         """
         bnodes=self.mesh.getBoundaryNodes()
+
         self.nodeVoltages=np.zeros(self.mesh.nodeCoords.shape[0])
 
 
-        if boundaryFun is None:
-            bvals=np.zeros_like(bnodes)
-        else:
-            bcoords=self.mesh.nodeCoords[bnodes]
-            blist=[]
-            for ii in nb.prange(len(bnodes)):
-                blist.append(boundaryFun(bcoords[ii]))
-            bvals=np.array(blist)
+        if expand is None:
+            if boundaryFun is None:
+                bvals=np.zeros_like(bnodes)
+            else:
+                bcoords=self.mesh.nodeCoords[bnodes]
+                blist=[]
+                for ii in nb.prange(len(bnodes)):
+                    blist.append(boundaryFun(bcoords[ii]))
+                bvals=np.array(blist)
 
-        self.nodeVoltages[bnodes]=bvals
-        self.nodeRoleTable[bnodes]=1
+            self.nodeVoltages[bnodes]=bvals
+            self.nodeRoleTable[bnodes]=1
+        else:
+            oldRoles=self.nodeRoleTable
+            oldEdges=self.edges
+            oldConductances=self.conductances
+            nInt=oldRoles.shape[0]
+
+            # v0: only corners
+            nX=util.MAXPT
+            xyz=np.array([[x,y,z] for z in [0,nX-1] for y in [0,nX-1] for x in [0,nX-1]], dtype=np.uint64)
+            ind=util.pos2index(xyz, nX)
+            bnodes=np.array([self.mesh.inverseIdxMap[n] for n in ind])
+
+
+            newEdges=np.array([[n,nInt] for n in bnodes], dtype=np.uint64)
+
+#TODO: assumes isotropic mesh/conductance
+            cond=sum(sigma*self.mesh.span)
+
+
+            self.nodeRoleVals=np.concatenate((self.nodeRoleVals,[0.]))
+            self.nodeRoleTable=np.concatenate((oldRoles,[1]))
+            self.nodeVoltages=np.zeros(oldRoles.shape[0]+1)
+
+            self.edges=np.vstack((oldEdges,newEdges))
+            self.conductances=np.concatenate((oldConductances,cond*np.ones(bnodes.shape)))
+
+
+
+
+
 
 
     def solve(self):
@@ -637,6 +696,8 @@ class Simulation:
     def getDoFs(self):
         isDoF=self.nodeRoleTable==0
         ndof=np.nonzero(isDoF)[0].shape[0]
+
+        # nsrc=np.nonzero(self.nodeRoleTable==2)[0].shape[0]
         nsrc=len(self.currentSources)
 
         vDoF=np.empty(nsrc+ndof)
@@ -644,8 +705,11 @@ class Simulation:
         vDoF[:ndof]=self.nodeVoltages[isDoF]
 
         for nn in range(nsrc):
-            sel=np.nonzero(self.__selByDoF(nn+ndof))[0][0]
-            vDoF[ndof+nn]=self.nodeRoleTable[sel]
+            matchArr=self.__selByDoF(nn+ndof)
+            matches=np.nonzero(matchArr)[0]
+            if matches.shape[0]>0:
+                sel=matches[0]
+                vDoF[ndof+nn]=self.nodeVoltages[sel]
 
         return vDoF
 
@@ -885,6 +949,8 @@ class Simulation:
         sorter : int[:]
             Indices to sort globally-ordered array based on the corresponding node's distance from center
             e.g. erSorted=err[sorter]
+        r : float[:]
+            distance of each point from source
         """
         # v=self.nodeVoltages
 
@@ -1177,6 +1243,8 @@ class Simulation:
         for ii in range(Ns):
             b[ii+Nx]+=self.currentSources[ii].value
 
+        # idx=self.node
+
         diags=-np.array(gR.sum(1)).squeeze()
 
         G.setdiag(diags)
@@ -1324,6 +1392,7 @@ class Simulation:
         isFix=self.nodeRoleTable==1
 
         # N=self.mesh.nodeCoords.shape[0]
+        # Ns=np.nonzero(self.nodeRoleTable==2)[0].shape[0]
         Ns=len(self.currentSources)
         Nx=np.nonzero(self.nodeRoleTable==0)[0].shape[0]
         Nd=Nx+Ns
@@ -1546,7 +1615,7 @@ class Simulation:
         otherAx=[n!=axis for n in range(3)]
         pcoord=self.mesh.nodeCoords[:,otherAx]
 
-        corEdge=self.mesh.edges[inPlane]
+        corEdge=self.edges[inPlane]
         corEdge[ineg,:]=np.fliplr(corEdge[ineg,:])
 
 

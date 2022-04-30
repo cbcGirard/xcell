@@ -22,7 +22,7 @@ elementType='Admittance'
 # elementType='Face'
 
 xmax=1e-4
-maxdepth=3
+maxdepth=4
 
 sigma=np.ones(3)
 
@@ -96,7 +96,7 @@ def boundaryFun(coord):
 
 setup.finalizeMesh()
 
-setup.setBoundaryNodes(boundaryFun)
+setup.setBoundaryNodes(boundaryFun,expand=True,sigma=1)
 
 # v=setup.solve()
 v=setup.iterativeSolve(None,1e-9)
@@ -150,12 +150,6 @@ setup.logTime()
 
 
 
-##### ERROR GRAPH
-ptr=xCell.Visualizers.ErrorGraph(plt.figure(),study)
-ptr.prefs['universalPts']=False
-pdata=ptr.addSimulationData(setup)
-ptr.getArtists(0,pdata)
-
 
 
 
@@ -168,8 +162,17 @@ ptr.getArtists(0,pdata)
 # mcoords=setup.mesh.nodeCoords
 
 
-# ##### TOPOLOGY/connectivity
-# ax=xCell.Visualizers.showMesh(setup)
+##### TOPOLOGY/connectivity
+ax=xCell.Visualizers.showMesh(setup)
+ax.set_xticks([])
+ax.set_yticks([])
+ax.set_zticks([])
+ghost=(.0, .0, .0, 0.0)
+ax.xaxis.set_pane_color(ghost)
+ax.yaxis.set_pane_color(ghost)
+ax.zaxis.set_pane_color(ghost)
+
+
 
 # xCell.Visualizers.showEdges(ax,
 #                             setup.mesh.nodeCoords,
@@ -193,20 +196,32 @@ ptr.getArtists(0,pdata)
 # img.getArtists()
 
 
-_,basicAna,basicErr,_=setup.estimateVolumeError(basic=True)
-_,advAna,advErr,_=setup.estimateVolumeError(basic=False)
-
-errBasic=sum(basicErr)/sum(basicAna)
-errAdv=sum(advErr)/sum(advAna)
-
-
-es,err,ana,sr,r=setup.calculateErrors()
 
 
 
-print('Error metrics:\nbasic vol:%g\nadv vol:%g\narea%g'%(errBasic,errAdv,es))
 
 
+# ##### ERROR GRAPH
+# ptr=xCell.Visualizers.ErrorGraph(plt.figure(),study)
+# ptr.prefs['universalPts']=False
+# pdata=ptr.addSimulationData(setup)
+# ptr.getArtists(0,pdata)
+
+
+# _,basicAna,basicErr,_=setup.estimateVolumeError(basic=True)
+# _,advAna,advErr,_=setup.estimateVolumeError(basic=False)
+
+# errBasic=sum(basicErr)/sum(basicAna)
+# errAdv=sum(advErr)/sum(advAna)
+
+
+# es,err,ana,sr,r=setup.calculateErrors()
+
+
+
+# print('Error metrics:\nbasic vol:%g\nadv vol:%g\narea%g'%(errBasic,errAdv,es))
+
+#################### LOGLOG Error
 P=xCell.Visualizers.LogError(None,study)
 P.addSimulationData(setup,True)
 P.getArtists(0)

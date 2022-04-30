@@ -16,7 +16,7 @@ meshtype='adaptive'
 # studyPath='Results/studyTst/miniCur/'#+meshtype
 datadir='/home/benoit/smb4k/ResearchData/Results/studyTst/'#+meshtype
 # studyPath=datadir+'post-renumber/'
-studyPath=datadir+'Boundary_large'
+studyPath=datadir+'Boundary_large/rubik0'
 
 xmax=1e-2
 sigma=np.ones(3)
@@ -60,7 +60,8 @@ lastNx=0
 # tstVals=[None]
 # tstCat='Power'
 
-tstVals=['Analytic','Ground']
+# tstVals=['Analytic','Ground']
+tstVals=['Analytic','Ground','Rubik0']
 tstCat='Boundary'
 
 if generate:
@@ -126,8 +127,10 @@ if generate:
 
             if tstVal=='Analytic':
                 setup.setBoundaryNodes(boundaryFun)
-            else:
+            elif tstVal=='Ground':
                 setup.setBoundaryNodes()
+            elif tstVal=='Rubik0':
+                setup.setBoundaryNodes(expand=True,sigma=1.)
             # setup.getEdgeCurrents()
 
             # v=setup.solve()

@@ -12,9 +12,9 @@ import xCell
 import matplotlib.pyplot as plt
 
 
-swept='depth'
+swept='density'
 dmin=2
-dmax=10
+dmax=8
 
 study,setup=Common.makeSynthStudy('adaptationDemos')
 
@@ -70,6 +70,15 @@ for val in vrange:
 
     img.addSimulationData(setup,append=True)
 
+    # ax=xCell.Visualizers.showMesh(setup)
+    # ax.set_xticks([])
+    # ax.set_yticks([])
+    # ax.set_zticks([])
+    # ghost=(.0, .0, .0, 0.0)
+    # ax.xaxis.set_pane_color(ghost)
+    # ax.yaxis.set_pane_color(ghost)
+    # ax.zaxis.set_pane_color(ghost)
 
 
-ani=img.animateStudy()
+
+ani=img.animateStudy(fname=swept,fps=5.)

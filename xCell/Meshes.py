@@ -15,6 +15,8 @@ class Mesh:
     def __init__(self,bbox,elementType='Admittance'):
         self.bbox=bbox
         self.extents=(bbox[3:]-bbox[:3])/2
+        self.span=bbox[3:]-bbox[:3]
+        self.center=bbox[:3]+self.span/2
         self.elements=[]
         self.conductances=[]
         self.elementType=elementType

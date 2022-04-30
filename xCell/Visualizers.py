@@ -6,6 +6,10 @@ Visualization routines for meshes
 @author: benoit
 """
 
+
+
+
+
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d as p3d
 import matplotlib as mpl
@@ -27,8 +31,21 @@ import pandas
 import util
 import misc
 
+
+try:
+    plt.style.use('../scope.mplstyle')
+    plt.style.use('../xcell.mplstyle')
+except:
+    try:
+        plt.style.use('./scope.mplstyle')
+        plt.style.use('./xcell.mplstyle')
+    except:
+        print('oops')
+        pass
+
 # Dark mode
-FAINT = (1., 1., 1., 0.05)
+MESH_ALPHA=0.05
+FAINT = (1., 1., 1., MESH_ALPHA)
 CM_BIPOLAR = mpl.colors.LinearSegmentedColormap.from_list('bipolar',
                                                           np.array([[0, 0, 1, 1],
                                                                  [.098, .137, .176, 0],
@@ -53,6 +70,7 @@ class TimingBar:
 
         self.data = data
         if data is not None:
+        # if 'style' in data:
             if data['style'] != 'sweep':
                 if data['style']=='dot':
                     alpha=0.5
@@ -74,7 +92,7 @@ class TimingBar:
         ymin, ymax = self.ax.get_ylim()
         art = []
 
-        if step is not None:
+        if step is not None and self.data is not None:
             if self.data['style'] == 'sweep':
                 art.append(self.ax.plot(self.data['x'][:step],
                                         self.data['y'][:step],
@@ -543,7 +561,7 @@ def groupedScatter(fname, xcat, ycat, groupcat, filtercat=None, df=None):
     for ii, label in enumerate(catNames):
         sel = dL == label
         plt.loglog(dX[sel], dY[sel], marker='.',
-                   label=groupcat+': '+str(label))
+                   label=groupcat+':\n'+str(label))
 
     outsideLegend()
     plt.tight_layout()
@@ -784,12 +802,16 @@ def getCmap(vals, forceBipolar=False, logscale=False):
     return (cMap, cNorm)
 
 
-def new3dPlot(boundingBox, *args, fig=None):
+def new3dPlot(boundingBox=None, *args, fig=None):
     """ Force 3d axes to same scale
         Based on https://stackoverflow.com/a/13701747
     """
     if fig is None:
         fig = plt.figure()
+
+    if boundingBox is None:
+        boundingBox=np.array([-1,-1,-1,1,1,1], dtype=np.float64)
+
     axis = fig.add_subplot(*args, projection='3d')
     origin = boundingBox[:3]
     span = boundingBox[3:]-origin
@@ -1035,8 +1057,12 @@ def patchworkImage(axis, maskedArrays, cMap, cNorm, extent):
     return imlist
 
 
-def showMesh(setup):
-    ax = new3dPlot(setup.mesh.bbox)
+def showMesh(setup,axis=None):
+
+    if axis is None:
+        ax = new3dPlot(setup.mesh.bbox)
+    else:
+        ax=axis
 
     mcoord, medge = setup.getMeshGeometry()
 
@@ -1151,7 +1177,7 @@ class FigureAnimator:
                                     artists,
                                     interval=1000/fps,
                                     repeat_delay=2000,
-                                    blit=True)
+                                    blit=False)
 
         if fname is None:
             plt.show()
@@ -1408,9 +1434,18 @@ class ErrorGraph(FigureAnimator):
         # axV = self.fig.add_subplot(5, 1, (1, 2))
         # axErr = self.fig.add_subplot(5, 1, (3, 4))
         # axL=self.fig.add_subplot(5,1,5)
-        axV = self.fig.add_subplot(3, 1, 1)
-        axErr = self.fig.add_subplot(3, 1, 2)
-        axL = self.fig.add_subplot(3, 1, 3)
+
+        self.fig.set_figheight(1.5*self.fig.get_figheight())
+
+        axes = self.fig.subplots(3, 1,
+                                 gridspec_kw={
+                                     'height_ratios': [4,4,2]})
+
+        axV,axErr,axL=axes
+        # axV = self.fig.add_subplot(3, 1, 1)
+        # axErr = self.fig.add_subplot(3, 1, 2)
+        # axL = self.fig.add_subplot(3, 1, 3)
+
         axV.grid(True)
         axErr.grid(True)
         axL.grid(True)
@@ -1524,6 +1559,11 @@ class ErrorGraph(FigureAnimator):
 
         errFilt = errSort[filt]
 
+        # sse,sstot=misc.getSquares(err,vAna)
+        # FVU=sse/sstot
+
+        # title = '%s:%d nodes, %d elements, error %.2g, FVU %.2g' % (
+        #     sim.meshtype, nNodes, nElems, ErrSum,FVU)
         title = '%s:%d nodes, %d elements, error %.2g' % (
             sim.meshtype, nNodes, nElems, ErrSum)
 
@@ -1897,7 +1937,7 @@ class SingleSlice(FigureAnimator):
 
     def setupFigure(self):
 
-        fig, axes = plt.subplots(2, 2,
+        axes = self.fig.subplots(2, 2,
                                  gridspec_kw={
                                      'height_ratios': [9, 1],
                                      'width_ratios': [19, 1]})
@@ -1909,10 +1949,10 @@ class SingleSlice(FigureAnimator):
         tax = axes[1, 0]
         cax = axes[0, 1]
         nonax = axes[1, 1]
-        fig.delaxes(nonax)
+        self.fig.delaxes(nonax)
 
         formatXYAxis(ax, self.bnds)
-        self.tbar = TimingBar(fig, tax, self.tdata)
+        self.tbar = TimingBar(self.fig, tax, self.tdata)
 
         # plt.tight_layout()
 
@@ -1922,7 +1962,6 @@ class SingleSlice(FigureAnimator):
         self.cax = cax
         self.tax = tax
         self.axes = [ax, cax, tax]
-        self.fig = fig
 
     def getArtists(self, setnum, data=None):
 
@@ -1938,7 +1977,7 @@ class SingleSlice(FigureAnimator):
                 self.cax=None
                 plt.tight_layout()
         else:
-            meshAlpha=0.025
+            meshAlpha=MESH_ALPHA
             cMap, cNorm = getCmap(self.dataScales[self.dataSrc].get())
 
             # if setnum==0:

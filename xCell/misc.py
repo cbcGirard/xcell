@@ -32,13 +32,15 @@ def estimatePower(voltages, edges, conductances):
 
 def getErrorEstimates(simulation):
     errSummary,err,vAna,sorter,r=simulation.calculateErrors()
+    intErr=np.trapz(err[sorter], r[sorter])
+
     v=vAna-err
 
     sse=np.sum(err**2)
-    sstot=np.sum((v-np.mean(v))**2)
-    ss=np.sum((vAna-np.mean(vAna))**2)
+    # sstot=np.sum((v-np.mean(v))**2)
+    sstot=np.sum((vAna-np.mean(vAna))**2)
+    # FVU=sse/sstot
     FVU=sse/sstot
-    FVU2=sse/ss
 
     elV,elAna,elErr,_=simulation.estimateVolumeError(basic=True)
 
@@ -50,7 +52,9 @@ def getErrorEstimates(simulation):
                         simulation.edges,
                         simulation.conductances)
 
-    powerTrue=iSourcePower(simulation.currentSources[0].value, simulation.currentSources[0].radius, simulation.mesh.tree.sigma)
+    powerTrue=iSourcePower(simulation.currentSources[0].value,
+                           simulation.currentSources[0].radius,
+                           simulation.mesh.tree.sigma)
 
     powerErr=abs(powerTrue-powerSim)/powerTrue
 
@@ -61,14 +65,22 @@ def getErrorEstimates(simulation):
         'avg':np.mean(absErr),
         'int1':errSummary,
         'int3':vol,
+        'intErr':intErr,
+        'intAna':intErr/errSummary,
+        'SSE':sse,
+        'SSTot':sstot,
         'FVU':FVU,
-        'FVU2':FVU2,
         'powerSim':powerSim,
         'powerTrue':powerTrue,
         'powerError':powerErr}
 
     return data
 
+def getSquares(err,vAna):
+    SSE=np.sum((err)**2)
+    SSTot=np.sum((vAna-np.mean(vAna))**2)
+
+    return SSE,SSTot
 
 def transposeDicts(dictList):
     arrayDict={}
