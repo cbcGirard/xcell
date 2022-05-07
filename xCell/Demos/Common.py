@@ -78,6 +78,7 @@ class Cell:
         self._rotate_z(theta)
         self._set_position(x, y, z)
 
+
         # everything below here in this method is NEW
         self._spike_detector = h.NetCon(self.soma(0.5)._ref_v, None, sec=self.soma)
         self.spike_times = h.Vector()
@@ -115,6 +116,14 @@ class Cell:
 
 class BallAndStick(Cell):
     name = 'BallAndStick'
+
+    def __init__(self, gid, x, y, z, theta):
+        super().__init__(gid, x, y, z, theta)
+        r=self.soma.diam/2
+        dx=r*np.cos(theta)
+        dy=r*np.sin(theta)
+
+        self._set_position(self.x-dx,self.y-dy, self.z)
 
     def _setup_morphology(self):
         self.soma = h.Section(name='soma', cell=self)

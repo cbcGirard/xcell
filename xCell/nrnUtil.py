@@ -10,6 +10,9 @@ Created on Wed Apr 20 15:16:59 2022
 from neuron import h
 
 import numpy as np
+from matplotlib.lines import Line2D
+from matplotlib.collections import PolyCollection
+from Visualizers import FAINT
 
 
 def returnSegmentCoordinates(section):
@@ -90,7 +93,7 @@ def returnSegmentCoordinates(section):
                 yCoord[n] = y3d[cIdxStart] + cFraction3dLength*(y3d[cIdxStart+1] - y3d[cIdxStart])
                 zCoord[n] = z3d[cIdxStart] + cFraction3dLength*(z3d[cIdxStart+1] - z3d[cIdxStart])
                 rads[n] = rad[cIdxStart] + cFraction3dLength*(rad[cIdxStart+1] - rad[cIdxStart])
-    return xCoord, yCoord, zCoord,rads
+    return xCoord*1e-6, yCoord*1e-6, zCoord*1e-6, rads*1e-6
 
 
 def getNeuronGeometry():
@@ -132,3 +135,73 @@ def getNeuronGeometry():
                     isSphere.append(sph)
     return ivecs, isSphere, coords, rads
 
+
+
+class LineDataUnits(Line2D):
+    """
+        Yoinked from https://stackoverflow.com/a/42972469
+    """
+    def __init__(self, *args, **kwargs):
+        _lw_data = kwargs.pop("linewidth", 1)
+        super().__init__(*args, **kwargs)
+        self._lw_data = _lw_data
+
+    def _get_lw(self):
+        if self.axes is not None:
+            ppd = 72./self.axes.figure.dpi
+            trans = self.axes.transData.transform
+            return ((trans((1, self._lw_data))-trans((0, 0)))*ppd)[1]
+        else:
+            return 1
+
+    def _set_lw(self, lw):
+        self._lw_data = lw
+
+    _linewidth = property(_get_lw, _set_lw)
+
+
+
+def showCellGeo(axis):
+
+    tht=np.linspace(0,2*np.pi)
+    shade=FAINT
+    polys=[]
+    for sec in h.allsec():
+        x,y,z,r=returnSegmentCoordinates(sec)
+        coords=np.vstack((x,y,z)).transpose()
+
+        if sec.hname().split('.')[-1]=='soma':
+            sx=x+r*np.cos(tht)
+            sy=y+r*np.sin(tht)
+
+            axis.fill(sx,sy,color=shade)
+        else:
+            # line=LineDataUnits(x,y, linewidth=r,color=shade)
+            # axis.add_line(line)
+            px=[]
+            py=[]
+
+            lx=x.shape
+            if len(lx)>0:
+                nseg=x.shape[0]-1
+                for ii in range(nseg):
+                    p0=coords[ii,:2]
+                    p1=coords[ii+1,:2]
+                    d=p1-p0
+                    dn=r[ii]*d/np.linalg.norm(d)
+                    n=np.array([-dn[1],dn[0]])
+                    pts=np.vstack((p0+n, p1+n, p1-n, p0-n))
+                    # a,b=np.hsplit(pts,2)
+
+                    # px.extend(a)
+                    # py.extend(b)
+
+                    polys.append(pts)
+            # else:
+
+
+
+                # mpl.collections.LineCollection(segments, color=shade)
+
+    polycol=PolyCollection(polys, color=shade)
+    axis.add_collection(polycol)

@@ -31,17 +31,61 @@ import pandas
 import util
 import misc
 
+styleScope={
+'axes.prop_cycle': mpl.cycler('color', ['#ffff00', '#00ffff', '#ff00ff', '#00ff00', '#ff0000', '#0000ff', '#ff8000', '#8000ff', '#ff0080', '#0080ff'])}
 
-try:
-    plt.style.use('../scope.mplstyle')
-    plt.style.use('../xcell.mplstyle')
-except:
-    try:
-        plt.style.use('./scope.mplstyle')
-        plt.style.use('./xcell.mplstyle')
-    except:
-        print('oops')
-        pass
+styleXcell={
+    'axes.grid' : True,
+    'figure.frameon' : False,
+    'figure.autolayout' : True,
+    'lines.markersize' : 1.0,
+    'legend.loc' : 'upper right',
+    'image.cmap' : 'plasma',
+    'image.aspect' : 'equal',
+    'image.origin' : 'lower',
+
+    'scatter.marker' : '.',
+    'path.simplify' : True,
+
+    'axes3d.grid' : False,
+
+    'axes.facecolor' : '#19232d',
+    'figure.edgecolor' : '#19232d',
+    'figure.facecolor' : '#19232d',
+    'savefig.edgecolor': '#19232d',
+    'savefig.facecolor' : '#19232d',
+
+
+    'axes.edgecolor' : '#dcd4c7',
+    'axes.labelcolor' : '#dcd4c7',
+    'boxplot.boxprops.color' : '#dcd4c7',
+    'boxplot.capprops.color' : '#dcd4c7',
+    'boxplot.flierprops.color' : '#dcd4c7',
+    'boxplot.flierprops.markeredgecolor' : '#dcd4c7',
+    'boxplot.whiskerprops.color' : '#dcd4c7',
+    'grid.color' : '#dcd4c7',
+    'lines.color' : '#dcd4c7',
+    'patch.edgecolor' : '#dcd4c7',
+    'text.color' : '#dcd4c7',
+    'xtick.color' : '#dcd4c7',
+    'ytick.color' : '#dcd4c7',
+
+    'grid.alpha' : 0.5}
+
+plt.style.use(styleScope)
+plt.style.use(styleXcell)
+# try:
+#     plt.style.use('../scope.mplstyle')
+#     plt.style.use('../xcell.mplstyle')
+# except:
+#     try:
+#         plt.style.use('./scope.mplstyle')
+#         plt.style.use('./xcell.mplstyle')
+#     except:
+#         print('oops')
+#         pass
+
+
 
 # Dark mode
 MESH_ALPHA=0.05
@@ -52,6 +96,11 @@ CM_BIPOLAR = mpl.colors.LinearSegmentedColormap.from_list('bipolar',
                                                                  [1, 0, 0, 1]],
                                                                 dtype=float))
 BASE = '#afcfff'
+NULL = '#00000000'
+plx=np.array(mpl.colormaps.get('plasma').colors)
+lint=np.array(np.linspace(0,1,num=plx.shape[0]),ndmin=2).transpose()
+CM_MONO = mpl.colors.LinearSegmentedColormap.from_list('mono',
+                                                       np.hstack((plx,lint)))
 
 
 class TimingBar:
@@ -762,6 +811,7 @@ def getCmap(vals, forceBipolar=False, logscale=False):
     """
     mn = min(vals)
     mx = max(vals)
+    span=mx-mn
     va = abs(vals)
     if any(va > 0):
         knee = min(va[va > 0])
@@ -769,9 +819,13 @@ def getCmap(vals, forceBipolar=False, logscale=False):
         knee = 0
     ratio = abs(mn/mx)
 
+    fracPos=abs(mx/span)
+    fracNeg=abs(mn/span)
+
+
     crosses = (mx/mn) < 0
 
-    if (crosses and (ratio > 0.01)) or forceBipolar:
+    if (crosses and (0.05<fracPos<0.95)) or forceBipolar:
         # significant data on either side of zero; use symmetric
         amax = max(abs(mn), mx)
         # cMap = mpl.cm.seismic.copy()
@@ -789,7 +843,10 @@ def getCmap(vals, forceBipolar=False, logscale=False):
         else:
             cNorm = mpl.colors.CenteredNorm(halfrange=amax)
     else:
-        cMap = mpl.cm.plasma.copy()
+        if fracPos>fracNeg:
+            cMap = CM_MONO.copy()
+        else:
+            cMap=CM_MONO.reversed()
         if logscale:
             cNorm = mpl.colors.LogNorm(vmin=knee,
                                        vmax=mx)
@@ -967,7 +1024,7 @@ def showSourceBoundary(axes, radius, srcCenter=np.zeros(2)):
     y = radius*np.sin(tht)+srcCenter[1]
 
     for ax in axes:
-        ax.plot(x, y, 'k', alpha=0.1)
+        ax.plot(x, y, color=FAINT)#, alpha=0.1)
 
 
 def addInset(baseAxis, rInset, xmax, relativeLoc=(.5, -.8)):
@@ -1229,8 +1286,10 @@ class SliceSet(FigureAnimator):
     def __init__(self, fig, study, prefs=None):
         if prefs is None:
             prefs = {
+                'showError' : True,
+                'showInsets' : True,
                 'relativeError': False,
-                'logScale': False,
+                'logScale': True,
             }
 
         super().__init__(fig, study, prefs)
@@ -1240,9 +1299,19 @@ class SliceSet(FigureAnimator):
 
     def setupFigure(self, resetBounds=False):
         self.bnds = self.study.bbox[[0, 3, 2, 4]]
-        self.grid = AxesGrid(self.fig, 211,  # similar to subplot(144)
-                             nrows_ncols=(1, 2),
-                             axes_pad=(0.5, .15),
+
+        if self.prefs['showError']:
+            nplot=2
+            pad=(0.5, .15)
+            arr=211
+        else:
+            nplot=1
+            pad=(0.05,0.05)
+            arr=111
+
+        self.grid = AxesGrid(self.fig, arr,  # similar to subplot(144)
+                             nrows_ncols=(1, nplot),
+                             axes_pad=pad,
                              # axes_pad=0.2,
                              label_mode="L",
                              share_all=True,
@@ -1256,9 +1325,11 @@ class SliceSet(FigureAnimator):
         self.axes.extend(self.grid.cbar_axes[:])
 
         self.grid[0].set_title('Simulated potential [V]')
-        self.grid[1].set_title('Absolute error [V]')
 
-        for ax in self.grid[:2]:
+        if self.prefs['showError']:
+            self.grid[1].set_title('Absolute error [V]')
+
+        for ax in self.grid[:nplot]:
             formatXYAxis(ax, self.bnds)
 
         if resetBounds:
@@ -1323,7 +1394,7 @@ class SliceSet(FigureAnimator):
         return data
 
     def getArtists(self, setnum, data=None):
-
+        artists = []
         # if data is None:
         #     dataSet=self.dataSets[setnum]
         # else:
@@ -1333,24 +1404,34 @@ class SliceSet(FigureAnimator):
             data = self.dataSets[setnum]
 
         vbounds = self.dataScales['vbounds']
-        errbounds = self.dataScales['errbounds']
 
-        vmap, vnorm = getCmap(vbounds.get())
-        emap, enorm = getCmap(errbounds.get(),
-                              forceBipolar=True)
+        vmap, vnorm = getCmap(vbounds.get(),
+                              logscale=self.prefs['logScale'])
+
 
         vmappr = mpl.cm.ScalarMappable(norm=vnorm, cmap=vmap)
         # vmappr.set_clim((vnorm.vmin, vnorm.vmax))
-
-        emappr = mpl.cm.ScalarMappable(norm=enorm, cmap=emap)
-        # vmappr.set_clim((-enorm.halfrange, enorm.halfrange))
-
         self.grid.cbar_axes[0].colorbar(
             vmappr)
-        self.grid.cbar_axes[1].colorbar(emappr)
+
+        if self.prefs['showError']:
+            errbounds = self.dataScales['errbounds']
+            emap, enorm = getCmap(errbounds.get(),
+                                  forceBipolar=True)
+            emappr = mpl.cm.ScalarMappable(norm=enorm, cmap=emap)
+            # vmappr.set_clim((-enorm.halfrange, enorm.halfrange))
+            self.grid.cbar_axes[1].colorbar(emappr)
+            errArt = patchworkImage(self.grid[1],
+                                    # self.maskedErrArr[ii],
+                                    data['errArrays'],
+                                    emap, enorm,
+                                    extent=self.bnds)
+            artists.extend(errArt)
+
+
 
         insets = []
-        if self.rElec > 0:
+        if self.rElec > 0 and self.prefs['showError']:
             for ax in self.grid:
                 inset = addInset(ax, 3*self.rElec, self.bnds[1])
                 showSourceBoundary([ax, inset], self.rElec)
@@ -1358,7 +1439,7 @@ class SliceSet(FigureAnimator):
 
         # for ii in range(len(self.maskedVArr)):
         # for data in dataSet:
-        artists = []
+
 
         # edgePoints = self.meshEdges[ii]
         # sourceEdge = self.sourceEdges[ii]
@@ -1367,13 +1448,10 @@ class SliceSet(FigureAnimator):
                               data['vArrays'],
                               vmap, vnorm,
                               extent=self.bnds)
-        errArt = patchworkImage(self.grid[1],
-                                # self.maskedErrArr[ii],
-                                data['errArrays'],
-                                emap, enorm,
-                                extent=self.bnds)
+
         artists.extend(vArt)
-        artists.extend(errArt)
+
+
 
         # errArt=self.grid[1].imshow(err, origin='lower', extent=self.bnds,
         #             cmap=emap, norm=enorm,interpolation='bilinear')
@@ -1803,7 +1881,7 @@ class CurrentPlot(FigureAnimator):
         dscale = self.dataScales['iRange']
         dscale.update(np.array(self.iSrc))
 
-        cmap, cnorm = getCmap(dscale.get(), logscale=True)
+        cmap, cnorm = getCmap(dscale.get(), logscale=self.prefs['logScale'])
         # cmap=mpl.cm.YlOrBr
         # cnorm=mpl.colors.LogNorm(vmin=self.crange[0],
         #                           vmax=self.crange[1])

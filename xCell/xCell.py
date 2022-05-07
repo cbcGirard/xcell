@@ -534,17 +534,22 @@ class Simulation:
 
             self.nodeCurrents[indices]+=src.value
             for idx in indices:
-                if self.nodeRoleTable[idx]==0:
-                    self.nodeRoleTable[idx]=2
-                    self.nodeRoleVals[idx]=ii
-                else:
-                    #shared node
-                    self.nodeRoleTable[idx]=3
-                    self.nodeRoleVals[idx]=nComposite
+                #TODO: rollback to fix single source
+                self.nodeRoleTable[idx]=2
+                self.nodeRoleVals[idx]=ii
 
-                    srcLists[nComposite].append(idx)
+                #TODO: fixes multiple sources sharing node, but breaks mesh reuse
+                # if self.nodeRoleTable[idx]==0:
+                #     self.nodeRoleTable[idx]=2
+                #     self.nodeRoleVals[idx]=ii
+                # else:
+                #     #shared node
+                #     self.nodeRoleTable[idx]=3
+                #     self.nodeRoleVals[idx]=nComposite
 
-                    nComposite+=1
+                #     srcLists[nComposite].append(idx)
+
+                #     nComposite+=1
 
 
             # self.srcLists=srcLists
@@ -556,9 +561,11 @@ class Simulation:
 
     def __nodesInSource(self, source):
 
-
-        d=np.linalg.norm(source.coords-self.mesh.nodeCoords,axis=1)
-        inside=d<=source.radius
+        if 'geometry' in dir(source):
+            inside=source.geometry.isInside(self.mesh.nodeCoords)
+        else:
+            d=np.linalg.norm(source.coords-self.mesh.nodeCoords,axis=1)
+            inside=d<=source.radius
 
         if sum(inside)>0:
             # Grab all nodes inside of source
@@ -1538,7 +1545,7 @@ class Simulation:
                     print()
 
 
-                for i,j,v in zip(x,y,interp):
+                for i,j,v in zip(y,x,interp):
                     arr[i,j]=v
 
             # arr=scipy.sparse.coo_matrix((vals,(xx,yy)))

@@ -35,10 +35,11 @@ class Sphere:
 #     ('axis',float64[:])
 #     ])
 class Disk:
-    def __init__(self,center,radius,axis):
+    def __init__(self,center,radius,axis,tol=1e-2):
         self.center=center
         self.radius=radius
         self.axis = axis/np.linalg.norm(axis)
+        self.tol=tol
 
     def isInside(self,coords):
         N=coords.shape[0]
@@ -56,7 +57,7 @@ class Disk:
             dist=np.linalg.norm(delta[ii])
 
 
-            isIn[ii]=abs(deviation[ii])<(self.radius/100) and dist<=self.radius
+            isIn[ii]=abs(deviation[ii])<(self.radius*self.tol) and dist<=self.radius
 
 
 
