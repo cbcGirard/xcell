@@ -38,7 +38,9 @@ viz=xc.visualizers.SliceSet(None,study,
                                 'showError':False,
                                 'showInsets':False,
                                 'relativeError':False,
-                                'logScale':True})
+                                'logScale':True,
+                                'showNodes':True,
+                                'fullInterp':True})
 
 def resetBounds(ax,xmax,xmin=None):
     if xmin is None:
@@ -100,7 +102,15 @@ def runStim(depth):
     metric= [xc.makeExplicitLinearMetric(maxdepth=depth,
                                 meshdensity=0.2)]
 
-    setup.makeAdaptiveGrid(metric, depth)
+    metrics=[]
+    for src in setup.currentSources:
+        metrics.append(xc.makeExplicitLinearMetric(maxdepth=depth,
+                                                   meshdensity=0.2,
+                                                   origin=src.geometry.center))
+    # metric= xc.makeExplicitLinearMetric(maxdepth=depth,
+    #                             meshdensity=0.2)
+
+    setup.makeAdaptiveGrid(metrics, depth)
 
     setup.finalizeMesh()
     setup.setBoundaryNodes()
