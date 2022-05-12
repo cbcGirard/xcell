@@ -24,7 +24,7 @@ pip install --upgrade pip
 
 here = path.abspath(path.dirname(__file__))
 
-with open(path.join(here, 'README.rst'), encoding='utf-8') as readme_file:
+with open(path.join(here, 'README.md'), encoding='utf-8') as readme_file:
     readme = readme_file.read()
 
 with open(path.join(here, 'requirements.txt')) as requirements_file:
@@ -37,7 +37,7 @@ setup(
     name='xcell',
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
-    description="Toolkit for handling the extracellular domain in neural simula",
+    description="Toolkit for handling the extracellular domain in neural simulations",
     long_description=readme,
     author="Christopher BC Girard",
     author_email='cgirard@usc.edu',
