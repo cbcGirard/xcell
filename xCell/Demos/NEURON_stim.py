@@ -6,14 +6,14 @@ Created on Wed Apr 20 17:14:52 2022
 @author: benoit
 """
 
-import xCell as xc
+import xcell as xc
 import numpy as np
 import Common as com
 from neuron import h#, gui
 import neuron.units as nUnit
 
 import matplotlib.pyplot as plt
-import nrnUtil
+from xcell import nrnUtil
 
 
 domX=5e-4
@@ -33,7 +33,7 @@ cellY=50
 
 study,_=com.makeSynthStudy('NEURON/Stim',xmax=domX,)
 
-viz=xc.Visualizers.SliceSet(None,study,
+viz=xc.visualizers.SliceSet(None,study,
                             prefs={
                                 'showError':False,
                                 'showInsets':False,
@@ -62,20 +62,20 @@ elecB=elec0.copy()
 if pairStim:
     elecA[0]=2*rElec
     elecB[0]=-2*rElec
-    wire2=xc.Geometry.Disk(elecB,
+    wire2=xc.geometry.Disk(elecB,
                         rElec,
                         np.array([0,0,1]))
 
-    xc.Visualizers.showSourceBoundary(viz.axes, rElec,
+    xc.visualizers.showSourceBoundary(viz.axes, rElec,
                                       srcCenter=elecB[:-1])
 
 
-xc.Visualizers.showSourceBoundary(viz.axes, rElec,
+xc.visualizers.showSourceBoundary(viz.axes, rElec,
                                   srcCenter=elecA[:-1])
 
 
 
-wire1=xc.Geometry.Disk(elecA,
+wire1=xc.geometry.Disk(elecA,
                     rElec,
                     np.array([0,0,1],dtype=float))
 
@@ -97,8 +97,8 @@ def runStim(depth):
 
     # depth=8
 
-    metric= xc.makeExplicitLinearMetric(maxdepth=depth,
-                                meshdensity=0.2)
+    metric= [xc.makeExplicitLinearMetric(maxdepth=depth,
+                                meshdensity=0.2)]
 
     setup.makeAdaptiveGrid(metric, depth)
 

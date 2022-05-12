@@ -6,7 +6,7 @@ Created on Sat Mar  5 19:18:30 2022
 @author: benoit
 """
 
-import xCell
+import xcell
 import numpy as np
 from os import path
 
@@ -48,7 +48,7 @@ def makeSynthStudy(folderName,
     folder=path.join(datadir, folderName)
     bbox=np.append(-xmax*np.ones(3),xmax*np.ones(3))
 
-    study=xCell.SimStudy(folder, bbox)
+    study=xcell.SimStudy(folder, bbox)
 
     setup=study.newSimulation()
 

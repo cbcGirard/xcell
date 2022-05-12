@@ -13,7 +13,7 @@ from numba import int64, float64
 import math
 import scipy
 from scipy.sparse.linalg import spsolve, cg
-# from Visualizers import *
+# from visualizers import *
 # from util import *
 import os
 import pickle
@@ -24,11 +24,11 @@ import matplotlib.pyplot as plt
 
 
 import util
-import Visualizers
-import Elements
-import Meshes
-import Geometry
-from FEM import ADMITTANCE_EDGES
+import visualizers
+import elements
+import meshes
+import geometry
+from fem import ADMITTANCE_EDGES
 import misc
 
 
@@ -70,7 +70,7 @@ class Simulation:
         self.nodeRoleTable=np.empty(0)
         self.nodeRoleVals=np.empty(0)
 
-        self.mesh=Meshes.Mesh(bbox)
+        self.mesh=meshes.Mesh(bbox)
         self.currentTime=0.
         self.iteration=0
         self.meshnum=0
@@ -95,13 +95,13 @@ class Simulation:
         self.asDual=False
 
 
-    def makeAdaptiveGrid(self,metric,maxdepth,autoExpand=False):
+    def makeAdaptiveGrid(self,metrics,maxdepth,autoExpand=False):
         """
         Fast utility to construct an octree-based mesh of the domain.
 
         Parameters
         ----------
-        metric : function
+        metric : list of functions
             Must take a 1d array of xyz coordinates and return target l0
             for that location.
         maxdepth : int
@@ -117,19 +117,23 @@ class Simulation:
         self.ptPerAxis=2**maxdepth+1
         self.meshtype='adaptive'
 
-        if (type(self.mesh)!=Meshes.Octree) or autoExpand:
+        #convert to octree mesh
+        if (type(self.mesh)!=meshes.Octree) or autoExpand:
             xdom=min(self.mesh.span)
-            scale=xdom/metric(np.array([xdom,0.,0.]))
+            metBounds=[m(np.array([xdom, 0., 0.])) for m in metrics]
+            # scale=xdom/metric(np.array([xdom,0.,0.]))
+            scale=xdom/min(metBounds)
             p2=np.ceil(np.log2(scale))
             bbox=np.tile(self.mesh.center,2)
             tmp=np.concatenate((-np.ones(3),np.ones(3)))
             bbox+=tmp*(2**p2)*np.tile(self.mesh.span,2)
 
-            self.mesh=Meshes.Octree(bbox,maxdepth,
+            self.mesh=meshes.Octree(bbox,maxdepth,
                                     elementType=self.mesh.elementType)
 
         self.mesh.maxDepth=maxdepth
-        changed=self.mesh.refineByMetric(metric)
+
+        changed=self.mesh.refineByMetric(metrics)
         self.logTime()
 
         return changed
@@ -908,11 +912,11 @@ class Simulation:
                 intAna=vol*np.mean(avals)
                 intErr=vol*np.mean(dvals)
             else:
-                intV=Meshes.FEM.integrateFromVerts(vals,
+                intV=meshes.FEM.integrateFromVerts(vals,
                                                    span)
-                intAna=Meshes.FEM.integrateFromVerts(avals,
+                intAna=meshes.FEM.integrateFromVerts(avals,
                                                    span)
-                intErr=Meshes.FEM.integrateFromVerts(dvals,
+                intErr=meshes.FEM.integrateFromVerts(dvals,
                                                    span)
 
 
@@ -1319,7 +1323,7 @@ class Simulation:
 
         return edges
 
-    def getMeshGeometry(self):
+    def getMeshgeometry(self):
         verts=[]
         rawEdges=[]
         for el in self.mesh.elements:
@@ -1431,7 +1435,7 @@ class Simulation:
         return numbering, (Nx,Nf,Ns,Nd)
 
 
-    def getElementsInPlane(self,axis=2, point=0.):
+    def getelementsInPlane(self,axis=2, point=0.):
         otherAx=np.array([n!=axis for n in range(3)])
         # arrays=[]
         # Gmax=self.mesh.maxDepth+1
@@ -1442,7 +1446,7 @@ class Simulation:
         origin=self.mesh.bbox.copy()[:3]
         origin[axis]=point
 
-        elements=self.mesh.getIntersectingElements(axis, coordinate=point)
+        elements=self.mesh.getIntersectingelements(axis, coordinate=point)
 
         coords=[]
         edgePts=[]
@@ -1470,7 +1474,7 @@ class Simulation:
         if data is None:
             data=self.nodeVoltages
 
-        elements,coords,_=self.getElementsInPlane(axis,point)
+        elements,coords,_=self.getelementsInPlane(axis,point)
 
         depths=np.array([el.depth for el in elements])
         Gmax=self.mesh.maxDepth+1
@@ -1595,7 +1599,7 @@ class Simulation:
         return uniInd,uniV
 
     def getCurrentsInPlane(self,axis=2,point=0.):
-        els,coords,mesh=self.getElementsInPlane(axis,point)
+        els,coords,mesh=self.getelementsInPlane(axis,point)
 
         if self.mesh.elementType=='Face':
             inds=np.unique([el.faces for el in els])
@@ -1694,7 +1698,7 @@ class SimStudy:
 
 
     def makeStandardPlots(self,savePlots=True,keepOpen=False):
-        plotfuns=[Visualizers.error2d, Visualizers.centerSlice]
+        plotfuns=[visualizers.error2d, visualizers.centerSlice]
         plotnames=['err2d','imgMesh']
 
         for f,n in zip(plotfuns,plotnames):
@@ -1778,12 +1782,12 @@ class SimStudy:
 
         """
         logfile=os.path.join(self.studyPath,'log.csv')
-        df,cats=Visualizers.importRunset(logfile)
+        df,cats=visualizers.importRunset(logfile)
         return df,cats
 
     def plotTimes(self,xCat='Number of elements',sortCat=None):
         logfile=os.path.join(self.studyPath,'log.csv')
-        df,cats=Visualizers.importRunset(logfile)
+        df,cats=visualizers.importRunset(logfile)
 
         if sortCat is not None:
             plotnames=df[sortCat].unique()
@@ -1791,12 +1795,12 @@ class SimStudy:
             plotnames=[None]
 
         for cat in plotnames:
-            Visualizers.importAndPlotTimes(logfile,onlyCat=sortCat,onlyVal=cat,xCat=xCat)
+            visualizers.importAndPlotTimes(logfile,onlyCat=sortCat,onlyVal=cat,xCat=xCat)
             plt.title(cat)
 
     def plotAccuracyCost(self):
         logfile=os.path.join(self.studyPath,'log.csv')
-        Visualizers.groupedScatter(logfile, xcat='Total time', ycat='Error', groupcat='Mesh type')
+        visualizers.groupedScatter(logfile, xcat='Total time', ycat='Error', groupcat='Mesh type')
 
 
 
@@ -1823,7 +1827,7 @@ class SimStudy:
         """
 
         logfile=os.path.join(self.studyPath,'log.csv')
-        df,cats=Visualizers.importRunset(logfile)
+        df,cats=visualizers.importRunset(logfile)
 
         selector=np.ones(len(df),dtype=bool)
         if filterCategories is not None:
@@ -1902,21 +1906,21 @@ class SimStudy:
 
 
 
-def makeBoundedLinearMetric(l0min,l0max,domainX):
+def makeBoundedLinearMetric(l0min,l0max,domainX, origin=np.zeros(3)):
     @nb.njit()
     def metric(coord,a=l0min,k=l0max/domainX):
-        r=np.linalg.norm(coord)
+        r=np.linalg.norm(coord-origin)
         val=a+r*k
         return val
 
     return metric
 
 
-def makeExplicitLinearMetric(maxdepth,meshdensity):
+def makeExplicitLinearMetric(maxdepth,meshdensity,origin=np.zeros(3)):
     param=2**(-maxdepth*meshdensity)#-1)*3**(0.5)
     # @nb.njit()
     def metric(coord):
-        r=np.linalg.norm(coord)
+        r=np.linalg.norm(coord-origin)
         val=r*param
         return val
 

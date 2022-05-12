@@ -205,3 +205,30 @@ def showCellGeo(axis):
 
     polycol=PolyCollection(polys, color=shade)
     axis.add_collection(polycol)
+
+
+def makeBiphasicPulse(amplitude,tstart,pulsedur,trise=None):
+    if trise is None:
+        trise=pulsedur/1000
+    dts=[0,tstart, trise, pulsedur, trise, pulsedur, trise]
+
+    tvals=np.cumsum(dts)
+    amps=amplitude*np.array([0,0,1,1,-1, -1, 0])
+
+    stimTvec=h.Vector(tvals)
+    stimVvec=h.Vector(amps)
+
+    return stimTvec,stimVvec
+
+def makeMonophasicPulse(amplitude,tstart,pulsedur,trise=None):
+    if trise is None:
+        trise=pulsedur/1000
+    dts=[0,tstart, trise, pulsedur, trise]
+
+    tvals=np.cumsum(dts)
+    amps=amplitude*np.array([0,0,1,1,0])
+
+    stimTvec=h.Vector(tvals)
+    stimVvec=h.Vector(amps)
+
+    return stimTvec,stimVvec
