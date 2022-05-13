@@ -97,6 +97,8 @@ CM_BIPOLAR = mpl.colors.LinearSegmentedColormap.from_list('bipolar',
                                                                 dtype=float))
 BASE = '#afcfff'
 NULL = '#00000000'
+ACCENT_DARK = '#990000'
+ACCENT_LIGHT = 'FFCC00'
 plx=np.array(mpl.colormaps.get('plasma').colors)
 lint=np.array(np.linspace(0,1,num=plx.shape[0]),ndmin=2).transpose()
 CM_MONO = mpl.colors.LinearSegmentedColormap.from_list('mono',
@@ -950,6 +952,41 @@ def showRawSlice(valList, ndiv):
 # TODO: deprecate?
 
 
+def resamplePlane(axis,sim):
+    """
+
+
+    Parameters
+    ----------
+    axis : TYPE
+        DESCRIPTION.
+    sim : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    TYPE
+        DESCRIPTION.
+
+    """
+    xl,xh=axis.get_xlim()
+    yl,yh=axis.get_ylim()
+
+    movetoCenter=True
+    ppts=util.makeGridPoints(513,xh,xl,yh,yl,centers=movetoCenter)
+
+    pts=np.hstack((ppts,np.zeros((ppts.shape[0],1))))
+
+    vInterp=sim.interpolateAt(pts)
+
+    if movetoCenter:
+        nX=512
+    else:
+        nx=513
+
+    return vInterp.reshape((nX,nX))
+
+
 def showCurrentVecs(axis, pts, vecs):
     X, Y, Z = np.hsplit(pts, 3)
     dx, dy, dz = np.hsplit(vecs, 3)
@@ -1356,14 +1393,24 @@ class SliceSet(FigureAnimator):
             rElec = sim.voltageSources[0].radius
             self.rElec = rElec
 
+        if self.prefs['fullInterp']:
+            vArrays=[resamplePlane(self.grid[0], sim)]
+            v1d=vArrays[0].ravel()
+        else:
+            vArrays, coords = sim.getValuesInPlane(data=None)
+            v1d = util.unravelArraySet(vArrays)
 
+        self.dataScales['vbounds'].update(v1d)
 
-        vArrays, coords = sim.getValuesInPlane(data=None)
-        cartCoords = np.hstack((coords, np.zeros((coords.shape[0], 1))))
+        if self.prefs['showError']:
+            # TODO: better filtering to only calculate err where needed
+            ana, _ = sim.analyticalEstimate()
+            err1d = sim.nodeVoltages-ana[0]
 
-        # TODO: better filtering to only calculate err where needed
-        ana, _ = sim.analyticalEstimate()
-        err1d = sim.nodeVoltages-ana[0]
+            erArrays, _ = sim.getValuesInPlane(data=err1d)
+            self.dataScales['errbounds'].update(err1d)
+        else:
+            erArrays=None
 
         erArrays, _ = sim.getValuesInPlane(data=err1d)
 
@@ -1378,8 +1425,14 @@ class SliceSet(FigureAnimator):
         _, _, edgePts = sim.getElementsInPlane()
 
         # TODO: dehackify so it works with sources other than axes origin
-        inSource = np.linalg.norm(
-            edgePts, axis=2) <= sim.currentSources[0].radius
+
+        try:
+            inSource=np.zeros(edgePts.shape[0],dtype=bool)
+            for src in sim.currentSources:
+                inSource|=src.geometry.isInside(edgePts)
+        except:
+            inSource = np.linalg.norm(edgePts,
+                                      axis=2) <= sim.currentSources[0].radius
         touchesSource = np.logical_xor(inSource[:, 0], inSource[:, 1])
         edgePoints = edgePts[~touchesSource]
         sourceEdge = edgePts[touchesSource]
@@ -1387,11 +1440,20 @@ class SliceSet(FigureAnimator):
         # self.meshEdges.append(edgePoints)
         # self.sourceEdges.append(sourceEdge)
 
+
+        #quick hack to get nodes in plane directly
+        inPlane=sim.mesh.nodeCoords[:,-1]==0.
+
+        pval=sim.nodeVoltages[inPlane]
+        pcoord=sim.mesh.nodeCoords[inPlane,:-1]
+
         data = {
             'vArrays': vArrays,
             'errArrays': erArrays,
             'meshPoints': edgePoints,
-            'sourcePoints': sourceEdge}
+            'sourcePoints': sourceEdge,
+            'pvals':pval,
+            'pcoords':pcoord}
 
         if append:
             self.dataSets.append(data)
@@ -1456,7 +1518,14 @@ class SliceSet(FigureAnimator):
 
         artists.extend(vArt)
 
+        if self.prefs['showNodes']:
+            px,py=np.hsplit(data['pcoords'],2)
+            pv=data['pvals']
+            ptart=self.grid[0].scatter(
+                px, py,
+                c=pv, norm=vnorm,cmap=vmap)
 
+            artists.append(ptart)
 
         # errArt=self.grid[1].imshow(err, origin='lower', extent=self.bnds,
         #             cmap=emap, norm=enorm,interpolation='bilinear')
@@ -1480,11 +1549,13 @@ class SliceSet(FigureAnimator):
 
         for ax in self.grid:
             artists.append(showEdges2d(ax, data['meshPoints']))
+            artists.append(showEdges2d(
+                ax, data['sourcePoints'], edgeColors=(.5, .5, .5), alpha=.25, linestyles=':'))
 
         for ax in insets:
             artists.append(showEdges2d(ax, data['meshPoints']))
             artists.append(showEdges2d(
-                ax, data['sourcePoints'], edgeColors=(.5, .5, .5), alpha=.25, linestyles=':'))
+                ax, data['sourcePoints'], edgeColors=ACCENT_LIGHT, alpha=.25, linestyles=':'))
 
         self.axes.extend(insets)
 
@@ -1987,6 +2058,10 @@ class ScaleRange:
             self.max = max(self.max, max(newVals))
             if any(va > 0):
                 self.knee = min(self.knee, min(va[va > 0]))
+
+    #TODO: something smarter than hard-coding
+            if max(va)/self.knee>(10**MAX_LOG_SPAN):
+                self.knee=max(va)/(10**MAX_LOG_SPAN)
 
     def get(self):
         isBipolar = (self.min < 0) & (self.max > 0)
