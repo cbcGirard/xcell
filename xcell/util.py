@@ -16,7 +16,7 @@ import resource
 import matplotlib.ticker as tickr
 
 import psutil
-from FEM import HEX_POINT_INDICES
+from .fem import HEX_POINT_INDICES
 
 # Atrocious typing hack to force use of uint64 
 MAXDEPTH=np.array(20,dtype=np.uint64)[()]

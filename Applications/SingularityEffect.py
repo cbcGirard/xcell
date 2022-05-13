@@ -6,7 +6,7 @@ Created on Sat Mar  5 19:29:09 2022
 @author: benoit
 """
 
-import xCell
+import xcell
 import numpy as np
 import Common
 import matplotlib.pyplot as plt
@@ -60,7 +60,7 @@ for xx in x0s:
 
             if generate:
                 if animate:
-                    plotter=xCell.Visualizers.ErrorGraph(plt.figure(),
+                    plotter=xcell.Visualizers.ErrorGraph(plt.figure(),
                                                          study0)
                     plotter.axes[0].xaxis.set_inverted(True)
 
@@ -86,9 +86,9 @@ for xx in x0s:
                                                       xmax=xmax,
                                                       rElec=rElec)
 
-                    metric=xCell.makeExplicitLinearMetric(maxdepth+1,
+                    metric=xcell.makeExplicitLinearMetric(maxdepth+1,
                                                           k)
-                    # metric=xCell.makeBoundedLinearMetric(l0min,
+                    # metric=xcell.makeBoundedLinearMetric(l0min,
                     #                                       xmax/4,
                     #                                       xmax)
                     setup.makeAdaptiveGrid(metric, maxdepth)
@@ -161,7 +161,7 @@ for xx in x0s:
             a3.plot(rplot[sortr],np.array(nInSrc)[sortr])
 
 
-xCell.Visualizers.outsideLegend(axis=ax)
+xcell.Visualizers.outsideLegend(axis=ax)
 # ax.legend()
 
 study.savePlot(f2, 'multiplot', '.png')

@@ -7,9 +7,9 @@ Created on Tue Jan  4 14:43:26 2022
 """
 import numpy as np
 import numba as nb
-import Elements
-import util
-import FEM
+from . import elements
+from . import util
+from . import fem
 
 class Mesh:
     def __init__(self,bbox,elementType='Admittance'):
@@ -146,9 +146,9 @@ class Mesh:
 
         """
         # if self.elementType=='Admittance':
-        #     newEl=Elements.AdmittanceHex(origin,extents,sigma)
+        #     newEl=elements.AdmittanceHex(origin,extents,sigma)
         # elif self.elementType=='FEM':
-        #     newEl=Elements.FEMHex(origin,extents,sigma)
+        #     newEl=elements.FEMHex(origin,extents,sigma)
 
         newEl=Octant(origin, extents,sigma=sigma,index=index)
         # newEl.globalNodeIndices=nodeIndices
@@ -194,14 +194,14 @@ class Mesh:
             # elConds=elem.getConductanceVals()
             # elEdges=elem.getConductanceIndices()
             if self.elementType=='Admittance':
-                elConds=FEM.getAdmittanceConductances(elem.span,elem.sigma)
-                elEdges=elem.vertices[FEM.ADMITTANCE_EDGES]
+                elConds=fem.getAdmittanceConductances(elem.span,elem.sigma)
+                elEdges=elem.vertices[fem.ADMITTANCE_EDGES]
             elif self.elementType=='FEM':
-                elConds=FEM.getHexConductances(elem.span,elem.sigma)
-                elEdges=elem.vertices[FEM.getHexIndices()]
+                elConds=fem.getHexConductances(elem.span,elem.sigma)
+                elEdges=elem.vertices[fem.getHexIndices()]
             elif self.elementType=='Face':
-                rawCond=FEM.getFaceConductances(elem.span,elem.sigma)
-                rawEdge=elem.faces[FEM.FACE_EDGES]
+                rawCond=fem.getFaceConductances(elem.span,elem.sigma)
+                rawEdge=elem.faces[fem.FACE_EDGES]
 
                 elConds=[]
                 elEdges=[]
@@ -301,7 +301,7 @@ class Octree(Mesh):
         el=self.tree.getContainingElement(coords)
         return el
 
-    def getIntersectingElements(self,axis,coordinate):
+    def getIntersectingelements(self,axis,coordinate):
         elements=self.tree.getIntersectingElement(axis, coordinate)
         return elements
 
@@ -410,9 +410,9 @@ class Octree(Mesh):
                 #continue recursion
                 return self.octantByList(indexList,oc)
 
-    def countElements(self):
+    def countelements(self):
 
-        return self.tree.countElements()
+        return self.tree.countelements()
 
     def getCoordsRecursively(self):
         """
@@ -489,7 +489,7 @@ class Octree(Mesh):
             coords[ii]=el.center
             nodeIdx.append(elIndex)
 
-            gEl=FEM.getFaceConductances(el.span, el.sigma)
+            gEl=fem.getFaceConductances(el.span, el.sigma)
 
             neighborList=util.octantNeighborIndexLists(np.array(el.index))
 
@@ -536,7 +536,7 @@ class Octree(Mesh):
                         neighborIndex=util.octantListToIndex(np.array(neighbor.index),
                                                              self.maxDepth)
 
-                        gA=FEM.getFaceConductances(neighbor.span,
+                        gA=fem.getFaceConductances(neighbor.span,
                                                           neighbor.sigma)[step//2]
                         gB=gEl[step//2]/nNeighbors
 
@@ -675,11 +675,11 @@ class Octant():
 
 
 
-    def countElements(self):
+    def countelements(self):
         if len(self.children)==0:
             return 1
         else:
-            return sum([ch.countElements() for ch in self.children])
+            return sum([ch.countelements() for ch in self.children])
 
     # @nb.njit(parallel=True)
     def split(self,division=np.array([0.5,0.5,0.5])):
@@ -729,24 +729,26 @@ class Octant():
 
 
     # @nb.njit(parallel=True)
-    def refineByMetric(self,l0Function,maxDepth):
-        l0Target=l0Function(self.center)
+    def refineByMetric(self,l0Functions,maxDepth):
         changed=False
+        for f in l0Functions:
 
-        if (self.l0>l0Target) and (self.depth<maxDepth):
-            if len(self.children)==0:
-                changed=True
-                self.split()
-            for ii in nb.prange(8):
-                changed|=self.children[ii].refineByMetric(l0Function,maxDepth)
-        # else:
-        #     #ripup logic
-        #     allUnder=self.coarsenByMetric(l0Function)
-        #     changed|=allUnder
+            l0Target=f(self.center)
+
+            if (self.l0>l0Target) and (self.depth<maxDepth):
+                if len(self.children)==0:
+                    changed=True
+                    self.split()
+                for ii in nb.prange(8):
+                    changed|=self.children[ii].refineByMetric(l0Functions,maxDepth)
+            # else:
+            #     #ripup logic
+            #     allUnder=self.coarsenByMetric(l0Function)
+            #     changed|=allUnder
 
         return changed
 
-    def coarsenByMetric(self,metric,maxdepth):
+    def coarsenByMetric(self,metrics,maxdepth):
         #TODO: coarsening factor control
 
 
@@ -781,23 +783,26 @@ class Octant():
 
         ###### pseudocode
         # delete children if all too small
-
-        undersize=self.l0<metric(self.center) or self.depth>maxdepth
         changed=False
-        if len(self.children)==0:
-            pass
-        else:
-            for ch in self.children:
-                chChange,chUnder=ch.coarsenByMetric(metric,maxdepth)
 
-                undersize&=chUnder
-                changed|=chChange
+        for f in metrics:
 
-            if undersize:
-                changed=True
+            undersize=self.l0<f(self.center) or self.depth>maxdepth
+
+            if len(self.children)==0:
+                pass
+            else:
                 for ch in self.children:
-                    del ch
-                self.children=[]
+                    chChange,chUnder=ch.coarsenByMetric(metrics,maxdepth)
+
+                    undersize&=chUnder
+                    changed|=chChange
+
+                if undersize:
+                    changed=True
+                    for ch in self.children:
+                        del ch
+                    self.children=[]
 
 
         return changed, undersize
@@ -867,12 +872,12 @@ class Octant():
     def calcIndices(self):
             # scale=2**(util.MAXDEPTH-self.depth)
 
-            # xyz=self.oXYZ+scale*FEM.HEX_POINT_INDICES
+            # xyz=self.oXYZ+scale*fem.HEX_POINT_INDICES
             # inds=util.pos2index(xyz, util.MAXPT)
 
 
             elList=np.array(self.index,dtype=np.int8)
-            inds=util.indicesWithinOctant(elList,FEM.HEX_POINT_INDICES)
+            inds=util.indicesWithinOctant(elList,fem.HEX_POINT_INDICES)
 
 
             self.vertices=inds[:8]
@@ -928,11 +933,11 @@ class Octant():
 
 
     def interpolateWithin(self,coordinates,values):
-        coords=FEM.toLocalCoords(coordinates, self.center, self.span)
+        coords=fem.toLocalCoords(coordinates, self.center, self.span)
         if values.shape[0]==8:
-            interp=FEM.interpolateFromVerts(values, coords)
+            interp=fem.interpolateFromVerts(values, coords)
         else:
-            interp=FEM.interpolateFromFace(values, coords)
+            interp=fem.interpolateFromFace(values, coords)
 
         return interp
 
@@ -955,12 +960,12 @@ class Octant():
 
         if knownValues.shape[0]==8:
             vVert=knownValues
-            vFace=FEM.interpolateFromVerts(knownValues,
-                                            FEM.HEX_FACE_COORDS)
+            vFace=fem.interpolateFromVerts(knownValues,
+                                            fem.HEX_FACE_COORDS)
         else:
             vFace=knownValues
-            vVert=FEM.interpolateFromFace(knownValues,
-                                           FEM.HEX_VERTEX_COORDS)
+            vVert=fem.interpolateFromFace(knownValues,
+                                           fem.HEX_VERTEX_COORDS)
 
         # allInds[vertOrder]=indV
         # allVals[vertOrder]=vVert
@@ -973,15 +978,15 @@ class Octant():
 
         # self.globalNodeIndices=oldInds
 
-        # import Visualizers
+        # import visualizers
         # # import matplotlib.pyplot as plt
-        # ax=Visualizers.new3dPlot(np.concatenate((-np.ones(3),np.ones(3))))
-        # cset=np.vstack((FEM.HEX_FACE_COORDS,FEM.HEX_VERTEX_COORDS))
+        # ax=visualizers.new3dPlot(np.concatenate((-np.ones(3),np.ones(3))))
+        # cset=np.vstack((fem.HEX_FACE_COORDS,fem.HEX_VERTEX_COORDS))
         # cval=np.concatenate((vFace,vVert))
         # # x,y,z=np.hsplit(cset, 3)
         # # pt=ax.scatter3D(x,y,z,cval)
         # # plt.colorbar(pt)
-        # Visualizers.showNodes3d(ax, cset, cval)
+        # visualizers.showNodes3d(ax, cset, cval)
 
         return allVals,allInds
 
@@ -994,9 +999,9 @@ class Octant():
         localCoords=np.array([[x,y,z] for z in inds[2] for y in inds[1] for x in inds[0]])
 
         if globalValues.shape[0]==8:
-            planeVals=FEM.interpolateFromVerts(globalValues, localCoords)
+            planeVals=fem.interpolateFromVerts(globalValues, localCoords)
         else:
-            planeVals=FEM.interpolateFromFace(globalValues, localCoords)
+            planeVals=fem.interpolateFromFace(globalValues, localCoords)
 
         return planeVals
 

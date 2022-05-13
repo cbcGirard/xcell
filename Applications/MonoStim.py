@@ -17,10 +17,10 @@ import matplotlib.pyplot as plt
 
 domX=250e-6
 
-stepViz=False
+stepViz=True
 
 
-pairStim=False
+pairStim=True
 #https://doi.org/10.1109/TBME.2018.2791860
 #48um diameter +24um insulation; 1ms, 50-650uA
 
@@ -30,7 +30,7 @@ tpulse=1.
 tstart=5.
 rElec=24e-6
 
-cellY=250
+elecY=100
 
 study,_=com.makeSynthStudy('NEURON/Stim/Mono',xmax=domX,)
 
@@ -61,7 +61,7 @@ def resetBounds(ax,xmax,xmin=None):
 
 
 elec0=np.zeros(3)
-elec0[1]=cellY*1e-6
+elec0[1]=elecY*1e-6
 elecA=elec0.copy()
 elecB=elec0.copy()
 
@@ -119,7 +119,7 @@ def runStim(depth):
     setup.setBoundaryNodes()
     v=setup.iterativeSolve(tol=1e-9)
     numel=len(setup.mesh.elements)
-    numElec=sum(setup.nodeRoleTable==2)
+    nElec=sum(setup.nodeRoleTable==2)
 
     def testThresh(k):
 
@@ -142,24 +142,12 @@ def runStim(depth):
 
         #optional visualization
         if stepViz:
-            viz.addsimulationdata(setup,append=True)
-            xc.nrnUtil.showcellgeo(viz.axes[0])
-
-
-
-
+            viz.addSimulationData(setup,append=True)
+            xc.nrnutil.showCellGeo(viz.axes[0])
 
         vext=setup.interpolateAt(np.array(cellcoords)/nUnit.m)
 
-
-
-        tstim,vstim =xc.nrnUtil.makeBiphasicPulse(k, tstart, tpulse)
-
-        # tlist=[0., tstart, tstart+tpulse, tstart+2*tpulse, tstop]
-        # vlist=1e5*np.array([0.,-1.,1.,0., 0.])
-
-
-        # tstim=h.Vector(tlist)
+        tstim,vstim =xc.nrnutil.makeBiphasicPulse(k, tstart, tpulse)
 
         vvecs=[]
         vmems=[]
@@ -209,7 +197,7 @@ def runStim(depth):
 
         while (mx-mn)>1e-6:
             md=0.5*(mn+mx)
-            print(md)
+            # print(md)
             spike=testThresh(md)
 
             if spike:
@@ -221,44 +209,24 @@ def runStim(depth):
 
     thresh=findThresh()
 
-    print(Imag*thresh)
+    # print(Imag*thresh)
 
     return thresh, numel, nElec
 
 threshSet=[]
 nElec=[]
 nTot=[]
-f,axes=plt.subplots(2,sharex=True,
-                    gridspec_kw={'height_ratios':[4,1]})
+
+for d in range(6,12):
+    t,nT,nE=runStim(d)
+
+    threshSet.append(t)
+    nElec.append(nE)
+    nTot.append(nT)
+
+ax=plt.figure().add_subplot()
+ax.plot(nElec,np.array(threshSet))
 
 
-# TODO: fix problems with appending
-for d in range(5,14):
-    t,n,nElec=runStim(d)
-    # axes[0].plot(t,v,label=str(nElec)+'/'+str(n))
-
-
-    # vset.append(v)
-    # numels.append(n)
-
-
-
-
-# axes[1].plot(t,np.array(vvecs).transpose())
-axes[1].step([0,tstart,tpulse+tstart,tstart+2*tpulse,tstop],
-             1e6*np.array([0.,0.,Imag, -Imag,0]))
-axes[0].set_ylabel('Membrane voltage [mV]')
-
-axes[1].set_xlabel('Time [ms]')
-axes[1].set_ylabel(r'Stimulus [$\mu$A]')
-
-axes[0].legend()
-
-ani=viz.animateStudy('dualTest')
-
-# del cell
-
-for sec in h.allsec():
-    h.delete_section(sec=sec)
-
-# h.quit()
+if stepViz:
+    ani=viz.animateStudy()

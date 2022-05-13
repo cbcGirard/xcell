@@ -9,12 +9,14 @@ Created on Sun Dec 19 20:28:33 2021
 
 import numpy as np
 import numba as nb
-import xCell
+import xcell
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import os
-import util
-import Visualizers
+from xcell import util
+from xcell import visualizers
+
+#todo: reup
 
 
 studyPath='/home/benoit/smb4k/ResearchData/Results/studyTst/algoDemo/'#+meshtype
@@ -52,7 +54,7 @@ else:
 #     bbox+=rElec*np.array([1,1,0,1,1,0])
 
 
-study=xCell.SimStudy(studyPath,bbox)
+study=xcell.SimStudy(studyPath,bbox)
 
 
 
@@ -61,7 +63,7 @@ study=xCell.SimStudy(studyPath,bbox)
 
 arts=[]
 fig=plt.figure()
-cm=Visualizers.CurrentPlot(fig, study,fullarrow=True,showInset=False,showAll=asDual)
+cm=visualizers.CurrentPlot(fig, study,fullarrow=True,showInset=False,showAll=asDual)
 ax=cm.fig.axes[0]
 
 
@@ -93,7 +95,7 @@ for maxdepth in range(1,lastGen+1):
         #     val=rElec
         return val
 
-    setup.makeAdaptiveGrid(metric,maxdepth)
+    setup.makeAdaptiveGrid([metric],maxdepth)
 
 
     setup.finalizeMesh(regularize=False)
@@ -108,10 +110,10 @@ for maxdepth in range(1,lastGen+1):
 
 
 
-    edgePoints=Visualizers.getPlanarEdgePoints(coords, edges)
+    edgePoints=visualizers.getPlanarEdgePoints(coords, edges)
 
-    art=Visualizers.showEdges2d(ax, edgePoints,edgeColors=(0.,0.,0.),alpha=1.)
-    title=Visualizers.animatedTitle(fig, 'Split if l_0>%.2f r, depth %d'%(k,maxdepth))
+    art=visualizers.showEdges2d(ax, edgePoints,edgeColors=(0.,0.,0.),alpha=1.)
+    title=visualizers.animatedTitle(fig, 'Split if l_0>%.2f r, depth %d'%(k,maxdepth))
     arts.append([art,title])
 
     if maxdepth!=lastGen:
@@ -140,7 +142,7 @@ if showSrcCircuit:
     #find nodes inside source, and map their location to center
     # inSrc=np.linalg.norm(setup.mesh.nodeCoords,axis=1)<=rElec
 
-    viewer=Visualizers.SliceViewer(ax,setup)
+    viewer=visualizers.SliceViewer(ax,setup)
 
     setup.addCurrentSource(1, np.zeros(3),rElec)
     setup.insertSourcesInMesh()
@@ -164,8 +166,8 @@ if showSrcCircuit:
     # edgeColors=np.zeros((oldEdges.shape[0],3))
     # edgeColors[edgeInSrc,0]=1
 
-    # pts=Visualizers.getPlanarEdgePoints(setup.mesh.nodeCoords, oldEdges)
-    # edgeArt=Visualizers.showEdges2d(ax, pts, oldEdges, colors=edgeColors)
+    # pts=visualizers.getPlanarEdgePoints(setup.mesh.nodeCoords, oldEdges)
+    # edgeArt=visualizers.showEdges2d(ax, pts, oldEdges, colors=edgeColors)
 
     # sX,sY=np.hsplit(setup.mesh.nodeCoords[inSrc,:-1], 2)
     # nodeArt=plt.scatter(sX,sY,marker='.',c='r')
@@ -190,7 +192,7 @@ if showSrcCircuit:
 
     nodeArt=viewer.showNodes(inSrc,colors=nodeColors[inSrc.astype(int)], marker='.')
 
-    title=Visualizers.animatedTitle(fig, 'Combine nodes inside source')
+    title=visualizers.animatedTitle(fig, 'Combine nodes inside source')
     artset=[nodeArt,title,finalMesh]
     if not asDual:
         edgeArt=viewer.showEdges(colors=eCol)
@@ -218,20 +220,20 @@ if showSrcCircuit:
     # srcEdge=edgeRemap[touchesSrc]
     # restEdge=edgeRemap[~touchesSrc]
 
-    # rePts=Visualizers.getPlanarEdgePoints(elCoords[:,:-1], setup.edges)
-    # reArt=Visualizers.showEdges2d(ax, rePts, colors=equColor)
+    # rePts=visualizers.getPlanarEdgePoints(elCoords[:,:-1], setup.edges)
+    # reArt=visualizers.showEdges2d(ax, rePts, colors=equColor)
 
     viewer.topoType='electrical'
     viewer.setPlane(showAll=asDual)
     reArt=viewer.showEdges(colors=equColor)
-    title=Visualizers.animatedTitle(fig, 'Equivalent circuit')
+    title=visualizers.animatedTitle(fig, 'Equivalent circuit')
     arts.append([reArt,title,finalMesh])
     arts.append([reArt,title,finalMesh])
 
 
     cm.addSimulationData(setup,append=True)
     endArts=cm.getArtists(0)
-    endArts[0].append(Visualizers.animatedTitle(fig, 'Current distribution'))
+    endArts[0].append(visualizers.animatedTitle(fig, 'Current distribution'))
     endArts[0].append(finalMesh)
     arts.extend(endArts)
 

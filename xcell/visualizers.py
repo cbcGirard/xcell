@@ -28,8 +28,8 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes, zoomed_inset_axes,
 import pickle
 import pandas
 # from util import uniformResample, edgeRoles, getquads, quadsToMaskedArrays, coords2MaskedArrays
-import util
-import misc
+from . import util
+from . import misc
 
 styleScope={
 'axes.prop_cycle': mpl.cycler('color', ['#ffff00', '#00ffff', '#ff00ff', '#00ff00', '#ff0000', '#0000ff', '#ff8000', '#8000ff', '#ff0080', '#0080ff'])}
@@ -1290,6 +1290,9 @@ class SliceSet(FigureAnimator):
                 'showInsets' : True,
                 'relativeError': False,
                 'logScale': True,
+                'showNodes': False,
+                'fullInterp': False
+
             }
 
         super().__init__(fig, study, prefs)
@@ -1352,6 +1355,8 @@ class SliceSet(FigureAnimator):
         if len(sim.voltageSources) > 0:
             rElec = sim.voltageSources[0].radius
             self.rElec = rElec
+
+
 
         vArrays, coords = sim.getValuesInPlane(data=None)
         cartCoords = np.hstack((coords, np.zeros((coords.shape[0], 1))))

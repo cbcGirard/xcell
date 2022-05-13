@@ -6,7 +6,7 @@ Created on Wed Apr 20 17:14:52 2022
 @author: benoit
 """
 
-import xCell as xc
+import xcell as xc
 import numpy as np
 import Common as com
 from neuron import h, gui

@@ -23,13 +23,13 @@ import matplotlib.pyplot as plt
 # plt.style.use('dark_background')
 
 
-import util
-import visualizers
-import elements
-import meshes
-import geometry
-from fem import ADMITTANCE_EDGES
-import misc
+from . import util
+from . import visualizers
+from . import elements
+from . import meshes
+from . import geometry
+from .fem import ADMITTANCE_EDGES
+from . import misc
 
 
 
@@ -1323,7 +1323,7 @@ class Simulation:
 
         return edges
 
-    def getMeshgeometry(self):
+    def getMeshGeometry(self):
         verts=[]
         rawEdges=[]
         for el in self.mesh.elements:
@@ -1435,7 +1435,7 @@ class Simulation:
         return numbering, (Nx,Nf,Ns,Nd)
 
 
-    def getelementsInPlane(self,axis=2, point=0.):
+    def getElementsInPlane(self,axis=2, point=0.):
         otherAx=np.array([n!=axis for n in range(3)])
         # arrays=[]
         # Gmax=self.mesh.maxDepth+1
@@ -1474,7 +1474,7 @@ class Simulation:
         if data is None:
             data=self.nodeVoltages
 
-        elements,coords,_=self.getelementsInPlane(axis,point)
+        elements,coords,_=self.getElementsInPlane(axis,point)
 
         depths=np.array([el.depth for el in elements])
         Gmax=self.mesh.maxDepth+1
@@ -1599,7 +1599,7 @@ class Simulation:
         return uniInd,uniV
 
     def getCurrentsInPlane(self,axis=2,point=0.):
-        els,coords,mesh=self.getelementsInPlane(axis,point)
+        els,coords,mesh=self.getElementsInPlane(axis,point)
 
         if self.mesh.elementType=='Face':
             inds=np.unique([el.faces for el in els])

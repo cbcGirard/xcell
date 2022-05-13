@@ -8,7 +8,7 @@ Created on Fri Nov 26 15:56:54 2021
 
 import numpy as np
 import numba as nb
-import xCell
+import xcell
 import matplotlib.pyplot as plt
 
 
@@ -34,7 +34,7 @@ bbox=np.append(-xmax*np.ones(3),xmax*np.ones(3))
 
 # bbox=bbox+np.tile()
 
-study=xCell.SimStudy(studyPath,bbox)
+study=xcell.SimStudy(studyPath,bbox)
 
 l0Min=1e-6
 rElec=1e-6
@@ -105,8 +105,8 @@ if generate:
             elif meshtype==r'equal $l_0$':
                 setup.makeUniformGrid(lastNx)
             else:
-                metric=xCell.makeExplicitLinearMetric(maxdepth,
-                                                      meshdensity=0.2)
+                metric=[xcell.makeExplicitLinearMetric(maxdepth,
+                                                      meshdensity=0.2)]
 
                 setup.makeAdaptiveGrid(metric,maxdepth)
 
@@ -140,7 +140,7 @@ if generate:
 
             setup.getMemUsage(True)
             errEst,err,ana,_,_=setup.calculateErrors()
-            FVU=xCell.misc.FVU(ana, err)
+            FVU=xcell.misc.FVU(ana, err)
 
 
             print('error: %g'%errEst)

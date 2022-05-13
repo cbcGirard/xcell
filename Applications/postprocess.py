@@ -9,7 +9,7 @@ Created on Thu Jan  6 19:24:52 2022
 
 import numpy as np
 import numba as nb
-import xCell
+import xcell
 import matplotlib.pyplot as plt
 
 meshtype='adaptive'
@@ -61,41 +61,41 @@ xmax=1e-4
 bbox=np.append(-xmax*np.ones(3),xmax*np.ones(3))
 
 
-study=xCell.SimStudy(studyPath,bbox)
+study=xcell.SimStudy(studyPath,bbox)
 
 
 
 
-# aniGraph=study.animatePlot(xCell.error2d,'err2d')
-# aniGraph=study.animatePlot(xCell.ErrorGraph,'err2d_adaptive',["Mesh type"],['adaptive'])
-# aniGraph2=study.animatePlot(xCell.error2d,'err2d_uniform',['Mesh type'],['uniform'])
-# aniImg=study.animatePlot(xCell.VisualizerscenterSlice,'img_mesh')
-# aniImg=study.animatePlot(xCell.SliceSet,'img_adaptive',["Mesh type"],['adaptive'])
-# aniImg2=study.animatePlot(xCell.centerSlice,'img_uniform',['Mesh type'],['uniform'])
+# aniGraph=study.animatePlot(xcell.error2d,'err2d')
+# aniGraph=study.animatePlot(xcell.ErrorGraph,'err2d_adaptive',["Mesh type"],['adaptive'])
+# aniGraph2=study.animatePlot(xcell.error2d,'err2d_uniform',['Mesh type'],['uniform'])
+# aniImg=study.animatePlot(xcell.VisualizerscenterSlice,'img_mesh')
+# aniImg=study.animatePlot(xcell.SliceSet,'img_adaptive',["Mesh type"],['adaptive'])
+# aniImg2=study.animatePlot(xcell.centerSlice,'img_uniform',['Mesh type'],['uniform'])
 
 
 # staticPlots=True
 staticPlots=False
 
 plotters=[
-    xCell.Visualizers.ErrorGraph,
-#     xCell.Visualizers.SliceSet,
-    # xCell.Visualizers.CurrentPlot,
-    # xCell.Visualizers.LogError
+    xcell.Visualizers.ErrorGraph,
+#     xcell.Visualizers.SliceSet,
+    # xcell.Visualizers.CurrentPlot,
+    # xcell.Visualizers.LogError
             ]
 
 
-# plotters=[xCell.Visualizers.ErrorGraph]
+# plotters=[xcell.Visualizers.ErrorGraph]
 
-# ptr=xCell.Visualizers.ErrorGraph(plt.figure(), study)
+# ptr=xcell.Visualizers.ErrorGraph(plt.figure(), study)
 
-# # ptr=xCell.Visualizers.SliceSet(plt.figure(), study)
+# # ptr=xcell.Visualizers.SliceSet(plt.figure(), study)
 # ptr.getStudyData(sortCategory=filterCategories[0])
 # ani=ptr.animateStudy()
 
 
 if staticPlots:
-    xCell.Visualizers.groupedScatter(study.studyPath+'/log.csv',
+    xcell.Visualizers.groupedScatter(study.studyPath+'/log.csv',
                          xcat='Number of elements',
                          ycat='FVU',
                          groupcat=filterCategories[0])
@@ -105,7 +105,7 @@ if staticPlots:
 
     for fv in filterVals:
 
-        fstack,fratio=xCell.Visualizers.plotStudyPerformance(study,
+        fstack,fratio=xcell.Visualizers.plotStudyPerformance(study,
                                                              onlyCat=filterCategories[0],
                                                              onlyVal=fv)
         fstem='_'+filterCategories[0]+str(fv)

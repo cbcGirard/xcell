@@ -8,7 +8,7 @@ Created on Tue Jan 11 10:37:11 2022
 
 import numpy as np
 import numba as nb
-import util
+from . import util
 
 
 @nb.njit()

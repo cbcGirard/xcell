@@ -6,7 +6,7 @@ Created on Wed Oct 27 12:59:01 2021
 @author: benoit
 """
 
-import xCell
+import xcell
 import numpy as np
 import matplotlib.pyplot as plt
 import numba as nb
@@ -26,8 +26,8 @@ resultpath="Results/cube/errEst/"
 def runL0Grid(maxDepth,coef,xmax,showGraphs,vMode,logTimes):
     bbox=np.concatenate((-xmax*np.ones(3), xmax*np.ones(3)))
     
-    otree=xCell.Octree(bbox,maxDepth=maxDepth)
-    setup=xCell.Simulation(resultpath)
+    otree=xcell.Octree(bbox,maxDepth=maxDepth)
+    setup=xcell.Simulation(resultpath)
     setup.mesh.extents=2*xmax*np.ones(3)
     setup.mesh.elementType=elType
     
@@ -77,7 +77,7 @@ def runL0Grid(maxDepth,coef,xmax,showGraphs,vMode,logTimes):
         if np.any(pt==xmax) or (rpt<=1e-6):
             # setup.addVoltageSource(0,index=ii)
             
-            vpt=xCell.analyticVsrc(np.zeros(3), srcMag, rpt,srcType=srcType)
+            vpt=xcell.analyticVsrc(np.zeros(3), srcMag, rpt,srcType=srcType)
             setup.addVoltageSource(vpt.squeeze(),index=ii)
         
     

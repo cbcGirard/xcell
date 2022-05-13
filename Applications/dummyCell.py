@@ -12,14 +12,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.animation import ArtistAnimation
-# from xCell import Visualizers
-import xCell
+# from xcell import visualizers
+import xcell
 import Common
 import time
 import pickle
 
 
-import nrnUtil
+from xcell import nrnutil as nUtil
 from matplotlib.lines import Line2D
 
 h.load_file('stdrun.hoc')
@@ -43,7 +43,7 @@ h.define_shape()
 
 
 
-ivecs, isSphere, coords, rads = nrnUtil.getNeuronGeometry()
+ivecs, isSphere, coords, rads = nUtil.getNeuronGeometry()
 
 t = h.Vector().record(h._ref_t)
 h.finitialize(-65 * mV)
@@ -53,7 +53,7 @@ h.continuerun(20)
 
 I=-1e-9*np.array(ivecs).transpose()
 imax=np.max(np.abs(I))
-cmap,norm=xCell.Visualizers.getCmap(I.ravel(),forceBipolar=True)
+cmap,norm=xcell.visualizers.getCmap(I.ravel(),forceBipolar=True)
 
 # fig=plt.figure()
 # ax=plt.gca()
@@ -113,10 +113,10 @@ class LineDataUnits(Line2D):
 def showCellGeo(axis):
 
     tht=np.linspace(0,2*np.pi)
-    shade=xCell.Visualizers.FAINT
+    shade=xcell.visualizers.FAINT
     polys=[]
     for sec in h.allsec():
-        x,y,z,r=nrnUtil.returnSegmentCoordinates(sec)
+        x,y,z,r=nUtil.returnSegmentCoordinates(sec)
         coords=np.vstack((x,y,z)).transpose()
 
         if sec.hname().split('.')[-1]=='soma':
@@ -181,10 +181,10 @@ nskip=10
 #        'x': tv}
 
 if vids:
-    img=xCell.Visualizers.SingleSlice(None,study,
+    img=xcell.visualizers.SingleSlice(None,study,
                                       tv)
 
-    err=xCell.Visualizers.SingleSlice(None, study,
+    err=xcell.visualizers.SingleSlice(None, study,
                                       tv)
 
 
@@ -232,9 +232,9 @@ for ii in range(0,tmax,nskip):
             density=0.2
 
 
-        metric=xCell.makeExplicitLinearMetric(maxdepth, density)
+        metrics=[xcell.makeExplicitLinearMetric(maxdepth, density)]
 
-        changed|=setup.makeAdaptiveGrid(metric, maxdepth)
+        changed|=setup.makeAdaptiveGrid(metrics, maxdepth)
 
 
 
@@ -279,7 +279,7 @@ for ii in range(0,tmax,nskip):
 
 
 
-    errdict=xCell.misc.getErrorEstimates(setup)
+    errdict=xcell.misc.getErrorEstimates(setup)
     errdict['densities']=density
     errdict['depths']=maxdepth
     errdict['numels']=lastNumEl
@@ -292,10 +292,10 @@ for ii in range(0,tmax,nskip):
         err.addSimulationData(setup,append=True)
         img.addSimulationData(setup,append=True)
 
-lists=xCell.misc.transposeDicts(errdicts)
+lists=xcell.misc.transposeDicts(errdicts)
 pickle.dump(lists, open(studyPath+strat+'.p','wb'))
     # scat=ax.scatter(x,y,c=I[ii],cmap=cmap,norm=norm)
-    # title=Visualizers.animatedTitle(fig, 't=%g ms'%tv[ii])
+    # title=visualizers.animatedTitle(fig, 't=%g ms'%tv[ii])
     # # tbar=tax.barh(0,tv[ii])
     # tbar=tax.vlines(tv[ii],0,1)
     # arts.append([scat,title,tbar])

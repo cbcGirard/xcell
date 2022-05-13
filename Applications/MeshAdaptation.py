@@ -8,7 +8,7 @@ Created on Thu Mar 17 13:25:55 2022
 
 import Common
 import numpy as np
-import xCell
+import xcell
 import matplotlib.pyplot as plt
 
 
@@ -37,7 +37,7 @@ tdata={
        }
 
 
-img=xCell.Visualizers.SingleSlice(None, study,timevec=tvec,tdata=tdata)
+img=xcell.Visualizers.SingleSlice(None, study,timevec=tvec,tdata=tdata)
 
 
 
@@ -61,7 +61,7 @@ for val in vrange:
         # else:
         #     lastdepth=maxdepth
 
-    metric=xCell.makeExplicitLinearMetric(maxdepth,
+    metric=xcell.makeExplicitLinearMetric(maxdepth,
                                           density)
 
     setup.makeAdaptiveGrid(metric, maxdepth)
@@ -70,7 +70,7 @@ for val in vrange:
 
     img.addSimulationData(setup,append=True)
 
-    # ax=xCell.Visualizers.showMesh(setup)
+    # ax=xcell.Visualizers.showMesh(setup)
     # ax.set_xticks([])
     # ax.set_yticks([])
     # ax.set_zticks([])

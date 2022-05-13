@@ -14,7 +14,7 @@ import resource
 from numba.types import int64, float64
 
 
-import xCell
+import xcell
 import matplotlib.pyplot as plt
 
 
@@ -52,7 +52,7 @@ isrc=vsrc*4*np.pi*sigma*1e-6
 bbox=np.append(-xmax*np.ones(3),xmax*np.ones(3))
 
 
-study=xCell.SimStudy(studyPath,bbox)
+study=xcell.SimStudy(studyPath,bbox)
 
 
 # setup=study.newSimulation()
@@ -81,8 +81,8 @@ study=xCell.SimStudy(studyPath,bbox)
     
 
 # # edges,conductances=setup.mesh.getConductances()
-# # ax=xCell.new3dPlot(boundingBox)
-# # xCell.showEdges(ax, coords, edges, conductances)
+# # ax=xcell.new3dPlot(boundingBox)
+# # xcell.showEdges(ax, coords, edges, conductances)
 
 # # v=setup.solve()
 # v=setup.iterativeSolve(None,1e-9)
@@ -94,8 +94,8 @@ study=xCell.SimStudy(studyPath,bbox)
 
 setup=study.loadData('sim0')
 
-# xCell.error2d(plt.figure(),setup)
-xCell.centerSlice(plt.figure(),setup)
+# xcell.error2d(plt.figure(),setup)
+xcell.centerSlice(plt.figure(),setup)
 
 # if logTimes:
 #     setup.logAsTableEntry(resultpath+fname, FVU,

@@ -8,7 +8,7 @@ Created on Fri Nov 26 15:56:54 2021
 
 import numpy as np
 import numba as nb
-import xCell
+import xcell
 import matplotlib.pyplot as plt
 import pickle
 
@@ -36,7 +36,7 @@ def run(X,V,R,generate):
 
     bbox=np.append(-xmax*np.ones(3),xmax*np.ones(3))
 
-    study=xCell.SimStudy(studyPath,bbox)
+    study=xcell.SimStudy(studyPath,bbox)
 
     l0Min=1e-6
     rElec=R*1e-6
@@ -90,7 +90,7 @@ def run(X,V,R,generate):
                 elif meshtype==r'equal $l_0$':
                     setup.makeUniformGrid(lastNx)
                 else:
-                    metric=xCell.makeExplicitLinearMetric(maxdepth,
+                    metric=xcell.makeExplicitLinearMetric(maxdepth,
                                                           meshdensity=0.2)
 
                     setup.makeAdaptiveGrid(metric,maxdepth)
@@ -155,13 +155,13 @@ def run(X,V,R,generate):
                                    power])
                 study.saveData(setup)
 
-                errdict=xCell.misc.getErrorEstimates(setup)
+                errdict=xcell.misc.getErrorEstimates(setup)
                 # errdict['densities']=density
                 errdict['depths']=maxdepth
                 errdict['numels']=numel
                 errdicts.append(errdict)
 
-        dlist=xCell.misc.transposeDicts(errdicts)
+        dlist=xcell.misc.transposeDicts(errdicts)
         pickle.dump(dlist,open(studyPath+'errMets.p','wb'))
 
 

@@ -8,7 +8,7 @@ Created on Sun Feb 27 19:17:41 2022
 
 import numpy as np
 import matplotlib.pyplot as plt
-import xCell
+import xcell
 import Common as com
 
 import pickle
@@ -90,13 +90,13 @@ tdata={
        'unit':'V',
        'style':'dot'}
 
-study=xCell.SimStudy(studyPath,bbox)
+study=xcell.SimStudy(studyPath,bbox)
 
 if vids:
-    img=xCell.Visualizers.SingleSlice(None,study,
+    img=xcell.Visualizers.SingleSlice(None,study,
                                       tvec,tdata)
 
-    err=xCell.Visualizers.SingleSlice(None, study,
+    err=xcell.Visualizers.SingleSlice(None, study,
                                       tvec,tdata,
                                       datasrc='absErr')
 
@@ -186,7 +186,7 @@ def runRecord(strat,dmax,dmin,maxdepth):
             density=0.2
 
 
-        metric=xCell.makeExplicitLinearMetric(maxdepth, density)
+        metric=xcell.makeExplicitLinearMetric(maxdepth, density)
 
 
 
@@ -243,7 +243,7 @@ def runRecord(strat,dmax,dmin,maxdepth):
 
 
 
-        errdict=xCell.misc.getErrorEstimates(setup)
+        errdict=xcell.misc.getErrorEstimates(setup)
         errdict['densities']=density
         errdict['depths']=maxdepth
         errdict['numels']=lastNumEl
@@ -256,7 +256,7 @@ def runRecord(strat,dmax,dmin,maxdepth):
             err.addSimulationData(setup,append=True)
             img.addSimulationData(setup,append=True)
 
-    lists=xCell.misc.transposeDicts(errdicts)
+    lists=xcell.misc.transposeDicts(errdicts)
     pickle.dump(lists, open(studyPath+strat+'.p','wb'))
 
     return lists
@@ -349,7 +349,7 @@ if post:
 
 
 
-    # a2.yaxis.set_major_formatter(xCell.Visualizers.eform('A'))
+    # a2.yaxis.set_major_formatter(xcell.Visualizers.eform('A'))
     # a2.grid(axis='y',color='C1')
     # axes[1].grid(axis='y',color='C0')
 
@@ -372,7 +372,7 @@ if post:
 
 
     axes[1].set_ylabel('Number of\nElements')
-    axes[1].xaxis.set_major_formatter(xCell.Visualizers.eform('s'))
+    axes[1].xaxis.set_major_formatter(xcell.Visualizers.eform('s'))
 
     axes[1].set_yscale('log')
 

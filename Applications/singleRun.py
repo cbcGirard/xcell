@@ -9,7 +9,7 @@ Regularization tests
 
 import numpy as np
 # import numba as nb
-import xCell
+import xcell
 import matplotlib.pyplot as plt
 
 
@@ -44,7 +44,7 @@ bbox=np.append(-xmax*np.ones(3),xmax*np.ones(3))
 #     bbox+=xmax*2**(-maxdepth)
 
 
-study=xCell.SimStudy(studyPath,bbox)
+study=xcell.SimStudy(studyPath,bbox)
 
 l0Min=1e-6
 rElec=1e-6
@@ -78,11 +78,11 @@ if meshtype=='uniform':
     print('uniform, %d per axis'%nX)
 else:
 
-    # metric=xCell.makeBoundedLinearMetric(l0min=2e-6,
+    # metric=xcell.makeBoundedLinearMetric(l0min=2e-6,
     #                                      l0max=1e-5,
     #                                      domainX=xmax)
 
-    metric=xCell.makeExplicitLinearMetric(maxdepth, 0.2)
+    metric=xcell.makeExplicitLinearMetric(maxdepth, 0.2)
 
     setup.makeAdaptiveGrid(metric,maxdepth)
 
@@ -121,32 +121,32 @@ setup.logTime()
 
 
 # pt,val=setup.getUniversalPoints()
-# coords=xCell.util.indexToCoords(pt, study.bbox[:3],study.span)
+# coords=xcell.util.indexToCoords(pt, study.bbox[:3],study.span)
 
 # setup.mesh.nodeCoords=coords
 # setup.nodeVoltages=val
 
 # ax=plt.gca()
-# sv=xCell.Visualizers.SliceViewer(ax, setup)
+# sv=xcell.Visualizers.SliceViewer(ax, setup)
 # sv.nodeData=pt
 
 
 
-# ax=xCell.Visualizers.new3dPlot(study.bbox)
-# cmap,cnorm=xCell.Visualizers.getCmap(val,forceBipolar=True)
-# xCell.Visualizers.showNodes3d(ax, coords, val,cMap=cmap,cNorm=cnorm)
+# ax=xcell.Visualizers.new3dPlot(study.bbox)
+# cmap,cnorm=xcell.Visualizers.getCmap(val,forceBipolar=True)
+# xcell.Visualizers.showNodes3d(ax, coords, val,cMap=cmap,cNorm=cnorm)
 
 
 # # 2d image
 # bnd=setup.mesh.bbox[[0,3,2,4]]
 # arr,_=setup.getValuesInPlane()
-# cMap,cNorm=xCell.Visualizers.getCmap(setup.nodeVoltages,forceBipolar=True)
-# xCell.Visualizers.patchworkImage(plt.figure().gca(),
+# cMap,cNorm=xcell.Visualizers.getCmap(setup.nodeVoltages,forceBipolar=True)
+# xcell.Visualizers.patchworkImage(plt.figure().gca(),
 #                                   arr, cMap, cNorm,
 #                                   extent=bnd)
 
 # _,_,edgePoints=setup.getElementsInPlane()
-# xCell.Visualizers.showEdges2d(plt.gca(), edgePoints)
+# xcell.Visualizers.showEdges2d(plt.gca(), edgePoints)
 
 
 
@@ -158,12 +158,12 @@ setup.logTime()
 
 # els=setup.getElementsInPlane()
 # eg,_=setup.mesh.getConductances(els)
-# medges=xCell.util.renumberIndices(eg,setup.mesh.indexMap)
+# medges=xcell.util.renumberIndices(eg,setup.mesh.indexMap)
 # mcoords=setup.mesh.nodeCoords
 
 
 ##### TOPOLOGY/connectivity
-ax=xCell.Visualizers.showMesh(setup)
+ax=xcell.Visualizers.showMesh(setup)
 ax.set_xticks([])
 ax.set_yticks([])
 ax.set_zticks([])
@@ -174,24 +174,24 @@ ax.zaxis.set_pane_color(ghost)
 
 
 
-# xCell.Visualizers.showEdges(ax,
+# xcell.Visualizers.showEdges(ax,
 #                             setup.mesh.nodeCoords,
 #                             setup.edges,
 #                             setup.conductances)
 
 # bnodes=setup.mesh.getBoundaryNodes()
-# xCell.Visualizers.showNodes3d(ax,
+# xcell.Visualizers.showNodes3d(ax,
 #                               setup.mesh.nodeCoords[bnodes],
 #                               nodeVals=np.ones_like(bnodes),
 #                               colors='r')
 
 
-# # # # xCell.Visualizers.showMesh(setup)
-# # eg=xCell.Visualizers.ErrorGraph(plt.figure(), study)
+# # # # xcell.Visualizers.showMesh(setup)
+# # eg=xcell.Visualizers.ErrorGraph(plt.figure(), study)
 # # eg.addSimulationData(setup)
 # # eg.getArtists()
 
-# img=xCell.Visualizers.SliceSet(plt.figure(),study)
+# img=xcell.Visualizers.SliceSet(plt.figure(),study)
 # img.addSimulationData(setup)
 # img.getArtists()
 
@@ -202,7 +202,7 @@ ax.zaxis.set_pane_color(ghost)
 
 
 # ##### ERROR GRAPH
-# ptr=xCell.Visualizers.ErrorGraph(plt.figure(),study)
+# ptr=xcell.Visualizers.ErrorGraph(plt.figure(),study)
 # ptr.prefs['universalPts']=False
 # pdata=ptr.addSimulationData(setup)
 # ptr.getArtists(0,pdata)
@@ -222,6 +222,6 @@ ax.zaxis.set_pane_color(ghost)
 # print('Error metrics:\nbasic vol:%g\nadv vol:%g\narea%g'%(errBasic,errAdv,es))
 
 #################### LOGLOG Error
-P=xCell.Visualizers.LogError(None,study)
+P=xcell.Visualizers.LogError(None,study)
 P.addSimulationData(setup,True)
 P.getArtists(0)
