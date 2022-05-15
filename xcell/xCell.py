@@ -478,35 +478,11 @@ class Simulation:
             pts=np.array([self.mesh.inverseIdxMap[nn] for nn in xf])
             self.nodeVoltages[ii]=np.mean(self.nodeVoltages[pts])
 
-
-
-        #TODO: remove regularization step?
-        # self.startTiming('Regularize mesh')
-        # if regularize:
-        #     self.regularizeMesh()
-        # self.logTime()
-
-    # def finalizeDualMesh(self):
-    #     self.startTiming('Finalize mesh')
-
-    #     coords, idxMap, edges, cond=self.mesh.getDualMesh()
-    #     self.mesh.nodeCoords=coords
-    #     self.mesh.indexMap=idxMap
-    #     self.mesh.inverseIdxMap=util.getIndexDict(idxMap)
-    #     self.logTime()
-
-    #     nNodes=self.mesh.nodeCoords.shape[0]
-    #     self.nodeRoleTable=np.zeros(nNodes,dtype=np.int64)
-    #     self.nodeRoleVals=np.zeros(nNodes,dtype=np.int64)
-
-    #     self.startTiming('Calculate conductances')
-    #     self.edges=edges
-    #     self.conductances=cond
-    #     self.logTime()
-    #     self.asDual=True
-
-    def addCurrentSource(self,value,coords,radius=0):
-        self.currentSources.append(CurrentSource(value,coords,radius))
+    def addCurrentSource(self,value,coords,radius=0,geometry=None):
+        src=CurrentSource(value,coords,radius)
+        if geometry is not None:
+            src.geometry=geometry
+        self.currentSources.append(src)
 
     def addVoltageSource(self,value,coords=None,radius=0):
         self.voltageSources.append(VoltageSource(value,coords,radius))
@@ -1343,18 +1319,20 @@ class Simulation:
         return coords,edges
 
 
-    def interpolateAt(self,coords):
-        coordsLeft=np.ma.array(coords)
+    def interpolateAt(self,coords,elements=None):
+        # coordsLeft=np.ma.array(coords)
 
 
-        # vals=np.empty(coords.shape[0])
-        # for el in self.mesh.elements:
-        #     print(el)
+        vals=np.empty(coords.shape[0])
+        unknown=np.ones_like(vals,dtype=bool)
 
-        #     upper=np.greater_equal(coordsLeft,el.origin)
-        #     lower=np.less_equal(coordsLeft,el.origin+el.span)
-        #     inside=np.all(np.logical_and(upper,lower),axis=1)
+        # els=[self.mesh.getContainingElement(c) for c in coords]
+        # Els,toEls=np.unique(els,return_inverse=True)
 
+        # for el in Els:
+        #     whichCoord=toEls==el
+
+        #     theCoords=coords[whichCoord]
 
         #     if self.mesh.elementType=='Face':
         #         inds=el.faces
@@ -1364,37 +1342,49 @@ class Simulation:
         #     simInds=np.array([self.mesh.inverseIdxMap[n] for n in inds])
         #     elValues=self.nodeVoltages[simInds]
 
-        #     intCoords=coordsLeft[inside]
-        #     if intCoords.shape[0]>0:
-        #         interpVals=el.interpolateWithin(intCoords,
-        #                                         elValues)
 
-        #         vals[inside]=interpVals
+        #     interpVals=el.interpolateWithin(theCoords,
+        #                                     elValues)
 
-        #         coordsLeft[inside,:]=np.ma.masked
-        vals=np.empty(coords.shape[0])
-        for el in self.mesh.elements:
+        #     vals[whichCoord]=interpVals
+
+
+        if elements is None:
+            elements=self.mesh.elements
+
+        for el in elements:
             upper=np.greater_equal(coords,el.origin)
             lower=np.less_equal(coords,el.origin+el.span)
             inside=np.all(np.logical_and(upper,lower),axis=1)
 
+            newpt=np.logical_and(inside,unknown)
+            intCoords=coords[newpt]
 
-            if self.mesh.elementType=='Face':
-                inds=el.faces
-            else:
-                inds=el.vertices
-
-            simInds=np.array([self.mesh.inverseIdxMap[n] for n in inds])
-            elValues=self.nodeVoltages[simInds]
-
-            intCoords=coords[inside]
             if intCoords.shape[0]>0:
+
+                if self.mesh.elementType=='Face':
+                    inds=el.faces
+                else:
+                    inds=el.vertices
+
+                simInds=np.array([self.mesh.inverseIdxMap[n] for n in inds])
+                elValues=self.nodeVoltages[simInds]
+
+
                 interpVals=el.interpolateWithin(intCoords,
                                                 elValues)
 
-                vals[inside]=interpVals
+                vals[newpt]=interpVals
+                unknown=np.logical_or(unknown,inside)
+
+                if not np.any(unknown):
+                    return vals
 
                 # coordsLeft[inside,:]=np.ma.masked
+
+
+
+
         return vals
 
 
@@ -1752,9 +1742,15 @@ class SimStudy:
         filepath=os.path.join(self.studyPath,name+extension)
         return  filepath
 
-    def savePlot(self,fig,fileName,ext):
-        fname=self.__makepath(fileName, ext)
-        fig.savefig(fname)
+    def savePlot(self,fig,fileName,ext=None):
+        if ext is None:
+            fnames=[self.__makepath(fileName,x) for x in ['.png','.eps']]
+
+            for f in fnames:
+                fig.savefig(f)
+        else:
+            fname=self.__makepath(fileName, ext)
+            fig.savefig(fname)
 
 
     def __makepath(self,fileName,ext):

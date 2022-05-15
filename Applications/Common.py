@@ -64,7 +64,17 @@ def makeSynthStudy(folderName,
     return study,setup
 
 
+def runAdaptation(setup,maxdepth=8,meshdensity=0.2,metrics=None):
+    if metrics is None:
+        metrics=[]
+        for src in setup.currentSources:
+            metrics.append(xcell.makeExplicitLinearMetric(maxdepth, meshdensity,
+                                                          origin=src.coords))
 
+    setup.makeAdaptiveGrid(metrics, maxdepth)
+    setup.finalizeMesh()
+    setup.setBoundaryNodes()
+    setup.iterativeSolve(tol=1e-9)
 
 
 class Cell:

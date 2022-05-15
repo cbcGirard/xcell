@@ -189,7 +189,7 @@ FACE_EDGES=getFaceIndices()
 #     return vertexV
 
 
-
+@nb.njit()
 def interpolateFromFace(faceValues,localCoords):
     # coef=TRIP_INVERSE_MATRIX @ faceValues
     coef=np.dot(TRIP_INVERSE_MATRIX,faceValues)
@@ -198,7 +198,7 @@ def interpolateFromFace(faceValues,localCoords):
     interpv=np.dot(cvals,coef)
     return interpv
 
-
+@nb.njit()
 def interpolateFromVerts(vertexValues,localCoords):
     # coef=TRIL_INVERSE_MATRIX @ vertexValues
     coef=np.dot(TRIL_INVERSE_MATRIX,vertexValues)
@@ -208,6 +208,7 @@ def interpolateFromVerts(vertexValues,localCoords):
     interpV=np.dot(cvals,coef)
     return interpV
 
+@nb.njit()
 def integrateFromVerts(vertexValues,span):
     vals=np.dot(TRIL_INVERSE_MATRIX,vertexValues)
     xyz=np.prod(span)
@@ -228,7 +229,7 @@ def integrateFromVerts(vertexValues,span):
 # V110 x y (1 - z) +
 # V111 x y z
 
-# @nb.njit()
+@nb.njit()
 def toLocalCoords(globalCoords,center,span):
     localCoords=np.empty_like(globalCoords)
 
@@ -237,22 +238,33 @@ def toLocalCoords(globalCoords,center,span):
 
     return localCoords
 
-# @nb.njit()
+@nb.njit()
 def __toTrilinCoefOrder(coords):
     npts=coords.shape[0]
-    ordered=np.array([[1,
-              c[0],
-              c[1],
-              c[2],
-              c[0]*c[1],
-              c[0]*c[2],
-              c[1]*c[2],
-              c[0]*c[1]*c[2]]
-             for c in coords])
+    ordered=np.empty((npts,8),dtype=np.float64)
+    for ii in nb.prange(npts):
+        c=coords[ii,:]
+        ordered[ii,0]=1
+        ordered[ii,1:4]=c
+        ordered[ii,4]=c[0]*c[1]
+        ordered[ii,5]=c[0]*c[2]
+        ordered[ii,6]=c[1]*c[2]
+        ordered[ii,7]=np.prod(c)
+
+
+    # ordered=np.array([[1,
+    #           c[0],
+    #           c[1],
+    #           c[2],
+    #           c[0]*c[1],
+    #           c[0]*c[2],
+    #           c[1]*c[2],
+    #           c[0]*c[1]*c[2]]
+    #          for c in coords], dtype=np.float64)
 
     return ordered
 
-# @nb.njit()
+@nb.njit()
 def __toFaceCoefOrder(coords):
     npts=coords.shape[0]
     ordered=np.empty((npts,7))

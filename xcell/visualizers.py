@@ -21,6 +21,8 @@ import numba as nb
 from scipy.sparse import tril
 import os
 
+import cmasher as cmr
+
 # import matplotlib.tri as tri
 from mpl_toolkits.axes_grid1 import AxesGrid
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes, zoomed_inset_axes, mark_inset
@@ -30,6 +32,8 @@ import pandas
 # from util import uniformResample, edgeRoles, getquads, quadsToMaskedArrays, coords2MaskedArrays
 from . import util
 from . import misc
+
+MAX_LOG_SPAN=2
 
 styleScope={
 'axes.prop_cycle': mpl.cycler('color', ['#ffff00', '#00ffff', '#ff00ff', '#00ff00', '#ff0000', '#0000ff', '#ff8000', '#8000ff', '#ff0080', '#0080ff'])}
@@ -86,23 +90,51 @@ plt.style.use(styleXcell)
 #         pass
 
 
+def scoopCmap(baseCmap,fraction=0.1):
+    col=np.array(baseCmap.colors)
+
+    x=np.linspace(-1,1,col.shape[0]).reshape((-1,1))
+    alpha=np.abs(x/fraction)
+    alpha[alpha>1.]=1.
+
+    newcol=np.hstack((col,alpha))
+
+    newCmap=mpl.colors.LinearSegmentedColormap.from_list(baseCmap.name+'_mod', newcol)
+    return newCmap
+
 
 # Dark mode
 MESH_ALPHA=0.05
 FAINT = (1., 1., 1., MESH_ALPHA)
+
+# CM_BIPOLAR=scoopCmap(cmr.wildfire, fraction=0.5)
+# CM_BIPOLAR=scoopCmap(cmr.guppy, fraction=0.1)
+# CM_BIPOLAR=scoopCmap(cmr.neon, fraction=0.2)
+
+colAr=[[0, 0, 1, 1],
+        [.098, .137, .176, 0],
+        [1, 0, 0, 1]]
+# colAr=[[0,1,0,1],[0,0.5,0.5,1],[0,0,1,0],[0.5,0.5,0,1],[1,0,0,1]]
+
 CM_BIPOLAR = mpl.colors.LinearSegmentedColormap.from_list('bipolar',
-                                                          np.array([[0, 0, 1, 1],
-                                                                 [.098, .137, .176, 0],
-                                                                 [1, 0, 0, 1]],
+                                                          np.array(colAr,
                                                                 dtype=float))
+
+
 BASE = '#afcfff'
 NULL = '#00000000'
 ACCENT_DARK = '#990000'
-ACCENT_LIGHT = 'FFCC00'
+ACCENT_LIGHT = '#FFCC00'
 plx=np.array(mpl.colormaps.get('plasma').colors)
 lint=np.array(np.linspace(0,1,num=plx.shape[0]),ndmin=2).transpose()
 CM_MONO = mpl.colors.LinearSegmentedColormap.from_list('mono',
                                                        np.hstack((plx,lint)))
+
+
+def engineerTicks(axis, xunit=None, yunit = None):
+    axis.xaxis.set_major_formatter(eform(xunit))
+    axis.yaxis.set_major_formatter(eform(yunit))
+
 
 
 class TimingBar:
@@ -952,7 +984,7 @@ def showRawSlice(valList, ndiv):
 # TODO: deprecate?
 
 
-def resamplePlane(axis,sim):
+def resamplePlane(axis,sim,movetoCenter=True, elements=None):
     """
 
 
@@ -972,17 +1004,18 @@ def resamplePlane(axis,sim):
     xl,xh=axis.get_xlim()
     yl,yh=axis.get_ylim()
 
-    movetoCenter=True
-    ppts=util.makeGridPoints(513,xh,xl,yh,yl,centers=movetoCenter)
-
-    pts=np.hstack((ppts,np.zeros((ppts.shape[0],1))))
-
-    vInterp=sim.interpolateAt(pts)
-
     if movetoCenter:
         nX=512
     else:
         nx=513
+
+    ppts=util.makeGridPoints(513,xh,xl,yh,yl,centers=movetoCenter)
+
+    pts=np.hstack((ppts,np.zeros((ppts.shape[0],1))))
+
+    vInterp=sim.interpolateAt(pts,elements)
+
+
 
     return vInterp.reshape((nX,nX))
 
@@ -1061,7 +1094,7 @@ def showSourceBoundary(axes, radius, srcCenter=np.zeros(2)):
     y = radius*np.sin(tht)+srcCenter[1]
 
     for ax in axes:
-        ax.plot(x, y, color=FAINT)#, alpha=0.1)
+        ax.plot(x, y, color=BASE)#, alpha=0.1)
 
 
 def addInset(baseAxis, rInset, xmax, relativeLoc=(.5, -.8)):
@@ -1393,8 +1426,11 @@ class SliceSet(FigureAnimator):
             rElec = sim.voltageSources[0].radius
             self.rElec = rElec
 
+
+        els, _, edgePts = sim.getElementsInPlane()
+
         if self.prefs['fullInterp']:
-            vArrays=[resamplePlane(self.grid[0], sim)]
+            vArrays=[resamplePlane(self.grid[0], sim,elements=els)]
             v1d=vArrays[0].ravel()
         else:
             vArrays, coords = sim.getValuesInPlane(data=None)
@@ -1412,17 +1448,8 @@ class SliceSet(FigureAnimator):
         else:
             erArrays=None
 
-        erArrays, _ = sim.getValuesInPlane(data=err1d)
 
-        v1d = util.unravelArraySet(vArrays)
 
-        # self.maskedVArr.append(vArrays)
-        # self.maskedErrArr.append(erArrays)
-
-        self.dataScales['vbounds'].update(v1d)
-        self.dataScales['errbounds'].update(err1d)
-
-        _, _, edgePts = sim.getElementsInPlane()
 
         # TODO: dehackify so it works with sources other than axes origin
 
@@ -2199,32 +2226,6 @@ class SingleSlice(FigureAnimator):
             self.dataSets.append(data)
 
     def animateStudy(self, fname=None, artists=None, fps=30.):
-        # animations=[]
-
-        # artists=[]
-        # for ii in range(len(self.dataSets)):
-        #     art=self.getArtists(ii)
-        #     artists.append(art)
-
-        # animation=ArtistAnimation(self.fig, artists,
-        #                           interval=1000/fps,
-        #                           repeat_delay=2000,
-        #                           blit=True)
-        # if fname is None:
-        #     plt.show()
-        # else:
-        #     # writer = FFMpegWriter(fps=50)
-        #     fpath=os.path.join(
-        #         self.study.studyPath, fname+'.mp4')
-        #     animation.save(fpath,fps=fps)
-
-        #     # with writer.saving(self.fig,fpath,dpi=None):
-        #     #     for ii in range(len(self.dataSets)):
-        #     #         self.getArtists(ii)
-        #     #         writer.grab_frame()
-        #     #         # self.resetFigure()
-        #     # animation=None
-
         animation = super().animateStudy(fname=fname,
                                          artists=artists,
                                          fps=fps)
@@ -2242,9 +2243,7 @@ class LogError(FigureAnimator):
 
             ax.xaxis.set_major_formatter(eform('m'))
             ax.yaxis.set_major_formatter(eform('V'))
-            # ax.set_title(" ")
-            # plt.title('')
-            # plt.tight_layout()
+
 
 
     def addSimulationData(self, sim, append=False):
@@ -2288,8 +2287,7 @@ class LogError(FigureAnimator):
         titlestr="FVU=%.2g, int1=%.2g, %d points in source"%(data['FVU'],data['err1d'],data['srcPts'])
 
         title=animatedTitle(None, titlestr,ax)
-        # title=animatedTitle(None, "FVU=%g, int1=%g, %d points in source"%(data['FVU'],data['err1d'],data['srcPts']), axis=ax)
-        # title=ax.set_title("FVU=%g, int1=%g, %d points in source"%(data['FVU'],data['err1d'],data['srcPts']))
+
 
         if setnum==0:
             self.axes[0].legend(loc='upper right')

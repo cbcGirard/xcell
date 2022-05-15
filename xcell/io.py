@@ -32,16 +32,3 @@ cell_data:
 
 
 """
-
-fd={'Source':[1,3],
-'Space':[2,3],
-'Boundary':[3,2]}
-
-for el in sim.elements:
-    elIdx=el.globalNodeIndices
-    inSrc=np.all(sim.nodeRoleTable==2)
-    
-    
-msh=meshio.Mesh(
-    sim.mesh.nodeCoords,
-    mioElems)

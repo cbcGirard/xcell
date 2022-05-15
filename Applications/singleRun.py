@@ -82,7 +82,7 @@ else:
     #                                      l0max=1e-5,
     #                                      domainX=xmax)
 
-    metric=xcell.makeExplicitLinearMetric(maxdepth, 0.2)
+    metric=[xcell.makeExplicitLinearMetric(maxdepth, 0.2)]
 
     setup.makeAdaptiveGrid(metric,maxdepth)
 
@@ -127,26 +127,36 @@ setup.logTime()
 # setup.nodeVoltages=val
 
 # ax=plt.gca()
-# sv=xcell.Visualizers.SliceViewer(ax, setup)
+# sv=xcell.visualizers.SliceViewer(ax, setup)
 # sv.nodeData=pt
 
 
 
-# ax=xcell.Visualizers.new3dPlot(study.bbox)
-# cmap,cnorm=xcell.Visualizers.getCmap(val,forceBipolar=True)
-# xcell.Visualizers.showNodes3d(ax, coords, val,cMap=cmap,cNorm=cnorm)
+# ax=xcell.visualizers.new3dPlot(study.bbox)
+# cmap,cnorm=xcell.visualizers.getCmap(val,forceBipolar=True)
+# xcell.visualizers.showNodes3d(ax, coords, val,cMap=cmap,cNorm=cnorm)
 
 
-# # 2d image
-# bnd=setup.mesh.bbox[[0,3,2,4]]
+# 2d image
+bnd=setup.mesh.bbox[[0,3,2,4]]
+
 # arr,_=setup.getValuesInPlane()
-# cMap,cNorm=xcell.Visualizers.getCmap(setup.nodeVoltages,forceBipolar=True)
-# xcell.Visualizers.patchworkImage(plt.figure().gca(),
+# cMap,cNorm=xcell.visualizers.getCmap(setup.nodeVoltages,forceBipolar=True)
+# xcell.visualizers.patchworkImage(plt.figure().gca(),
 #                                   arr, cMap, cNorm,
 #                                   extent=bnd)
 
-# _,_,edgePoints=setup.getElementsInPlane()
-# xcell.Visualizers.showEdges2d(plt.gca(), edgePoints)
+ax=plt.figure().add_subplot()
+xcell.visualizers.formatXYAxis(ax,bnd)
+arr=xcell.visualizers.resamplePlane(ax, setup)
+
+cMap,cNorm=xcell.visualizers.getCmap(arr.ravel(),forceBipolar=True)
+xcell.visualizers.patchworkImage(ax,
+                                  [arr], cMap, cNorm,
+                                  extent=bnd)
+
+_,_,edgePoints=setup.getElementsInPlane()
+xcell.visualizers.showEdges2d(ax, edgePoints)
 
 
 
@@ -163,7 +173,7 @@ setup.logTime()
 
 
 ##### TOPOLOGY/connectivity
-ax=xcell.Visualizers.showMesh(setup)
+ax=xcell.visualizers.showMesh(setup)
 ax.set_xticks([])
 ax.set_yticks([])
 ax.set_zticks([])
@@ -174,24 +184,24 @@ ax.zaxis.set_pane_color(ghost)
 
 
 
-# xcell.Visualizers.showEdges(ax,
+# xcell.visualizers.showEdges(ax,
 #                             setup.mesh.nodeCoords,
 #                             setup.edges,
 #                             setup.conductances)
 
 # bnodes=setup.mesh.getBoundaryNodes()
-# xcell.Visualizers.showNodes3d(ax,
+# xcell.visualizers.showNodes3d(ax,
 #                               setup.mesh.nodeCoords[bnodes],
 #                               nodeVals=np.ones_like(bnodes),
 #                               colors='r')
 
 
-# # # # xcell.Visualizers.showMesh(setup)
-# # eg=xcell.Visualizers.ErrorGraph(plt.figure(), study)
+# # # # xcell.visualizers.showMesh(setup)
+# # eg=xcell.visualizers.ErrorGraph(plt.figure(), study)
 # # eg.addSimulationData(setup)
 # # eg.getArtists()
 
-# img=xcell.Visualizers.SliceSet(plt.figure(),study)
+# img=xcell.visualizers.SliceSet(plt.figure(),study)
 # img.addSimulationData(setup)
 # img.getArtists()
 
@@ -202,7 +212,7 @@ ax.zaxis.set_pane_color(ghost)
 
 
 # ##### ERROR GRAPH
-# ptr=xcell.Visualizers.ErrorGraph(plt.figure(),study)
+# ptr=xcell.visualizers.ErrorGraph(plt.figure(),study)
 # ptr.prefs['universalPts']=False
 # pdata=ptr.addSimulationData(setup)
 # ptr.getArtists(0,pdata)
@@ -222,6 +232,6 @@ ax.zaxis.set_pane_color(ghost)
 # print('Error metrics:\nbasic vol:%g\nadv vol:%g\narea%g'%(errBasic,errAdv,es))
 
 #################### LOGLOG Error
-P=xcell.Visualizers.LogError(None,study)
+P=xcell.visualizers.LogError(None,study)
 P.addSimulationData(setup,True)
 P.getArtists(0)
