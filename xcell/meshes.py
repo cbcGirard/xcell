@@ -741,59 +741,24 @@ class Octant():
                     self.split()
                 for ii in nb.prange(8):
                     changed|=self.children[ii].refineByMetric(l0Functions,maxDepth)
-            # else:
-            #     #ripup logic
-            #     allUnder=self.coarsenByMetric(l0Function)
-            #     changed|=allUnder
+
 
         return changed
 
     def coarsenByMetric(self,metrics,maxdepth):
-        #TODO: coarsening factor control
 
-
-        ### This always prunes, even if mesh is the same
-        # oversize=self.l0<(metric(self.center)/3**(1/3))
-
-        # oversize=self.l0<(metric(self.center)/2)
-
-        # if oversize:
-        #     self.prune()
-        #     self.children=[]
-
-        ## This never prunes
-        # oversize=False
-        # if len(self.children)!=0:
-        #     #delete children if all oversized
-        #     overCh=True
-        #     for ch in self.children:
-        #         overCh&=ch.coarsenByMetric(metric)
-
-        #     if overCh:
-        #         #delete, then check if itself oversized
-        #         for ch in self.children:
-        #             del ch
-        #         oversize=self.l0<metric(self.center)/2
-
-        # else:
-        #     #is terminal octant; check size
-        #     oversize=self.l0<(metric(self.center)/2)
-
-
-
-        ###### pseudocode
-        # delete children if all too small
         changed=False
 
         for f in metrics:
 
             undersize=self.l0<f(self.center) or self.depth>maxdepth
 
-            if len(self.children)==0:
+            if self.isTerminal():
                 pass
             else:
                 for ch in self.children:
                     chChange,chUnder=ch.coarsenByMetric(metrics,maxdepth)
+
 
                     undersize&=chUnder
                     changed|=chChange
@@ -803,6 +768,7 @@ class Octant():
                     for ch in self.children:
                         del ch
                     self.children=[]
+                    self.calcIndices()
 
 
         return changed, undersize
@@ -829,7 +795,10 @@ class Octant():
 
 
     def isTerminal(self):
-        return len(self.children)==0
+        terminal=len(self.children)==0
+        if terminal and len(self.vertices)==0:
+            self.calcIndices()
+        return terminal
 
     def containsPoint(self,coord):
         gt=np.greater_equal(coord,self.origin)
@@ -853,9 +822,7 @@ class Octant():
             Childless octants (the actual elements of the mesh)
 
         """
-        if len(self.children)==0:
-            self.calcIndices()
-
+        if self.isTerminal():
             return [self]
         else:
 
@@ -870,11 +837,6 @@ class Octant():
 
 
     def calcIndices(self):
-            # scale=2**(util.MAXDEPTH-self.depth)
-
-            # xyz=self.oXYZ+scale*fem.HEX_POINT_INDICES
-            # inds=util.pos2index(xyz, util.MAXPT)
-
 
             elList=np.array(self.index,dtype=np.int8)
             inds=util.indicesWithinOctant(elList,fem.HEX_POINT_INDICES)
@@ -882,8 +844,6 @@ class Octant():
 
             self.vertices=inds[:8]
             self.faces=inds[8:]
-            # self.vertices=self.calcVertexTags()
-            # self.faces=self.calcFaceTags()
 
     def getContainingElement(self,coords):
         if len(self.children)==0:
@@ -949,12 +909,6 @@ class Octant():
         allVals=np.empty(15,dtype=np.float64)
         allInds=np.empty(15,dtype=np.int64)
 
-        vertOrder=np.array([0, 1, 3, 4, 10, 11, 13, 14])
-        faceOrder=np.array([6, 8, 5, 9, 2, 12, 7])
-
-        # indV=self.calcVertexTags()
-        # indF=self.calcFaceTags()
-
         indV=self.vertices
         indF=self.faces
 
@@ -967,26 +921,10 @@ class Octant():
             vVert=fem.interpolateFromFace(knownValues,
                                            fem.HEX_VERTEX_COORDS)
 
-        # allInds[vertOrder]=indV
-        # allVals[vertOrder]=vVert
-
-        # allInds[faceOrder]=indF
-        # allVals[faceOrder]=vFace
 
         allInds=np.concatenate((indV,indF))
         allVals=np.concatenate((vVert,vFace))
 
-        # self.globalNodeIndices=oldInds
-
-        # import visualizers
-        # # import matplotlib.pyplot as plt
-        # ax=visualizers.new3dPlot(np.concatenate((-np.ones(3),np.ones(3))))
-        # cset=np.vstack((fem.HEX_FACE_COORDS,fem.HEX_VERTEX_COORDS))
-        # cval=np.concatenate((vFace,vVert))
-        # # x,y,z=np.hsplit(cset, 3)
-        # # pt=ax.scatter3D(x,y,z,cval)
-        # # plt.colorbar(pt)
-        # visualizers.showNodes3d(ax, cset, cval)
 
         return allVals,allInds
 

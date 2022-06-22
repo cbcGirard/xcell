@@ -2163,7 +2163,8 @@ class SingleSlice(FigureAnimator):
                 plt.tight_layout()
         else:
             meshAlpha=MESH_ALPHA
-            cMap, cNorm = getCmap(self.dataScales[self.dataSrc].get())
+            cMap, cNorm = getCmap(self.dataScales[self.dataSrc].get(),
+                                  logscale=True)
 
             # if setnum==0:
             mapper = mpl.cm.ScalarMappable(norm=cNorm, cmap=cMap)
@@ -2202,25 +2203,32 @@ class SingleSlice(FigureAnimator):
             absErr = sim.nodeVoltages-vest[0]
             relErr = absErr/np.abs(vest[0])
 
-            vArrays, _ = sim.getValuesInPlane()
-            absArr, _ = sim.getValuesInPlane(data=absErr)
+            # vArrays, _ = sim.getValuesInPlane()
+            # absArr, _ = sim.getValuesInPlane(data=absErr)
 
 
-            v1d = util.unravelArraySet(vArrays)
+            # v1d = util.unravelArraySet(vArrays)
+            els, _, edgePts = sim.getElementsInPlane()
+
+            vArrays=[resamplePlane(self.ax, sim, elements=els)]
+            v1d=vArrays[0].ravel()
 
             self.dataScales['spaceV'].update(v1d)
             # self.dataScales['relErr'].update(relErr)
             self.dataScales['absErr'].update(absErr)
 
-        _, _, edgePts = sim.getElementsInPlane()
 
 
 
         data = {
-            'spaceV': vArrays,
-            # 'relErr':errArrays,
-            'absErr': absArr,
             'meshPts': edgePts}
+
+        if self.dataSrc=='spaceV':
+            data['spaceV']=vArrays
+
+        if self.dataSrc=='':
+            data['absErr']=absArr
+
 
         if append:
             self.dataSets.append(data)

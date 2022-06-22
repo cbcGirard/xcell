@@ -488,7 +488,6 @@ class Simulation:
         self.voltageSources.append(VoltageSource(value,coords,radius))
 
     def insertSourcesInMesh(self,snaplength=0):
-        self.nodeCurrents=np.zeros_like(self.nodeVoltages)
         for ii in nb.prange(len(self.voltageSources)):
             src=self.voltageSources[ii]
 
@@ -501,38 +500,45 @@ class Simulation:
             # self.vSourceVals.extend(src.value*np.ones(len(indices)))
             self.nodeVoltages[indices]=src.value
 
-        nComposite=0
-        srcLists=[]
+
+        meshCurrentSrc=[]
         for ii in nb.prange(len(self.currentSources)):
             src=self.currentSources[ii]
 
-            try:
+            if 'geometry' in dir(src):
                 indices=np.nonzero(src.geometry.isInside(self.mesh.nodeCoords))[0]
-            except:
+            else:
                 indices=self.__nodesInSource(src)
 
 
-            self.nodeCurrents[indices]+=src.value
             for idx in indices:
-                #TODO: rollback to fix single source
-                self.nodeRoleTable[idx]=2
-                self.nodeRoleVals[idx]=ii
+                # #TODO: rollback to fix single source
+                # self.nodeRoleTable[idx]=2
+                # self.nodeRoleVals[idx]=ii
 
-                #TODO: fixes multiple sources sharing node, but breaks mesh reuse
-                # if self.nodeRoleTable[idx]==0:
-                #     self.nodeRoleTable[idx]=2
-                #     self.nodeRoleVals[idx]=ii
-                # else:
-                #     #shared node
-                #     self.nodeRoleTable[idx]=3
-                #     self.nodeRoleVals[idx]=nComposite
+                if self.nodeRoleTable[idx]==2:
+                    #node is shared by sources
+                    sharedIdx=self.nodeRoleVals[idx]
+                    if sharedIdx<len(meshCurrentSrc):
+                        meshCurrentSrc[sharedIdx]+=src.value
+                    else:
+                        self.nodeRoleVals[idx]=len(meshCurrentSrc)
+                        meshCurrentSrc.append((src.value))
 
-                #     srcLists[nComposite].append(idx)
+                else:
+                    #normal, set as current dof
+                    self.nodeRoleTable[idx]=2
 
-                #     nComposite+=1
+                    self.nodeRoleVals[idx]=len(meshCurrentSrc)
+                    meshCurrentSrc.append(src.value)
 
 
-            # self.srcLists=srcLists
+
+
+
+
+
+        self.nodeISources=meshCurrentSrc
 
 
 
@@ -685,7 +691,7 @@ class Simulation:
         ndof=np.nonzero(isDoF)[0].shape[0]
 
         # nsrc=np.nonzero(self.nodeRoleTable==2)[0].shape[0]
-        nsrc=len(self.currentSources)
+        nsrc=len(self.nodeISources)
 
         vDoF=np.empty(nsrc+ndof)
 
@@ -703,7 +709,7 @@ class Simulation:
 
 
 
-    def iterativeSolve(self,vGuess=None,tol=1e-5):
+    def iterativeSolve(self,vGuess=None,tol=1e-9):
         """
         Solve nodal voltages using conjgate gradient method.
 
@@ -715,7 +721,7 @@ class Simulation:
         vGuess : float[:]
             Initial guess for nodal voltages. Default None.
         tol : float, optional
-            Maximum allowed norm of the residual. The default is 1e-5.
+            Maximum allowed norm of the residual. The default is 1e-9.
 
         Returns
         -------
@@ -744,15 +750,13 @@ class Simulation:
         M,b=self.getSystem()
 
         self.startTiming('Solving')
-        vDoF,_=cg(M.tocsc(),b,vGuess,tol)
+        vDoF,cginfo=cg(M.tocsc(),b,vGuess,tol)
         self.logTime()
 
+        if cginfo!=0:
+            print('cg:%d'%cginfo)
 
         voltages[dof2Global]=vDoF[:nDoF]
-
-        # for nn in range(len(self.currentSources)):
-        #     v=vDoF[nDoF+nn]
-        #     voltages[np.logical_and(self.nodeRoleTable==2,self.nodeRoleVals==nn)]=v
 
         for nn in range(nDoF,len(vDoF)):
             sel=self.__selByDoF(nn)
@@ -1065,8 +1069,16 @@ class Simulation:
 
         return nConn
 
-    #TODO: slow, worse error. bad algo?
+
     def regularizeMesh(self):
+        """
+        Deprecated. Attempt to remove nonconforming nodes
+
+        Returns
+        -------
+        None.
+
+        """
         nConn=self.getNodeConnectivity()
         # self.__dedupEdges()
 
@@ -1228,7 +1240,8 @@ class Simulation:
         b=-np.array(gR.dot(v)).squeeze()
 
         for ii in range(Ns):
-            b[ii+Nx]+=self.currentSources[ii].value
+            # b[ii+Nx]+=self.currentSources[ii].value
+            b[ii+Nx]=self.nodeISources[ii]
 
         # idx=self.node
 
@@ -1320,33 +1333,9 @@ class Simulation:
 
 
     def interpolateAt(self,coords,elements=None):
-        # coordsLeft=np.ma.array(coords)
-
 
         vals=np.empty(coords.shape[0])
         unknown=np.ones_like(vals,dtype=bool)
-
-        # els=[self.mesh.getContainingElement(c) for c in coords]
-        # Els,toEls=np.unique(els,return_inverse=True)
-
-        # for el in Els:
-        #     whichCoord=toEls==el
-
-        #     theCoords=coords[whichCoord]
-
-        #     if self.mesh.elementType=='Face':
-        #         inds=el.faces
-        #     else:
-        #         inds=el.vertices
-
-        #     simInds=np.array([self.mesh.inverseIdxMap[n] for n in inds])
-        #     elValues=self.nodeVoltages[simInds]
-
-
-        #     interpVals=el.interpolateWithin(theCoords,
-        #                                     elValues)
-
-        #     vals[whichCoord]=interpVals
 
 
         if elements is None:
@@ -1394,23 +1383,14 @@ class Simulation:
 
         # N=self.mesh.nodeCoords.shape[0]
         # Ns=np.nonzero(self.nodeRoleTable==2)[0].shape[0]
-        Ns=len(self.currentSources)
+        # Ns=len(self.currentSources)
+        Ns=len(self.nodeISources)
         Nx=np.nonzero(self.nodeRoleTable==0)[0].shape[0]
         Nd=Nx+Ns
         Nf=np.nonzero(isFix)[0].shape[0]
 
         # if orderType=='electrical':
         if orderType=='dof':
-            # if maskArray is None:
-            #     role=self.nodeRoleTable
-            #     val=self.nodeRoleVals
-            # else:
-            #     role=np.ma.array(self.nodeRoleTable,
-            #                      mask=~maskArray)
-            #     val=np.ma.array(self.nodeRoleVals,
-            #                     mask=~maskArray)
-
-
 
             #renumber nodes in order of dof, current source, fixed v
             numbering=self.nodeRoleVals.copy()
@@ -1933,3 +1913,17 @@ def _analytic(rad,V,I,r):
     # integral=V*rad #inside
     integral=V*rad*(1+np.log(max(r)/rad))
     return voltage, integral
+
+
+
+def makeScaledMetrics(pts,ptVals,maxdepth,density=0.2):
+    param=2**(-maxdepth*density)
+
+    def metric(coord):
+        r=np.linalg.norm(pts-coord,axis=1)
+
+        l0=min(param*r*ptVals)
+
+        return l0
+
+    return [metric]

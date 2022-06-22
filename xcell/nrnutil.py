@@ -105,9 +105,9 @@ def getNeuronGeometry():
     for sec in h.allsec():
         N=sec.n3d()-1
         x,y,z,r=returnSegmentCoordinates(sec)
-        r=r*1e-6
+        r=r
         coord=np.vstack((x,y,z)).transpose()
-        coords.extend(coord*1e-6)
+        coords.extend(coord)
         if coord.shape[0]==1:
             rads.append(r.tolist())
         else:
