@@ -104,7 +104,7 @@ def scoopCmap(baseCmap,fraction=0.1):
 
 
 # Dark mode
-MESH_ALPHA=0.05
+MESH_ALPHA=0.25
 FAINT = (1., 1., 1., MESH_ALPHA)
 
 # CM_BIPOLAR=scoopCmap(cmr.wildfire, fraction=0.5)
@@ -984,7 +984,7 @@ def showRawSlice(valList, ndiv):
 # TODO: deprecate?
 
 
-def resamplePlane(axis,sim,movetoCenter=True, elements=None):
+def resamplePlane(axis,sim,movetoCenter=True, elements=None, data=None):
     """
 
 
@@ -1013,7 +1013,7 @@ def resamplePlane(axis,sim,movetoCenter=True, elements=None):
 
     pts=np.hstack((ppts,np.zeros((ppts.shape[0],1))))
 
-    vInterp=sim.interpolateAt(pts,elements)
+    vInterp=sim.interpolateAt(pts,elements,data)
 
 
 
@@ -1361,7 +1361,7 @@ class SliceSet(FigureAnimator):
                 'relativeError': False,
                 'logScale': True,
                 'showNodes': False,
-                'fullInterp': False
+                'fullInterp': True
 
             }
 
@@ -1369,6 +1369,10 @@ class SliceSet(FigureAnimator):
         self.dataScales = {
             'vbounds': ScaleRange(),
             'errbounds': ScaleRange()}
+
+    # def __getstate__(self):
+    #     state=self.__dict__.copy()
+    #     del state['insets']
 
     def setupFigure(self, resetBounds=False):
         self.bnds = self.study.bbox[[0, 3, 2, 4]]
@@ -1442,8 +1446,14 @@ class SliceSet(FigureAnimator):
             # TODO: better filtering to only calculate err where needed
             ana, _ = sim.analyticalEstimate()
             err1d = sim.nodeVoltages-ana[0]
+            if self.prefs['fullInterp']:
+                erArrays=[resamplePlane(self.grid[0],
+                                        sim,
+                                        elements=els,
+                                        data=err1d)]
 
-            erArrays, _ = sim.getValuesInPlane(data=err1d)
+            else:
+                erArrays, _ = sim.getValuesInPlane(data=err1d)
             self.dataScales['errbounds'].update(err1d)
         else:
             erArrays=None
@@ -1511,7 +1521,8 @@ class SliceSet(FigureAnimator):
         if self.prefs['showError']:
             errbounds = self.dataScales['errbounds']
             emap, enorm = getCmap(errbounds.get(),
-                                  forceBipolar=True)
+                                  forceBipolar=True,
+                                  logscale=self.prefs['logScale'])
             emappr = mpl.cm.ScalarMappable(norm=enorm, cmap=emap)
             # vmappr.set_clim((-enorm.halfrange, enorm.halfrange))
             self.grid.cbar_axes[1].colorbar(emappr)
@@ -1645,7 +1656,7 @@ class ErrorGraph(FigureAnimator):
         else:
             axErr.set_ylabel('Absolute error')
             axErr.yaxis.set_major_formatter(mpl.ticker.EngFormatter('V'))
-        axL.set_ylabel(r'Element $l_0$')
+        axL.set_ylabel(r'Element $\ell_0$')
 
         axV.set_xscale('log')
         axErr.set_xscale('log')
@@ -1680,7 +1691,10 @@ class ErrorGraph(FigureAnimator):
 
         if self.prefs['universalPts']:
             pts, v = sim.getUniversalPoints()
-            coords = util.indexToCoords(pts,
+            if sim.meshtype=='uniform':
+                coords=sim.mesh.nodeCoords
+            else:
+                coords = util.indexToCoords(pts,
                                         sim.mesh.bbox[:3],
                                         sim.mesh.span)
             # sim.nodeVoltages = v
@@ -1875,6 +1889,8 @@ class ErrorGraph(FigureAnimator):
 class CurrentPlot(FigureAnimator):
     def __init__(self, fig, study, fullarrow=False, showInset=True, showAll=False, normalAxis=2, normalCoord=0.):
         super().__init__(fig, study)
+
+        self.prefs['logScale']=True
 
         # inf lower bound needed for log colorbar
         self.crange = ScaleRange()

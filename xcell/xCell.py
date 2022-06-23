@@ -119,14 +119,15 @@ class Simulation:
 
         #convert to octree mesh
         if (type(self.mesh)!=meshes.Octree) or autoExpand:
-            xdom=min(self.mesh.span)
-            metBounds=[m(np.array([xdom, 0., 0.])) for m in metrics]
-            # scale=xdom/metric(np.array([xdom,0.,0.]))
-            scale=xdom/min(metBounds)
-            p2=np.ceil(np.log2(scale))
-            bbox=np.tile(self.mesh.center,2)
-            tmp=np.concatenate((-np.ones(3),np.ones(3)))
-            bbox+=tmp*(2**p2)*np.tile(self.mesh.span,2)
+            # xdom=min(self.mesh.span)
+            # metBounds=[m(np.array([xdom, 0., 0.])) for m in metrics]
+            # # scale=xdom/metric(np.array([xdom,0.,0.]))
+            # scale=xdom/min(metBounds)
+            # p2=np.ceil(np.log2(scale))
+            # bbox=np.tile(self.mesh.center,2)
+            # tmp=np.concatenate((-np.ones(3),np.ones(3)))
+            # bbox+=tmp*(2**p2)*np.tile(self.mesh.span,2)
+            bbox=self.mesh.bbox
 
             self.mesh=meshes.Octree(bbox,maxdepth,
                                     elementType=self.mesh.elementType)
@@ -160,8 +161,16 @@ class Simulation:
         xmax=self.mesh.extents[0]
         self.ptPerAxis=nX+1
 
-        xx=np.linspace(-xmax,xmax,nX+1)
-        XX,YY,ZZ=np.meshgrid(xx,xx,xx)
+        xx=np.linspace(self.mesh.bbox[0],
+                       self.mesh.bbox[3],
+                       nX+1)
+        yy=np.linspace(self.mesh.bbox[1],
+                       self.mesh.bbox[4],
+                       nX+1)
+        zz=np.linspace(self.mesh.bbox[2],
+                       self.mesh.bbox[5],
+                       nX+1)
+        XX,YY,ZZ=np.meshgrid(xx,yy,zz)
 
 
         coords=np.vstack((XX.ravel(),YY.ravel(), ZZ.ravel())).transpose()
@@ -172,7 +181,7 @@ class Simulation:
 
         elOffsets=np.array([1,nX+1,(nX+1)**2])
         nodeOffsets=np.array([np.dot(util.toBitArray(i),elOffsets) for i in range(8)])
-        elExtents=self.mesh.extents/nX
+        elExtents=self.mesh.span/nX
 
 
 
@@ -184,6 +193,7 @@ class Simulation:
                     elementNodes=elOriginNode+nodeOffsets
 
                     self.mesh.addElement(origin, elExtents, sigma,elementNodes)
+                    self.mesh.elements[-1].vertices=elementNodes
 
         self.logTime()
         print("%d elements in mesh"%(nX**3))
@@ -427,12 +437,12 @@ class Simulation:
         self.logTime()
 
         self.startTiming('Renumber nodes')
-        connInds=np.unique(edges)
+        connInds=np.unique(edges).astype(np.uint64)
         floatInds=np.array([xf[-1] for xf in transforms],dtype=np.uint64)
-        allInds=np.concatenate((connInds,floatInds))
+        allInds=np.concatenate((connInds,floatInds), dtype=np.uint64)
 
         #label points lacking a corresponding edge (floaters in transform)
-        okPts=np.isin(self.mesh.indexMap,connInds,assume_unique=True)
+        # okPts=np.isin(self.mesh.indexMap,connInds,assume_unique=True)
         self.transforms=transforms
 
         # # Explicit exclusion of unconnected nodes
@@ -445,20 +455,15 @@ class Simulation:
         self.mesh.indexMap=allInds
         idic=util.getPyDict(allInds)
         self.mesh.inverseIdxMap=idic
-        self.mesh.nodeCoords=util.indexToCoords(allInds,
+
+        if self.meshtype!='uniform':
+            self.mesh.nodeCoords=util.indexToCoords(allInds,
                                                 self.mesh.bbox[:3],
                                                 self.mesh.span)
 
-
-
-
-        # newEdges=util.renumberIndices(edges, connInds)
-        # self.edges=newEdges
-
-
-
-
-        self.edges=util.renumberIndices(edges,self.mesh.indexMap)
+            self.edges=util.renumberIndices(edges,self.mesh.indexMap)
+        else:
+            self.edges=edges
         nNodes=self.mesh.nodeCoords.shape[0]
 
 
@@ -510,27 +515,40 @@ class Simulation:
             else:
                 indices=self.__nodesInSource(src)
 
-
-            for idx in indices:
+            indNodeSrc=len(meshCurrentSrc)
+            for ni,idx in enumerate(indices):
                 # #TODO: rollback to fix single source
                 # self.nodeRoleTable[idx]=2
                 # self.nodeRoleVals[idx]=ii
 
+
+                #scenarios
+                #node is one of many in source
+                #node is lone of several sources
+                #node is lone of source
+
+
+
                 if self.nodeRoleTable[idx]==2:
-                    #node is shared by sources
+                    #node is already claimed by source
                     sharedIdx=self.nodeRoleVals[idx]
-                    if sharedIdx<len(meshCurrentSrc):
-                        meshCurrentSrc[sharedIdx]+=src.value
-                    else:
-                        self.nodeRoleVals[idx]=len(meshCurrentSrc)
-                        meshCurrentSrc.append((src.value))
+                    # if sharedIdx<len(meshCurrentSrc):
+                        #add to value of existing node source
+                    meshCurrentSrc[sharedIdx]+=src.value
+                    # else:
+                    #     #this shouldn't happen...?
+                    #     self.nodeRoleVals[idx]=len(meshCurrentSrc)
+                    #     meshCurrentSrc.append((src.value))
 
                 else:
                     #normal, set as current dof
                     self.nodeRoleTable[idx]=2
 
-                    self.nodeRoleVals[idx]=len(meshCurrentSrc)
-                    meshCurrentSrc.append(src.value)
+                    if ni==0:
+                        meshCurrentSrc.append(src.value)
+
+                    self.nodeRoleVals[idx]=indNodeSrc
+
 
 
 
@@ -954,8 +972,10 @@ class Simulation:
             v=v[sel]
             ind=ind[sel]
 
-
-        coord=util.indexToCoords(ind,
+        if self.meshtype=='uniform':
+            coord=self.mesh.nodeCoords
+        else:
+            coord=util.indexToCoords(ind,
                                  origin=self.mesh.bbox[:3],
                                  span=self.mesh.span)
         r=np.linalg.norm(coord,axis=1)
@@ -1332,7 +1352,7 @@ class Simulation:
         return coords,edges
 
 
-    def interpolateAt(self,coords,elements=None):
+    def interpolateAt(self,coords,elements=None, data=None):
 
         vals=np.empty(coords.shape[0])
         unknown=np.ones_like(vals,dtype=bool)
@@ -1340,6 +1360,9 @@ class Simulation:
 
         if elements is None:
             elements=self.mesh.elements
+
+        if data is None:
+            data=self.nodeVoltages
 
         for el in elements:
             upper=np.greater_equal(coords,el.origin)
@@ -1357,7 +1380,7 @@ class Simulation:
                     inds=el.vertices
 
                 simInds=np.array([self.mesh.inverseIdxMap[n] for n in inds])
-                elValues=self.nodeVoltages[simInds]
+                elValues=data[simInds]
 
 
                 interpVals=el.interpolateWithin(intCoords,
@@ -1447,7 +1470,6 @@ class Simulation:
         elements,coords,_=self.getElementsInPlane(axis,point)
 
         depths=np.array([el.depth for el in elements])
-        Gmax=self.mesh.maxDepth+1
 
         dcats=np.unique(depths)
         nDcats=dcats.shape[0]
@@ -1532,39 +1554,38 @@ class Simulation:
 
 
     def getUniversalPoints(self,elements=None):
+        if self.meshtype=='uniform':
+            uniInd=self.mesh.indexMap
+            uniV=self.nodeVoltages
+        else:
+            if elements is None:
+                elements=self.mesh.elements
 
-        if elements is None:
-            elements=self.mesh.elements
+            universalIndices=[]
+            universalVals=[]
+            for ii in nb.prange(len(elements)):
+                el=self.mesh.elements[ii]
 
-        universalIndices=[]
-        universalVals=[]
-        for ii in nb.prange(len(elements)):
-            el=self.mesh.elements[ii]
+                if self.mesh.elementType=='Face':
+                    elUind=el.faces
+                else:
+                    elUind=el.vertices
 
-            if self.mesh.elementType=='Face':
-                elUind=el.faces
-            else:
-                elUind=el.vertices
+                vals=np.array([self.nodeVoltages[self.mesh.inverseIdxMap[nn]]
+                      for nn in elUind])
+                uVal,uInd=el.getUniversalVals(vals)
 
-            vals=np.array([self.nodeVoltages[self.mesh.inverseIdxMap[nn]]
-                  for nn in elUind])
-            uVal,uInd=el.getUniversalVals(vals)
-
-            universalIndices.extend(uInd.tolist())
-            universalVals.extend(uVal.tolist())
+                universalIndices.extend(uInd.tolist())
+                universalVals.extend(uVal.tolist())
 
 
-        #explicit use of uint required; casts to float otherwise
-        indArr=np.array(universalIndices,dtype=np.uint64)
+            #explicit use of uint required; casts to float otherwise
+            indArr=np.array(universalIndices,dtype=np.uint64)
 
-        uniInd,invmap=np.unique(indArr,return_index=True)
+            uniInd,invmap=np.unique(indArr,return_index=True)
 
-        uniV=np.array(universalVals)[invmap]
+            uniV=np.array(universalVals)[invmap]
 
-        # for ii,nn in enumerate(uniInd):
-        #     if nn in self.mesh.inverseIdxMap:
-        #         inv=self.mesh.inverseIdxMap[nn]
-        #         uniV[ii]=self.nodeVoltages[inv]
 
         return uniInd,uniV
 

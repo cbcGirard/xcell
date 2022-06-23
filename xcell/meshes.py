@@ -112,7 +112,7 @@ class Mesh:
             #     ext=elem['extents']
             # else:
             delta=coords-elem.origin+tol
-            ext=elem.extents+2*tol
+            ext=elem.span+2*tol
 
 
             difs=np.logical_and(delta>=0,delta<=ext)
@@ -125,7 +125,7 @@ class Mesh:
     def finalize(self):
        pass
 
-    def addElement(self,origin, extents,sigma,index):
+    def addElement(self,origin, span,sigma,index):
         """
         Insert element into the mesh.
 
@@ -150,7 +150,7 @@ class Mesh:
         # elif self.elementType=='FEM':
         #     newEl=elements.FEMHex(origin,extents,sigma)
 
-        newEl=Octant(origin, extents,sigma=sigma,index=index)
+        newEl=Octant(origin, span,sigma=sigma,index=index)
         # newEl.globalNodeIndices=nodeIndices
         self.elements.append(newEl)
 
@@ -276,6 +276,18 @@ class Mesh:
         globalIndices=np.nonzero(isbnd)[0]
 
         return globalIndices
+
+
+    def getIntersectingelements(self,axis,coordinate):
+        elements=[]
+
+        for el in self.elements:
+            gt=el.origin[axis]>=coordinate
+            lt=(el.origin[axis]-el.span[axis])<coordinate
+            if gt and lt:
+                elements.append(el)
+
+        return elements
 
 
 class Octree(Mesh):

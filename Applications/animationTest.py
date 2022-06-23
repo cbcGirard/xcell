@@ -14,11 +14,11 @@ import matplotlib.pyplot as plt
 
 meshtype='adaptive'
 # studyPath='Results/studyTst/miniCur/'#+meshtype
-datadir='/home/benoit/smb4k/ResearchData/Results/studyTst/'#+meshtype
+datadir='/home/benoit/smb4k/ResearchData/Results/Final/'#+meshtype
 # studyPath=datadir+'post-renumber/'
-studyPath=datadir+'Boundary_large/rubik0'
+studyPath=datadir+'uniformVsOctree'
 
-xmax=1e-2
+xmax=1e-4
 sigma=np.ones(3)
 
 
@@ -43,10 +43,10 @@ lastNumEl=0
 lastNx=0
 
 # tstVals=['adaptive']
-# tstVals=["adaptive","uniform"]
+tstVals=["adaptive","uniform"]
 # elementType='Admittance'
 # tstVals=['adaptive','equal elements',r'equal $l_0$']
-# tstCat='Mesh type'
+tstCat='Mesh type'
 
 
 # tstVals=[False, True]
@@ -61,8 +61,8 @@ lastNx=0
 # tstCat='Power'
 
 # tstVals=['Analytic','Ground']
-tstVals=['Analytic','Ground','Rubik0']
-tstCat='Boundary'
+# tstVals=['Analytic','Ground','Rubik0']
+# tstCat='Boundary'
 
 if generate:
 

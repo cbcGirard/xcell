@@ -77,6 +77,91 @@ def runAdaptation(setup,maxdepth=8,meshdensity=0.2,metrics=None):
     setup.iterativeSolve(tol=1e-9)
 
 
+def setParams(testCat,testVal):
+
+    params={
+        'Mesh type':'adaptive',
+        'Element type':'Admittance',
+        'Vsrc?':False,
+        'BoundaryFunction':None}
+
+    params[testCat]=testVal
+
+    return params
+
+def pairedDepthSweep(study,depthRange, testCat,testVals, rElec=1e-6,sigma=np.ones(3)):
+    lastmesh={'numel':0,'nX':0}
+    meshnum=0
+    for maxdepth in depthRange:
+        for tstVal in testVals:
+            params=setParams(testCat,tstVal)
+
+            setup=study.newSimulation()
+            setup.mesh.elementType=params['Element type']
+            setup.meshtype=params['Mesh type']
+            setup.meshnum=meshnum
+
+            if params['Vsrc?']:
+                setup.addVoltageSource(1,np.zeros(3),rElec)
+                srcMag=1.
+            else:
+                srcMag=4*np.pi*sigma[0]*rElec
+                setup.addCurrentSource(srcMag,np.zeros(3),rElec)
+
+            if params['Mesh type']=='uniform':
+                newNx=int(np.ceil(lastmesh['numel']**(1/3)))
+                nX=newNx+newNx%2
+                setup.makeUniformGrid(newNx+newNx%2)
+                print('uniform, %d per axis'%nX)
+            elif params['Mesh type']==r'equal $l_0$':
+                setup.makeUniformGrid(lastmesh['nX'])
+            else:
+                metric=[xcell.makeExplicitLinearMetric(maxdepth,
+                                                      meshdensity=0.2)]
+
+                setup.makeAdaptiveGrid(metric,maxdepth)
+
+
+            setup.mesh.elementType=params['Element type']
+            setup.finalizeMesh()
+
+            def boundaryFun(coord):
+                r=np.linalg.norm(coord)
+                return rElec/(r*np.pi*4)
+            # setup.insertSourcesInMesh()
+
+            if params['BoundaryFunction']=='Analytic':
+                setup.setBoundaryNodes(boundaryFun)
+            elif params['BoundaryFunction']=='Rubik0':
+                setup.setBoundaryNodes(None,
+                                       expand=True,
+                                       sigma=1.)
+            else:
+                setup.setBoundaryNodes()
+            # setup.getEdgeCurrents()
+
+            # v=setup.solve()
+            v=setup.iterativeSolve(None,1e-9)
+
+            setup.applyTransforms()
+
+            setup.getMemUsage(True)
+            errEst,err,ana,_,_=setup.calculateErrors()
+            FVU=xcell.misc.FVU(ana, err)
+
+            minel=setup.mesh.getL0Min()
+
+
+            print('error: %g'%errEst)
+
+            study.newLogEntry(['Error','FVU','l0min',testCat],[errEst,FVU,minel,tstVal])
+            study.saveData(setup)
+            if params['Mesh type']=='adaptive':
+                lastmesh={'numel':len(setup.mesh.elements),
+                          'nX':setup.ptPerAxis-1}
+
+
+
 class Cell:
     def __init__(self, gid, x, y, z, theta):
         self._gid = gid
