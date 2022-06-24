@@ -1296,9 +1296,10 @@ class FigureAnimator:
 
     def animateStudy(self, fname=None, artists=None, fps=1.0):
 
-        artists = []
-        for ii in range(len(self.dataSets)):
-            artists.append(self.getArtists(ii))
+        if artists is None:
+            artists = []
+            for ii in range(len(self.dataSets)):
+                artists.append(self.getArtists(ii))
 
         animation = ArtistAnimation(self.fig,
                                     artists,
@@ -1929,6 +1930,12 @@ class CurrentPlot(FigureAnimator):
         self.dataScales = {
             'iRange': ScaleRange()}
 
+        self.prefs={
+            'logScale':True,
+            'colorbar':True,
+            'title':True,
+        }
+
     def addSimulationData(self, sim, append=False):
         # i, E = sim.getEdgeCurrents()
 
@@ -2006,9 +2013,13 @@ class CurrentPlot(FigureAnimator):
         #                           vmax=self.crange[1])
 
         if setnum == 0:
-            plt.colorbar(mpl.cm.ScalarMappable(norm=cnorm, cmap=cmap),
-                         ax=self.ax)
-            plt.title('Edge currents')
+
+            if self.prefs['colorbar']:
+                plt.colorbar(mpl.cm.ScalarMappable(norm=cnorm, cmap=cmap),
+                            ax=self.ax)
+
+            if self.prefs['title']:
+                plt.title('Edge currents')
             inset = None
             if self.showInset & (self.rElec > 0) & (self.dim != 3):
                 self.inset = addInset(self.ax,
@@ -2034,17 +2045,22 @@ class CurrentPlot(FigureAnimator):
         m0 = x0+0.5*d0
         mags = d0/np.linalg.norm(d0, axis=1, keepdims=True)
 
-        x, y, z = np.hsplit(x0, 3)
-        a, b, c = np.hsplit(d0, 3)
-        m1, m2, m3 = np.hsplit(m0, 3)
-        v1, v2, v3 = np.hsplit(mags, 3)
         if self.dim == 3:
+            x, y, z = np.hsplit(x0, 3)
+            a, b, c = np.hsplit(d0, 3)
+            m1, m2, m3 = np.hsplit(m0, 3)
+            v1, v2, v3 = np.hsplit(mags, 3)
+
             artists.append([
                 self.ax.quiver3D(x, y, z, a, b, c,
                                  colors=colors)
             ])
 
         else:
+            x,y=np.hsplit(x0,2)
+            a,b=np.hsplit(d0,2)
+            m1,m2=np.hsplit(m0,2)
+            v1,v2=np.hsplit(mags,2)
             axes = [self.ax]
             art = []
             if self.inset is not None:
@@ -2052,7 +2068,7 @@ class CurrentPlot(FigureAnimator):
 
             for ax in axes:
                 edgecol = mpl.collections.LineCollection(data['mesh'],
-                                                         color=(0., 0., 0., 0.1))
+                                                         color=FAINT)
                 art.append(ax.add_collection(edgecol))
                 if self.fullarrow:
                     art.append(ax.quiver(x, y, a, b,
