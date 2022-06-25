@@ -10,7 +10,7 @@ import xcell
 import Common
 import matplotlib.pyplot as plt
 
-foldername='Quals/uniformVsOctree'
+foldername='Quals/formulations'
 
 generate=True
 
@@ -27,25 +27,26 @@ plotters=[
 
 plotPrefs=[
     None,
-    {'onlyDoF':True, 'colorNodeConnectivity':True},
+    # {'onlyDoF':True, 'colorNodeConnectivity':True},
+    None,
     None,
     None
     ]
 
 # tstVals=['adaptive']
-tstVals=["adaptive","uniform"]
+# tstVals=["adaptive","uniform"]
 # tstVals=['adaptive','equal elements',r'equal $l_0$']
-tstCat='Mesh type'
+# tstCat='Mesh type'
 
 
 
 # tstVals=[False, True]
 # tstCat='Vsrc?'
 
-# # tstVals=['Admittance','FEM']
+tstVals=['Admittance','FEM','Face']
 # tstVals=['Admittance','Face']
 # # tstVals=['Admittance']
-# tstCat='Element type'
+tstCat='Element type'
 
 # tstVals=[None]
 # tstCat='Power'
@@ -70,7 +71,8 @@ if generate:
 
 costcat='Error'
 # costcat='FVU'
-xcat='l0min'
+# xcat='l0min'
+xcat='Number of elements'
 filterCategories=[tstCat]
 if staticPlots:
     xcell.visualizers.groupedScatter(study.studyPath+'/log.csv',

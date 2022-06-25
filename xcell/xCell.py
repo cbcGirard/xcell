@@ -1429,6 +1429,24 @@ class Simulation:
 
 
     def getElementsInPlane(self,axis=2, point=0.):
+        """
+
+
+        Parameters
+        ----------
+        axis : TYPE, optional
+            DESCRIPTION. The default is 2.
+        point : TYPE, optional
+            DESCRIPTION. The default is 0..
+
+        Returns
+        -------
+        elements : elements
+            DESCRIPTION.
+        coords : float[:,2]
+        edgePts : float[:,2,2]
+
+        """
         otherAx=np.array([n!=axis for n in range(3)])
         # arrays=[]
         # Gmax=self.mesh.maxDepth+1
@@ -1590,6 +1608,26 @@ class Simulation:
         return uniInd,uniV
 
     def getCurrentsInPlane(self,axis=2,point=0.):
+        """
+
+
+        Parameters
+        ----------
+        axis : TYPE, optional
+            DESCRIPTION. The default is 2.
+        point : TYPE, optional
+            DESCRIPTION. The default is 0..
+
+        Returns
+        -------
+        currents : TYPE
+            DESCRIPTION.
+        currentPts : TYPE
+            DESCRIPTION.
+        mesh : TYPE
+            DESCRIPTION.
+
+        """
         els,coords,mesh=self.getElementsInPlane(axis,point)
 
         if self.mesh.elementType=='Face':

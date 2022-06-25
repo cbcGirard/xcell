@@ -102,6 +102,9 @@ def eliminateRows(matrix):
 
     return xmat
 
+def htile(array,ncopy):
+    return np.vstack([array]*ncopy).transpose()
+
 # @nb.njit(nb.types.Tuple(nb.float64[:], nb.int64[:], nb.int64[:])(nb.int64[:], nb.int64[:], nb.int64[:]),
 #          parallel=True)
 # @nb.njit(parallel=True)
