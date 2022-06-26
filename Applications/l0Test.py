@@ -10,7 +10,7 @@ import xcell
 import numpy as np
 import matplotlib.pyplot as plt
 import numba as nb
-import resource 
+import resource
 
 xmax=1e-4
 
@@ -19,23 +19,23 @@ maxDepth=8
 sigma=np.ones(3,dtype=np.float64)
 vMode=False
 elType='Admittance'
-fname='l0_current.csv'
+fname = 'l0_current.csv'
 
 resultpath="Results/cube/errEst/"
 
 def runL0Grid(maxDepth,coef,xmax,showGraphs,vMode,logTimes):
     bbox=np.concatenate((-xmax*np.ones(3), xmax*np.ones(3)))
-    
+
     otree=xcell.Octree(bbox,maxDepth=maxDepth)
     setup=xcell.Simulation(resultpath)
     setup.mesh.extents=2*xmax*np.ones(3)
     setup.mesh.elementType=elType
-    
-    
+
+
     def inverseSquare(coord):
         return 1/np.dot(coord,coord)
-    
-    
+
+
     @nb.njit
     def toR(coord,coef=coef):
         r=np.linalg.norm(coord)
@@ -45,57 +45,57 @@ def runL0Grid(maxDepth,coef,xmax,showGraphs,vMode,logTimes):
         if val<1e-6:
             val=1e-6
         return val
-    
+
     metric=toR
-    
+
     setup.startTiming("Make elements")
     otree.refineByMetric(metric)
 
-    
+
     setup.mesh=otree.makeMesh(setup.mesh)
     coords=setup.mesh.nodeCoords
-    
+
     setup.logTime()
     numEl=len(setup.mesh.elements)
-    
+
     sourceIndex=otree.coord2Index(np.zeros(3))
-    
+
     if vMode:
         srcMag=1
-    
+
         # setup.addVoltageSource(srcMag,index=sourceIndex)
         srcType='Voltage'
     else:
         srcMag=1e-6
         setup.addCurrentSource(srcMag,index=sourceIndex)
         srcType='Current'
-    
+
     # ground boundary nodes, set v sources
     for ii in nb.prange(coords.shape[0]):
         pt=np.abs(coords[ii])
         rpt=np.array(np.linalg.norm(pt))
         if np.any(pt==xmax) or (rpt<=1e-6):
             # setup.addVoltageSource(0,index=ii)
-            
+
             vpt=xcell.analyticVsrc(np.zeros(3), srcMag, rpt,srcType=srcType)
             setup.addVoltageSource(vpt.squeeze(),index=ii)
-        
-    
-    
+
+
+
     v=setup.solve()
     # v=setup.iterativeSolve(None,1e-9)
     setup.getMemUsage(True)
     FVU=setup.calculateErrors(srcMag,srcType,showPlots=showGraphs)
 
-    
-    
-    
+
+
+
     if logTimes:
         setup.logAsTableEntry(resultpath+fname, FVU,
                               ['vSource'],
                               [v[sourceIndex]])
-        
-        
+
+
     times=np.array([l.duration for l in setup.stepLogs])
     print('\n\n\tTotal Time: %g' % np.sum(times))
     print(numEl**(1/3))

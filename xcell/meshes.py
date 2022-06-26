@@ -11,76 +11,75 @@ from . import elements
 from . import util
 from . import fem
 
+
 class Mesh:
-    def __init__(self,bbox,elementType='Admittance'):
-        self.bbox=bbox
-        self.extents=(bbox[3:]-bbox[:3])/2
-        self.span=bbox[3:]-bbox[:3]
-        self.center=bbox[:3]+self.span/2
-        self.elements=[]
-        self.conductances=[]
-        self.elementType=elementType
-        self.nodeCoords=np.empty((0,3),dtype=np.float64)
-        self.edges=[]
+    def __init__(self, bbox, elementType='Admittance'):
+        self.bbox = bbox
+        self.extents = (bbox[3:]-bbox[:3])/2
+        self.span = bbox[3:]-bbox[:3]
+        self.center = bbox[:3]+self.span/2
+        self.elements = []
+        self.conductances = []
+        self.elementType = elementType
+        self.nodeCoords = np.empty((0, 3), dtype=np.float64)
+        self.edges = []
 
-        self.minl0=0
+        self.minl0 = 0
 
-        self.indexMap=[]
-        self.inverseIdxMap={}
-        self.boundaryNodes=np.empty(0,dtype=np.int64)
-
+        self.indexMap = []
+        self.inverseIdxMap = {}
+        self.boundaryNodes = np.empty(0, dtype=np.int64)
 
     def __getstate__(self):
 
-        state=self.__dict__.copy()
+        state = self.__dict__.copy()
 
-        elInfo=[]
+        elInfo = []
         for el in self.elements:
-            d={'origin':el.origin,
-               'span':el.span,
-               'l0':el.l0,
-               'sigma':el.sigma,
-                'vertices':el.vertices,
-                'faces':el.faces,
-               'index':el.index}
+            d = {'origin': el.origin,
+                 'span': el.span,
+                 'l0': el.l0,
+                 'sigma': el.sigma,
+                 'vertices': el.vertices,
+                 'faces': el.faces,
+                 'index': el.index}
             elInfo.append(d)
 
-        state['elements']=elInfo
-        state['inverseIdxMap']={}
+        state['elements'] = elInfo
+        state['inverseIdxMap'] = {}
         if 'tree' in state:
-            dtree={'origin':self.tree.origin,
-                   'span':self.tree.span,
-                   'sigma':self.tree.sigma,
-                   'index':self.tree.index
-                   }
-            state['tree']=dtree
+            dtree = {'origin': self.tree.origin,
+                     'span': self.tree.span,
+                     'sigma': self.tree.sigma,
+                     'index': self.tree.index
+                     }
+            state['tree'] = dtree
         return state
 
-    def __setstate__(self,state):
+    def __setstate__(self, state):
         self.__dict__.update(state)
-        elDicts=self.elements.copy()
+        elDicts = self.elements.copy()
 
-        self.elements=[]
+        self.elements = []
 
-        for ii,el in enumerate(elDicts):
+        for ii, el in enumerate(elDicts):
             self.addElement(el['origin'], el['span'],
                             el['sigma'], el['index'])
-            self.elements[-1].faces=el['faces']
-            self.elements[-1].vertices=el['vertices']
+            self.elements[-1].faces = el['faces']
+            self.elements[-1].vertices = el['vertices']
 
-
-        self.inverseIdxMap=util.getIndexDict(self.indexMap)
+        self.inverseIdxMap = util.getIndexDict(self.indexMap)
 
         if 'tree' in state:
-            treeDict=self.tree.copy()
-            tree=Octant(origin=treeDict['origin'],
-                             span=treeDict['span'],
-                             sigma=treeDict['sigma'],
-                             index=treeDict['index'])
+            treeDict = self.tree.copy()
+            tree = Octant(origin=treeDict['origin'],
+                          span=treeDict['span'],
+                          sigma=treeDict['sigma'],
+                          index=treeDict['index'])
             tree._Octant__recreateTree(self.elements)
-            self.tree=tree
+            self.tree = tree
 
-    def getContainingElement(self,coords):
+    def getContainingElement(self, coords):
         """
         Get element containing specified point.
 
@@ -100,32 +99,31 @@ class Mesh:
             Containing element.
 
         """
-        nElem=len(self.elements)
+        nElem = len(self.elements)
 
-        #TODO: workaround fudge factor
-        tol=1e-9*np.ones(3)
+        # TODO: workaround fudge factor
+        tol = 1e-9*np.ones(3)
 
         for nn in nb.prange(nElem):
-            elem=self.elements[nn]
+            elem = self.elements[nn]
             # if type(elem) is dict:
             #     delta=coords-elem['origin']
             #     ext=elem['extents']
             # else:
-            delta=coords-elem.origin+tol
-            ext=elem.span+2*tol
+            delta = coords-elem.origin+tol
+            ext = elem.span+2*tol
 
-
-            difs=np.logical_and(delta>=0,delta<=ext)
+            difs = np.logical_and(delta >= 0, delta <= ext)
             if all(difs):
                 return elem
 
-        raise ValueError('Point (%s) not inside any element' % ','.join(map(str,coords)))
-
+        raise ValueError('Point (%s) not inside any element' %
+                         ','.join(map(str, coords)))
 
     def finalize(self):
-       pass
+        pass
 
-    def addElement(self,origin, span,sigma,index):
+    def addElement(self, origin, span, sigma, index):
         """
         Insert element into the mesh.
 
@@ -150,11 +148,11 @@ class Mesh:
         # elif self.elementType=='FEM':
         #     newEl=elements.FEMHex(origin,extents,sigma)
 
-        newEl=Octant(origin, span,sigma=sigma,index=index)
+        newEl = Octant(origin, span, sigma=sigma, index=index)
         # newEl.globalNodeIndices=nodeIndices
         self.elements.append(newEl)
 
-    def getConductances(self,elements=None):
+    def getConductances(self, elements=None):
         """
         Get the discrete conductances from every element.
 
@@ -168,8 +166,8 @@ class Mesh:
         """
 
         if elements is None:
-            elements=self.elements
-        nElem=len(elements)
+            elements = self.elements
+        nElem = len(elements)
         # if self.elementType=='Admittance':
         #     nElemEdge=12
         # elif self.elementType=='FEM':
@@ -182,61 +180,59 @@ class Mesh:
         # conductances=np.empty(nEdges,dtype=np.float64)
         # edgeIndices=np.empty((nEdges,2),dtype=np.int64)
 
-        clist=[]
-        elist=[]
-        transforms=[]
+        clist = []
+        elist = []
+        transforms = []
 
         for nn in nb.prange(nElem):
 
-            elem=elements[nn]
-
+            elem = elements[nn]
 
             # elConds=elem.getConductanceVals()
             # elEdges=elem.getConductanceIndices()
-            if self.elementType=='Admittance':
-                elConds=fem.getAdmittanceConductances(elem.span,elem.sigma)
-                elEdges=elem.vertices[fem.ADMITTANCE_EDGES]
-            elif self.elementType=='FEM':
-                elConds=fem.getHexConductances(elem.span,elem.sigma)
-                elEdges=elem.vertices[fem.getHexIndices()]
-            elif self.elementType=='Face':
-                rawCond=fem.getFaceConductances(elem.span,elem.sigma)
-                rawEdge=elem.faces[fem.FACE_EDGES]
+            if self.elementType == 'Admittance':
+                elConds = fem.getAdmittanceConductances(elem.span, elem.sigma)
+                elEdges = elem.vertices[fem.ADMITTANCE_EDGES]
+            elif self.elementType == 'FEM':
+                elConds = fem.getHexConductances(elem.span, elem.sigma)
+                elEdges = elem.vertices[fem.getHexIndices()]
+            elif self.elementType == 'Face':
+                rawCond = fem.getFaceConductances(elem.span, elem.sigma)
+                rawEdge = elem.faces[fem.FACE_EDGES]
 
-                elConds=[]
-                elEdges=[]
+                elConds = []
+                elEdges = []
                 for ii in nb.prange(6):
-                    neighbors=elem.neighbors[ii]
-                    nNei=len(neighbors)
+                    neighbors = elem.neighbors[ii]
+                    nNei = len(neighbors)
 
-                    if nNei<=1:
+                    if nNei <= 1:
                         elConds.append(rawCond[ii])
                         elEdges.append(rawEdge[ii])
 
                     else:
-                        #faces are shared; split original edge
-                        origNode=rawEdge[ii,0]
-                        xform=[]
+                        # faces are shared; split original edge
+                        origNode = rawEdge[ii, 0]
+                        xform = []
 
                         # neiNodeIdx=ii
-                        neiNodeIdx=ii+(-1)**ii
+                        neiNodeIdx = ii+(-1)**ii
 
                         # if elem.depth==11:
                         #     print()
                         for jj in nb.prange(nNei):
                             elConds.append(rawCond[ii]/nNei)
 
-                            neighbor=neighbors[jj]
-                            neiNode=neighbor.faces[neiNodeIdx]
+                            neighbor = neighbors[jj]
+                            neiNode = neighbor.faces[neiNodeIdx]
 
-                            edge=np.array([neiNode,
-                                           rawEdge[ii,1]])
+                            edge = np.array([neiNode,
+                                             rawEdge[ii, 1]])
                             elEdges.append(edge)
                             xform.append(neiNode)
 
                         xform.append(origNode)
                         transforms.append(xform)
-
 
             # conductances[nn*nElemEdge:(nn+1)*nElemEdge]=elConds
             # edgeIndices[nn*nElemEdge:(nn+1)*nElemEdge,:]=elEdges
@@ -246,10 +242,10 @@ class Mesh:
 
         # self.edges=edgeIndices
 
-        edgeIndices=np.array(elist)
-        conductances=np.array(clist)
+        edgeIndices = np.array(elist)
+        conductances = np.array(clist)
 
-        return edgeIndices,conductances,transforms
+        return edgeIndices, conductances, transforms
 
     def getL0Min(self):
         """
@@ -261,29 +257,28 @@ class Mesh:
             smallest edge length.
 
         """
-        l0Min=np.infty
+        l0Min = np.infty
 
         for el in self.elements:
-            l0Min=min(l0Min,el.l0)
+            l0Min = min(l0Min, el.l0)
         return l0Min
 
     def getBoundaryNodes(self):
-        mins,maxes=np.hsplit(self.bbox,2)
+        mins, maxes = np.hsplit(self.bbox, 2)
 
-        atmin=np.equal(mins,self.nodeCoords)
-        atmax=np.equal(maxes,self.nodeCoords)
-        isbnd=np.any(np.logical_or(atmin,atmax),axis=1)
-        globalIndices=np.nonzero(isbnd)[0]
+        atmin = np.equal(mins, self.nodeCoords)
+        atmax = np.equal(maxes, self.nodeCoords)
+        isbnd = np.any(np.logical_or(atmin, atmax), axis=1)
+        globalIndices = np.nonzero(isbnd)[0]
 
         return globalIndices
 
-
-    def getIntersectingelements(self,axis,coordinate):
-        elements=[]
+    def getIntersectingelements(self, axis, coordinate):
+        elements = []
 
         for el in self.elements:
-            gt=el.origin[axis]>=coordinate
-            lt=(el.origin[axis]-el.span[axis])<coordinate
+            gt = el.origin[axis] >= coordinate
+            lt = (el.origin[axis]-el.span[axis]) < coordinate
             if gt and lt:
                 elements.append(el)
 
@@ -291,33 +286,33 @@ class Mesh:
 
 
 class Octree(Mesh):
-    def __init__(self,boundingBox,maxDepth=10,elementType='Admittance'):
-        self.center=np.mean(boundingBox.reshape(2,3),axis=0)
-        self.span=(boundingBox[3:]-boundingBox[:3])
+    def __init__(self, boundingBox, maxDepth=10, elementType='Admittance'):
+        self.center = np.mean(boundingBox.reshape(2, 3), axis=0)
+        self.span = (boundingBox[3:]-boundingBox[:3])
         super().__init__(boundingBox, elementType)
 
-        self.maxDepth=maxDepth
-        self.bbox=boundingBox
-        self.indexMap=np.empty(0,dtype=np.uint64)
-        self.inverseIdxMap={}
+        self.maxDepth = maxDepth
+        self.bbox = boundingBox
+        self.indexMap = np.empty(0, dtype=np.uint64)
+        self.inverseIdxMap = {}
 
-        self.changed=True
+        self.changed = True
 
         # coord0=self.center-self.span/2
 
-        self.tree=Octant(origin=boundingBox[:3],
-                         span=self.span)
+        self.tree = Octant(origin=boundingBox[:3],
+                           span=self.span)
 
     def getContainingElement(self, coords):
 
-        el=self.tree.getContainingElement(coords)
+        el = self.tree.getContainingElement(coords)
         return el
 
-    def getIntersectingelements(self,axis,coordinate):
-        elements=self.tree.getIntersectingElement(axis, coordinate)
+    def getIntersectingelements(self, axis, coordinate):
+        elements = self.tree.getIntersectingElement(axis, coordinate)
         return elements
 
-    def refineByMetric(self,l0Function):
+    def refineByMetric(self, l0Function):
         """
         Recursively splits elements until l0Function evaluated at the center
         of each element is greater than that element's l0'
@@ -333,14 +328,14 @@ class Octree(Mesh):
             Adaptation resulted in new topology
 
         """
-        changed=self.tree.refineByMetric(l0Function, self.maxDepth)
-        pruned,_=self.tree.coarsenByMetric(l0Function,self.maxDepth)
+        changed = self.tree.refineByMetric(l0Function, self.maxDepth)
+        pruned, _ = self.tree.coarsenByMetric(l0Function, self.maxDepth)
 
         # if pruned:
         #     print()
         #     changed|=pruned
 
-        self.changed=changed|pruned
+        self.changed = changed | pruned
 
         return changed
 
@@ -353,21 +348,19 @@ class Octree(Mesh):
         None.
 
         """
-        octs=self.tree.getTerminalOctants()
+        octs = self.tree.getTerminalOctants()
 
         # self.nodeCoords=self.getCoordsRecursively()
 
         # d=util.getIndexDict(self.indexMap)
 
-        self.elements=octs
+        self.elements = octs
 
-
-        if self.elementType=='Face':
+        if self.elementType == 'Face':
             self.getElementAdjacencies()
 
-
         # self.inverseIdxMap=d
-        self.changed=False
+        self.changed = False
 
         return
 
@@ -382,7 +375,7 @@ class Octree(Mesh):
         """
         self.tree.printStructure()
 
-    def octantByList(self,indexList,octant=None):
+    def octantByList(self, indexList, octant=None):
         """
         Select an octant by recursing through a list of indices.
 
@@ -399,7 +392,7 @@ class Octree(Mesh):
             The octant object specified.
 
         """
-        head=indexList.pop(0)
+        head = indexList.pop(0)
 
         # #debug
 
@@ -409,18 +402,18 @@ class Octree(Mesh):
         # #enddebug
 
         if octant is None:
-            octant=self.tree
-        oc=octant.children[head]
-        if len(oc.children)==0:
-            #terminal octant reached, match found
+            octant = self.tree
+        oc = octant.children[head]
+        if len(oc.children) == 0:
+            # terminal octant reached, match found
             return [oc]
         else:
-            if len(indexList)==0:
-                #list exhausted at non-terminal octant
+            if len(indexList) == 0:
+                # list exhausted at non-terminal octant
                 return oc.children
             else:
-                #continue recursion
-                return self.octantByList(indexList,oc)
+                # continue recursion
+                return self.octantByList(indexList, oc)
 
     def countelements(self):
 
@@ -439,31 +432,26 @@ class Octree(Mesh):
 
         """
 
-        #TODO: parallelize?
-        #around 2x element creation time (not bad)
-        #rest of function very fast
+        # TODO: parallelize?
+        # around 2x element creation time (not bad)
+        # rest of function very fast
 
-        asdual=self.elementType=='Face'
-        i=self.tree.getCoordsRecursively(self.maxDepth,asDual=asdual)
+        asdual = self.elementType == 'Face'
+        i = self.tree.getCoordsRecursively(self.maxDepth, asDual=asdual)
         # if asdual:
         #     self.getElementAdjacencies()
 
-
-        indices=np.unique(np.array(i,dtype=np.uint64))
-        self.indexMap=indices
-
+        indices = np.unique(np.array(i, dtype=np.uint64))
+        self.indexMap = indices
 
         # c=util.indexToCoords(indices,self.span,self.maxDepth+int(asdual))
         # coords=c+self.bbox[:3]
-        coords=util.indexToCoords(indices,self.bbox[:3],self.span)
-
-
-
+        coords = util.indexToCoords(indices, self.bbox[:3], self.span)
 
         return coords
 
-    def getBoundaryNodes(self,asdual=False):
-        bnodes=[]
+    def getBoundaryNodes(self, asdual=False):
+        bnodes = []
         # if asdual:
         #     nX=2**self.maxDepth
         # else:
@@ -471,9 +459,9 @@ class Octree(Mesh):
 
         # nX=1+2**(self.maxDepth+1)
         for ii in nb.prange(self.indexMap.shape[0]):
-            nn=self.indexMap[ii]
-            xyz=util.index2pos(nn,util.MAXPT)
-            if np.any(xyz==0) or np.any(xyz==util.MAXPT-1):
+            nn = self.indexMap[ii]
+            xyz = util.index2pos(nn, util.MAXPT)
+            if np.any(xyz == 0) or np.any(xyz == util.MAXPT-1):
                 bnodes.append(ii)
 
         return np.array(bnodes)
@@ -481,29 +469,29 @@ class Octree(Mesh):
         # return bnodes
 
     def getDualMesh(self):
-        octs=self.tree.getTerminalOctants()
-        self.elements=octs
-        numel=len(self.elements)
+        octs = self.tree.getTerminalOctants()
+        self.elements = octs
+        numel = len(self.elements)
 
-        coords=np.empty((numel,3),dtype=np.float64)
-        edges=[]
-        conductances=[]
-        nodeIdx=[]
-        bnodes=[]
+        coords = np.empty((numel, 3), dtype=np.float64)
+        edges = []
+        conductances = []
+        nodeIdx = []
+        bnodes = []
 
-        temp=[]
+        temp = []
         for ii in nb.prange(numel):
-            el=self.elements[ii]
+            el = self.elements[ii]
 
-            elIndex=util.octantListToIndex(np.array(el.index),
-                                           self.maxDepth)
-            el.globalNodeIndices[0]=elIndex
-            coords[ii]=el.center
+            elIndex = util.octantListToIndex(np.array(el.index),
+                                             self.maxDepth)
+            el.globalNodeIndices[0] = elIndex
+            coords[ii] = el.center
             nodeIdx.append(elIndex)
 
-            gEl=fem.getFaceConductances(el.span, el.sigma)
+            gEl = fem.getFaceConductances(el.span, el.sigma)
 
-            neighborList=util.octantNeighborIndexLists(np.array(el.index))
+            neighborList = util.octantNeighborIndexLists(np.array(el.index))
 
             # if len(neighborList)!=6:
             #     neighborList=util.octantNeighborIndexLists(np.array(el.index))
@@ -513,10 +501,10 @@ class Octree(Mesh):
         # for ii in nb.prange(numel):
         #     neighborList=temp[ii]
 
-            if ii==(numel):
+            if ii == (numel):
                 print()
 
-            isBnd=False
+            isBnd = False
 
             # debug trap
             # if len(neighborList)!=6:
@@ -525,85 +513,86 @@ class Octree(Mesh):
             #     print(elIndex)
 
             for step in nb.prange(6):
-                neighborI=neighborList[step]
-                if len(neighborI)==0:
-                    isBnd=True
+                neighborI = neighborList[step]
+                if len(neighborI) == 0:
+                    isBnd = True
                 else:
-            #     neighborI=el.getNeighborIndex(step)
-                # if neighborI is not None:
-                    #neighbor exists
-                    tstNeighbor=self.octantByList(neighborI)
-                    nNeighbors=len(tstNeighbor)
+                    #     neighborI=el.getNeighborIndex(step)
+                    # if neighborI is not None:
+                    # neighbor exists
+                    tstNeighbor = self.octantByList(neighborI)
+                    nNeighbors = len(tstNeighbor)
 
-                    if nNeighbors>1:
-                        ax=step//2
-                        dr=step%2
-                        neighbors=[n for n in tstNeighbor if util.toBitArray(n.index[-1])[ax]^dr]
-                        nNeighbors=len(neighbors)
+                    if nNeighbors > 1:
+                        ax = step//2
+                        dr = step % 2
+                        neighbors = [n for n in tstNeighbor if util.toBitArray(
+                            n.index[-1])[ax] ^ dr]
+                        nNeighbors = len(neighbors)
                     else:
-                        neighbors=tstNeighbor
+                        neighbors = tstNeighbor
 
                     for neighbor in neighbors:
                         # neighborIndex=neighbor.globalNodeIndices[0]
-                        neighborIndex=util.octantListToIndex(np.array(neighbor.index),
-                                                             self.maxDepth)
+                        neighborIndex = util.octantListToIndex(np.array(neighbor.index),
+                                                               self.maxDepth)
 
-                        gA=fem.getFaceConductances(neighbor.span,
-                                                          neighbor.sigma)[step//2]
-                        gB=gEl[step//2]/nNeighbors
+                        gA = fem.getFaceConductances(neighbor.span,
+                                                     neighbor.sigma)[step//2]
+                        gB = gEl[step//2]/nNeighbors
 
-                        gnet=0.5*(gA*gB)/(gA+gB)
+                        gnet = 0.5*(gA*gB)/(gA+gB)
 
                         conductances.append(gnet)
-                        edges.append([elIndex,neighborIndex])
+                        edges.append([elIndex, neighborIndex])
 
             if isBnd:
                 bnodes.append(elIndex)
 
-        idxMap=np.array(nodeIdx)
+        idxMap = np.array(nodeIdx)
 
-        corrEdges=util.renumberIndices(np.array(edges),idxMap)
-        self.boundaryNodes=util.renumberIndices(np.array(bnodes,ndmin=2),
-                                                idxMap).squeeze()
+        corrEdges = util.renumberIndices(np.array(edges), idxMap)
+        self.boundaryNodes = util.renumberIndices(np.array(bnodes, ndmin=2),
+                                                  idxMap).squeeze()
 
         return coords, idxMap, corrEdges, np.array(conductances)
 
-
     def getElementAdjacencies(self):
-        numel=len(self.elements)
+        numel = len(self.elements)
 
-        adjacencies=[]
+        adjacencies = []
 
         for ii in nb.prange(numel):
-            el=self.elements[ii]
+            el = self.elements[ii]
 
-            maybeNeighbors=util.octantNeighborIndexLists(np.array(el.index))
-            neighborSet=[]
+            maybeNeighbors = util.octantNeighborIndexLists(np.array(el.index))
+            neighborSet = []
             for nn in nb.prange(6):
-                nei=maybeNeighbors[nn]
-                if len(nei)>0:
-                    tstEl=self.octantByList(nei)
+                nei = maybeNeighbors[nn]
+                if len(nei) > 0:
+                    tstEl = self.octantByList(nei)
 
-                    if len(tstEl)>1:
-                        ax=nn//2
-                        dr=nn%2
+                    if len(tstEl) > 1:
+                        ax = nn//2
+                        dr = nn % 2
 
                         # select elements on opposite side of
                         # sameFace=[((n>>ax)&1) for n in range(6)]
                         # neighbors=[tstEl[n] for n in sameFace]
 
-                        neighbors=[n for n in tstEl if util.toBitArray(n.index[-1])[ax]^dr]
+                        neighbors = [n for n in tstEl if util.toBitArray(
+                            n.index[-1])[ax] ^ dr]
                         # neighbors=[n for n in tstEl if util.toBitArray(n.index[-1])[ax]]
 
                     else:
-                        neighbors=tstEl
+                        neighbors = tstEl
 
                 else:
-                    neighbors=[]
+                    neighbors = []
 
                 neighborSet.append(neighbors)
 
-            el.neighbors=neighborSet
+            el.neighbors = neighborSet
             adjacencies.append(neighborSet)
 
         return adjacencies
@@ -625,33 +614,32 @@ class Octree(Mesh):
 #     ('sigma',nb.float64[:])
 #     ]
 # @nb.experimental.jitclass(spec=octantspec)
-class Octant():
-    def __init__(self,origin, span,depth=0,sigma=np.ones(3),index=[],oXYZ=np.zeros(3,dtype=np.int32)):
-        # super().__init__(origin, span, sigma)
-        self.origin=origin
-        self.span=span
-        self.center=origin+span/2
-        self.l0=np.prod(span)**(1/3)
 
-        self.children=[]
-        self.depth=depth
-        self.index=index
+
+class Octant():
+    def __init__(self, origin, span, depth=0, sigma=np.ones(3), index=[], oXYZ=np.zeros(3, dtype=np.int32)):
+        # super().__init__(origin, span, sigma)
+        self.origin = origin
+        self.span = span
+        self.center = origin+span/2
+        self.l0 = np.prod(span)**(1/3)
+
+        self.children = []
+        self.depth = depth
+        self.index = index
 
         # rdepth=util.MAXDEPTH-depth
 
-        #don't calculate indices here, since we might split later
-        self.vertices=[]
-        self.faces=[]
+        # don't calculate indices here, since we might split later
+        self.vertices = []
+        self.faces = []
 
-        self.sigma=sigma
+        self.sigma = sigma
 
-        self.neighbors=6*[[]]
-        self.oXYZ=oXYZ
+        self.neighbors = 6*[[]]
+        self.oXYZ = oXYZ
 
-
-
-
-    def __recreateTree(self,elements):
+    def __recreateTree(self, elements):
         # childLists=8*[[]]
         # for el in elements:
         #     if el.depth==self.depth+1:
@@ -668,120 +656,112 @@ class Octant():
         # else:
         #     for ii,ch in enumerate(self.children):
         #         ch.__recreateTree(childLists[ii])
-        childLists=[]
-        D=self.depth
+        childLists = []
+        D = self.depth
         for ind in range(8):
-            childList=[el for el in elements if el.index[D]==ind]
+            childList = [el for el in elements if el.index[D] == ind]
             childLists.append(childList)
 
         self.split()
-        for ii,ch in enumerate(self.children):
-            clist=childLists[ii]
-            if len(clist)==1:
-                el=clist[0]
-                el.depth=len(el.index)
-                self.children[ii]=el
+        for ii, ch in enumerate(self.children):
+            clist = childLists[ii]
+            if len(clist) == 1:
+                el = clist[0]
+                el.depth = len(el.index)
+                self.children[ii] = el
             else:
                 ch.__recreateTree(clist)
 
-
-
-
     def countelements(self):
-        if len(self.children)==0:
+        if len(self.children) == 0:
             return 1
         else:
             return sum([ch.countelements() for ch in self.children])
 
     # @nb.njit(parallel=True)
-    def split(self,division=np.array([0.5,0.5,0.5])):
-        newSpan=self.span*division
+    def split(self, division=np.array([0.5, 0.5, 0.5])):
+        newSpan = self.span*division
         # scale=np.array(2**(util.MAXDEPTH-len(self.index)),dtype=np.int32)
 
         for ii in nb.prange(8):
-            offset=newSpan*util.OCT_INDEX_BITS[ii]
+            offset = newSpan*util.OCT_INDEX_BITS[ii]
             # offset=util.toBitArray(ii)*newSpan
-            newOrigin=self.origin+offset
-            newIndex=self.index.copy()
+            newOrigin = self.origin+offset
+            newIndex = self.index.copy()
             newIndex.append(ii)
             # oxyz=np.array(self.oXYZ+scale*util.OCT_INDEX_BITS[ii],dtype=np.int32)
             self.children.append(Octant(origin=newOrigin,
                                         span=newSpan,
                                         depth=self.depth+1,
                                         index=newIndex))
-                                        # oXYZ=oxyz))
+            # oXYZ=oxyz))
 
         # return self.children
     # def getOwnCoords(self):
     #     return [self.origin+self.span*util.toBitArray(n) for n in range(8)]
 
-
-    def getCoordsRecursively(self,maxdepth,asDual=False):
+    def getCoordsRecursively(self, maxdepth, asDual=False):
         # T=Logger('depth  %d'%self.depth, printStart=False)
-        if len(self.children)==0:
+        if len(self.children) == 0:
             # coords=self.getOwnCoords()
             # indices=self.globalNodeIndices
 
             if asDual:
                 # indices=self.calcFaceTags()
-                indices=self.faces.tolist()
+                indices = self.faces.tolist()
             else:
                 # indices=self.calcVertexTags()
-                indices=self.vertices.tolist()
+                indices = self.vertices.tolist()
             # indices=self.calcFaceTags(maxdepth)
         else:
-            indices=[]
+            indices = []
 
             for ch in self.children:
-                i = ch.getCoordsRecursively(maxdepth,asDual)
+                i = ch.getCoordsRecursively(maxdepth, asDual)
                 indices.extend(i)
 
         return indices
 
-
-
     # @nb.njit(parallel=True)
-    def refineByMetric(self,l0Functions,maxDepth):
-        changed=False
+    def refineByMetric(self, l0Functions, maxDepth):
+        changed = False
         for f in l0Functions:
 
-            l0Target=f(self.center)
+            l0Target = f(self.center)
 
-            if (self.l0>l0Target) and (self.depth<maxDepth):
-                if len(self.children)==0:
-                    changed=True
+            if (self.l0 > l0Target) and (self.depth < maxDepth):
+                if len(self.children) == 0:
+                    changed = True
                     self.split()
                 for ii in nb.prange(8):
-                    changed|=self.children[ii].refineByMetric(l0Functions,maxDepth)
-
+                    changed |= self.children[ii].refineByMetric(
+                        l0Functions, maxDepth)
 
         return changed
 
-    def coarsenByMetric(self,metrics,maxdepth):
+    def coarsenByMetric(self, metrics, maxdepth):
 
-        changed=False
+        changed = False
 
         for f in metrics:
 
-            undersize=self.l0<f(self.center) or self.depth>maxdepth
+            undersize = self.l0 < f(self.center) or self.depth > maxdepth
 
             if self.isTerminal():
                 pass
             else:
                 for ch in self.children:
-                    chChange,chUnder=ch.coarsenByMetric(metrics,maxdepth)
+                    chChange, chUnder = ch.coarsenByMetric(metrics, maxdepth)
 
-
-                    undersize&=chUnder
-                    changed|=chChange
+                    undersize &= chUnder
+                    changed |= chChange
 
                 if undersize:
-                    changed=True
+                    changed = True
                     for ch in self.children:
                         del ch
-                    self.children=[]
+                    self.children = []
                     self.calcIndices()
-
 
         return changed, undersize
 
@@ -799,30 +779,27 @@ class Octant():
         None.
 
         """
-        base='> '*self.depth
+        base = '> '*self.depth
         print(base+str(self.l0))
 
         for ch in self.children:
             ch.printStructure()
 
-
     def isTerminal(self):
-        terminal=len(self.children)==0
-        if terminal and len(self.vertices)==0:
+        terminal = len(self.children) == 0
+        if terminal and len(self.vertices) == 0:
             self.calcIndices()
         return terminal
 
-    def containsPoint(self,coord):
-        gt=np.greater_equal(coord,self.origin)
-        lt=np.less_equal(coord-self.origin,self.span)
-        return np.all(gt&lt)
+    def containsPoint(self, coord):
+        gt = np.greater_equal(coord, self.origin)
+        lt = np.less_equal(coord-self.origin, self.span)
+        return np.all(gt & lt)
 
-    def intersectsPlane(self,axis,coord):
-        cmin=self.origin[axis]
-        cmax=cmin+self.span[axis]
-        return (cmin<=coord)&(coord<cmax)
-
-
+    def intersectsPlane(self, axis, coord):
+        cmin = self.origin[axis]
+        cmax = cmin+self.span[axis]
+        return (cmin <= coord) & (coord < cmax)
 
     def getTerminalOctants(self):
         """
@@ -838,39 +815,37 @@ class Octant():
             return [self]
         else:
 
-            descendants=[]
+            descendants = []
             for ch in self.children:
-            # if len(ch.children)==0:
-                grandkids=ch.getTerminalOctants()
+                # if len(ch.children)==0:
+                grandkids = ch.getTerminalOctants()
 
                 if grandkids is not None:
                     descendants.extend(grandkids)
         return descendants
 
-
     def calcIndices(self):
 
-            elList=np.array(self.index,dtype=np.int8)
-            inds=util.indicesWithinOctant(elList,fem.HEX_POINT_INDICES)
+        elList = np.array(self.index, dtype=np.int8)
+        inds = util.indicesWithinOctant(elList, fem.HEX_POINT_INDICES)
 
+        self.vertices = inds[:8]
+        self.faces = inds[8:]
 
-            self.vertices=inds[:8]
-            self.faces=inds[8:]
-
-    def getContainingElement(self,coords):
-        if len(self.children)==0:
+    def getContainingElement(self, coords):
+        if len(self.children) == 0:
             if self.containsPoint(coords):
                 return self
             else:
                 return None
         else:
             for ch in self.children:
-                tmp=ch.getContainingElement(coords)
+                tmp = ch.getContainingElement(coords)
                 if tmp is not None:
                     return tmp
             return None
 
-    def getIntersectingElement(self,axis,coord):
+    def getIntersectingElement(self, axis, coord):
         # if (len(self.children)==0) and (self.intersectsPlane(axis, coord)):
         #     return [self]
 
@@ -881,8 +856,8 @@ class Octant():
         #         if intersects is not None:
         #             descendants.extend(intersects)
         #     return descendants
-        descendants=[]
-        if len(self.children)==0:
+        descendants = []
+        if len(self.children) == 0:
             if self.intersectsPlane(axis, coord):
                 return [self]
             else:
@@ -890,81 +865,74 @@ class Octant():
         else:
 
             for ch in self.children:
-                intersects=ch.getIntersectingElement(axis,coord)
+                intersects = ch.getIntersectingElement(axis, coord)
                 if intersects is not None:
                     descendants.extend(intersects)
 
             return descendants
 
+    def getNeighborIndex(self, direction):
 
-    def getNeighborIndex(self,direction):
-
-        ownInd=np.array(self.index)
+        ownInd = np.array(self.index)
 
         return util.octantNeighborIndexList(ownInd, direction)
 
-
-    def interpolateWithin(self,coordinates,values):
-        coords=fem.toLocalCoords(coordinates, self.center, self.span)
-        if values.shape[0]==8:
-            interp=fem.interpolateFromVerts(values, coords)
+    def interpolateWithin(self, coordinates, values):
+        coords = fem.toLocalCoords(coordinates, self.center, self.span)
+        if values.shape[0] == 8:
+            interp = fem.interpolateFromVerts(values, coords)
         else:
-            interp=fem.interpolateFromFace(values, coords)
+            interp = fem.interpolateFromFace(values, coords)
 
         return interp
 
-    #TODO: fix hack of changing node indices
-    def getUniversalVals(self,knownValues):
+    # TODO: fix hack of changing node indices
+    def getUniversalVals(self, knownValues):
 
         # oldInds=self.globalNodeIndices
 
-        allVals=np.empty(15,dtype=np.float64)
-        allInds=np.empty(15,dtype=np.int64)
+        allVals = np.empty(15, dtype=np.float64)
+        allInds = np.empty(15, dtype=np.int64)
 
-        indV=self.vertices
-        indF=self.faces
+        indV = self.vertices
+        indF = self.faces
 
-        if knownValues.shape[0]==8:
-            vVert=knownValues
-            vFace=fem.interpolateFromVerts(knownValues,
-                                            fem.HEX_FACE_COORDS)
+        if knownValues.shape[0] == 8:
+            vVert = knownValues
+            vFace = fem.interpolateFromVerts(knownValues,
+                                             fem.HEX_FACE_COORDS)
         else:
-            vFace=knownValues
-            vVert=fem.interpolateFromFace(knownValues,
-                                           fem.HEX_VERTEX_COORDS)
+            vFace = knownValues
+            vVert = fem.interpolateFromFace(knownValues,
+                                            fem.HEX_VERTEX_COORDS)
 
+        allInds = np.concatenate((indV, indF))
+        allVals = np.concatenate((vVert, vFace))
 
-        allInds=np.concatenate((indV,indF))
-        allVals=np.concatenate((vVert,vFace))
+        return allVals, allInds
 
+    def getPlanarValues(self, globalValues, axis=2, coord=0.):
+        zcoord = (coord-self.center[axis])/self.span[axis]
 
-        return allVals,allInds
+        inds = 3*[[-1., 1.]]
+        inds[axis] = [zcoord]
+        localCoords = np.array([[x, y, z] for z in inds[2]
+                               for y in inds[1] for x in inds[0]])
 
-
-    def getPlanarValues(self,globalValues,axis=2,coord=0.):
-        zcoord=(coord-self.center[axis])/self.span[axis]
-
-        inds=3*[[-1.,1.]]
-        inds[axis]=[zcoord]
-        localCoords=np.array([[x,y,z] for z in inds[2] for y in inds[1] for x in inds[0]])
-
-        if globalValues.shape[0]==8:
-            planeVals=fem.interpolateFromVerts(globalValues, localCoords)
+        if globalValues.shape[0] == 8:
+            planeVals = fem.interpolateFromVerts(globalValues, localCoords)
         else:
-            planeVals=fem.interpolateFromFace(globalValues, localCoords)
+            planeVals = fem.interpolateFromFace(globalValues, localCoords)
 
         return planeVals
 
 
-
-
 class MeshStats:
     def __init__(self):
-        self.l0Min=0.
-        self.l0Max=0.
-        self.numEls=0
-        self.numPts=0
+        self.l0Min = 0.
+        self.l0Max = 0.
+        self.numEls = 0
+        self.numPts = 0
 
-
-        self.metricCoeffs=np.array([])
-        self.metricCoeffNames=[]
+        self.metricCoeffs = np.array([])
+        self.metricCoeffNames = []

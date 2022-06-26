@@ -12,8 +12,8 @@ import numba as nb
 import xcell
 import matplotlib.pyplot as plt
 
-meshtype='adaptive'
-datadir='/home/benoit/smb4k/ResearchData/Results/studyTst/'
+meshtype = 'adaptive'
+datadir = '/home/benoit/smb4k/ResearchData/Results/studyTst/'
 # studyPath=datadir+'regularization/'
 # filterCategories=["Regularized?"]
 # filterVals=[True]
@@ -49,21 +49,19 @@ datadir='/home/benoit/smb4k/ResearchData/Results/studyTst/'
 # filterCategories=None
 # filterVals=[None]
 
-studyPath=datadir+'Boundary_large/rubik0'
-filterCategories=['Boundary']
+studyPath = datadir+'Boundary_large/rubik0'
+filterCategories = ['Boundary']
 # filterVals=['Analytic','Ground','Rubik0']
-filterVals=['Analytic']#,'Ground','Rubik0']
+filterVals = ['Analytic']  # ,'Ground','Rubik0']
 
 
-xmax=1e-4
+xmax = 1e-4
 
 
-bbox=np.append(-xmax*np.ones(3),xmax*np.ones(3))
+bbox = np.append(-xmax*np.ones(3), xmax*np.ones(3))
 
 
-study=xcell.SimStudy(studyPath,bbox)
-
-
+study = xcell.SimStudy(studyPath, bbox)
 
 
 # aniGraph=study.animatePlot(xcell.error2d,'err2d')
@@ -75,14 +73,14 @@ study=xcell.SimStudy(studyPath,bbox)
 
 
 # staticPlots=True
-staticPlots=False
+staticPlots = False
 
-plotters=[
+plotters = [
     xcell.Visualizers.ErrorGraph,
-#     xcell.Visualizers.SliceSet,
+    #     xcell.Visualizers.SliceSet,
     # xcell.Visualizers.CurrentPlot,
     # xcell.Visualizers.LogError
-            ]
+]
 
 
 # plotters=[xcell.Visualizers.ErrorGraph]
@@ -96,29 +94,25 @@ plotters=[
 
 if staticPlots:
     xcell.Visualizers.groupedScatter(study.studyPath+'/log.csv',
-                         xcat='Number of elements',
-                         ycat='FVU',
-                         groupcat=filterCategories[0])
-    nufig=plt.gcf()
+                                     xcat='Number of elements',
+                                     ycat='FVU',
+                                     groupcat=filterCategories[0])
+    nufig = plt.gcf()
     study.savePlot(nufig, 'AccuracyCost', '.eps')
     study.savePlot(nufig, 'AccuracyCost', '.png')
 
     for fv in filterVals:
 
-        fstack,fratio=xcell.Visualizers.plotStudyPerformance(study,
-                                                             onlyCat=filterCategories[0],
-                                                             onlyVal=fv)
-        fstem='_'+filterCategories[0]+str(fv)
+        fstack, fratio = xcell.Visualizers.plotStudyPerformance(study,
+                                                                onlyCat=filterCategories[0],
+                                                                onlyVal=fv)
+        fstem = '_'+filterCategories[0]+str(fv)
 
         study.savePlot(fstack, 'Performance'+fstem, '.eps')
         study.savePlot(fstack, 'Performance'+fstem, '.png')
 
         study.savePlot(fratio, 'Ratio'+fstem, '.eps')
         study.savePlot(fratio, 'Ratio'+fstem, '.png')
-
-
-
-
 
 
 # #THIS WORKS
@@ -136,29 +130,28 @@ if staticPlots:
 #         plotr.animateStudy(fname=fname)
 
 
+for ii, p in enumerate(plotters):
 
-for ii,p in enumerate(plotters):
-
-    plots=[]
-    names=[]
-    ranges=None
+    plots = []
+    names = []
+    ranges = None
     for fv in filterVals:
-        fname=p.__name__+'_'+str(fv)
-        plotr=p(plt.figure(),study)
+        fname = p.__name__+'_'+str(fv)
+        plotr = p(plt.figure(), study)
         if 'universalPts' in plotr.prefs:
-            plotr.prefs['universalPts']=True
+            plotr.prefs['universalPts'] = True
 
         plotr.getStudyData(filterCategories=filterCategories,
-                  filterVals=[fv])
+                           filterVals=[fv])
 
         plots.append(plotr)
         names.append(fname)
 
         if ranges is not None:
             plotr.unifyScales(ranges)
-        ranges=plotr.dataScales
+        ranges = plotr.dataScales
 
-    for plot,name in zip(plots,names):
-        plot.dataScales=ranges
+    for plot, name in zip(plots, names):
+        plot.dataScales = ranges
 
         plot.animateStudy(fname=name)

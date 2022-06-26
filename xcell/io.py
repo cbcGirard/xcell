@@ -13,7 +13,7 @@ format conversions for gmsh
 field_data:
     {'physName1':[tag,dim],
      'physName2':[tag,dim]...}
-    
+
 point_data:
     {'gmsh:dim_tags': [
         [entDim,entTag],

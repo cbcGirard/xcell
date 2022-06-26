@@ -12,33 +12,33 @@ import xcell
 import matplotlib.pyplot as plt
 
 
-swept='density'
-dmin=2
-dmax=8
+swept = 'density'
+dmin = 2
+dmax = 8
 
-study,setup=Common.makeSynthStudy('adaptationDemos')
+study, setup = Common.makeSynthStudy('adaptationDemos')
 
 
-sweepval=1-abs(np.linspace(-1,1))
+sweepval = 1-abs(np.linspace(-1, 1))
 
-if swept=='density':
-    vrange=0.5*sweepval
-elif swept=='depth':
+if swept == 'density':
+    vrange = 0.5*sweepval
+elif swept == 'depth':
     # vrange=dmin+np.array((dmax-dmin)*sweepval,dtype=int)
-    vrange=np.concatenate((np.arange(dmin,dmax+1),np.arange(dmax-1,dmin-1,-1)))
-tvec=np.linspace(0,1,vrange.shape[0])
+    vrange = np.concatenate(
+        (np.arange(dmin, dmax+1), np.arange(dmax-1, dmin-1, -1)))
+tvec = np.linspace(0, 1, vrange.shape[0])
 
-tdata={
-       'x':tvec,
-       'y':vrange,
-       'ylabel':swept,
-       'unit':None,
-       'style':'dot'
-       }
+tdata = {
+    'x': tvec,
+    'y': vrange,
+    'ylabel': swept,
+    'unit': None,
+    'style': 'dot'
+}
 
 
-img=xcell.Visualizers.SingleSlice(None, study,timevec=tvec,tdata=tdata)
-
+img = xcell.Visualizers.SingleSlice(None, study, timevec=tvec, tdata=tdata)
 
 
 # data={
@@ -46,29 +46,29 @@ img=xcell.Visualizers.SingleSlice(None, study,timevec=tvec,tdata=tdata)
 #       'depth':[],
 #       'density':[]}
 
-lastdepth=-1
+lastdepth = -1
 for val in vrange:
 
-    if swept=='density':
-        density=val
-        maxdepth=dmax
-    elif swept=='depth':
-        maxdepth=val
-        density=.2
+    if swept == 'density':
+        density = val
+        maxdepth = dmax
+    elif swept == 'depth':
+        maxdepth = val
+        density = .2
 
         # if lastdepth==maxdepth:
         #     continue
         # else:
         #     lastdepth=maxdepth
 
-    metric=xcell.makeExplicitLinearMetric(maxdepth,
-                                          density)
+    metric = xcell.makeExplicitLinearMetric(maxdepth,
+                                            density)
 
     setup.makeAdaptiveGrid(metric, maxdepth)
     setup.finalizeMesh()
     # _,_,edgePts=setup.getElementsInPlane()
 
-    img.addSimulationData(setup,append=True)
+    img.addSimulationData(setup, append=True)
 
     # ax=xcell.Visualizers.showMesh(setup)
     # ax.set_xticks([])
@@ -80,5 +80,4 @@ for val in vrange:
     # ax.zaxis.set_pane_color(ghost)
 
 
-
-ani=img.animateStudy(fname=swept,fps=5.)
+ani = img.animateStudy(fname=swept, fps=5.)

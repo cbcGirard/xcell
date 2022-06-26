@@ -10,28 +10,28 @@ import xcell
 import Common
 import matplotlib.pyplot as plt
 
-foldername='Quals/formulations'
+foldername = 'Quals/formulations'
 
-generate=True
+generate = True
 
-#plot performance info
-staticPlots=True
+# plot performance info
+staticPlots = True
 
-#generate animation(s)
-plotters=[
+# generate animation(s)
+plotters = [
     xcell.visualizers.LogError,
     xcell.visualizers.ErrorGraph,
     xcell.visualizers.SliceSet,
     # xcell.visualizers.CurrentPlot,
-            ]
+]
 
-plotPrefs=[
+plotPrefs = [
     None,
     # {'onlyDoF':True, 'colorNodeConnectivity':True},
     None,
     None,
     None
-    ]
+]
 
 # tstVals=['adaptive']
 # tstVals=["adaptive","uniform"]
@@ -39,14 +39,13 @@ plotPrefs=[
 # tstCat='Mesh type'
 
 
-
 # tstVals=[False, True]
 # tstCat='Vsrc?'
 
-tstVals=['Admittance','FEM','Face']
+tstVals = ['Admittance', 'FEM', 'Face']
 # tstVals=['Admittance','Face']
 # # tstVals=['Admittance']
-tstCat='Element type'
+tstCat = 'Element type'
 
 # tstVals=[None]
 # tstCat='Power'
@@ -56,50 +55,42 @@ tstCat='Element type'
 # tstCat='Boundary'
 
 
-
-
-
-
-study,_=Common.makeSynthStudy(foldername)
+study, _ = Common.makeSynthStudy(foldername)
 
 if generate:
     Common.pairedDepthSweep(study,
-                        depthRange=range(3,18),
-                        testCat=tstCat,
-                        testVals=tstVals)
+                            depthRange=range(3, 18),
+                            testCat=tstCat,
+                            testVals=tstVals)
 
 
-costcat='Error'
+costcat = 'Error'
 # costcat='FVU'
 # xcat='l0min'
-xcat='Number of elements'
-filterCategories=[tstCat]
+xcat = 'Number of elements'
+filterCategories = [tstCat]
 if staticPlots:
     xcell.visualizers.groupedScatter(study.studyPath+'/log.csv',
-                         xcat=xcat,
-                         ycat=costcat,
-                         groupcat=tstCat)
-    fname=tstCat+"_"+costcat+'-vs-'+xcat
-    nufig=plt.gcf()
+                                     xcat=xcat,
+                                     ycat=costcat,
+                                     groupcat=tstCat)
+    fname = tstCat+"_"+costcat+'-vs-'+xcat
+    nufig = plt.gcf()
     study.savePlot(nufig, fname, '.eps')
     study.savePlot(nufig, fname, '.png')
 
     for fv in tstVals:
 
-        fstack,fratio=xcell.visualizers.plotStudyPerformance(study,
-                                                             onlyCat=filterCategories[0],
-                                                             onlyVal=fv)
-        fstem='_'+filterCategories[0]+str(fv)
+        fstack, fratio = xcell.visualizers.plotStudyPerformance(study,
+                                                                onlyCat=filterCategories[0],
+                                                                onlyVal=fv)
+        fstem = '_'+filterCategories[0]+str(fv)
 
         study.savePlot(fstack, 'Performance'+fstem, '.eps')
         study.savePlot(fstack, 'Performance'+fstem, '.png')
 
         study.savePlot(fratio, 'Ratio'+fstem, '.eps')
         study.savePlot(fratio, 'Ratio'+fstem, '.png')
-
-
-
-
 
 
 # #THIS WORKS
@@ -117,29 +108,28 @@ if staticPlots:
 #         plotr.animateStudy(fname=fname)
 
 
+for ii, p in enumerate(plotters):
 
-for ii,p in enumerate(plotters):
-
-    plots=[]
-    names=[]
-    ranges=None
+    plots = []
+    names = []
+    ranges = None
     for fv in tstVals:
-        fname=p.__name__+'_'+str(fv)
-        plotr=p(plt.figure(),study)
+        fname = p.__name__+'_'+str(fv)
+        plotr = p(plt.figure(), study)
         if 'universalPts' in plotr.prefs:
-            plotr.prefs['universalPts']=True
+            plotr.prefs['universalPts'] = True
 
         plotr.getStudyData(filterCategories=filterCategories,
-                  filterVals=[fv])
+                           filterVals=[fv])
 
         plots.append(plotr)
         names.append(fname)
 
         if ranges is not None:
             plotr.unifyScales(ranges)
-        ranges=plotr.dataScales
+        ranges = plotr.dataScales
 
-    for plot,name in zip(plots,names):
-        plot.dataScales=ranges
+    for plot, name in zip(plots, names):
+        plot.dataScales = ranges
 
         plot.animateStudy(fname=name)

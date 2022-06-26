@@ -44,13 +44,13 @@ def makeSynthStudy(folderName,
         DESCRIPTION.
 
     """
-    datadir='/home/benoit/smb4k/ResearchData/Results'
-    folder=path.join(datadir, folderName)
-    bbox=np.append(-xmax*np.ones(3),xmax*np.ones(3))
+    datadir = '/home/benoit/smb4k/ResearchData/Results'
+    folder = path.join(datadir, folderName)
+    bbox = np.append(-xmax*np.ones(3), xmax*np.ones(3))
 
-    study=xcell.SimStudy(folder, bbox)
+    study = xcell.SimStudy(folder, bbox)
 
-    setup=study.newSimulation()
+    setup = study.newSimulation()
 
     if vSource:
         setup.addVoltageSource(1.,
@@ -61,12 +61,12 @@ def makeSynthStudy(folderName,
                                coords=np.zeros(3),
                                radius=rElec)
 
-    return study,setup
+    return study, setup
 
 
-def runAdaptation(setup,maxdepth=8,meshdensity=0.2,metrics=None):
+def runAdaptation(setup, maxdepth=8, meshdensity=0.2, metrics=None):
     if metrics is None:
-        metrics=[]
+        metrics = []
         for src in setup.currentSources:
             metrics.append(xcell.makeExplicitLinearMetric(maxdepth, meshdensity,
                                                           origin=src.coords))
@@ -77,62 +77,62 @@ def runAdaptation(setup,maxdepth=8,meshdensity=0.2,metrics=None):
     setup.iterativeSolve(tol=1e-9)
 
 
-def setParams(testCat,testVal):
+def setParams(testCat, testVal):
 
-    params={
-        'Mesh type':'adaptive',
-        'Element type':'Admittance',
-        'Vsrc?':False,
-        'BoundaryFunction':None}
+    params = {
+        'Mesh type': 'adaptive',
+        'Element type': 'Admittance',
+        'Vsrc?': False,
+        'BoundaryFunction': None}
 
-    params[testCat]=testVal
+    params[testCat] = testVal
 
     return params
 
-def pairedDepthSweep(study,depthRange, testCat,testVals, rElec=1e-6,sigma=np.ones(3)):
-    lastmesh={'numel':0,'nX':0}
-    meshnum=0
+
+def pairedDepthSweep(study, depthRange, testCat, testVals, rElec=1e-6, sigma=np.ones(3)):
+    lastmesh = {'numel': 0, 'nX': 0}
+    meshnum = 0
     for maxdepth in depthRange:
         for tstVal in testVals:
-            params=setParams(testCat,tstVal)
+            params = setParams(testCat, tstVal)
 
-            setup=study.newSimulation()
-            setup.mesh.elementType=params['Element type']
-            setup.meshtype=params['Mesh type']
-            setup.meshnum=meshnum
+            setup = study.newSimulation()
+            setup.mesh.elementType = params['Element type']
+            setup.meshtype = params['Mesh type']
+            setup.meshnum = meshnum
 
             if params['Vsrc?']:
-                setup.addVoltageSource(1,np.zeros(3),rElec)
-                srcMag=1.
+                setup.addVoltageSource(1, np.zeros(3), rElec)
+                srcMag = 1.
             else:
-                srcMag=4*np.pi*sigma[0]*rElec
-                setup.addCurrentSource(srcMag,np.zeros(3),rElec)
+                srcMag = 4*np.pi*sigma[0]*rElec
+                setup.addCurrentSource(srcMag, np.zeros(3), rElec)
 
-            if params['Mesh type']=='uniform':
-                newNx=int(np.ceil(lastmesh['numel']**(1/3)))
-                nX=newNx+newNx%2
-                setup.makeUniformGrid(newNx+newNx%2)
-                print('uniform, %d per axis'%nX)
-            elif params['Mesh type']==r'equal $l_0$':
+            if params['Mesh type'] == 'uniform':
+                newNx = int(np.ceil(lastmesh['numel']**(1/3)))
+                nX = newNx+newNx % 2
+                setup.makeUniformGrid(newNx+newNx % 2)
+                print('uniform, %d per axis' % nX)
+            elif params['Mesh type'] == r'equal $l_0$':
                 setup.makeUniformGrid(lastmesh['nX'])
             else:
-                metric=[xcell.makeExplicitLinearMetric(maxdepth,
-                                                      meshdensity=0.2)]
+                metric = [xcell.makeExplicitLinearMetric(maxdepth,
+                                                         meshdensity=0.2)]
 
-                setup.makeAdaptiveGrid(metric,maxdepth)
+                setup.makeAdaptiveGrid(metric, maxdepth)
 
-
-            setup.mesh.elementType=params['Element type']
+            setup.mesh.elementType = params['Element type']
             setup.finalizeMesh()
 
             def boundaryFun(coord):
-                r=np.linalg.norm(coord)
+                r = np.linalg.norm(coord)
                 return rElec/(r*np.pi*4)
             # setup.insertSourcesInMesh()
 
-            if params['BoundaryFunction']=='Analytic':
+            if params['BoundaryFunction'] == 'Analytic':
                 setup.setBoundaryNodes(boundaryFun)
-            elif params['BoundaryFunction']=='Rubik0':
+            elif params['BoundaryFunction'] == 'Rubik0':
                 setup.setBoundaryNodes(None,
                                        expand=True,
                                        sigma=1.)
@@ -141,25 +141,24 @@ def pairedDepthSweep(study,depthRange, testCat,testVals, rElec=1e-6,sigma=np.one
             # setup.getEdgeCurrents()
 
             # v=setup.solve()
-            v=setup.iterativeSolve(None,1e-9)
+            v = setup.iterativeSolve(None, 1e-9)
 
             setup.applyTransforms()
 
             setup.getMemUsage(True)
-            errEst,err,ana,_,_=setup.calculateErrors()
-            FVU=xcell.misc.FVU(ana, err)
+            errEst, err, ana, _, _ = setup.calculateErrors()
+            FVU = xcell.misc.FVU(ana, err)
 
-            minel=setup.mesh.getL0Min()
+            minel = setup.mesh.getL0Min()
 
+            print('error: %g' % errEst)
 
-            print('error: %g'%errEst)
-
-            study.newLogEntry(['Error','FVU','l0min',testCat],[errEst,FVU,minel,tstVal])
+            study.newLogEntry(['Error', 'FVU', 'l0min', testCat], [
+                              errEst, FVU, minel, tstVal])
             study.saveData(setup)
-            if params['Mesh type']=='adaptive':
-                lastmesh={'numel':len(setup.mesh.elements),
-                          'nX':setup.ptPerAxis-1}
-
+            if params['Mesh type'] == 'adaptive':
+                lastmesh = {'numel': len(setup.mesh.elements),
+                            'nX': setup.ptPerAxis-1}
 
 
 class Cell:
@@ -173,16 +172,16 @@ class Cell:
         self._rotate_z(theta)
         self._set_position(x, y, z)
 
-
         # everything below here in this method is NEW
-        self._spike_detector = h.NetCon(self.soma(0.5)._ref_v, None, sec=self.soma)
+        self._spike_detector = h.NetCon(
+            self.soma(0.5)._ref_v, None, sec=self.soma)
         self.spike_times = h.Vector()
         self._spike_detector.record(self.spike_times)
 
         self._ncs = []
 
         self.soma_v = h.Vector().record(self.soma(0.5)._ref_v)
-        self.ivec=h.Vector().record(self.soma(0.5)._ref_i_membrane_)
+        self.ivec = h.Vector().record(self.soma(0.5)._ref_i_membrane_)
 
     def __repr__(self):
         return '{}[{}]'.format(self.name, self._gid)
@@ -194,7 +193,7 @@ class Cell:
                                x - self.x + sec.x3d(i),
                                y - self.y + sec.y3d(i),
                                z - self.z + sec.z3d(i),
-                              sec.diam3d(i))
+                               sec.diam3d(i))
         self.x, self.y, self.z = x, y, z
 
     def _rotate_z(self, theta):
@@ -209,16 +208,17 @@ class Cell:
                 yprime = x * s + y * c
                 sec.pt3dchange(i, xprime, yprime, sec.z3d(i), sec.diam3d(i))
 
+
 class BallAndStick(Cell):
     name = 'BallAndStick'
 
     def __init__(self, gid, x, y, z, theta):
         super().__init__(gid, x, y, z, theta)
-        r=self.soma.diam/2
-        dx=r*np.cos(theta)
-        dy=r*np.sin(theta)
+        r = self.soma.diam/2
+        dx = r*np.cos(theta)
+        dy = r*np.sin(theta)
 
-        self._set_position(self.x-dx,self.y-dy, self.z)
+        self._set_position(self.x-dx, self.y-dy, self.z)
 
     def _setup_morphology(self):
         self.soma = h.Section(name='soma', cell=self)
@@ -254,6 +254,7 @@ class Ring:
     excitatory synapse onto cell n + 1 and the last, Nth cell in the
     network projects to the first cell.
     """
+
     def __init__(self, N=5, stim_w=0.04, stim_t=4, stim_delay=1, syn_w=0.01, syn_delay=5, r=50):
         """
         :param N: Number of cells.
@@ -280,7 +281,8 @@ class Ring:
         self.cells = []
         for i in range(N):
             theta = i * 2 * h.PI / N
-            self.cells.append(BallAndStick(i, h.cos(theta) * r, h.sin(theta) * r, 0, theta))
+            self.cells.append(BallAndStick(
+                i, h.cos(theta) * r, h.sin(theta) * r, 0, theta))
 
     def _connect_cells(self):
         for source, target in zip(self.cells, self.cells[1:] + [self.cells[0]]):
@@ -288,4 +290,3 @@ class Ring:
             nc.weight[0] = self._syn_w
             nc.delay = self._syn_delay
             source._ncs.append(nc)
-

@@ -123,6 +123,7 @@ BASE = '#afcfff'
 NULL = '#00000000'
 ACCENT_DARK = '#990000'
 ACCENT_LIGHT = '#FFCC00'
+LINE = '#dcd4c7'
 plx = np.array(mpl.colormaps.get('plasma').colors)
 lint = np.array(np.linspace(0, 1, num=plx.shape[0]), ndmin=2).transpose()
 CM_MONO = mpl.colors.LinearSegmentedColormap.from_list('mono',
@@ -1058,8 +1059,10 @@ def showEdges2d(axis, edgePoints, edgeColors=None, **kwargs):
         kwargs['colors'] = edgeColors
         # alpha=0.05
 
+    if not 'linewidths' in kwargs:
+        kwargs['linewidths'] = 0.5
+
     edgeCol = mpl.collections.LineCollection(edgePoints,
-                                             linewidths=0.5,
                                              **kwargs)
     axis.add_collection(edgeCol)
     return edgeCol
@@ -1878,7 +1881,7 @@ class CurrentPlot(FigureAnimator):
             'logScale': True,
             'colorbar': True,
             'title': True,
-            'scaleToSource':False,
+            'scaleToSource': False,
         }
 
         # inf lower bound needed for log colorbar
@@ -1917,8 +1920,6 @@ class CurrentPlot(FigureAnimator):
 
         self.dataScales = {
             'iRange': ScaleRange()}
-
-
 
     def addSimulationData(self, sim, append=False):
         # i, E = sim.getEdgeCurrents()

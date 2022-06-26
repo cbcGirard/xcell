@@ -42,7 +42,7 @@ meshTypes=["adaptive","uniform"]
 
 
 if generate:
-   
+
     for maxdepth in range(2,20):
         for regularize in range(2):
         # for maxdepth in range(2,10):
@@ -51,13 +51,13 @@ if generate:
             # else:
             l0Param=2**(-maxdepth*0.2)
             # l0Param=0.2
-            
+
             setup=study.newSimulation()
             setup.mesh.elementType='Admittance'
             setup.meshtype=meshtype
             setup.mesh.minl0=2*xmax/(2**maxdepth)
             setup.ptPerAxis=1+2**maxdepth
-            
+
             if vMode:
                 setup.addVoltageSource(1,np.zeros(3),rElec)
                 srcMag=1.
@@ -80,11 +80,11 @@ if generate:
                     # val=(l0Param*r**4)**(1/3) #dirichlet energy continutity
                     # if val<rElec:
                     #     val=rElec
-                    
+
                     if (r+val)<rElec:
                         val=rElec/2
                     return val
-                
+
                 # def metric(coord):
                 #     r=np.linalg.norm(coord)
                 #     # val=l0Param*r #1/r dependence
@@ -92,21 +92,21 @@ if generate:
                 #     # val=(l0Param*r**4)**(1/3) #dirichlet energy continutity
                 #     # if val<rElec:
                 #     #     val=rElec
-                    
+
                 #     if (r+val)<rElec:
                 #         val=rElec/2
                 #     return val
-                
+
                 setup.makeAdaptiveGrid(metric,maxdepth)
-            
-        
-      
-            
+
+
+
+
             def boundaryFun(coord):
                 r=np.linalg.norm(coord)
                 return rElec/(r*np.pi*4)
-            
-                
+
+
 
             setup.finalizeMesh(regularize)
 
@@ -115,32 +115,32 @@ if generate:
 
             # v=setup.solve()
             v=setup.iterativeSolve(None,1e-9)
-            
+
             setup.getMemUsage(True)
             setup.printTotalTime()
-            
+
             setup.startTiming('Estimate error')
             errEst,_,_,_=setup.calculateErrors()#srcMag,srcType,showPlots=showGraphs)
             print('error: %g'%errEst)
             setup.logTime()
-            
-            
+
+
             study.newLogEntry(['Error','k','Depth','Rregularized?'],
                               [errEst,l0Param,maxdepth,str(bool(regularize))])
             study.saveData(setup)
             lastNumEl=len(setup.mesh.elements)
-            
-            
+
+
             # ax=xCell.new3dPlot( bbox)
             # xCell.showEdges(ax, coords, setup.mesh.edges)
             # break
-        
+
             # fig=plt.figure()
             # xCell.centerSlice(fig, setup)
-            
+
             # if saveGraphs:
             #     study.makeStandardPlots()
-    
+
 
 # aniGraph=study.animatePlot(xCell.error2d,'err2d')
 # aniGraph=study.animatePlot(xCell.ErrorGraph,'err2d_adaptive',["Mesh type"],['adaptive'])
@@ -169,16 +169,16 @@ for mt in range(2):
             plotr=p(fig,study,fullarrow=True)
         else:
             plotr=p(fig,study)
-        
+
         isreg=bool(mt)
         plotr.getStudyData(filterCategories=["Regularized?"],
                           filterVals=[isreg])
-        
+
         name=ptype[ii]+'_'+regNames[mt]
-        
+
         ani=plotr.animateStudy(name)
-        
-        
+
+
 
 
 
@@ -197,7 +197,7 @@ for mt in range(2):
 # aniC=plotC.animateStudy()
 
 xCell.groupedScatter(study.studyPath+'log.csv',
-    xcat='Number of elements',
+                     xcat='Number of elements',
     ycat='Error',
     groupcat='Regularized?')
 nufig=plt.gcf()
