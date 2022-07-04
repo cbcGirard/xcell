@@ -14,12 +14,12 @@ import matplotlib.pyplot as plt
 
 swept = 'density'
 dmin = 2
-dmax = 8
+dmax = 6
 
 study, setup = Common.makeSynthStudy('adaptationDemos')
 
 
-sweepval = 1-abs(np.linspace(-1, 1))
+sweepval = 1-abs(np.linspace(-1, 1,20))
 
 if swept == 'density':
     vrange = 0.5*sweepval
@@ -38,7 +38,7 @@ tdata = {
 }
 
 
-img = xcell.Visualizers.SingleSlice(None, study, timevec=tvec, tdata=tdata)
+img = xcell.visualizers.SingleSlice(None, study, timevec=tvec, tdata=tdata)
 
 
 # data={
@@ -61,16 +61,15 @@ for val in vrange:
         # else:
         #     lastdepth=maxdepth
 
-    metric = xcell.makeExplicitLinearMetric(maxdepth,
-                                            density)
+    metric = xcell.generalMetric
 
-    setup.makeAdaptiveGrid(metric, maxdepth)
+    setup.makeAdaptiveGrid(np.zeros((1,3)), maxdepth, metric,coefs=np.ones(1)*2**(-maxdepth*density))
     setup.finalizeMesh()
     # _,_,edgePts=setup.getElementsInPlane()
 
     img.addSimulationData(setup, append=True)
 
-    # ax=xcell.Visualizers.showMesh(setup)
+    # ax=xcell.visualizers.showMesh(setup)
     # ax.set_xticks([])
     # ax.set_yticks([])
     # ax.set_zticks([])

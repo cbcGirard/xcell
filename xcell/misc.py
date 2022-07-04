@@ -68,6 +68,8 @@ def getErrorEstimates(simulation):
         'avg': np.mean(absErr),
         'int1': errSummary,
         'int3': vol,
+        'volErr':volErr,
+        'volAna':volAna,
         'intErr': intErr,
         'intAna': intErr/errSummary,
         'SSE': sse,

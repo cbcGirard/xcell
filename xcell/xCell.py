@@ -92,7 +92,7 @@ class Simulation:
 
         self.asDual = False
 
-    def makeAdaptiveGrid(self, metrics, maxdepth, autoExpand=False):
+    def makeAdaptiveGrid(self, refPts, maxdepth, minl0Function, maxl0Function=None, coefs=None):
         """
         Fast utility to construct an octree-based mesh of the domain.
 
@@ -115,7 +115,7 @@ class Simulation:
         self.meshtype = 'adaptive'
 
         # convert to octree mesh
-        if (type(self.mesh) != meshes.Octree) or autoExpand:
+        if (type(self.mesh) != meshes.Octree):
             # xdom=min(self.mesh.span)
             # metBounds=[m(np.array([xdom, 0., 0.])) for m in metrics]
             # # scale=xdom/metric(np.array([xdom,0.,0.]))
@@ -131,7 +131,7 @@ class Simulation:
 
         self.mesh.maxDepth = maxdepth
 
-        changed = self.mesh.refineByMetric(metrics)
+        changed = self.mesh.refineByMetric(minl0Function,  refPts, maxl0Function, coefs)
         self.logTime()
 
         return changed
@@ -413,6 +413,7 @@ class Simulation:
         """
         self.startTiming('Finalize mesh')
         self.mesh.finalize()
+        self.nodeISources=[]
         numEl = len(self.mesh.elements)
         self.logTime()
 
@@ -494,7 +495,15 @@ class Simulation:
             # self.vSourceVals.extend(src.value*np.ones(len(indices)))
             self.nodeVoltages[indices] = src.value
 
-        meshCurrentSrc = []
+        # if 'nodeISources' in self.__dict__:
+        #     if len(self.nodeISources)>0:
+        #         meshCurrentSrc=self.nodeISources
+        # else:
+        #     meshCurrentSrc = []
+
+        meshCurrentSrc=self.nodeISources
+
+
         for ii in nb.prange(len(self.currentSources)):
             src = self.currentSources[ii]
 
@@ -518,8 +527,11 @@ class Simulation:
                 if self.nodeRoleTable[idx] == 2:
                     # node is already claimed by source
                     sharedIdx = self.nodeRoleVals[idx]
-                    # if sharedIdx<len(meshCurrentSrc):
+                    # if sharedIdx<=len(meshCurrentSrc):
+                    #     meshCurrentSrc.append(src.value)
                     # add to value of existing node source
+                    if sharedIdx>=len(meshCurrentSrc):
+                        print('')
                     meshCurrentSrc[sharedIdx] += src.value
                     # else:
                     #     #this shouldn't happen...?
@@ -1882,14 +1894,32 @@ def _analytic(rad, V, I, r):
     return voltage, integral
 
 
-def makeScaledMetrics(pts, ptVals, maxdepth, density=0.2):
+def makeScaledMetrics(maxdepth, density=0.2):
     param = 2**(-maxdepth*density)
 
-    def metric(coord):
-        r = np.linalg.norm(pts-coord, axis=1)
+    @nb.njit()
+    def metric(elBBox,refCoords,coefs):
+        nPts=refCoords.shape[0]
+        coord=(elBBox[:3]+elBBox[3:])/2
+        l0s=np.empty(nPts)
 
-        l0 = min(param*r*ptVals)
+        for ii in nb.prange(nPts):
+            l0s[ii]=param*coefs[ii]*np.linalg.norm(refCoords[ii]-coord)
 
-        return l0
+        return l0s
 
-    return [metric]
+    return metric
+
+
+@nb.njit()
+def generalMetric(elementBBox,refCoords,refCoefs):
+    # param=2**(-maxdepth*density)
+
+    nPts=refCoords.shape[0]
+    coord=(elementBBox[:3]+elementBBox[3:])/2
+    l0s=np.empty(nPts)
+
+    for ii in nb.prange(nPts):
+        l0s[ii]=refCoefs[ii]*np.linalg.norm(refCoords[ii]-coord)
+
+    return l0s

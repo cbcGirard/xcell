@@ -28,16 +28,28 @@ h.CVode().use_fast_imem(1)
 
 
 nRing = 5
-nSegs = 1
+nSegs = 5
 
-ring = Common.Ring(N=1, stim_delay=0)
+strat = 'depth'
+# strat = 'fixedMin'
+# strat = 'fixedMax'
+
+dmax = 8
+dmin = 3
+
+resultDir = 'Quals/NEURON/ring'+str(nRing)+strat
+
+vids = True
+nskip = 10
+
+ring = Common.Ring(N=nRing, stim_delay=0,dendSegs=nSegs,r=175)
 # shape_window=h.PlotShape(True)
 # shape_window.show(0)
 
 
-for cell in ring.cells:
-    cell.dend.nseg = nSegs
-    h.define_shape()
+# for cell in ring.cells:
+#     cell.dend.nseg = nSegs
+#     h.define_shape()
 
 #
 
@@ -46,7 +58,7 @@ ivecs, isSphere, coords, rads = nUtil.getNeuronGeometry()
 
 t = h.Vector().record(h._ref_t)
 h.finitialize(-65 * mV)
-h.continuerun(20)
+h.continuerun(40)
 
 
 I = -1e-9*np.array(ivecs).transpose()
@@ -79,16 +91,13 @@ lastI = 0
 tv = np.array(t)*1e-3
 
 
-study, setup = Common.makeSynthStudy('NEURON/ring'+str(nRing), xmax=xmax)
+study, setup = Common.makeSynthStudy(resultDir, xmax=xmax)
 setup.currentSources = []
 studyPath = study.studyPath
 
-strat = 'depth'
-dmax = 9
-dmin = 6
+dspan=dmax-dmin
 
-vids = True
-nskip = 4
+
 # nskip=len(tv)
 
 # tdata={
@@ -99,9 +108,9 @@ if vids:
                                         tv)
     nUtil.showCellGeo(img.axes[0])
 
-    # err=xcell.visualizers.SingleSlice(None, study,
-    #                                   tv)
-
+    err=xcell.visualizers.SingleSlice(None, study,
+                                      tv)
+    err.dataSrc='absErr'
 
 for r, c, v in zip(rads, coords, I[0]):
     setup.addCurrentSource(v, c, r)
@@ -120,7 +129,10 @@ for ii in range(0, tmax, nskip):
     changed = False
     # metrics=[]
 
-    iscale = 1-np.abs(ivals)/imax
+
+    #TODO: fix scaling problem
+
+    iscale = np.abs(ivals)/imax
     for jj in range(len(setup.currentSources)):
         ival = ivals[jj]
         setup.currentSources[jj].value = ival
@@ -132,9 +144,10 @@ for ii in range(0, tmax, nskip):
 
     elif strat == 'depth' or strat == 'd2':
         # Depth strategy
-        scale = (dmax-dmin)*np.max(iscale)
-        dint, dfrac = divmod(scale, 1)
-        maxdepth = dmin+int(dint)
+        scale = dmin+dspan*iscale
+        # dint, dfrac = divmod(np.min(scale), 1)
+        dint=np.rint(np.max(scale))
+        maxdepth = int(dint)
         # print('depth:%d'%maxdepth)
 
         # density=0.25
@@ -143,17 +156,26 @@ for ii in range(0, tmax, nskip):
         else:
             density = 0.2  # +0.2*dfrac
 
-    elif strat == 'fixed':
-        # Static mesh
-        maxdepth = 5
-        density = 0.2
+        metricCoef=2**(-density*scale)
 
+    elif strat[:5] == 'fixed':
+        # Static mesh
+        density = 0.2
+        if strat == 'fixedMax':
+            maxdepth=dmax
+        elif strat == 'fixedMin':
+            maxdepth=dmin
+        else:
+            maxdepth = 5
+        metricCoef=np.ones_like(iscale)*2**(-maxdepth*density)
+
+    netScale=2**(-maxdepth*density)
         # metrics.append(xcell.makeExplicitLinearMetric(maxdepth, density))
 
-    metrics = xcell.makeScaledMetrics(coords, iscale, maxdepth)
-    changed = setup.makeAdaptiveGrid(metrics, maxdepth)
+    # metric = xcell.makeScaledMetrics(maxdepth)
+    changed = setup.makeAdaptiveGrid(coord, maxdepth, xcell.generalMetric, coefs=metricCoef)
 
-    if changed:
+    if changed or ii==0:
         setup.meshnum += 1
         setup.finalizeMesh()
 
@@ -167,7 +189,7 @@ for ii in range(0, tmax, nskip):
 
         study.saveData(setup)  # ,baseName=str(setup.iteration))
     else:
-        vdof = setup.getDoFs()
+        # vdof = setup.getDoFs()
         # v=setup.iterativeSolve(vGuess=vdof)
         # TODO: vguess slows things down?
 
@@ -193,11 +215,11 @@ for ii in range(0, tmax, nskip):
     errdicts.append(errdict)
 
     if vids:
-        # err.addSimulationData(setup,append=True)
+        err.addSimulationData(setup,append=True)
         img.addSimulationData(setup, append=True)
 
 lists = xcell.misc.transposeDicts(errdicts)
-pickle.dump(lists, open(studyPath+strat+'.p', 'wb'))
+pickle.dump(lists, open(studyPath+'/'+strat+'.p', 'wb'))
 # scat=ax.scatter(x,y,c=I[ii],cmap=cmap,norm=norm)
 # title=visualizers.animatedTitle(fig, 't=%g ms'%tv[ii])
 # # tbar=tax.barh(0,tv[ii])
@@ -207,4 +229,4 @@ pickle.dump(lists, open(studyPath+strat+'.p', 'wb'))
 
 if vids:
     ani = img.animateStudy('volt-'+strat, fps=30.)
-    # erAni=err.animateStudy('error-'+strat,fps=30.)
+    erAni=err.animateStudy('error-'+strat,fps=30.)

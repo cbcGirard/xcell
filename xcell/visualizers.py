@@ -18,7 +18,7 @@ import numba as nb
 from scipy.sparse import tril
 import os
 
-import cmasher as cmr
+# import cmasher as cmr
 
 # import matplotlib.tri as tri
 from mpl_toolkits.axes_grid1 import AxesGrid
@@ -2117,10 +2117,11 @@ class ScaleRange:
 
     def get(self, forceBipolar=False):
         isBipolar = (self.min < 0) & (self.max > 0)
-        if isBipolar or forceBipolar:
-            out = np.array([self.min, self.knee, self.max])
-        else:
-            out = np.array([self.min, self.max])
+        # if isBipolar or forceBipolar:
+        #     out = np.array([self.min, self.knee, self.max])
+        # else:
+        #     out = np.array([self.min, self.max])
+        out=np.array([self.min,self.knee,self.max])
         return out
 
 
@@ -2217,10 +2218,11 @@ class SingleSlice(FigureAnimator):
         return artists
 
     def addSimulationData(self, sim, append=False):
+        els, _, edgePts = sim.getElementsInPlane()
 
         if sim.nodeVoltages.shape[0] == 0:
             vArrays = None
-            absArr = None
+            absErr = None
         else:
             vest, _ = sim.analyticalEstimate()
 
@@ -2231,7 +2233,6 @@ class SingleSlice(FigureAnimator):
             # absArr, _ = sim.getValuesInPlane(data=absErr)
 
             # v1d = util.unravelArraySet(vArrays)
-            els, _, edgePts = sim.getElementsInPlane()
 
             vArrays = [resamplePlane(self.ax, sim, elements=els)]
             v1d = vArrays[0].ravel()
@@ -2246,8 +2247,11 @@ class SingleSlice(FigureAnimator):
         if self.dataSrc == 'spaceV':
             data['spaceV'] = vArrays
 
-        if self.dataSrc == '':
-            data['absErr'] = absArr
+        if self.dataSrc == 'absErr':
+            data['absErr'] = [resamplePlane(self.ax,
+                                            sim,
+                                            elements=els,
+                                            data=absErr)]
 
         if append:
             self.dataSets.append(data)

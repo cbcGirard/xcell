@@ -16,7 +16,7 @@ import pickle
 from neuron import h  # , gui
 from neuron.units import ms, mV
 
-import misc
+# import misc
 import time
 
 h.load_file('stdrun.hoc')
@@ -93,17 +93,17 @@ tdata = {
 study = xcell.SimStudy(studyPath, bbox)
 
 if vids:
-    img = xcell.Visualizers.SingleSlice(None, study,
+    img = xcell.visualizers.SingleSlice(None, study,
                                         tvec, tdata)
 
-    err = xcell.Visualizers.SingleSlice(None, study,
+    err = xcell.visualizers.SingleSlice(None, study,
                                         tvec, tdata,
                                         datasrc='absErr')
 
 # img.tax.plot(tvec,vvec)
 # img.tax.set_ylabel('Membrane potential [V]')
 
-
+density=0.2
 # if generate:
 def runRecord(strat, dmax, dmin, maxdepth):
 
@@ -150,6 +150,7 @@ def runRecord(strat, dmax, dmin, maxdepth):
 
     errdicts = []
 
+    density=0.2
     for tval, ival, vval in zip(tvec, ivec, vvec):
 
         t0 = time.monotonic()
@@ -171,17 +172,15 @@ def runRecord(strat, dmax, dmin, maxdepth):
             # density=0.25
             if strat == 'd2':
                 density = 0.5
-            else:
-                density = 0.2  # +0.2*dfrac
 
         elif strat == 'fixed':
             # Static mesh
-            maxdepth = 5
-            density = 0.2
+            maxdepth = 3
 
-        metric = xcell.makeExplicitLinearMetric(maxdepth, density)
 
-        changed = setup.makeAdaptiveGrid(metric, maxdepth)
+        metricCoef=np.array(2**(-maxdepth*density),dtype=np.float64,ndmin=1)
+
+        changed = setup.makeAdaptiveGrid(np.zeros((1,3)), maxdepth, xcell.generalMetric, coefs=metricCoef)
 
         if changed:
             setup.meshnum += 1
@@ -315,7 +314,7 @@ if post:
 
     axes[0].legend(loc='upper left')
 
-    # a2.yaxis.set_major_formatter(xcell.Visualizers.eform('A'))
+    # a2.yaxis.set_major_formatter(xcell.visualizers.eform('A'))
     # a2.grid(axis='y',color='C1')
     # axes[1].grid(axis='y',color='C0')
 
@@ -333,7 +332,7 @@ if post:
     axes[1].plot(tvec, lk['numels'])
 
     axes[1].set_ylabel('Number of\nElements')
-    axes[1].xaxis.set_major_formatter(xcell.Visualizers.eform('s'))
+    axes[1].xaxis.set_major_formatter(xcell.visualizers.eform('s'))
 
     axes[1].set_yscale('log')
 

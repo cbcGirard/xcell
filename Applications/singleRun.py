@@ -13,7 +13,8 @@ import xcell
 import matplotlib.pyplot as plt
 
 
-meshtype = 'uniform'
+# meshtype = 'uniform'
+meshtype= 'adaptive'
 # studyPath='Results/studyTst/miniCur/'#+meshtype
 studyPath = '/dev/null'
 
@@ -22,7 +23,7 @@ elementType = 'Admittance'
 # elementType='Face'
 
 xmax = 1e-4
-maxdepth = 11
+maxdepth = 18
 nX = 10
 
 sigma = np.ones(3)
@@ -165,7 +166,7 @@ setup.logTime()
 
 
 # ##### TOPOLOGY/connectivity
-ax = xcell.visualizers.showMesh(setup)
+# ax = xcell.visualizers.showMesh(setup)
 # ax.set_xticks([])
 # ax.set_yticks([])
 # ax.set_zticks([])
@@ -180,11 +181,11 @@ ax = xcell.visualizers.showMesh(setup)
 #                             setup.edges,
 #                             setup.conductances)
 
-bnodes = setup.mesh.getBoundaryNodes()
-xcell.visualizers.showNodes3d(ax,
-                              setup.mesh.nodeCoords[bnodes],
-                              nodeVals=np.ones_like(bnodes),
-                              colors='r')
+# bnodes = setup.mesh.getBoundaryNodes()
+# xcell.visualizers.showNodes3d(ax,
+#                               setup.mesh.nodeCoords[bnodes],
+#                               nodeVals=np.ones_like(bnodes),
+#                               colors='r')
 
 
 # # # # xcell.visualizers.showMesh(setup)
@@ -197,11 +198,11 @@ xcell.visualizers.showNodes3d(ax,
 # img.getArtists()
 
 
-# ERROR GRAPH
-ptr = xcell.visualizers.ErrorGraph(plt.figure(), study)
-ptr.prefs['universalPts'] = True
-pdata = ptr.addSimulationData(setup)
-ptr.getArtists(0, pdata)
+# # ERROR GRAPH
+# ptr = xcell.visualizers.ErrorGraph(plt.figure(), study)
+# ptr.prefs['universalPts'] = True
+# pdata = ptr.addSimulationData(setup)
+# ptr.getArtists(0, pdata)
 
 
 # _,basicAna,basicErr,_=setup.estimateVolumeError(basic=True)
@@ -216,7 +217,7 @@ ptr.getArtists(0, pdata)
 
 # print('Error metrics:\nbasic vol:%g\nadv vol:%g\narea%g'%(errBasic,errAdv,es))
 
-# LOGLOG Error
-P = xcell.visualizers.LogError(None, study)
-P.addSimulationData(setup, True)
-P.getArtists(0)
+# # LOGLOG Error
+# P = xcell.visualizers.LogError(None, study)
+# P.addSimulationData(setup, True)
+# P.getArtists(0)

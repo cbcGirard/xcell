@@ -91,3 +91,63 @@ class Cylinder:
 
             isIn[ii] = 0 <= dz <= self.length and dr <= self.radius
         return isIn
+
+
+@nb.njit()
+def isInBBox(bbox,point):
+    gt=np.greater_equal(point, bbox[:3])
+    lt=np.less_equal(point,bbox[3:])
+
+    return np.all(np.logical_and(lt,gt))
+
+
+@nb.njit()
+def avgPoints(pts):
+    center=np.zeros(3)
+
+    for ii in nb.prange(pts.shape[0]):
+        center+=pts[ii,:]
+
+    center/=pts.shape[0]
+
+    return center
+
+
+
+@nb.njit()
+def calcTriNormals(pts,surf):
+    ntris=surf.shape[0]
+    norms=np.empty((ntris,3))
+
+    for ii in nb.prange(ntris):
+        inds=surf[ii,:]
+        a=pts[inds[0],:]-pts[inds[1],:]
+        b=pts[inds[1],:]-pts[inds[2],:]
+
+        tmp=np.cross(a, b)
+        norms[ii,:]=tmp/np.linalg.norm(tmp)
+
+    return norms
+
+
+# @nb.njit()
+def fixTriNormals(pts,surf):
+    norms=calcTriNormals(pts,surf)
+
+    uniqueInds=np.unique(surf.ravel())
+    ctr=avgPoints(pts[uniqueInds])
+
+    fixedSurf=np.empty_like(surf)
+    ntri=surf.shape[0]
+
+
+    for ii in nb.prange(ntri):
+        triCtr=avgPoints(pts[surf[ii],:])
+        ok=np.dot(norms[ii,:],triCtr-ctr)>0
+
+        if ok:
+            fixedSurf[ii,:]=surf[ii,:]
+        else:
+            fixedSurf[ii,:]=np.flip(surf[ii,:])
+
+    return fixedSurf

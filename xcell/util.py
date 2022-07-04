@@ -184,6 +184,9 @@ def condenseIndices(globalMask):
 # @nb.njit(parallel=True)
 
 
+
+
+
 @nb.njit()
 def getIndexDict(sparseIndices):
     """
@@ -706,6 +709,21 @@ def pos2index(pos, dX):
     newNdx = intdot(pos, vals)
 
     return newNdx
+
+@nb.njit()
+def reduceFunctions(l0Function, refPts, elBBox, coefs=None, returnUnder=True):
+    nFun=refPts.shape[0]
+
+    l0s=l0Function(elBBox,refPts,coefs)
+
+    actualL0=np.prod(elBBox[3:]-elBBox[:3])**(1/3)
+
+    whichPts=np.logical_xor(l0s>actualL0,returnUnder)
+
+    # nextPts=refPts[whichPts]
+
+    return np.min(l0s),whichPts
+
 
 
 @nb.njit()  # ,parallel=True)
