@@ -34,34 +34,32 @@ strat = 'depth'
 # strat = 'fixedMin'
 # strat = 'fixedMax'
 
-dmax = 8
-dmin = 3
+dmax = 10
+dmin = 4
 
 resultDir = 'Quals/NEURON/ring'+str(nRing)+strat
 
 vids = True
-nskip = 10
+nskip = 2
 
-ring = Common.Ring(N=nRing, stim_delay=0,dendSegs=nSegs,r=175)
-# shape_window=h.PlotShape(True)
-# shape_window.show(0)
+ring = Common.Ring(N=nRing, stim_delay=0, dendSegs=nSegs, r=175)
+tstop = 40
 
-
-# for cell in ring.cells:
-#     cell.dend.nseg = nSegs
-#     h.define_shape()
-
-#
-
+#single compartment
+# ring = Common.Ring(N=1, stim_delay=0, dendSegs=1, r=0)
+# tstop=10
 
 ivecs, isSphere, coords, rads = nUtil.getNeuronGeometry()
 
 t = h.Vector().record(h._ref_t)
 h.finitialize(-65 * mV)
-h.continuerun(40)
+h.continuerun(tstop)
 
 
-I = -1e-9*np.array(ivecs).transpose()
+I = 1e-9*np.array(ivecs).transpose()
+analyticVmax=I/(4*np.pi*np.array(rads,ndmin=2))
+
+print('Vrange\n%.2g\t%.2g\n'%(np.min(analyticVmax), np.max(analyticVmax)))
 imax = np.max(np.abs(I))
 cmap, norm = xcell.visualizers.getCmap(
     I.ravel(), forceBipolar=True, logscale=True)
@@ -157,6 +155,7 @@ for ii in range(0, tmax, nskip):
             density = 0.2  # +0.2*dfrac
 
         metricCoef=2**(-density*scale)
+        # metricCoef=2**(-density*dmax*iscale)
 
     elif strat[:5] == 'fixed':
         # Static mesh

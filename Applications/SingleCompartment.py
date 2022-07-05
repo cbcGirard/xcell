@@ -22,22 +22,22 @@ import time
 h.load_file('stdrun.hoc')
 h.CVode().use_fast_imem(1)
 
+strat = 'depth'
 
-datadir = '/home/benoit/smb4k/ResearchData/Results/NEURON/'  # +meshtype
+datadir = '/home/benoit/smb4k/ResearchData/Results/Quals/NEURON/singleCompartment/'  # +meshtype
 # studyPath=datadir+'tmp/coarse/'
-studyPath = datadir+'fixedGroup/'
+studyPath = datadir+strat+'/'
 
 
 generate = True
 vids = True
-post = True
+post = False
 
 
 # generate=False
 # vids=False
 # post=True
 
-strat = 'fixed'
 dmax = 10
 dmin = 3
 maxdepth = 3
@@ -67,7 +67,7 @@ h.continuerun(12)
 
 # plt.scatter(t,ring.cells[0].ivec)
 
-ivec = -ring.cells[0].ivec.as_numpy()*1e-9
+ivec = ring.cells[0].ivec.as_numpy()*1e-9
 tvec = t.as_numpy()*1e-3
 vvec = ring.cells[0].soma_v.as_numpy()*1e-3
 
@@ -95,10 +95,12 @@ study = xcell.SimStudy(studyPath, bbox)
 if vids:
     img = xcell.visualizers.SingleSlice(None, study,
                                         tvec, tdata)
-
     err = xcell.visualizers.SingleSlice(None, study,
                                         tvec, tdata,
                                         datasrc='absErr')
+
+    animators=[img, err]
+    [xcell.nrnutil.showCellGeo(an.ax) for an in animators]
 
 # img.tax.plot(tvec,vvec)
 # img.tax.set_ylabel('Membrane potential [V]')
@@ -114,21 +116,8 @@ def runRecord(strat, dmax, dmin, maxdepth):
                            np.zeros(3),
                            1e-6*ring.cells[0].soma.diam3d(0)/2)
 
-    # # maxdepth=5
-    # maxdepth=6
-
-    # dmin=6
-    # dmax=8
-
     lastNumEl = 0
     lastI = 0
-    numels = []
-    Emax = []
-    Emin = []
-    Eavg = []
-    Esum = []
-    depths = []
-    densities = []
 
     lists = {
         'numels': [],
@@ -150,11 +139,10 @@ def runRecord(strat, dmax, dmin, maxdepth):
 
     errdicts = []
 
-    density=0.2
     for tval, ival, vval in zip(tvec, ivec, vvec):
 
         t0 = time.monotonic()
-        setup.currentSources[0].value = -ival
+        setup.currentSources[0].value = ival
         setup.currentTime = tval
 
         if strat == 'k':
@@ -220,7 +208,6 @@ def runRecord(strat, dmax, dmin, maxdepth):
                           setup.currentTime, setup.meshnum])
 
         setup.stepLogs = []
-        numels.append(lastNumEl)
 
         print('%d percent done' % (int(100*tval/tmax)))
 

@@ -700,7 +700,7 @@ class Simulation:
 
         return vDoF
 
-    def iterativeSolve(self, vGuess=None, tol=1e-9):
+    def iterativeSolve(self, vGuess=None, tol=1e-12):
         """
         Solve nodal voltages using conjgate gradient method.
 

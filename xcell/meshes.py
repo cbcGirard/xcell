@@ -774,7 +774,12 @@ class Octant():
         """
         changed = False
         _,whichPts=util.reduceFunctions(metric, refPts, self.bbox, coefs=coefs, returnUnder=False)
-        undersize=np.all(whichPts)
+
+        #let metric implicitly prune if maxdepth lowered
+        #causes insufficient meshing otherwise
+        # undersize=np.all(whichPts) #or self.depth<maxdepth
+        undersize=np.all(whichPts) or self.depth<maxdepth
+
 
         if self.isTerminal():
             #end condition
@@ -786,12 +791,12 @@ class Octant():
                 changed |= chChanged
                 undersize &= chUnder
 
-                if undersize:
-                    changed=True
-                    for ch in self.children:
-                        del ch
-                    self.children=[]
-                    self.calcIndices()
+            if undersize:
+                changed=True
+                for ch in self.children:
+                    del ch
+                self.children=[]
+                self.calcIndices()
 
         return changed, undersize
 
