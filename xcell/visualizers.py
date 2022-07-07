@@ -2141,7 +2141,8 @@ class SingleSlice(FigureAnimator):
         self.dataScales = {
             'spaceV': ScaleRange(),
             'absErr': ScaleRange(),
-            'relErr': ScaleRange()
+            'relErr': ScaleRange(),
+            'vAna': ScaleRange(),
         }
 
         self.timevec = timevec
@@ -2194,7 +2195,7 @@ class SingleSlice(FigureAnimator):
             # if setnum==0:
             mapper = mpl.cm.ScalarMappable(norm=cNorm, cmap=cMap)
 
-            if self.dataSrc == 'spaceV' or self.dataSrc == 'absErr':
+            if self.dataSrc == 'spaceV' or self.dataSrc == 'absErr' or self.dataSrc == 'vAna':
                 cbarFormat = eform('V')
             else:
                 cbarFormat = mpl.ticker.PercentFormatter(xmax=1.,
@@ -2226,8 +2227,10 @@ class SingleSlice(FigureAnimator):
         else:
             vest, _ = sim.analyticalEstimate()
 
-            absErr = sim.nodeVoltages-vest[0]
-            relErr = absErr/np.abs(vest[0])
+            vAna = np.sum(vest,axis=0)
+
+            absErr = sim.nodeVoltages-vAna
+            relErr = absErr/np.abs(vAna)
 
             # vArrays, _ = sim.getValuesInPlane()
             # absArr, _ = sim.getValuesInPlane(data=absErr)
@@ -2240,6 +2243,7 @@ class SingleSlice(FigureAnimator):
             self.dataScales['spaceV'].update(v1d)
             # self.dataScales['relErr'].update(relErr)
             self.dataScales['absErr'].update(absErr)
+            self.dataScales['vAna'].update(vAna)
 
         data = {
             'meshPts': edgePts}
@@ -2252,6 +2256,12 @@ class SingleSlice(FigureAnimator):
                                             sim,
                                             elements=els,
                                             data=absErr)]
+
+        if self.dataSrc == 'vAna':
+            data['vAna'] = [resamplePlane(self.ax,
+                                          sim,
+                                          elements=els,
+                                          data=absErr)]
 
         if append:
             self.dataSets.append(data)

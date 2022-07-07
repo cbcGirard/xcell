@@ -491,17 +491,11 @@ class Simulation:
             self.nodeRoleTable[indices] = 1
             self.nodeRoleVals[indices] = ii
 
-            # self.vSourceNodes.extend(indices)
-            # self.vSourceVals.extend(src.value*np.ones(len(indices)))
             self.nodeVoltages[indices] = src.value
 
-        # if 'nodeISources' in self.__dict__:
-        #     if len(self.nodeISources)>0:
-        #         meshCurrentSrc=self.nodeISources
-        # else:
-        #     meshCurrentSrc = []
-
-        meshCurrentSrc=self.nodeISources
+        # meshCurrentSrc=self.nodeISources
+        # meshCurrentSrc=[0 for k in self.nodeISources]
+        meshCurrentSrc=[]
 
 
         for ii in nb.prange(len(self.currentSources)):
@@ -527,17 +521,10 @@ class Simulation:
                 if self.nodeRoleTable[idx] == 2:
                     # node is already claimed by source
                     sharedIdx = self.nodeRoleVals[idx]
-                    # if sharedIdx<=len(meshCurrentSrc):
-                    #     meshCurrentSrc.append(src.value)
                     # add to value of existing node source
                     if sharedIdx>=len(meshCurrentSrc):
                         print('')
                     meshCurrentSrc[sharedIdx] += src.value
-                    # else:
-                    #     #this shouldn't happen...?
-                    #     self.nodeRoleVals[idx]=len(meshCurrentSrc)
-                    #     meshCurrentSrc.append((src.value))
-
                 else:
                     # normal, set as current dof
                     self.nodeRoleTable[idx] = 2
@@ -1299,7 +1286,24 @@ class Simulation:
         return coords, edges
 
     def interpolateAt(self, coords, elements=None, data=None):
+        """
+        Interpolate values at specified coordinates.
 
+        Parameters
+        ----------
+        coords : float[:,:]
+            Coordinates to interpolate ate.
+        elements : element list, optional
+            Elements to search for the proper interpolation. The default is None, which checks all elements.
+        data : float[:], optional
+            Nodal values used for interpolation. The default is None, which uses node voltages.
+
+        Returns
+        -------
+        vals : float[:]
+            Interpolated values at the specfied points
+
+        """
         vals = np.empty(coords.shape[0])
         unknown = np.ones_like(vals, dtype=bool)
 

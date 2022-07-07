@@ -731,21 +731,23 @@ class Octant():
     def refineByMetric(self, l0Function, refPts, maxDepth, coefs):
         changed = False
         l0Target,whichPts=util.reduceFunctions(l0Function,refPts, self.bbox, coefs=coefs)
-        nextPts=refPts[whichPts]
+        filt=np.logical_and(whichPts,maxDepth>self.depth)
+        nextPts=refPts[filt]
+        nextMaxDepths=maxDepth[filt]
 
         if coefs is not None:
-            nextCoefs=coefs[whichPts]
+            nextCoefs=coefs[filt]
         else:
             nextCoefs=coefs
 
-        if nextPts.shape[0]>0 and self.depth<maxDepth:
+        if nextPts.shape[0]>0:# and self.depth<maxDepth:
             if len(self.children)==0:
                 changed=True
                 self.split()
             for ii in nb.prange(8):
                 changed|=self.children[ii].refineByMetric(l0Function,
                                                           nextPts,
-                                                          maxDepth, nextCoefs)
+                                                          nextMaxDepths, nextCoefs)
 
         return changed
 
@@ -778,8 +780,9 @@ class Octant():
         #let metric implicitly prune if maxdepth lowered
         #causes insufficient meshing otherwise
         # undersize=np.all(whichPts) #or self.depth<maxdepth
-        undersize=np.all(whichPts) or self.depth<maxdepth
 
+        filt=np.logical_or(whichPts,maxdepth<self.depth)
+        undersize=np.all(filt)
 
         if self.isTerminal():
             #end condition

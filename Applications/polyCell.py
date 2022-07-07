@@ -26,30 +26,40 @@ from matplotlib.lines import Line2D
 h.load_file('stdrun.hoc')
 h.CVode().use_fast_imem(1)
 
+mpl.style.use('fast')
 
+
+#set nring=0 for single compartment
 nRing = 5
 nSegs = 5
 
-strat = 'depth'
-# strat = 'fixedMin'
+# strat = 'depth'
+strat = 'fixedMin'
 # strat = 'fixedMax'
 
-dmax = 10
+dmax = 8
 dmin = 4
 
 resultDir = 'Quals/NEURON/ring'+str(nRing)+strat
 
-vids = True
-nskip = 2
+vids = False
+nskip = 1
 
-ring = Common.Ring(N=nRing, stim_delay=0, dendSegs=nSegs, r=175)
-tstop = 40
 
-#single compartment
-# ring = Common.Ring(N=1, stim_delay=0, dendSegs=1, r=0)
-# tstop=10
+
+if nRing == 0:
+    ring = Common.Ring(N=1, stim_delay=0, dendSegs=1, r=0)
+    tstop=12
+else:
+    ring = Common.Ring(N=nRing, stim_delay=0, dendSegs=nSegs, r=175)
+    tstop = 40
 
 ivecs, isSphere, coords, rads = nUtil.getNeuronGeometry()
+if nRing == 0:
+    ivecs.pop()
+    coords.pop()
+    rads.pop()
+
 
 t = h.Vector().record(h._ref_t)
 h.finitialize(-65 * mV)
@@ -58,28 +68,18 @@ h.continuerun(tstop)
 
 I = 1e-9*np.array(ivecs).transpose()
 analyticVmax=I/(4*np.pi*np.array(rads,ndmin=2))
+vPeak=np.max(np.abs(analyticVmax))
 
 print('Vrange\n%.2g\t%.2g\n'%(np.min(analyticVmax), np.max(analyticVmax)))
 imax = np.max(np.abs(I))
-cmap, norm = xcell.visualizers.getCmap(
-    I.ravel(), forceBipolar=True, logscale=True)
 
-# fig=plt.figure()
-# ax=plt.gca()
 
 coord = np.array(coords)
 xmax = 1.5*np.max(np.concatenate(
     (np.max(coord, axis=0), np.min(coord, axis=0))
 ))
-
-
-x, y, z = np.hsplit(coord, 3)
-
-tht = np.linspace(0, 2*np.pi)
-
-# to numpy arrays
-selSphere = np.array(isSphere)
-rvec = np.array(rads)
+if xmax<=0:
+    xmax=1e-4
 
 
 lastNumEl = 0
@@ -96,20 +96,22 @@ studyPath = study.studyPath
 dspan=dmax-dmin
 
 
-# nskip=len(tv)
-
-# tdata={
-#        'x': tv}
-
 if vids:
     img = xcell.visualizers.SingleSlice(None, study,
                                         tv)
-    nUtil.showCellGeo(img.axes[0])
 
     err=xcell.visualizers.SingleSlice(None, study,
                                       tv)
-    err.dataSrc='absErr'
+    # err.dataSrc='absErr'
+    err.dataSrc='vAna'
 
+    animators=[img,err]
+
+    [nUtil.showCellGeo(an.axes[0]) for an in animators]
+    # animators=[xcell.visualizers.ErrorGraph(None, study)]
+    # animators.append(xcell.visualizers.LogError(None,study))
+
+iEffective=[]
 for r, c, v in zip(rads, coords, I[0]):
     setup.addCurrentSource(v, c, r)
 
@@ -121,6 +123,7 @@ for ii in range(0, tmax, nskip):
     t0 = time.monotonic()
     ivals = I[ii]
     tval = tv[ii]
+    vScale=np.abs(analyticVmax[ii])/vPeak
 
     setup.currentTime = tval
 
@@ -137,15 +140,15 @@ for ii in range(0, tmax, nskip):
 
     if strat == 'k':
         # k-param strategy
-        density = 0.4*np.max(iscale)
+        density = 0.4*iscale
         # print('density:%.2g'%density)
 
     elif strat == 'depth' or strat == 'd2':
         # Depth strategy
-        scale = dmin+dspan*iscale
+        scale = dmin+dspan*vScale
         # dint, dfrac = divmod(np.min(scale), 1)
-        dint=np.rint(np.max(scale))
-        maxdepth = int(dint)
+        dint=np.rint(scale)
+        maxdepth = np.rint(scale).astype(int)
         # print('depth:%d'%maxdepth)
 
         # density=0.25
@@ -161,17 +164,16 @@ for ii in range(0, tmax, nskip):
         # Static mesh
         density = 0.2
         if strat == 'fixedMax':
-            maxdepth=dmax
+            maxdepth=dmax*np.ones_like(iscale)
         elif strat == 'fixedMin':
-            maxdepth=dmin
+            maxdepth=dmin*np.ones_like(iscale)
         else:
             maxdepth = 5
-        metricCoef=np.ones_like(iscale)*2**(-maxdepth*density)
+        metricCoef=2**(-maxdepth*density)
 
     netScale=2**(-maxdepth*density)
-        # metrics.append(xcell.makeExplicitLinearMetric(maxdepth, density))
 
-    # metric = xcell.makeScaledMetrics(maxdepth)
+
     changed = setup.makeAdaptiveGrid(coord, maxdepth, xcell.generalMetric, coefs=metricCoef)
 
     if changed or ii==0:
@@ -187,10 +189,13 @@ for ii in range(0, tmax, nskip):
         setup.iteration += 1
 
         study.saveData(setup)  # ,baseName=str(setup.iteration))
+        print('%d source nodes'%sum(setup.nodeRoleTable==2))
     else:
         # vdof = setup.getDoFs()
         # v=setup.iterativeSolve(vGuess=vdof)
         # TODO: vguess slows things down?
+
+        setup.nodeRoleTable[setup.nodeRoleTable==2]=0
 
         v = setup.iterativeSolve()
 
@@ -213,19 +218,19 @@ for ii in range(0, tmax, nskip):
     errdict['vMax'] = max(np.abs(v))
     errdicts.append(errdict)
 
+    iEffective.append(setup.nodeISources)
+
     if vids:
-        err.addSimulationData(setup,append=True)
-        img.addSimulationData(setup, append=True)
+        [an.addSimulationData(setup,append=True) for an in animators]
+        # err.addSimulationData(setup,append=True)
+        # img.addSimulationData(setup, append=True)
 
 lists = xcell.misc.transposeDicts(errdicts)
 pickle.dump(lists, open(studyPath+'/'+strat+'.p', 'wb'))
-# scat=ax.scatter(x,y,c=I[ii],cmap=cmap,norm=norm)
-# title=visualizers.animatedTitle(fig, 't=%g ms'%tv[ii])
-# # tbar=tax.barh(0,tv[ii])
-# tbar=tax.vlines(tv[ii],0,1)
-# arts.append([scat,title,tbar])
+
 
 
 if vids:
-    ani = img.animateStudy('volt-'+strat, fps=30.)
-    erAni=err.animateStudy('error-'+strat,fps=30.)
+    # ani = img.animateStudy('volt-'+strat, fps=30.)
+    # erAni=err.animateStudy('error-'+strat,fps=30.)
+    erAn=[an.animateStudy(fps=30.) for an in animators]

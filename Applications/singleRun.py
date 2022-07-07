@@ -23,7 +23,7 @@ elementType = 'Admittance'
 # elementType='Face'
 
 xmax = 1e-4
-maxdepth = 18
+maxdepth = 8
 nX = 10
 
 sigma = np.ones(3)
@@ -84,7 +84,10 @@ else:
 
     metric = [xcell.makeExplicitLinearMetric(maxdepth, 0.2)]
 
-    setup.makeAdaptiveGrid(metric, maxdepth)
+    setup.makeAdaptiveGrid(refPts=np.zeros((1,3)),
+                           maxdepth=np.array(maxdepth, ndmin=1),
+                           minl0Function=xcell.generalMetric,
+                           coefs=np.ones(1))
 
 
 boundaryFun = None
@@ -111,113 +114,74 @@ print('error: %g' % errEst)
 setup.logTime()
 
 
-# Tweaking error metrics
-# setup.nodeVoltages=np.zeros_like(setup.nodeVoltages)
-# r=np.linalg.norm(setup.mesh.nodeCoords,axis=1)
-# va,_=setup.analyticalEstimate(r)
-# setup.nodeVoltages=.2*va[0]
-
-
-# pt,val=setup.getUniversalPoints()
-# coords=xcell.util.indexToCoords(pt, study.bbox[:3],study.span)
-
-# setup.mesh.nodeCoords=coords
-# setup.nodeVoltages=val
-
-# ax=plt.gca()
-# sv=xcell.visualizers.SliceViewer(ax, setup)
+# %%
+# Interactive slice viewer (use arrow keys to change location)
+sv=xcell.visualizers.SliceViewer(axis=None, setup)
 # sv.nodeData=pt
 
+# %%
+# 2d image
+bnd=setup.mesh.bbox[[0,3,2,4]]
 
-# ax=xcell.visualizers.new3dPlot(study.bbox)
-# cmap,cnorm=xcell.visualizers.getCmap(val,forceBipolar=True)
-# xcell.visualizers.showNodes3d(ax, coords, val,cMap=cmap,cNorm=cnorm)
+arr,_=setup.getValuesInPlane()
+cMap,cNorm=xcell.visualizers.getCmap(setup.nodeVoltages,forceBipolar=True)
+xcell.visualizers.patchworkImage(plt.figure().gca(),
+                                  arr, cMap, cNorm,
+                                  extent=bnd)
 
+ax=plt.figure().add_subplot()
+xcell.visualizers.formatXYAxis(ax,bnd)
+arr=xcell.visualizers.resamplePlane(ax, setup)
 
-# # 2d image
-# bnd=setup.mesh.bbox[[0,3,2,4]]
+cMap,cNorm=xcell.visualizers.getCmap(arr.ravel(),forceBipolar=True)
+xcell.visualizers.patchworkImage(ax,
+                                  [arr], cMap, cNorm,
+                                  extent=bnd)
 
-# # arr,_=setup.getValuesInPlane()
-# # cMap,cNorm=xcell.visualizers.getCmap(setup.nodeVoltages,forceBipolar=True)
-# # xcell.visualizers.patchworkImage(plt.figure().gca(),
-# #                                   arr, cMap, cNorm,
-# #                                   extent=bnd)
-
-# ax=plt.figure().add_subplot()
-# xcell.visualizers.formatXYAxis(ax,bnd)
-# arr=xcell.visualizers.resamplePlane(ax, setup)
-
-# cMap,cNorm=xcell.visualizers.getCmap(arr.ravel(),forceBipolar=True)
-# xcell.visualizers.patchworkImage(ax,
-#                                   [arr], cMap, cNorm,
-#                                   extent=bnd)
-
-# _,_,edgePoints=setup.getElementsInPlane()
-# xcell.visualizers.showEdges2d(ax, edgePoints)
+_,_,edgePoints=setup.getElementsInPlane()
+xcell.visualizers.showEdges2d(ax, edgePoints)
 
 
-# # setup.mesh.elementType='Admittance'
-# setup.finalizeMesh()
-
-# els=setup.getElementsInPlane()
-# eg,_=setup.mesh.getConductances(els)
-# medges=xcell.util.renumberIndices(eg,setup.mesh.indexMap)
-# mcoords=setup.mesh.nodeCoords
-
-
-# ##### TOPOLOGY/connectivity
-# ax = xcell.visualizers.showMesh(setup)
-# ax.set_xticks([])
-# ax.set_yticks([])
-# ax.set_zticks([])
-# ghost=(.0, .0, .0, 0.0)
-# ax.xaxis.set_pane_color(ghost)
-# ax.yaxis.set_pane_color(ghost)
-# ax.zaxis.set_pane_color(ghost)
+# %%
+##### TOPOLOGY/connectivity
+ax = xcell.visualizers.showMesh(setup)
+ax.set_xticks([])
+ax.set_yticks([])
+ax.set_zticks([])
+ghost=(.0, .0, .0, 0.0)
+ax.xaxis.set_pane_color(ghost)
+ax.yaxis.set_pane_color(ghost)
+ax.zaxis.set_pane_color(ghost)
 
 
-# xcell.visualizers.showEdges(ax,
-#                             setup.mesh.nodeCoords,
-#                             setup.edges,
-#                             setup.conductances)
+xcell.visualizers.showEdges(ax,
+                            setup.mesh.nodeCoords,
+                            setup.edges,
+                            setup.conductances)
 
-# bnodes = setup.mesh.getBoundaryNodes()
-# xcell.visualizers.showNodes3d(ax,
-#                               setup.mesh.nodeCoords[bnodes],
-#                               nodeVals=np.ones_like(bnodes),
-#                               colors='r')
-
-
-# # # # xcell.visualizers.showMesh(setup)
-# # eg=xcell.visualizers.ErrorGraph(plt.figure(), study)
-# # eg.addSimulationData(setup)
-# # eg.getArtists()
-
-# img=xcell.visualizers.SliceSet(plt.figure(),study)
-# img.addSimulationData(setup)
-# img.getArtists()
+bnodes = setup.mesh.getBoundaryNodes()
+xcell.visualizers.showNodes3d(ax,
+                              setup.mesh.nodeCoords[bnodes],
+                              nodeVals=np.ones_like(bnodes),
+                              colors='r')
 
 
-# # ERROR GRAPH
-# ptr = xcell.visualizers.ErrorGraph(plt.figure(), study)
-# ptr.prefs['universalPts'] = True
-# pdata = ptr.addSimulationData(setup)
-# ptr.getArtists(0, pdata)
+
+# %%
+img=xcell.visualizers.SliceSet(plt.figure(),study)
+img.addSimulationData(setup,append=True)
+img.getArtists(0)
+
+# %%
+# ERROR GRAPH
+ptr = xcell.visualizers.ErrorGraph(plt.figure(), study)
+ptr.prefs['universalPts'] = True
+pdata = ptr.addSimulationData(setup)
+ptr.getArtists(0, pdata)
 
 
-# _,basicAna,basicErr,_=setup.estimateVolumeError(basic=True)
-# _,advAna,advErr,_=setup.estimateVolumeError(basic=False)
-
-# errBasic=sum(basicErr)/sum(basicAna)
-# errAdv=sum(advErr)/sum(advAna)
-
-
-# es,err,ana,sr,r=setup.calculateErrors()
-
-
-# print('Error metrics:\nbasic vol:%g\nadv vol:%g\narea%g'%(errBasic,errAdv,es))
-
-# # LOGLOG Error
-# P = xcell.visualizers.LogError(None, study)
-# P.addSimulationData(setup, True)
-# P.getArtists(0)
+# %%
+# LOGLOG Error
+P = xcell.visualizers.LogError(None, study)
+P.addSimulationData(setup, True)
+P.getArtists(0)
