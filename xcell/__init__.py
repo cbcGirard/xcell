@@ -10,4 +10,5 @@ from . import meshes
 from . import visualizers
 from . import nrnutil
 from . import io
+from . import colors
 from .xCell import *

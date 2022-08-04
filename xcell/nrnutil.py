@@ -12,7 +12,7 @@ from neuron import h
 import numpy as np
 from matplotlib.lines import Line2D
 from matplotlib.collections import PolyCollection
-from .visualizers import FAINT
+from .colors import FAINT
 
 
 def returnSegmentCoordinates(section):

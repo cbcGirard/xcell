@@ -30,7 +30,7 @@ from . import meshes
 from . import geometry
 from .fem import ADMITTANCE_EDGES
 from . import misc
-
+from . import colors
 
 # @nb.experimental.jitclass([
 #     ('value',float64),
@@ -851,11 +851,14 @@ class Simulation:
         ana, anaInt = self.analyticalEstimate()
         analyticInt = anaInt[0]
 
+        netAna=np.sum(ana,axis=0)
+
         for el in self.mesh.elements:
             span = el.span
             inds = np.array([self.mesh.inverseIdxMap[v] for v in el.vertices])
             vals = self.nodeVoltages[inds]
-            avals = ana[0][inds]
+
+            avals = netAna[inds]
             dvals = np.abs(vals-avals)
 
             if basic:
@@ -1710,13 +1713,14 @@ class SimStudy:
 
     def savePlot(self, fig, fileName, ext=None):
         if ext is None:
-            fnames = [self.__makepath(fileName, x) for x in ['.png', '.eps']]
+            fnames = [self.__makepath(fileName, x) for x in ['.png', '.svg', '.eps']]
 
             for f in fnames:
-                fig.savefig(f)
+                fig.savefig(f, transparent=True)
+
         else:
             fname = self.__makepath(fileName, ext)
-            fig.savefig(fname)
+            fig.savefig(fname, transparent=True)
 
     def __makepath(self, fileName, ext):
         basepath = os.path.join(self.studyPath)

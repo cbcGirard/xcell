@@ -29,110 +29,18 @@ import pandas
 # from util import uniformResample, edgeRoles, getquads, quadsToMaskedArrays, coords2MaskedArrays
 from . import util
 from . import misc
+from . import colors
 
 MAX_LOG_SPAN = 2
 
-styleScope = {
-    'axes.prop_cycle': mpl.cycler('color', ['#ffff00', '#00ffff', '#ff00ff', '#00ff00', '#ff0000', '#0000ff', '#ff8000', '#8000ff', '#ff0080', '#0080ff'])}
-
-styleXcell = {
-    'axes.grid': True,
-    'figure.frameon': False,
-    'figure.autolayout': True,
-    'lines.markersize': 1.0,
-    'legend.loc': 'upper right',
-    'image.cmap': 'plasma',
-    'image.aspect': 'equal',
-    'image.origin': 'lower',
-
-    'scatter.marker': '.',
-    'path.simplify': True,
-
-    'axes3d.grid': False,
-
-    'axes.facecolor': '#19232d',
-    'figure.edgecolor': '#19232d',
-    'figure.facecolor': '#19232d',
-    'savefig.edgecolor': '#19232d',
-    'savefig.facecolor': '#19232d',
-
-
-    'axes.edgecolor': '#dcd4c7',
-    'axes.labelcolor': '#dcd4c7',
-    'boxplot.boxprops.color': '#dcd4c7',
-    'boxplot.capprops.color': '#dcd4c7',
-    'boxplot.flierprops.color': '#dcd4c7',
-    'boxplot.flierprops.markeredgecolor': '#dcd4c7',
-    'boxplot.whiskerprops.color': '#dcd4c7',
-    'grid.color': '#dcd4c7',
-    'lines.color': '#dcd4c7',
-    'patch.edgecolor': '#dcd4c7',
-    'text.color': '#dcd4c7',
-    'xtick.color': '#dcd4c7',
-    'ytick.color': '#dcd4c7',
-
-    'grid.alpha': 0.5}
-
-plt.style.use(styleScope)
-plt.style.use(styleXcell)
-# try:
-#     plt.style.use('../scope.mplstyle')
-#     plt.style.use('../xcell.mplstyle')
-# except:
-#     try:
-#         plt.style.use('./scope.mplstyle')
-#         plt.style.use('./xcell.mplstyle')
-#     except:
-#         print('oops')
-#         pass
-
-
-def scoopCmap(baseCmap, fraction=0.1):
-    col = np.array(baseCmap.colors)
-
-    x = np.linspace(-1, 1, col.shape[0]).reshape((-1, 1))
-    alpha = np.abs(x/fraction)
-    alpha[alpha > 1.] = 1.
-
-    newcol = np.hstack((col, alpha))
-
-    newCmap = mpl.colors.LinearSegmentedColormap.from_list(
-        baseCmap.name+'_mod', newcol)
-    return newCmap
-
-
-# Dark mode
-MESH_ALPHA = 0.25
-FAINT = (0xaf/255, 0xcf/255, 1., MESH_ALPHA)
-
-# CM_BIPOLAR=scoopCmap(cmr.wildfire, fraction=0.5)
-# CM_BIPOLAR=scoopCmap(cmr.guppy, fraction=0.1)
-# CM_BIPOLAR=scoopCmap(cmr.neon, fraction=0.2)
-
-colAr = [[0, 0, 1, 1],
-         [.098, .137, .176, 0],
-         [1, 0, 0, 1]]
-# colAr=[[0,1,0,1],[0,0.5,0.5,1],[0,0,1,0],[0.5,0.5,0,1],[1,0,0,1]]
-
-CM_BIPOLAR = mpl.colors.LinearSegmentedColormap.from_list('bipolar',
-                                                          np.array(colAr,
-                                                                   dtype=float))
-
-
-BASE = '#afcfff'
-NULL = '#00000000'
-ACCENT_DARK = '#990000'
-ACCENT_LIGHT = '#FFCC00'
-LINE = '#dcd4c7'
-plx = np.array(mpl.colormaps.get('plasma').colors)
-lint = np.array(np.linspace(0, 1, num=plx.shape[0]), ndmin=2).transpose()
-CM_MONO = mpl.colors.LinearSegmentedColormap.from_list('mono',
-                                                       np.hstack((plx, lint)))
+colors.useDarkStyle()
 
 
 def engineerTicks(axis, xunit=None, yunit=None):
-    axis.xaxis.set_major_formatter(eform(xunit))
-    axis.yaxis.set_major_formatter(eform(yunit))
+    if xunit is not None:
+        axis.xaxis.set_major_formatter(eform(xunit))
+    if yunit is not None:
+        axis.yaxis.set_major_formatter(eform(yunit))
 
 
 class TimingBar:
@@ -192,7 +100,7 @@ class TimingBar:
 
         else:
             art.append(self.ax.vlines(time, .8*ymin, .8*ymax,
-                                      colors=BASE,
+                                      colors=colors.BASE,
                                       linewidths=.5))
 
         return art
@@ -763,7 +671,7 @@ def showEdges(axis, coords, edgeIndices, edgeVals=None, colorbar=True, **kwargs)
 
         else:
 
-            kwargs['colors'] = BASE
+            kwargs['colors'] = colors.BASE
             kwargs['alpha'] = 0.05
 
     gCollection = p3d.art3d.Line3DCollection(
@@ -866,7 +774,7 @@ def getCmap(vals, forceBipolar=False, logscale=False):
         #        [1.0, 0.5, 0.5, 1.0],
         #        [1.0, 0.0, 0.0, 1.0]]
         # cMap=mpl.colors.LinearSegmentedColormap.from_list('biBR', clist)
-        cMap = CM_BIPOLAR
+        cMap = colors.CM_BIPOLAR
         if logscale:
             cNorm = mpl.colors.SymLogNorm(linthresh=knee,
                                           vmin=-amax,
@@ -875,9 +783,9 @@ def getCmap(vals, forceBipolar=False, logscale=False):
             cNorm = mpl.colors.CenteredNorm(halfrange=amax)
     else:
         if fracPos > fracNeg:
-            cMap = CM_MONO.copy()
+            cMap = colors.CM_MONO.copy()
         else:
-            cMap = CM_MONO.reversed()
+            cMap = colors.CM_MONO.reversed()
         if logscale:
             cNorm = mpl.colors.LogNorm(vmin=knee,
                                        vmax=mx)
@@ -1054,7 +962,7 @@ def showEdges2d(axis, edgePoints, edgeColors=None, **kwargs):
         # kwargs['colors'] = (0., 0., 0.,)
 
         # kwargs['alpha'] = 0.05
-        kwargs['colors'] = FAINT
+        kwargs['colors'] = colors.FAINT
     else:
         kwargs['colors'] = edgeColors
         # alpha=0.05
@@ -1091,7 +999,7 @@ def showSourceBoundary(axes, radius, srcCenter=np.zeros(2)):
     y = radius*np.sin(tht)+srcCenter[1]
 
     for ax in axes:
-        ax.plot(x, y, color=BASE)  # , alpha=0.1)
+        ax.plot(x, y, color=colors.BASE)  # , alpha=0.1)
 
 
 def addInset(baseAxis, rInset, xmax, relativeLoc=(.5, -.8)):
@@ -1580,7 +1488,7 @@ class SliceSet(FigureAnimator):
         for ax in insets:
             artists.append(showEdges2d(ax, data['meshPoints']))
             artists.append(showEdges2d(
-                ax, data['sourcePoints'], edgeColors=ACCENT_LIGHT, alpha=.25, linestyles=':'))
+                ax, data['sourcePoints'], edgeColors=colors.ACCENT_LIGHT, alpha=.25, linestyles=':'))
 
         self.axes.extend(insets)
 
@@ -1795,7 +1703,7 @@ class ErrorGraph(FigureAnimator):
             data = self.dataSets[setnum]
 
         self.axV.plot(self.analyticR, self.analytic,
-                      c=BASE, label='Analytical')
+                      c=colors.BASE, label='Analytical')
 
         vbnd = self.dataScales['vsim'].get()
         self.axV.set_ylim(vbnd[0], vbnd[-1])
@@ -1811,7 +1719,7 @@ class ErrorGraph(FigureAnimator):
             toN = np.zeros(max(connNs)+1, dtype=int)
             toN[connNs] = np.arange(connNs.shape[0])
 
-            colors = discreteLegend(self.axErr, connNs, loc='upper right')
+            mcolors = discreteLegend(self.axErr, connNs, loc='upper right')
             # colors,legEntries=discreteColors(connNs)
             # outsideLegend(axis=self.axErr,handles=legEntries)
 
@@ -1839,7 +1747,7 @@ class ErrorGraph(FigureAnimator):
         if self.prefs['colorNodeConnectivity']:
             rcol = data['rColors']
             nconn = toN[rcol]
-            nodeColors = colors[nconn]
+            nodeColors = mcolors[nconn]
         else:
             nodeColors = 'r'
 
@@ -1858,7 +1766,7 @@ class ErrorGraph(FigureAnimator):
                                   data['elemL'],
                                   # self.elemR[ii],
                                   #                     self.elemL[ii],
-                                  c=BASE, marker='.')
+                                  c=colors.BASE, marker='.')
 
         # plt.tight_layout()
         artists.append(title)
@@ -2056,7 +1964,7 @@ class CurrentPlot(FigureAnimator):
 
             for ax in axes:
                 edgecol = mpl.collections.LineCollection(data['mesh'],
-                                                         color=FAINT)
+                                                         color=colors.FAINT)
                 art.append(ax.add_collection(edgecol))
                 if self.fullarrow:
                     art.append(ax.quiver(x, y, a, b,
@@ -2188,7 +2096,7 @@ class SingleSlice(FigureAnimator):
                 self.cax = None
                 plt.tight_layout()
         else:
-            meshAlpha = MESH_ALPHA
+            meshAlpha = colors.MESH_ALPHA
             cMap, cNorm = getCmap(self.dataScales[self.dataSrc].get(),
                                   logscale=True)
 
@@ -2320,7 +2228,7 @@ class LogError(FigureAnimator):
         ax = self.fig.axes[0]
 
         er1 = ax.loglog(data['rAna'], data['ana'],
-                        label='Analytic', color=BASE)
+                        label='Analytic', color=colors.BASE)
         er2 = ax.loglog(data['r'], data['err'], label='Error', color='r')
 
         titlestr = "FVU=%.2g, int1=%.2g, %d points in source" % (

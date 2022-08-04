@@ -286,7 +286,7 @@ class Ring:
     network projects to the first cell.
     """
 
-    def __init__(self, N=5, stim_w=0.04, stim_t=4, stim_delay=1, syn_w=0.01, syn_delay=5, r=50, dendSegs=1):
+    def __init__(self, N=5, stim_w=0.02, stim_t=4, stim_delay=1, syn_w=0.01, syn_delay=5, r=50, dendSegs=1):
         """
         :param N: Number of cells.
         :param stim_w: Weight of the stimulus

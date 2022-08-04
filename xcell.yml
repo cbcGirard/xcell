@@ -14,4 +14,4 @@ dependencies:
   - scipy=1.8.*
   - setuptools=62.2.*
   - cmasher
-  
+  - gcc_linux-64  

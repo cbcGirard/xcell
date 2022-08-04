@@ -7,7 +7,7 @@ getdpFiles/
 xCell/__pycache__
 xCell/Results
 xCell/examples
-xCell/x86_64
+*/x86_64/
 docs/build
 
 
@@ -18,7 +18,8 @@ docs/build
 
 # other
 *.o
-
+*.so
+*.ses
 
 # Node artifact files
 node_modules/
