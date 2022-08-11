@@ -19,11 +19,16 @@ from xcell import util
 from xcell import visualizers
 import Common
 
-asDual = True
+lite = False
+asDual = False
 studyPath = '/home/benoit/smb4k/ResearchData/Results/Quals/algoDemo/'
 fname = 'overview'
 if asDual:
     fname += '-dual'
+
+if lite:
+    xcell.colors.useLightStyle()
+    fname += '-lite'
 
 showSrcCircuit = True
 lastGen = 5
@@ -45,7 +50,7 @@ study, setup = Common.makeSynthStudy(studyPath, rElec=rElec, xmax=xmax)
 
 
 arts = []
-fig = plt.figure()
+fig = plt.figure(constrained_layout=True)
 cm = visualizers.CurrentPlot(
     fig, study, fullarrow=True, showInset=False, showAll=asDual)
 cm.prefs['colorbar'] = False
@@ -64,24 +69,18 @@ arcY = rElec*np.sin(tht)
 src = ax.fill(arcX, arcY, color=mpl.cm.plasma(1.0), alpha=0.5, label='Source')
 ax.legend(handles=src)
 
-noteColor = visualizers.ACCENT_DARK
+noteColor = xcell.colors.ACCENT_DARK
 
 
 for maxdepth in range(1, lastGen+1):
     l0Param = 2**(-maxdepth*0.2)
 
-    # setup=study.newSimulation()
 
-    def metric(coord):
-        r = np.linalg.norm(coord)
-        val = k*r  # 1/r dependence
-        # val=(l0Param*r**2)**(1/3) #current continuity
-        # val=(l0Param*r**4)**(1/3) #dirichlet energy continutity
-        # if val<rElec:
-        #     val=rElec
-        return val
-
-    setup.makeAdaptiveGrid([metric], maxdepth)
+    setup.makeAdaptiveGrid(refPts=np.zeros((1,3)),
+                           maxdepth=np.array(maxdepth, ndmin=1),
+                           minl0Function=xcell.generalMetric,
+                           # coefs=np.array(2**(-0.2*maxdepth), ndmin=1))
+                           coefs=np.array(k, ndmin=1))
 
     setup.finalizeMesh(regularize=False)
     # edges,_,_=setup.mesh.getConductances()
@@ -130,7 +129,7 @@ if showSrcCircuit:
 
     # edges outside, crossing, and fully inside source
     edgeColors = np.array([
-        visualizers.FAINT,
+        xcell.colors.FAINT,
         [1, 0.5, 0, 0.25],
         [1, 0, 0, 1]])
 
@@ -142,7 +141,7 @@ if showSrcCircuit:
 
     finalMesh = art
     if asDual:
-        finalMesh.set_alpha(0.05)
+        finalMesh.set_alpha(0.25)
         setup.mesh.elementType = 'Face'
     setup.finalizeMesh()
 

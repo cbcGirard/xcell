@@ -855,10 +855,20 @@ class Simulation:
 
         for el in self.mesh.elements:
             span = el.span
-            inds = np.array([self.mesh.inverseIdxMap[v] for v in el.vertices])
-            vals = self.nodeVoltages[inds]
+            if self.mesh.elementType=='Face':
+                elInd=el.faces
+            else:
+                elInd=el.vertices
+            globalInd = np.array([self.mesh.inverseIdxMap[v] for v in elInd])
+            elVals = self.nodeVoltages[globalInd]
 
-            avals = netAna[inds]
+            if self.mesh.elementType=='Face':
+                vals=meshes.fem.interpolateFromFace(elVals, meshes.fem.HEX_VERTEX_COORDS)
+                avals=np.abs(meshes.fem.interpolateFromFace(netAna[globalInd], meshes.fem.HEX_VERTEX_COORDS))
+            else:
+                vals=elVals
+                avals = np.abs(netAna[globalInd])
+
             dvals = np.abs(vals-avals)
 
             if basic:
@@ -1715,19 +1725,19 @@ class SimStudy:
         if ext is None:
             fnames = [self.__makepath(fileName, x) for x in ['.png', '.svg', '.eps']]
 
-            for f in fnames:
-                fig.savefig(f, transparent=True)
-
         else:
-            fname = self.__makepath(fileName, ext)
-            fig.savefig(fname, transparent=True)
+            fnames = [self.__makepath(fileName, ext)]
+
+        for f in fnames:
+            fig.savefig(f, transparent=True, dpi=300)
 
     def __makepath(self, fileName, ext):
-        basepath = os.path.join(self.studyPath)
+        fpath = os.path.join(self.studyPath, fileName+ext)
+
+        basepath,_ = os.path.split(fpath)
 
         if not os.path.exists(basepath):
             os.makedirs(basepath)
-        fpath = os.path.join(basepath, fileName+ext)
         return fpath
 
     def saveAnimation(self, animator, filename):

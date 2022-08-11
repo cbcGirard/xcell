@@ -12,7 +12,7 @@ import numpy as np
 import xcell
 import matplotlib.pyplot as plt
 
-
+xcell.colors.useLightStyle()
 # meshtype = 'uniform'
 meshtype= 'adaptive'
 # studyPath='Results/studyTst/miniCur/'#+meshtype
@@ -23,7 +23,7 @@ elementType = 'Admittance'
 # elementType='Face'
 
 xmax = 1e-4
-maxdepth = 8
+maxdepth = 12
 nX = 10
 
 sigma = np.ones(3)
@@ -82,12 +82,13 @@ else:
     #                                      l0max=1e-5,
     #                                      domainX=xmax)
 
-    metric = [xcell.makeExplicitLinearMetric(maxdepth, 0.2)]
+    l0min=np.array(rElec/2, ndmin=1)
 
     setup.makeAdaptiveGrid(refPts=np.zeros((1,3)),
                            maxdepth=np.array(maxdepth, ndmin=1),
                            minl0Function=xcell.generalMetric,
-                           coefs=np.ones(1))
+                           # coefs=np.array(2**(-0.2*maxdepth), ndmin=1))
+                           coefs=np.array(0.2,ndmin=1))
 
 
 boundaryFun = None
@@ -116,7 +117,7 @@ setup.logTime()
 
 # %%
 # Interactive slice viewer (use arrow keys to change location)
-sv=xcell.visualizers.SliceViewer(axis=None, setup)
+sv=xcell.visualizers.SliceViewer(axis=None, sim=setup)
 # sv.nodeData=pt
 
 # %%

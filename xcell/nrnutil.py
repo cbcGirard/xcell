@@ -12,7 +12,7 @@ from neuron import h
 import numpy as np
 from matplotlib.lines import Line2D
 from matplotlib.collections import PolyCollection
-from .colors import FAINT
+from . import colors
 
 
 def returnSegmentCoordinates(section):
@@ -170,7 +170,7 @@ class LineDataUnits(Line2D):
 def showCellGeo(axis):
 
     tht = np.linspace(0, 2*np.pi)
-    shade = FAINT
+    shade = colors.FAINT
     polys = []
     for sec in h.allsec():
         x, y, z, r = returnSegmentCoordinates(sec)

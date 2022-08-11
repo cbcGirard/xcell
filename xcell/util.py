@@ -34,7 +34,10 @@ def pointCurrentV(tstCoords, iSrc, sigma=1., srcLoc=np.zeros(3, dtype=np.float64
     v = np.array([k/np.linalg.norm(d) for d in dif])
     return v
 
+def oneDigit(x):
+    factor=10**np.floor(np.log10(x))
 
+    return factor*np.ceil(x/factor)
 def makeGridPoints(nx, xmax, xmin=None, ymax=None, ymin=None, centers=False):
     if xmin is None:
         xmin = -xmax

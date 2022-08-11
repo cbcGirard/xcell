@@ -51,15 +51,15 @@ def getErrorEstimates(simulation):
     volAna = sum(np.abs(elAna))
     vol = volErr/volAna
 
-    powerSim = estimatePower(simulation.nodeVoltages,
-                             simulation.edges,
-                             simulation.conductances)
+    # powerSim = estimatePower(simulation.nodeVoltages,
+    #                          simulation.edges,
+    #                          simulation.conductances)
 
-    powerTrue = iSourcePower(simulation.currentSources[0].value,
-                             simulation.currentSources[0].radius,
-                             simulation.mesh.tree.sigma)
+    # powerTrue = iSourcePower(simulation.currentSources[0].value,
+    #                          simulation.currentSources[0].radius,
+    #                          simulation.mesh.tree.sigma)
 
-    powerErr = abs(powerTrue-powerSim)/powerTrue
+    # powerErr = abs(powerTrue-powerSim)/powerTrue
 
     absErr = abs(err)
     data = {
@@ -75,9 +75,10 @@ def getErrorEstimates(simulation):
         'SSE': sse,
         'SSTot': sstot,
         'FVU': FVU,
-        'powerSim': powerSim,
-        'powerTrue': powerTrue,
-        'powerError': powerErr}
+        # 'powerSim': powerSim,
+        # 'powerTrue': powerTrue,
+        # 'powerError': powerErr,
+        }
 
     return data
 

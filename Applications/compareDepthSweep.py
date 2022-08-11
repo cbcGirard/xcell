@@ -9,55 +9,71 @@ Created on Wed Jun 22 15:46:30 2022
 import xcell
 import Common
 import matplotlib.pyplot as plt
+import argparse
+import numpy as np
 
-foldername = 'Quals/formulations'
+cli=argparse.ArgumentParser()
+cli.add_argument('--comparison', choices=['bounds','mesh','formula'], default='testing')
+cli.add_argument('-p','--plot-only',help='skip simulation and use existing data', action = 'store_true')
+# cli.add_argument('-a','--animate',help='skip simulation and use existing data', action = 'store_true')
+# cli.add_argument('-p','--plot-only',help='skip simulation and use existing data', action = 'store_true')
+
+args = cli.parse_args()
+
 
 generate = True
 
 # plot performance info
 staticPlots = True
 
-# generate animation(s)
-plotters = [
-    xcell.visualizers.LogError,
-    xcell.visualizers.ErrorGraph,
-    xcell.visualizers.SliceSet,
-    # xcell.visualizers.CurrentPlot,
-]
-
-plotPrefs = [
-    None,
-    # {'onlyDoF':True, 'colorNodeConnectivity':True},
-    None,
-    None,
-    None
-]
-
-# tstVals=['adaptive']
-# tstVals=["adaptive","uniform"]
-# tstVals=['adaptive','equal elements',r'equal $l_0$']
-# tstCat='Mesh type'
+if args.comparison=='mesh':
+    foldername = 'Quals/PoC'
+    tstVals=["adaptive","uniform"]
+    # tstVals=['adaptive','equal elements',r'equal $l_0$']
+    tstCat='Mesh type'
+if args.comparison=='formula':
+    foldername = 'Quals/formulations'
+    tstVals = ['Admittance', 'FEM', 'Face']
+    tstCat = 'Element type'
+if args.comparison == 'bounds':
+    foldername = 'Quals/boundaries'
+    tstVals=['Analytic','Ground','Rubik0']
+    tstCat='Boundary'
+if args.comparison == 'testing':
+    foldername = 'Quals/miniset'
+    tstVals = ['adaptive']
+    tstCat = 'Mesh type'
+    generate = False
+    staticPlots = False
 
 
 # tstVals=[False, True]
 # tstCat='Vsrc?'
 
-tstVals = ['Admittance', 'FEM', 'Face']
-# tstVals=['Admittance','Face']
-# # tstVals=['Admittance']
-tstCat = 'Element type'
 
-# tstVals=[None]
-# tstCat='Power'
+# generate animation(s)
+plotters = [
+    xcell.visualizers.ErrorGraph,
+    xcell.visualizers.ErrorGraph,
+    xcell.visualizers.SliceSet,
+    xcell.visualizers.LogError,
+    # xcell.visualizers.CurrentPlot,
+]
 
-# tstVals=['Analytic','Ground']
-# tstVals=['Analytic','Ground','Rubik0']
-# tstCat='Boundary'
+plotPrefs = [
+    None,
+    {'onlyDoF':True},
+    None,
+    None,
+]
+
+
+
 
 
 study, _ = Common.makeSynthStudy(foldername)
 
-if generate:
+if generate and not args.plot_only:
     Common.pairedDepthSweep(study,
                             depthRange=range(3, 18),
                             testCat=tstCat,
@@ -70,66 +86,67 @@ costcat = 'Error'
 xcat = 'Number of elements'
 filterCategories = [tstCat]
 if staticPlots:
-    xcell.visualizers.groupedScatter(study.studyPath+'/log.csv',
-                                     xcat=xcat,
-                                     ycat=costcat,
-                                     groupcat=tstCat)
-    fname = tstCat+"_"+costcat+'-vs-'+xcat
-    nufig = plt.gcf()
-    study.savePlot(nufig, fname, '.eps')
-    study.savePlot(nufig, fname, '.png')
+    for lite in ['','-lite']:
+        if lite=='':
+            xcell.colors.useDarkStyle()
+        else:
+            xcell.colors.useLightStyle()
 
-    for fv in tstVals:
-
-        fstack, fratio = xcell.visualizers.plotStudyPerformance(study,
-                                                                onlyCat=filterCategories[0],
-                                                                onlyVal=fv)
-        fstem = '_'+filterCategories[0]+str(fv)
-
-        study.savePlot(fstack, 'Performance'+fstem, '.eps')
-        study.savePlot(fstack, 'Performance'+fstem, '.png')
-
-        study.savePlot(fratio, 'Ratio'+fstem, '.eps')
-        study.savePlot(fratio, 'Ratio'+fstem, '.png')
+        xcell.visualizers.groupedScatter(study.studyPath+'/log.csv',
+                                         xcat=xcat,
+                                         ycat=costcat,
+                                         groupcat=tstCat)
+        fname = tstCat+"_"+costcat+'-vs-'+xcat+lite
+        nufig = plt.gcf()
+        study.savePlot(nufig, fname)
+        for fv in tstVals:
 
 
-# #THIS WORKS
-# for ii,p in enumerate(plotters):
+            fstack, fratio = xcell.visualizers.plotStudyPerformance(study,
+                                                                    onlyCat=filterCategories[0],
+                                                                    onlyVal=fv)
+            fstem = '_'+filterCategories[0]+str(fv)
 
-#     for fv in tstVals:
-#         fname=p.__name__+'_'+str(fv)
+            study.savePlot(fstack, 'Performance'+fstem+lite)
 
-
-#         plotr=p(plt.figure(),study)
-
-
-#         plotr.getStudyData(filterCategories=filterCategories,
-#                   tstVals=[fv])
-#         plotr.animateStudy(fname=fname)
+            study.savePlot(fratio, 'Ratio'+fstem+lite)
 
 
-for ii, p in enumerate(plotters):
 
-    plots = []
-    names = []
-    ranges = None
-    for fv in tstVals:
-        fname = p.__name__+'_'+str(fv)
-        plotr = p(plt.figure(), study)
-        if 'universalPts' in plotr.prefs:
-            plotr.prefs['universalPts'] = True
+for lite in ['','-lite']:
+    if lite=='':
+        xcell.colors.useDarkStyle()
+    else:
+        xcell.colors.useLightStyle()
 
-        plotr.getStudyData(filterCategories=filterCategories,
-                           filterVals=[fv])
+    for ii, p in enumerate(plotters):
 
-        plots.append(plotr)
-        names.append(fname)
+        plots = []
+        names = []
+        ranges = None
+        for fv in tstVals:
+            fname = p.__name__+'_'+str(fv)+lite
+            plotr = p(plt.figure(), study, prefs = plotPrefs[ii])
+            if 'universalPts' in plotr.prefs:
+                plotr.prefs['universalPts'] = True
+            if 'onlyDoF' in plotr.prefs:
+                if plotr.prefs['onlyDoF']:
+                    fname+='-detail'
 
-        if ranges is not None:
-            plotr.unifyScales(ranges)
-        ranges = plotr.dataScales
 
-    for plot, name in zip(plots, names):
-        plot.dataScales = ranges
+            plotr.getStudyData(filterCategories=filterCategories,
+                               filterVals=[fv])
 
-        plot.animateStudy(fname=name)
+            plots.append(plotr)
+            names.append(fname)
+
+            if ranges is not None:
+                plotr.unifyScales(ranges)
+            ranges = plotr.dataScales
+
+        for plot, name in zip(plots, names):
+            plot.dataScales = ranges
+
+            plot.animateStudy(fname=name, fps=1.0)
+            # plot.getSnapshots(np.arange(len(plot.dataSets)), name)
+            # xcell.colors.useDarkStyle()

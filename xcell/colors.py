@@ -101,6 +101,12 @@ def makeStyleDict(fgColor,bgColor):
         styleDict[c] = fgColor
 
 
+    global FAINT
+
+    FAINT = mpl.colors.to_rgba(BASE, MESH_ALPHA)
+
+
+
     return styleDict
 
 def useDarkStyle():
@@ -112,11 +118,24 @@ def useDarkStyle():
     None.
 
     """
+    global BASE, CM_MONO, CM_BIPOLAR, MESH_ALPHA
+    MESH_ALPHA = 0.25
+    BASE = HILITE
+
     plt.style.use(makeStyleDict(fgColor=OFFWHITE, bgColor=DARK))
     plt.style.use(styleScope)
 
-    global BASE
-    BASE = HILITE
+
+    plx = np.array(mpl.colormaps.get('plasma').colors)
+    lint = np.array(np.linspace(0, 1, num=plx.shape[0]), ndmin=2).transpose()
+    CM_MONO = mpl.colors.LinearSegmentedColormap.from_list('mono',
+                                                           np.hstack((plx, lint)))
+
+    biArray=np.vstack(([0,0,1,1],
+                       mpl.colors.to_rgba(DARK, alpha=0.5),
+                       [1,0,0,1]))
+
+    CM_BIPOLAR = mpl.colors.LinearSegmentedColormap.from_list('bipolar', biArray)
 
 
 def useLightStyle():
@@ -128,11 +147,19 @@ def useLightStyle():
     None.
 
     """
+    global BASE, CM_MONO, CM_BIPOLAR, MESH_ALPHA
+    MESH_ALPHA = 0.5
+    BASE = DARK
+
     plt.style.use(makeStyleDict(fgColor=DARK, bgColor=WHITE))
     plt.style.use(styleScope2)
 
-    global BASE
-    BASE = DARK
+
+    cm=mpl.colormaps.get('plasma')
+    CM_MONO = cm.copy()
+
+    CM_BIPOLAR = mpl.colormaps.get('seismic').copy()
+
 
 
 def scoopCmap(baseCmap, fraction=0.1):
@@ -198,3 +225,8 @@ def recolorSVG(fname,toLight=True):
 
     newfile.write(rawtxt)
     newfile.close()
+
+
+
+
+useDarkStyle()

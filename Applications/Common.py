@@ -117,10 +117,8 @@ def pairedDepthSweep(study, depthRange, testCat, testVals, rElec=1e-6, sigma=np.
             elif params['Mesh type'] == r'equal $l_0$':
                 setup.makeUniformGrid(lastmesh['nX'])
             else:
-                metric = [xcell.makeExplicitLinearMetric(maxdepth,
-                                                         meshdensity=0.2)]
-
-                setup.makeAdaptiveGrid(metric, maxdepth)
+                metricCoef=np.array(2**(-maxdepth*0.2), dtype=np.float64, ndmin=1)
+                setup.makeAdaptiveGrid(np.zeros((1,3)),                                        np.array(maxdepth,ndmin=1), xcell.generalMetric, coefs = metricCoef)
 
             setup.mesh.elementType = params['Element type']
             setup.finalizeMesh()
@@ -128,7 +126,6 @@ def pairedDepthSweep(study, depthRange, testCat, testVals, rElec=1e-6, sigma=np.
             def boundaryFun(coord):
                 r = np.linalg.norm(coord)
                 return rElec/(r*np.pi*4)
-            # setup.insertSourcesInMesh()
 
             if params['BoundaryFunction'] == 'Analytic':
                 setup.setBoundaryNodes(boundaryFun)
@@ -146,6 +143,8 @@ def pairedDepthSweep(study, depthRange, testCat, testVals, rElec=1e-6, sigma=np.
             setup.applyTransforms()
 
             setup.getMemUsage(True)
+
+
             errEst, err, ana, _, _ = setup.calculateErrors()
             FVU = xcell.misc.FVU(ana, err)
 
@@ -153,8 +152,16 @@ def pairedDepthSweep(study, depthRange, testCat, testVals, rElec=1e-6, sigma=np.
 
             print('error: %g' % errEst)
 
-            study.newLogEntry(['Error', 'FVU', 'l0min', testCat], [
-                              errEst, FVU, minel, tstVal])
+            dataCats=['Error', 'FVU', 'l0min', testCat]
+            dataVals=[errEst, FVU, minel, tstVal]
+
+            data=xcell.misc.getErrorEstimates(setup)
+
+            for k,v in data.items():
+                dataCats.append(k)
+                dataVals.append(v)
+
+            study.newLogEntry(dataCats, dataVals)
             study.saveData(setup)
             if params['Mesh type'] == 'adaptive':
                 lastmesh = {'numel': len(setup.mesh.elements),

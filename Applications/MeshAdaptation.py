@@ -3,6 +3,9 @@
 """
 Created on Thu Mar 17 13:25:55 2022
 
+Illusrates how adaptation parameters affect the generated mesh
+
+
 @author: benoit
 """
 
@@ -12,14 +15,14 @@ import xcell
 import matplotlib.pyplot as plt
 
 
-swept = 'density'
+swept = 'depth'
 dmin = 2
 dmax = 6
 
 study, setup = Common.makeSynthStudy('adaptationDemos')
 
 
-sweepval = 1-abs(np.linspace(-1, 1,20))
+sweepval = 1-abs(np.linspace(-1, 1, 20))
 
 if swept == 'density':
     vrange = 0.5*sweepval
@@ -63,7 +66,7 @@ for val in vrange:
 
     metric = xcell.generalMetric
 
-    setup.makeAdaptiveGrid(np.zeros((1,3)), maxdepth, metric,coefs=np.ones(1)*2**(-maxdepth*density))
+    setup.makeAdaptiveGrid(np.zeros((1, 3)),  maxdepth=np.array(maxdepth,ndmin=1), minl0Function=metric,  coefs=np.ones(1)*2**(-maxdepth*density))
     setup.finalizeMesh()
     # _,_,edgePts=setup.getElementsInPlane()
 
@@ -80,3 +83,7 @@ for val in vrange:
 
 
 ani = img.animateStudy(fname=swept, fps=5.)
+
+lcopy=img.makeLightCopy()
+
+lani=lcopy.animateStudy(fps=5)
