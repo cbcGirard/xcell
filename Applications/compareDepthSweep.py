@@ -69,7 +69,7 @@ plotPrefs = [
 
 
 
-
+#%%
 
 study, _ = Common.makeSynthStudy(foldername)
 
@@ -78,6 +78,7 @@ if generate and not args.plot_only:
                             depthRange=range(3, 18),
                             testCat=tstCat,
                             testVals=tstVals)
+
 
 
 costcat = 'Error'
@@ -97,6 +98,7 @@ if staticPlots:
                                          ycat=costcat,
                                          groupcat=tstCat)
         fname = tstCat+"_"+costcat+'-vs-'+xcat+lite
+        fname.replace(' ', '_')
         nufig = plt.gcf()
         study.savePlot(nufig, fname)
         for fv in tstVals:
@@ -113,40 +115,44 @@ if staticPlots:
 
 
 
-for lite in ['','-lite']:
-    if lite=='':
+xcell.colors.useDarkStyle()
+
+
+for ii, p in enumerate(plotters):
+
+    plots = []
+    names = []
+    ranges = None
+    for fv in tstVals:
+        fname = p.__name__+'_'+str(fv)
+        fname.replace(' ', '_')
+        plotr = p(plt.figure(), study, prefs = plotPrefs[ii])
+        if 'universalPts' in plotr.prefs:
+            plotr.prefs['universalPts'] = True
+        if 'onlyDoF' in plotr.prefs:
+            if plotr.prefs['onlyDoF']:
+                fname+='-detail'
+
+
+        plotr.getStudyData(filterCategories=filterCategories,
+                           filterVals=[fv])
+
+        plots.append(plotr)
+        names.append(fname)
+
+        if ranges is not None:
+            plotr.unifyScales(ranges)
+        ranges = plotr.dataScales
+
+    for plot, name in zip(plots, names):
+        plot.dataScales = ranges
+
         xcell.colors.useDarkStyle()
-    else:
+        plot.animateStudy(fname=name, fps=1.0)
+
         xcell.colors.useLightStyle()
+        liteplot=plot.copy()
+        liteplot.animateStudy(fname=name+'-lite', fps=1)
 
-    for ii, p in enumerate(plotters):
-
-        plots = []
-        names = []
-        ranges = None
-        for fv in tstVals:
-            fname = p.__name__+'_'+str(fv)+lite
-            plotr = p(plt.figure(), study, prefs = plotPrefs[ii])
-            if 'universalPts' in plotr.prefs:
-                plotr.prefs['universalPts'] = True
-            if 'onlyDoF' in plotr.prefs:
-                if plotr.prefs['onlyDoF']:
-                    fname+='-detail'
-
-
-            plotr.getStudyData(filterCategories=filterCategories,
-                               filterVals=[fv])
-
-            plots.append(plotr)
-            names.append(fname)
-
-            if ranges is not None:
-                plotr.unifyScales(ranges)
-            ranges = plotr.dataScales
-
-        for plot, name in zip(plots, names):
-            plot.dataScales = ranges
-
-            plot.animateStudy(fname=name, fps=1.0)
-            # plot.getSnapshots(np.arange(len(plot.dataSets)), name)
-            # xcell.colors.useDarkStyle()
+        # plot.getSnapshots(np.arange(len(plot.dataSets)), name)
+        # xcell.colors.useDarkStyle()

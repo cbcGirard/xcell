@@ -636,7 +636,7 @@ def stackedTimePlot(axis, xvals, stepTimes, stepNames):
     axis.xaxis.set_major_formatter(mpl.ticker.EngFormatter())
 
 
-def outsideLegend(axis=None, **kwargs):
+def outsideLegend(axis=None, flipOrder=False, **kwargs):
     """
     Create legend outside of axes, at top right.
 
@@ -654,7 +654,18 @@ def outsideLegend(axis=None, **kwargs):
     """
     if axis is None:
         axis = plt.gca()
-    axis.legend(bbox_to_anchor=(1.05, 1), loc='upper left',
+
+    handles, labels = axis.get_legend_handles_labels()
+
+    if flipOrder:
+        h=reversed(handles)
+        l=reversed(labels)
+    else:
+        h=handles
+        l=labels
+
+
+    axis.legend(h, l, bbox_to_anchor=(1.05, 1), loc='upper left',
                 borderaxespad=0., **kwargs)
 
 
@@ -1351,6 +1362,8 @@ class SliceSet(FigureAnimator):
                 showSourceBoundary([ax, inset], self.rElec)
                 insets.append(inset)
 
+                self.axes.append(inset)
+
         self.insets=insets
 
         for ax in self.grid[:nplot]:
@@ -1369,12 +1382,12 @@ class SliceSet(FigureAnimator):
 
     def addSimulationData(self, sim, append=False):
 
-
+        ax=self.axes[0]
 
         els, _, edgePts = sim.getElementsInPlane()
 
         if self.prefs['fullInterp']:
-            vArrays = [resamplePlane(self.grid[0], sim, elements=els)]
+            vArrays = [resamplePlane(ax, sim, elements=els)]
             v1d = vArrays[0].ravel()
         else:
             vArrays, coords = sim.getValuesInPlane(data=None)
@@ -1387,7 +1400,7 @@ class SliceSet(FigureAnimator):
             ana, _ = sim.analyticalEstimate()
             err1d = sim.nodeVoltages-ana[0]
             if self.prefs['fullInterp']:
-                erArrays = [resamplePlane(self.grid[0],
+                erArrays = [resamplePlane(ax,
                                           sim,
                                           elements=els,
                                           data=err1d)]
@@ -1435,13 +1448,28 @@ class SliceSet(FigureAnimator):
 
     def getArtists(self, setnum, data=None):
         artists = []
-        # if data is None:
-        #     dataSet=self.dataSets[setnum]
-        # else:
-        #     dataSet=[data]
+
 
         if data is None:
             data = self.dataSets[setnum]
+
+        imAxV = self.axes[0]
+        imAxes = [imAxV]
+
+        if self.prefs['showError']:
+            cbarAxV=self.axes[2]
+            cbarAxE = self.axes[3]
+            imAxE = self.axes[1]
+            imAxes.append(imAxE)
+            if self.prefs['showInsets']:
+                insets=self.axes[4:]
+                imAxes.extend(insets)
+        else:
+            cbarAxV = self.axes[1]
+            if self.prefs['showInsets']:
+                insets=[self.axes[2]]
+                imAxes.extend(insets)
+
 
         vbounds = self.dataScales['vbounds']
 
@@ -1449,9 +1477,9 @@ class SliceSet(FigureAnimator):
                               logscale=self.prefs['logScale'])
 
         vmappr = mpl.cm.ScalarMappable(norm=vnorm, cmap=vmap)
-        # vmappr.set_clim((vnorm.vmin, vnorm.vmax))
-        self.grid.cbar_axes[0].colorbar(
-            vmappr)
+
+
+        cbarAxV.colorbar(vmappr)
 
         if self.prefs['showError']:
             errbounds = self.dataScales['errbounds']
@@ -1460,28 +1488,15 @@ class SliceSet(FigureAnimator):
                                   logscale=self.prefs['logScale'])
             emappr = mpl.cm.ScalarMappable(norm=enorm, cmap=emap)
             # vmappr.set_clim((-enorm.halfrange, enorm.halfrange))
-            self.grid.cbar_axes[1].colorbar(emappr)
-            errArt = patchworkImage(self.grid[1],
+            cbarAxE.colorbar(emappr)
+            errArt = patchworkImage(imAxE,
                                     # self.maskedErrArr[ii],
                                     data['errArrays'],
                                     emap, enorm,
                                     extent=self.bnds)
             artists.extend(errArt)
 
-        # insets = []
-        # if self.rElec > 0 and self.prefs['showError']:
-        #     for ax in self.grid:
-        #         inset = addInset(ax, 3*self.rElec, self.bnds[1])
-        #         showSourceBoundary([ax, inset], self.rElec)
-        #         insets.append(inset)
-
-        # for ii in range(len(self.maskedVArr)):
-        # for data in dataSet:
-
-        # edgePoints = self.meshEdges[ii]
-        # sourceEdge = self.sourceEdges[ii]
-
-        vArt = patchworkImage(self.grid[0],
+        vArt = patchworkImage(imAxV,
                               data['vArrays'],
                               vmap, vnorm,
                               extent=self.bnds)
@@ -1491,55 +1506,38 @@ class SliceSet(FigureAnimator):
         if self.prefs['showNodes']:
             px, py = np.hsplit(data['pcoords'], 2)
             pv = data['pvals']
-            ptart = self.grid[0].scatter(
+            ptart = imAxV.scatter(
                 px, py,
                 c=pv, norm=vnorm, cmap=vmap)
 
             artists.append(ptart)
 
-        # errArt=self.grid[1].imshow(err, origin='lower', extent=self.bnds,
-        #             cmap=emap, norm=enorm,interpolation='bilinear')
-        # self.grid.cbar_axes[1].colorbar(errArt)
+        if self.prefs['showInsets']:
+            # insets=self.insets
 
-        if len(self.insets) > 0:
-            insets=self.insets
-            # artists.append(insets[0].imshow(vInterp, origin='lower', extent=self.bnds,
-            #             cmap=vmap, norm=vnorm,interpolation='bilinear'))
-            # artists.append(insets[1].imshow(err, origin='lower', extent=self.bnds,
-            #             cmap=emap, norm=enorm,interpolation='bilinear'))
             artists.extend(patchworkImage(insets[0],
                                           # self.maskedVArr[ii],
                                           data['vArrays'],
                                           vmap, vnorm,
                                           extent=self.bnds))
-            artists.extend(patchworkImage(insets[1],
-                                          # self.maskedErrArr[ii],
-                                          data['errArrays'],
-                                          emap, enorm,
-                                          extent=self.bnds))
+            if self.prefs['showError']:
+                artists.extend(patchworkImage(insets[1],
+                                              # self.maskedErrArr[ii],
+                                              data['errArrays'],
+                                              emap, enorm,
+                                              extent=self.bnds))
 
-        for ax in self.grid:
+        for ax in imAxes:
             artists.append(showEdges2d(ax, data['meshPoints']))
             artists.append(showEdges2d(
                 ax, data['sourcePoints'], edgeColors=(.5, .5, .5), alpha=.25, linestyles=':'))
 
-        for ax in insets:
-            artists.append(showEdges2d(ax, data['meshPoints']))
-            artists.append(showEdges2d(
-                ax, data['sourcePoints'], edgeColors=colors.ACCENT_LIGHT, alpha=.25, linestyles=':'))
-
-
-
-        # artists.append(errArt)
-        # artists.append(vArt)
-        # artistSet.append(artists)
+        # for ax in insets:
+        #     artists.append(showEdges2d(ax, data['meshPoints']))
+        #     artists.append(showEdges2d(
+        #         ax, data['sourcePoints'], edgeColors=colors.ACCENT_LIGHT, alpha=.25, linestyles=':'))
 
         return artists
-
-    # def resetFigure(self):
-    #     for ax in self.axes:
-    #         ax.cla()
-
 
 class ErrorGraph(FigureAnimator):
     def __init__(self, fig, study, prefs=None):
@@ -1605,9 +1603,9 @@ class ErrorGraph(FigureAnimator):
 
 
 
-        self.axV = axV
-        self.axErr = axErr
-        self.axL = axL
+        # self.axV = axV
+        # self.axErr = axErr
+        # self.axL = axL
 
         self.axes = [axV, axErr, axL]
 
@@ -1660,7 +1658,7 @@ class ErrorGraph(FigureAnimator):
 
             self.dataScales['vsim'].update(vAna)
 
-            self.axV.set_xlim(left=rElec/2, right=2*max(r))
+            self.axes[0].set_xlim(left=rElec/2, right=2*max(r))
 
         ErrSum, err, vAna, sorter, _ = sim.calculateErrors(pts)
 
@@ -1738,20 +1736,24 @@ class ErrorGraph(FigureAnimator):
     def getArtists(self, setnum, data=None):
         artistSet = []
 
+        axV=self.axes[0]
+        axErr=self.axes[1]
+        axL=self.axes[2]
+
         if data is None:
             #     dataset=[self.dataSets[setnum]]
             # else:
             #     dataset=[data]
             data = self.dataSets[setnum]
 
-        self.axV.plot(self.analyticR, self.analytic,
+        axV.plot(self.analyticR, self.analytic,
                       c=colors.BASE, label='Analytical')
 
         vbnd = self.dataScales['vsim'].get()
-        self.axV.set_ylim(vbnd[0], vbnd[-1])
+        axV.set_ylim(vbnd[0], vbnd[-1])
 
         errbnd = self.dataScales['error'].get()
-        self.axErr.set_ylim(errbnd[0], errbnd[-1])
+        axErr.set_ylim(errbnd[0], errbnd[-1])
 
         if self.prefs['colorNodeConnectivity']:
             allconn = []
@@ -1761,7 +1763,7 @@ class ErrorGraph(FigureAnimator):
             toN = np.zeros(max(connNs)+1, dtype=int)
             toN[connNs] = np.arange(connNs.shape[0])
 
-            mcolors = discreteLegend(self.axErr, connNs, loc='upper right')
+            mcolors = discreteLegend(axErr, connNs, loc='upper right')
             # colors,legEntries=discreteColors(connNs)
             # outsideLegend(axis=self.axErr,handles=legEntries)
 
@@ -1769,12 +1771,12 @@ class ErrorGraph(FigureAnimator):
         # for data in dataset:
 
         artists = []
-        simLine = self.axV.plot(
+        simLine = axV.plot(
             # self.simR[ii], self.sims[ii],
             data['simR'], data['simV'],
             c='C1', marker='.', label='Simulated')
         if setnum == 0:
-            self.axV.legend(loc='upper right')
+            axV.legend(loc='upper right')
 
         title = animatedTitle(self.fig, data['title'])
 
@@ -1786,10 +1788,9 @@ class ErrorGraph(FigureAnimator):
         else:
             nodeColors = 'r'
 
-        errLine = self.axErr.scatter(  # self.errR[ii], self.errors[ii],
-            data['errR'], data['errors'],
+        errLine = axErr.scatter(data['errR'], data['errors'],
             c=nodeColors, marker='.', linestyle='None')
-        errArea = self.axErr.fill_between(data['errR'],
+        errArea = axErr.fill_between(data['errR'],
                                           data['errors'],
                                           #  self.errR[ii],
                                           # self.errors[ii],
@@ -1797,7 +1798,7 @@ class ErrorGraph(FigureAnimator):
                                           alpha=0.75)
 
         # Third pane: element sizes
-        l0line = self.axL.scatter(data['elemR'],
+        l0line = axL.scatter(data['elemR'],
                                   data['elemL'],
                                   # self.elemR[ii],
                                   #                     self.elemL[ii],

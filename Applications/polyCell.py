@@ -52,7 +52,7 @@ cli = argparse.ArgumentParser()
 cli.add_argument('-f', '--folder',
                  help='path from main results folder', default='polyCell/')
 cli.add_argument('-n', '--nRing', type=int,
-                 help='number of cells (default %(default)s', default=5)
+                 help='number of cells (default %(default)s) 0->single compartment', default=5)
 cli.add_argument('-s', '--nSegs', type=int,
                  help='segments per dendrite (default %(default)s', default=5)
 cli.add_argument('-k', '--nskip', type=int,
@@ -70,9 +70,9 @@ cli.add_argument(
 args = cli.parse_args()
 
 # Overrides for e.g. debugging in Spyder
-args.vids=True
-args.synth=True
-args.folder='tmp'
+#args.vids=True
+#args.synth=True
+#args.folder='tmp'
 
 #%%
 if args.strat == 'depthExt':
@@ -128,7 +128,7 @@ xmax = 2*np.max(np.concatenate(
 
 #round up
 xmax=xcell.util.oneDigit(xmax)
-if xmax <= 0:
+if xmax <= 0 or np.isnan(xmax):
     xmax = 1e-4
 
 
