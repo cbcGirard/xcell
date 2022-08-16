@@ -19,7 +19,7 @@ from xcell import util
 from xcell import visualizers
 import Common
 
-lite = False
+lite = True
 asDual = False
 studyPath = '/home/benoit/smb4k/ResearchData/Results/Quals/algoDemo/'
 fname = 'overview'

@@ -1836,12 +1836,12 @@ class CurrentPlot(FigureAnimator):
 
         self.inset = None
         if fig is None:
-            self.axes[0] = new3dPlot(study.bbox)
+            ax = new3dPlot(study.bbox)
             self.dim = 3
         else:
             self.dim = 2
             if showInset:
-                self.axes[0] = plt.subplot2grid((3, 3), (0, 1),
+                ax = plt.subplot2grid((3, 3), (0, 1),
                                            colspan=2, rowspan=2,
                                            fig=fig)
                 # self.inset=addInset(self.axes[0],
@@ -1849,10 +1849,16 @@ class CurrentPlot(FigureAnimator):
                 #                  self.study.bbox[3],
                 #                  (-.2, -.2))
             else:
-                self.axes[0] = fig.add_subplot()
+                ax = fig.add_subplot()
 
             bnds = study.bbox[[0, 3, 1, 4]]
-            formatXYAxis(self.axes[0], bnds)
+            formatXYAxis(ax, bnds)
+
+        if len(self.axes)>0:
+            self.axes[0]=ax
+        else:
+            self.axes.append(ax)
+
 
         self.rElec = 0
         self.iSrc = []
