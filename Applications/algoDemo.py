@@ -20,7 +20,7 @@ from xcell import visualizers
 import Common
 
 lite = True
-asDual = False
+asDual = True
 studyPath = '/home/benoit/smb4k/ResearchData/Results/Quals/algoDemo/'
 fname = 'overview'
 if asDual:
@@ -28,15 +28,19 @@ if asDual:
 
 if lite:
     xcell.colors.useLightStyle()
+    mpl.rcParams.update({'figure.figsize':[3.2, 2.4],
+                         'font.size':12.,
+                         'lines.markersize':5.,
+                         })
     fname += '-lite'
 
 showSrcCircuit = True
-lastGen = 5
+lastGen = 4
 fullCircle = True
 
 xmax = 1
 
-rElec = xmax/10
+rElec = xmax/5
 
 
 k = 0.5
@@ -51,12 +55,19 @@ study, setup = Common.makeSynthStudy(studyPath, rElec=rElec, xmax=xmax)
 
 arts = []
 fig = plt.figure(constrained_layout=True)
+
+
 cm = visualizers.CurrentPlot(
     fig, study, fullarrow=True, showInset=False, showAll=asDual)
 cm.prefs['colorbar'] = False
 cm.prefs['title'] = False
 cm.prefs['logScale'] = True
 ax = cm.fig.axes[0]
+#hide axes
+ax.set_xticks([])
+ax.set_yticks([])
+plt.title("spacer",color=xcell.colors.NULL)
+
 
 
 if fullCircle:
@@ -67,7 +78,7 @@ arcX = rElec*np.cos(tht)
 arcY = rElec*np.sin(tht)
 
 src = ax.fill(arcX, arcY, color=mpl.cm.plasma(1.0), alpha=0.5, label='Source')
-ax.legend(handles=src)
+# ax.legend(handles=src)
 
 noteColor = xcell.colors.ACCENT_DARK
 
@@ -95,8 +106,9 @@ for maxdepth in range(1, lastGen+1):
 
     # ,edgeColors=visualizers.FAINT,alpha=1.)
     art = visualizers.showEdges2d(ax, edgePoints)
-    title = visualizers.animatedTitle(
-        fig, r'Split if $\ell_0$>%.2f r, depth %d' % (k, maxdepth))
+    title = visualizers.animatedTitle(fig,
+    # title = ax.set_title(
+        r'Split if $\ell_0$>%.2f r, depth %d' % (k, maxdepth))
     arts.append([art, title])
 
     if maxdepth != lastGen:
@@ -116,7 +128,7 @@ for maxdepth in range(1, lastGen+1):
         cpts = np.array(centers, ndmin=2)
 
         ctrArt = ax.scatter(cpts[:, 0], cpts[:, 1],
-                            c=noteColor, s=10, marker='o')
+                            c=noteColor, marker='o')
         arts.append([ctrArt, art, title])
 
 
@@ -130,7 +142,7 @@ if showSrcCircuit:
     # edges outside, crossing, and fully inside source
     edgeColors = np.array([
         xcell.colors.FAINT,
-        [1, 0.5, 0, 0.25],
+        [1, 0.5, 0, 1.],
         [1, 0, 0, 1]])
 
     if asDual:
@@ -171,9 +183,11 @@ if showSrcCircuit:
     # mergePts=visualizers.getPlanarEdgePoints(setup.mesh.nodeCoords, setup.edges)
 
     sX, sY = np.hsplit(setup.mesh.nodeCoords[inSrc, :-1], 2)
-    nodeArt = plt.scatter(sX, sY, s=2, marker='*', c=noteColor)
+    nodeArt = plt.scatter(sX, sY,marker='*', c=noteColor)
 
-    title = visualizers.animatedTitle(fig, 'Combine nodes inside source')
+    title = visualizers.animatedTitle(fig,
+    # title = ax.set_title(
+                                      'Combine nodes inside source')
     artset = [nodeArt, title]  # ,finalMesh]
 
     if asDual:
@@ -199,12 +213,14 @@ if showSrcCircuit:
     # eqPts=visualizers.getPlanarEdgePoints(setup.mesh.nodeCoords, setup.edges)
     eqPts = setup.mesh.nodeCoords[setup.edges, :-1]
     reArt = visualizers.showEdges2d(ax, eqPts, colors=equivColors)
-    ctrArt = ax.scatter(0, 0, s=16, c=noteColor, marker='*')
+    ctrArt = ax.scatter(0, 0, c=noteColor, marker='*')
 
     # viewer.topoType='electrical'
     # viewer.setPlane(showAll=asDual)
     # reArt=viewer.showEdges(colors=equColor)
-    title = visualizers.animatedTitle(fig, 'Equivalent circuit')
+    title = visualizers.animatedTitle(fig,
+    # title=ax.set_title(
+                                      'Equivalent circuit')
 
     eqArtists = [reArt, title, ctrArt]
     if asDual:
@@ -215,8 +231,12 @@ if showSrcCircuit:
 
     cm.addSimulationData(setup, append=True)
     endArts = cm.getArtists(0)
-    endArts.append(visualizers.animatedTitle(fig, 'Current distribution'))
-    # endArts[0].append(finalMesh)
+    endArts.append(visualizers.animatedTitle(fig,
+    # endArts.append(ax.set_title(
+    'Current distribution'))
+
+    if asDual:
+        endArts.append(finalMesh)
 
     for ii in range(5):
         arts.append(endArts)

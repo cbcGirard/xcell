@@ -81,9 +81,11 @@ if args.strat == 'depthExt':
 if args.nRing == 0:
     ring = Common.Ring(N=1, stim_delay=0, dendSegs=1, r=0)
     tstop = 12
+    tPerFrame=2
 else:
     ring = Common.Ring(N=args.nRing, stim_delay=0, dendSegs=args.nSegs, r=175)
     tstop = 40
+    tPerFrame = 5
 
 ivecs, isSphere, coords, rads = nUtil.getNeuronGeometry()
 if args.nRing == 0:
@@ -145,12 +147,23 @@ studyPath = study.studyPath
 dspan = dmax-dmin
 
 
+if args.nRing==0:
+    tdata={
+        'x': tv,
+        'y': I,
+        'style': 'sweep',
+        'ylabel': '',
+        'unit':'A',
+            }
+else:
+    tdata=None
+
 if args.vids:
     img = xcell.visualizers.SingleSlice(None, study,
-                                        tv)
+                                        tv, tdata=tdata)
 
     err = xcell.visualizers.SingleSlice(None, study,
-                                        tv)
+                                        tv, tdata=tdata)
     err.dataSrc = 'absErr'
     # err.dataSrc='vAna'
 
@@ -308,7 +321,7 @@ if args.vids:
         nUtil.showCellGeo(alite.axes[0])
 
         #get closest frames to 5ms intervals
-        frameNs=[int(f*len(alite.dataSets)/tstop) for f in np.arange(0,tstop, 5)]
+        frameNs=[int(f*len(alite.dataSets)/tstop) for f in np.arange(0,tstop, tPerFrame)]
         artists=[alite.getArtists(ii) for ii in frameNs]
         alite.animateStudy(fname+'-lite', fps=30, artists=artists,  vectorFrames=np.arange(len(frameNs)))
 
@@ -329,16 +342,16 @@ if args.post:
     for fmt in ['.png','.svg','.eps']:
         for lite in ['','-lite']:
             if lite=='':
-                xcell.colors.useLightStyle()
-            else:
                 xcell.colors.useDarkStyle()
+            else:
+                xcell.colors.useLightStyle()
 
             f, ax = plt.subplots(3, gridspec_kw={'height_ratios': [5, 5, 2]})
             ax[2].plot(tv, I)
 
             for d, l in zip(data, labels):
-                ax[0].semilogy(tv, np.abs(d['volErr']), label=d['depths'])
-                # ax[0].plot(tv,  np.abs(d['intErr']), label=l)
+                # ax[0].semilogy(tv, np.abs(d['volErr']), label=d['depths'])
+                ax[0].plot(tv,  np.abs(d['intErr']), label=l)
                 ax[1].plot(tv[1:], d['dt'][1:])
 
             ax[0].legend()
@@ -376,6 +389,15 @@ if args.post:
             ax.set_xticklabels(categories)
 
             ax.legend(handles=[tart, eart])
+
+            axes=[ax, aright]
+            ntick=0
+
+            nticks=[len(a.get_yticks()) for a in axes]
+            ntick=max(nticks)
+            for a in axes:
+                dtick=a.get_yticks()[1]
+                a.set_yticks(np.arange(ntick)*dtick)
 
 
             study.savePlot(f2, os.path.join(

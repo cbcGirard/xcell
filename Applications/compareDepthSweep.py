@@ -46,9 +46,9 @@ if args.comparison == 'testing':
     generate = False
     staticPlots = False
 
-
-# tstVals=[False, True]
-# tstCat='Vsrc?'
+# if args.comparison=='voltage':
+    # tstVals=[False, True]
+    # tstCat='Vsrc?'
 
 
 # generate animation(s)
@@ -153,6 +153,3 @@ for ii, p in enumerate(plotters):
         xcell.colors.useLightStyle()
         liteplot=plot.copy()
         liteplot.animateStudy(fname=name+'-lite', fps=1)
-
-        # plot.getSnapshots(np.arange(len(plot.dataSets)), name)
-        # xcell.colors.useDarkStyle()

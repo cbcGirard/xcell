@@ -1941,3 +1941,46 @@ def generalMetric(elementBBox,refCoords,refCoefs):
         l0s[ii]=refCoefs[ii]*np.linalg.norm(refCoords[ii]-coord)
 
     return l0s
+
+
+def getStandardMeshParams(sources, meshDepth, density=0.2):
+    """
+    #
+
+    Parameters
+    ----------
+    sources : TYPE
+        DESCRIPTION.
+    meshDepth : TYPE
+        DESCRIPTION.
+    density : TYPE, optional
+        DESCRIPTION. The default is 0.2.
+
+    Returns
+    -------
+    srcCoords : TYPE
+        DESCRIPTION.
+    maxDepths : TYPE
+        DESCRIPTION.
+    coefs : TYPE
+        DESCRIPTION.
+
+    """
+    nSrc=len(sources)
+
+    coefs=np.ones(nSrc)*2**(-density*meshDepth)
+    maxDepths = np.ones(nSrc, dtype=int)*meshDepth
+
+
+    srcPts=[]
+    for src in sources:
+        if 'geometry' in dir(src):
+            srcPts.append(src.geometry.center)
+        else:
+            srcPts.append(src.coords)
+
+    srcCoords=np.array(srcPts, ndmin=2)
+
+    # srcCoords = np.array([src.geometry.center for src in sources])
+
+    return srcCoords, maxDepths, coefs

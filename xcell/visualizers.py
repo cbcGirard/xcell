@@ -860,7 +860,7 @@ def animatedTitle(figure, text, axis=None):
 
     title = dest.text(0.5, .95, text,
                       horizontalalignment='center',
-                      verticalalignment='bottom',
+                      verticalalignment='top',
                       **kwargs)
     return title
 
@@ -981,14 +981,15 @@ def showEdges2d(axis, edgePoints, edgeColors=None, **kwargs):
         Artist for displaying the edges.
 
     """
-    if edgeColors is None:
-        # kwargs['colors'] = (0., 0., 0.,)
+    if not 'colors' in kwargs:
+        if edgeColors is None:
+            # kwargs['colors'] = (0., 0., 0.,)
 
-        # kwargs['alpha'] = 0.05
-        kwargs['colors'] = colors.FAINT
-    else:
-        kwargs['colors'] = edgeColors
-        # alpha=0.05
+            # kwargs['alpha'] = 0.05
+            kwargs['colors'] = colors.FAINT
+        else:
+            kwargs['colors'] = edgeColors
+            # alpha=0.05
 
     if not 'linewidths' in kwargs:
         kwargs['linewidths'] = 0.5
@@ -2005,9 +2006,9 @@ class CurrentPlot(FigureAnimator):
                 axes.append(self.inset)
 
             for ax in axes:
-                edgecol = mpl.collections.LineCollection(data['mesh'],
-                                                         color=colors.FAINT)
-                art.append(ax.add_collection(edgecol))
+                # edgecol = mpl.collections.LineCollection(data['mesh'],
+                #                                          color=colors.FAINT)
+                # art.append(ax.add_collection(edgecol))
                 if self.fullarrow:
                     art.append(ax.quiver(x, y, a, b,
                                          color=ccolors,

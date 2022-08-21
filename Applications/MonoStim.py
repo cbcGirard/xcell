@@ -3,6 +3,8 @@
 """
 Created on Sun May  8 14:00:57 2022
 
+Preliminary results for effect of mesh parameters on activation thresholds
+
 @author: benoit
 """
 
@@ -14,17 +16,23 @@ import neuron.units as nUnit
 
 import matplotlib.pyplot as plt
 import pickle
+import argparse
 
+parser=argparse.ArgumentParser()
+parser.add_argument('-Y', '--elecY', help='electrode distance in um', type=int, default=50)
+parser.add_argument('-v', '--stepViz', help='generate animation of refinement', action='store_true')
+parser.add_argument('-a','--analytic', action='store_true', help='use analyic point-sources instead of mesh')
+parser.add_argument('-S', '--summary', action='store_true', help='generate summary graph of results')
+
+parser.add_argument('-f','--folder', default='MonoStim')
+parser.add_argument('-l','--liteMode', help='use light mode', action='store_true')
 
 domX = 250e-6
 
-stepViz = True
 save = True
 
 pairStim = True
-analytic = False
-if analytic:
-    stepViz = False
+
 
 # https://doi.org/10.1109/TBME.2018.2791860
 # 48um diameter +24um insulation; 1ms, 50-650uA
@@ -41,11 +49,24 @@ tpulse = 1.
 tstart = 5.
 rElec = 24e-6
 
-elecY = 50
+
+args=parser.parse_args()
+
+elecY=args.elecY
+combineRuns=args.summary
+stepViz=args.stepViz
+analytic = args.analytic
+if analytic:
+    stepViz = False
+
+if args.liteMode:
+    xc.colors.useLightStyle()
+
+
 
 
 study, _ = com.makeSynthStudy(
-    'NEURON/Stim2/Dual_fixed_y'+str(elecY), xmax=domX,)
+    args.folder+'y'+str(elecY), xmax=domX,)
 
 
 if stepViz:
@@ -116,13 +137,15 @@ class ThresholdSim(xc.Simulation):
                               geometry=wire1)
 
     def meshAndSolve(self, depth):
-        metrics = []
-        for src in self.currentSources:
-            metrics.append(xc.makeExplicitLinearMetric(maxdepth=depth,
-                                                       meshdensity=0.2,
-                                                       origin=src.geometry.center))
+        # metrics = []
+        # for src in self.currentSources:
+        #     metrics.append(xc.makeExplicitLinearMetric(maxdepth=depth,
+        #                                                meshdensity=0.2,
+        #                                                origin=src.geometry.center))
 
-        self.makeAdaptiveGrid(metrics, depth)
+        srcCoords, depths, metricCoefs = xc.getStandardMeshParams(self.currentSources, depth)
+
+        self.makeAdaptiveGrid(refPts=srcCoords, maxdepth=depths, minl0Function=xc.generalMetric, coefs=metricCoefs)
 
         self.finalizeMesh()
         self.setBoundaryNodes()
@@ -246,7 +269,8 @@ class ThresholdStudy:
         memVals = cell.soma_v.as_numpy()
         t = tvec.as_numpy()
 
-        spiked = np.any(memVals > 0)
+        # spiked = np.any(memVals > 0)
+        spiked = len(cell.spike_times)>0
 
         del cell
 
@@ -327,7 +351,7 @@ else:
     for d in range(3, 14):
         tst = ThresholdStudy(sim, viz=viz)
 
-        t, nT, nE = tst.getThreshold(d)
+        t, nT, nE = tst.getThreshold(d, pmin=threshAna*1e-2, pmax=threshAna*1e2)
         del tst
 
         threshSet.append(t)
@@ -342,6 +366,8 @@ else:
 
     else:
         stimStr = 'mono'
+
+    del tmp
 
     f, ax = plt.subplots()
     simline, = ax.semilogx(nElec, threshSet, marker='o', label='Simulated')
@@ -373,7 +399,7 @@ else:
         ani = viz.animateStudy(aniName)
 
 
-combineRuns = True
+# combineRuns = True
 if combineRuns:
     import os
     bpath, _ = os.path.split(study.studyPath)
@@ -392,14 +418,18 @@ if combineRuns:
     ax.yaxis.set_major_formatter(xc.visualizers.eform('A'))
 
     for d, y in zip(np.array(dx)[order], np.array(Ys)[order]):
-        simline, = ax.semilogx(d['nElec'], d['thresh'], marker='o', label=y)
+        # simline, = ax.semilogx(
+        simline, = ax.loglog(
+            d['nElec'], d['thresh'], marker='o', linestyle=':', label=r'$%s \mu m$, simulated'%y)
         ax.hlines(d['threshAna'],
                   np.nanmin(d['nElec']),
                   np.nanmax(d['nElec']),
-                  linestyles=':',
-                  colors=simline.get_color())
+                  linestyles='-',
+                  colors=simline.get_color(),
+                  label=r'$%s \mu m$, analytic'%y)
 
-    ax.legend()
+    # ax.legend()
+    xc.visualizers.outsideLegend(ax)
     ax.set_title(r'Activation threshold for %.1f ms %sphasic pulse' %
                  (tpulse, stimStr))
 

@@ -3,6 +3,9 @@
 """
 Created on Sun Feb 27 19:17:41 2022
 
+
+DEPRECATED
+
 @author: benoit
 """
 
@@ -100,7 +103,7 @@ if vids:
                                         datasrc='absErr')
 
     animators=[img, err]
-    [xcell.nrnutil.showCellGeo(an.ax) for an in animators]
+    [xcell.nrnutil.showCellGeo(an.axes[0]) for an in animators]
 
 # img.tax.plot(tvec,vvec)
 # img.tax.set_ylabel('Membrane potential [V]')
@@ -157,7 +160,7 @@ def runRecord(strat, dmax, dmin, maxdepth):
             maxdepth = dmin+int(dint)
             print('depth:%d' % maxdepth)
 
-            # density=0.25
+            density=0.2
             if strat == 'd2':
                 density = 0.5
 
@@ -166,9 +169,12 @@ def runRecord(strat, dmax, dmin, maxdepth):
             maxdepth = 3
 
 
-        metricCoef=np.array(2**(-maxdepth*density),dtype=np.float64,ndmin=1)
+        srcs, depths, metricCoefs= xcell.getStandardMeshParams(setup.currentSources, maxdepth, density)
 
-        changed = setup.makeAdaptiveGrid(np.zeros((1,3)), maxdepth, xcell.generalMetric, coefs=metricCoef)
+        changed=setup.makeAdaptiveGrid(srcs, depths, xcell.generalMetric, coefs=metricCoefs)
+        # metricCoef=np.array(2**(-maxdepth*density),dtype=np.float64,ndmin=1)
+
+        # changed = setup.makeAdaptiveGrid(np.zeros((1,3)), maxdepth, xcell.generalMetric, coefs=metricCoef)
 
         if changed:
             setup.meshnum += 1
@@ -189,8 +195,8 @@ def runRecord(strat, dmax, dmin, maxdepth):
             study.saveData(setup)  # ,baseName=str(setup.iteration))
         else:
 
-            vdof = setup.getDoFs()
-            v = setup.iterativeSolve(vGuess=vdof)
+            # vdof = setup.getDoFs()
+            # v = setup.iterativeSolve(vGuess=vdof)
 
             # #Shortcut for single source
             # scale=ival/lastI
@@ -198,7 +204,7 @@ def runRecord(strat, dmax, dmin, maxdepth):
             # v=setup.nodeVoltages*scale
             # setup.nodeVoltages=v
 
-            # v=setup.solve()
+            v=setup.iterativeSolve()
 
         dt = time.monotonic()-t0
 

@@ -3,6 +3,8 @@
 """
 Created on Sun May  8 14:00:57 2022
 
+Based on simulation protocol of Reilly 2016, using the Carnavale biophysics
+
 @author: benoit
 """
 
