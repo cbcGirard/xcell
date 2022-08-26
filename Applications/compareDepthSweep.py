@@ -26,6 +26,8 @@ generate = True
 # plot performance info
 staticPlots = True
 
+depths=np.arange(3,18)
+
 if args.comparison=='mesh':
     foldername = 'Quals/PoC'
     tstVals=["adaptive","uniform"]
@@ -41,10 +43,12 @@ if args.comparison == 'bounds':
     tstCat='Boundary'
 if args.comparison == 'testing':
     foldername = 'Quals/miniset'
-    tstVals = ['adaptive']
+    tstVals = ['adaptive', 'uniform']
     tstCat = 'Mesh type'
     generate = False
     staticPlots = False
+    depths=np.arange(3,8)
+
 
 # if args.comparison=='voltage':
     # tstVals=[False, True]
@@ -54,50 +58,50 @@ if args.comparison == 'testing':
 # generate animation(s)
 plotters = [
     xcell.visualizers.ErrorGraph,
-    xcell.visualizers.ErrorGraph,
-    xcell.visualizers.SliceSet,
-    xcell.visualizers.LogError,
+    # xcell.visualizers.ErrorGraph,
+    # xcell.visualizers.SliceSet,
+    # xcell.visualizers.LogError,
     # xcell.visualizers.CurrentPlot,
 ]
 
 plotPrefs = [
     None,
-    {'onlyDoF':True},
-    None,
-    None,
+    # {'onlyDoF':True},
+    # None,
+    # None,
 ]
 
 
 
-#%%
 
 study, _ = Common.makeSynthStudy(foldername)
+#%%
 
 if generate and not args.plot_only:
     Common.pairedDepthSweep(study,
-                            depthRange=range(3, 18),
+                            depthRange=depths,
                             testCat=tstCat,
                             testVals=tstVals)
 
-
+#%%
 
 costcat = 'Error'
 # costcat='FVU'
 # xcat='l0min'
-xcat = 'Number of elements'
-filterCategories = [tstCat]
+
+xcell.colors.useLightStyle()
+
+xvalues=['Number of elements','l0min','Total time [Wall]']
+xtags=['numel','l0','totTime']
 if staticPlots:
-    for lite in ['','-lite']:
-        if lite=='':
-            xcell.colors.useDarkStyle()
-        else:
-            xcell.colors.useLightStyle()
+    for xcat,xtag in zip(xvalues,xtags):
+
 
         xcell.visualizers.groupedScatter(study.studyPath+'/log.csv',
                                          xcat=xcat,
                                          ycat=costcat,
                                          groupcat=tstCat)
-        fname = tstCat+"_"+costcat+'-vs-'+xcat+lite
+        fname = tstCat+"_"+costcat+'-vs-'+xtag
         fname.replace(' ', '_')
         nufig = plt.gcf()
         study.savePlot(nufig, fname)
@@ -105,16 +109,18 @@ if staticPlots:
 
 
             fstack, fratio = xcell.visualizers.plotStudyPerformance(study,
-                                                                    onlyCat=filterCategories[0],
+                                                                    onlyCat=tstCat,
                                                                     onlyVal=fv)
-            fstem = '_'+filterCategories[0]+str(fv)
+            fstem = '_'+tstCat+str(fv)
 
-            study.savePlot(fstack, 'Performance'+fstem+lite)
+            study.savePlot(fstack, 'Performance'+fstem)
 
-            study.savePlot(fratio, 'Ratio'+fstem+lite)
+            study.savePlot(fratio, 'Ratio'+fstem)
 
 
 
+
+#%%
 xcell.colors.useDarkStyle()
 
 
@@ -134,7 +140,7 @@ for ii, p in enumerate(plotters):
                 fname+='-detail'
 
 
-        plotr.getStudyData(filterCategories=filterCategories,
+        plotr.getStudyData(filterCategories=[tstCat],
                            filterVals=[fv])
 
         plots.append(plotr)
@@ -151,5 +157,9 @@ for ii, p in enumerate(plotters):
         plot.animateStudy(fname=name, fps=1.0)
 
         xcell.colors.useLightStyle()
-        liteplot=plot.copy()
+        nuprefs={}
+        if ii<2:
+            nuprefs.update({'printScale':[2,3],})
+
+        liteplot=plot.copy(nuprefs)
         liteplot.animateStudy(fname=name+'-lite', fps=1)

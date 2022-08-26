@@ -70,9 +70,14 @@ cli.add_argument(
 args = cli.parse_args()
 
 # Overrides for e.g. debugging in Spyder
-#args.vids=True
-#args.synth=True
-#args.folder='tmp'
+args.vids=True
+args.synth=False
+# args.folder='Quals/monoCell'
+# args.strat='depth'
+args.folder='tst'
+args.vids=True
+args.nskip=1
+args.nRing=0
 
 #%%
 if args.strat == 'depthExt':
@@ -316,14 +321,30 @@ if args.vids:
         an.animateStudy(fname, fps=30)
 
         xcell.colors.useLightStyle()
-        alite=an.copy()
+
+        alite=an.copy({'colorbar':False})
+        alite.fig.set_figwidth(3.2)
+        alite.fig.set_figheight(3.2)
 
         nUtil.showCellGeo(alite.axes[0])
 
         #get closest frames to 5ms intervals
         frameNs=[int(f*len(alite.dataSets)/tstop) for f in np.arange(0,tstop, tPerFrame)]
         artists=[alite.getArtists(ii) for ii in frameNs]
-        alite.animateStudy(fname+'-lite', fps=30, artists=artists,  vectorFrames=np.arange(len(frameNs)))
+        alite.animateStudy(fname+'-lite', fps=30, artists=artists, vectorFrames=np.arange(len(frameNs)))
+
+        def solobar(data, unit=None):
+            fbar, printbar=plt.subplots(figsize=[5., 1.0])
+            cmap, norm = xcell.visualizers.getCmap(data,logscale=True)
+
+            fbar.colorbar(plt.cm.ScalarMappable(norm=norm,cmap=cmap), cax=printbar, orientation='horizontal')
+            xcell.visualizers.engineerTicks(printbar,xunit=unit)
+
+            study.savePlot(fbar, fname+'-colorbar')
+            plt.close(fbar)
+
+
+
 
 
 # %%

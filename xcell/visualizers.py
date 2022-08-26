@@ -534,7 +534,7 @@ def plotBoundEffect(fname, ycat='FVU', xcat='Domain size', groupby='Number of el
     makePlot(l0, 'Element $l_0$ [m]')
 
 
-def groupedScatter(fname, xcat, ycat, groupcat, filtercat=None, df=None):
+def groupedScatter(fname, xcat, ycat, groupcat, filtercat=None, df=None, **kwargs):
     if df is None:
         df, cats = importRunset(fname)
     else:
@@ -554,7 +554,7 @@ def groupedScatter(fname, xcat, ycat, groupcat, filtercat=None, df=None):
     for ii, label in enumerate(catNames):
         sel = dL == label
         plt.loglog(dX[sel], dY[sel], marker='.',
-                   label=groupcat+':\n'+str(label))
+                   label=groupcat+':\n'+str(label), **kwargs)
 
     outsideLegend()
     plt.tight_layout()
@@ -1191,7 +1191,11 @@ class FigureAnimator:
 
         if artists is None:
             artists = []
-            for ii in range(len(self.dataSets)):
+            if len(vectorFrames)>0:
+                frameList=vectorFrames
+            else:
+                frameList=range(len(self.dataSets))
+            for ii in frameList:
                 artists.append(self.getArtists(ii))
 
         animation = AAnimation(self.fig,
@@ -1258,9 +1262,11 @@ class FigureAnimator:
             ax.set_facecolor(colors.WHITE)
 
 
-    def copy(self):
+    def copy(self, overridePrefs={}):
         # colors.useLightStyle()
-        newAni=self.__class__(None, self.study, self.prefs)
+        newPrefs=self.prefs.copy()
+        newPrefs.update(overridePrefs)
+        newAni=self.__class__(None, self.study, newPrefs)
 
         params=self.__dict__.copy()
         params['fig']=newAni.fig
@@ -1548,6 +1554,7 @@ class ErrorGraph(FigureAnimator):
             'onlyDoF': False,
             'universalPts': True,
             'infoTitle': False,
+            'printScale':1.0,
             }
         if prefs is not None:
             stdPrefs.update(prefs)
@@ -1562,24 +1569,32 @@ class ErrorGraph(FigureAnimator):
         # axErr = self.fig.add_subplot(5, 1, (3, 4))
         # axL=self.fig.add_subplot(5,1,5)
 
-        self.fig.set_figheight(1.5*self.fig.get_figheight())
+#TODO: sane way to set figure size, aspect ratio for print vs screen
+        figH=self.fig.get_figheight()
+        figW=self.fig.get_figwidth()
+
+        scaler = self.prefs['printScale']
+
+        if type(scaler) is list:
+            kW, kH = scaler
+            self.fig.set_figheight(9.0/kH)
+            self.fig.set_figwidth(6.0/kW)
+        else:
+            self.fig.set_figheight(1.5*figH*scaler)
+            self.fig.set_figwidth(figW*scaler)
+
+        axRatios=[5, 5, 2]
 
         axes = self.fig.subplots(3, 1,
                                  gridspec_kw={
-                                     'height_ratios': [5, 5, 2]})
+                                     'height_ratios': axRatios})
 
         axV, axErr, axL = axes
-        # axV = self.fig.add_subplot(3, 1, 1)
-        # axErr = self.fig.add_subplot(3, 1, 2)
-        # axL = self.fig.add_subplot(3, 1, 3)
 
-        axV.grid(True)
-        axErr.grid(True)
-        axL.grid(True)
+        for a in axes:
+            a.grid(True)
+            a.set_xscale('log')
 
-        axV.set_xscale('log')
-        axErr.set_xscale('log')
-        axL.set_xscale('log')
         axL.set_yscale('log')
 
         axErr.sharex(axV)
@@ -1601,12 +1616,6 @@ class ErrorGraph(FigureAnimator):
         axL.xaxis.set_major_formatter(mpl.ticker.EngFormatter('m'))
 
         [plt.setp(a.get_xticklabels(), visible=False) for a in [axV, axErr]]
-
-
-
-        # self.axV = axV
-        # self.axErr = axErr
-        # self.axL = axL
 
         self.axes = [axV, axErr, axL]
 
@@ -1805,7 +1814,9 @@ class ErrorGraph(FigureAnimator):
                                   #                     self.elemL[ii],
                                   c=colors.BASE, marker='.')
 
-        # plt.tight_layout()
+
+        #fix scaling issue
+        self.axes[0].set_xlim(min(self.analyticR))
         if self.prefs['infoTitle']:
             artists.append(title)
         artists.append(errLine)
@@ -2086,12 +2097,15 @@ def hideBorders(axis, hidex=False):
 
 
 class SingleSlice(FigureAnimator):
-    def __init__(self, fig, study, timevec=[], tdata=None, datasrc='spaceV'):
+    def __init__(self, fig, study, timevec=[], tdata=None, datasrc='spaceV', prefs=None):
         self.bnds = study.bbox[[0, 3, 2, 4]]
         self.tdata = tdata
         self.dataSrc = datasrc
         self.timevec = timevec
-        super().__init__(fig, study)
+
+        if prefs is None:
+            prefs={'colorbar':True}
+        super().__init__(fig, study, prefs=prefs)
         self.dataScales = {
             'spaceV': ScaleRange(),
             'absErr': ScaleRange(),
@@ -2101,10 +2115,14 @@ class SingleSlice(FigureAnimator):
 
 
 
-    def copy(self):
-        newAni=self.__class__(None, self.study, timevec=self.timevec, tdata=self.tdata, datasrc=self.dataSrc)
-
+    def copy(self,newPrefs=None):
         params=self.__dict__.copy()
+        oldPrefs=params['prefs']
+
+        if newPrefs is not None:
+            oldPrefs.update(newPrefs)
+        newAni=self.__class__(None, self.study, timevec=self.timevec, tdata=self.tdata, datasrc=self.dataSrc, prefs=oldPrefs)
+
         params['fig']=newAni.fig
         params['axes']=newAni.axes
         params['tbar']=newAni.tbar
@@ -2114,20 +2132,31 @@ class SingleSlice(FigureAnimator):
         return newAni
 
     def setupFigure(self):
+        if self.prefs['colorbar']:
+            nCol=2
+        else:
+            nCol=1
 
-        axes = self.fig.subplots(2, 2,
+        ratios = [19,1]
+        axes = self.fig.subplots(2, nCol,
                                  gridspec_kw={
-                                     'height_ratios': [19, 1],
-                                     'width_ratios': [19, 1]})
-        # gridspec_kw={
-        #     'height_ratios': [9,3],
-        #     'width_ratios': [9,1]})
+                                     'height_ratios': ratios,
+                                     'width_ratios': ratios[:nCol]})
 
-        ax = axes[0, 0]
-        tax = axes[1, 0]
-        cax = axes[0, 1]
-        nonax = axes[1, 1]
-        self.fig.delaxes(nonax)
+
+
+
+        if self.prefs['colorbar']:
+            ax = axes[0, 0]
+            tax = axes[1, 0]
+            cax = axes[0, 1]
+            nonax = axes[1, 1]
+            self.fig.delaxes(nonax)
+        else:
+            cax=None
+            ax=axes[0]
+            tax=axes[1]
+
 
         formatXYAxis(ax, self.bnds)
         self.tbar = TimingBar(self.fig, tax, self.tdata)
@@ -2152,7 +2181,7 @@ class SingleSlice(FigureAnimator):
             cMap, cNorm = getCmap(self.dataScales[self.dataSrc],
                                   logscale=True)
 
-            if setnum==0:
+            if setnum==0 and self.prefs['colorbar']:
                 mapper = mpl.cm.ScalarMappable(norm=cNorm, cmap=cMap)
 
                 if self.dataSrc == 'spaceV' or self.dataSrc == 'absErr' or self.dataSrc == 'vAna':

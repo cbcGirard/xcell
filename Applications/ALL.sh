@@ -2,3 +2,4 @@
 
 ./Statics.sh
 ./polySet.sh
+./monoSet.sh
