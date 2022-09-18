@@ -9,7 +9,7 @@ Generates the xcell logo from point cloud
 @author: benoit
 """
 
-import xcell
+# import xcell
 import pandas
 import numpy as np
 import matplotlib.pyplot as plt
