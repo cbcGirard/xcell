@@ -11,11 +11,16 @@ import numpy as np
 import Common
 import matplotlib.pyplot as plt
 import pickle
+import os
 
 fname = 'Singularity_sweep'
 # fname="Singularity"
 generate = False
 animate = False
+lite=True
+
+if lite:
+    xcell.colors.useLightStyle()
 
 rElec = 1e-6
 x0max = rElec*200
@@ -130,11 +135,16 @@ for xx in x0s:
 
                 pickle.dump(pdata, open(fbase+'.pdata', 'wb'))
             else:
-                data = pickle.load(open(fbase+'.pdata', 'rb'))
-                rrel = data['rrel']
-                esrc = data['esrc']
-                etots = data['etots']
-                nInSrc = data['nInSrc']
+
+                if os.path.exists(fbase+'.pdata'):
+
+                    data = pickle.load(open(fbase+'.pdata', 'rb'))
+                    rrel = data['rrel']
+                    esrc = data['esrc']
+                    etots = data['etots']
+                    nInSrc = data['nInSrc']
+                else:
+                    continue
 
             # totcol='tab:orange'
             # pkcol='tab:red'
@@ -158,8 +168,11 @@ for xx in x0s:
             a3.plot(rplot[sortr], np.array(nInSrc)[sortr])
 
 
-xcell.Visualizers.outsideLegend(axis=ax)
+xcell.visualizers.outsideLegend(axis=ax)
 # ax.legend()
 
-study.savePlot(f2, 'multiplot', '.png')
-study.savePlot(f2, 'multiplot', '.eps')
+figname='multiplot'
+if lite:
+    figname+='-lite'
+
+study.savePlot(f2, figname)

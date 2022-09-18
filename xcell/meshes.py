@@ -10,6 +10,7 @@ import numba as nb
 from . import elements
 from . import util
 from . import fem
+from . import geometry as geo
 
 
 class Mesh:
@@ -312,7 +313,7 @@ class Octree(Mesh):
         elements = self.tree.getIntersectingElement(axis, coordinate)
         return elements
 
-    def refineByMetric(self, l0Function):
+    def refineByMetric(self, minl0Function, refPts, maxl0Function=None, coefs=None):
         """
         Recursively splits elements until l0Function evaluated at the center
         of each element is greater than that element's l0'
@@ -328,8 +329,11 @@ class Octree(Mesh):
             Adaptation resulted in new topology
 
         """
-        changed = self.tree.refineByMetric(l0Function, self.maxDepth)
-        pruned, _ = self.tree.coarsenByMetric(l0Function, self.maxDepth)
+
+        if maxl0Function is None:
+            maxl0Function=minl0Function
+        changed = self.tree.refineByMetric(minl0Function, refPts, self.maxDepth, coefs)
+        pruned, _ = self.tree.coarsenByMetric(maxl0Function, refPts, self.maxDepth, coefs)
 
         # if pruned:
         #     print()
@@ -622,6 +626,7 @@ class Octant():
         self.origin = origin
         self.span = span
         self.center = origin+span/2
+        self.bbox=np.hstack((self.origin,self.origin+self.span))
         self.l0 = np.prod(span)**(1/3)
 
         self.children = []
@@ -723,45 +728,78 @@ class Octant():
         return indices
 
     # @nb.njit(parallel=True)
-    def refineByMetric(self, l0Functions, maxDepth):
+    def refineByMetric(self, l0Function, refPts, maxDepth, coefs):
         changed = False
-        for f in l0Functions:
+        l0Target,whichPts=util.reduceFunctions(l0Function,refPts, self.bbox, coefs=coefs)
+        filt=np.logical_and(whichPts,maxDepth>self.depth)
+        nextPts=refPts[filt]
+        nextMaxDepths=maxDepth[filt]
 
-            l0Target = f(self.center)
+        if coefs is not None:
+            nextCoefs=coefs[filt]
+        else:
+            nextCoefs=coefs
 
-            if (self.l0 > l0Target) and (self.depth < maxDepth):
-                if len(self.children) == 0:
-                    changed = True
-                    self.split()
-                for ii in nb.prange(8):
-                    changed |= self.children[ii].refineByMetric(
-                        l0Functions, maxDepth)
+        if nextPts.shape[0]>0:# and self.depth<maxDepth:
+            if len(self.children)==0:
+                changed=True
+                self.split()
+            for ii in nb.prange(8):
+                changed|=self.children[ii].refineByMetric(l0Function,
+                                                          nextPts,
+                                                          nextMaxDepths, nextCoefs)
 
         return changed
 
-    def coarsenByMetric(self, metrics, maxdepth):
+    def coarsenByMetric(self, metric, refPts, maxdepth, coefs):
+        """
+        If element and all children are smaller than target, delete children
 
+        Parameters
+        ----------
+        metric : TYPE
+            DESCRIPTION.
+        refPts : TYPE
+            DESCRIPTION.
+        maxdepth : TYPE
+            DESCRIPTION.
+        coefs : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        TYPE
+            DESCRIPTION.
+        TYPE
+            DESCRIPTION.
+
+        """
         changed = False
+        _,whichPts=util.reduceFunctions(metric, refPts, self.bbox, coefs=coefs, returnUnder=False)
 
-        for f in metrics:
+        #let metric implicitly prune if maxdepth lowered
+        #causes insufficient meshing otherwise
+        # undersize=np.all(whichPts) #or self.depth<maxdepth
 
-            undersize = self.l0 < f(self.center) or self.depth > maxdepth
+        filt=np.logical_or(whichPts,maxdepth<self.depth)
+        undersize=np.all(filt)
 
-            if self.isTerminal():
-                pass
-            else:
+        if self.isTerminal():
+            #end condition
+            pass
+        else:
+            #recurse to end
+            for ch in self.children:
+                chChanged,chUnder=ch.coarsenByMetric(metric, refPts, maxdepth, coefs)
+                changed |= chChanged
+                undersize &= chUnder
+
+            if undersize:
+                changed=True
                 for ch in self.children:
-                    chChange, chUnder = ch.coarsenByMetric(metrics, maxdepth)
-
-                    undersize &= chUnder
-                    changed |= chChange
-
-                if undersize:
-                    changed = True
-                    for ch in self.children:
-                        del ch
-                    self.children = []
-                    self.calcIndices()
+                    del ch
+                self.children=[]
+                self.calcIndices()
 
         return changed, undersize
 
@@ -834,7 +872,8 @@ class Octant():
 
     def getContainingElement(self, coords):
         if len(self.children) == 0:
-            if self.containsPoint(coords):
+            # if self.containsPoint(coords):
+            if geo.isInBBox(self.bbox, coords):
                 return self
             else:
                 return None

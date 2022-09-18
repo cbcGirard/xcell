@@ -3,6 +3,11 @@
 """
 Created on Wed Apr 20 17:14:52 2022
 
+
+DEPRECATED
+
+
+
 @author: benoit
 """
 
@@ -13,7 +18,7 @@ from neuron import h  # , gui
 import neuron.units as nUnit
 
 import matplotlib.pyplot as plt
-from xcell import nrnUtil
+from xcell import nrnutil
 
 
 domX = 5e-4
@@ -108,7 +113,12 @@ def runStim(depth):
     # metric= xc.makeExplicitLinearMetric(maxdepth=depth,
     #                             meshdensity=0.2)
 
-    setup.makeAdaptiveGrid(metrics, depth)
+    # srcCoords=np.array([src.geometry.center for src in setup.currentSources])
+    # metricCoefs=2**(-0.2*depth)*np.ones(len(setup.currentSources))
+
+    srcCoords, depths, metricCoefs = xc.getStandardMeshParams(setup.currentSources, depth)
+
+    setup.makeAdaptiveGrid(srcCoords, depths, xc.generalMetric, coefs=metricCoefs)
 
     setup.finalizeMesh()
     setup.setBoundaryNodes()
@@ -134,7 +144,7 @@ def runStim(depth):
 
     # optional visualization
     viz.addSimulationData(setup, append=True)
-    nrnUtil.showCellGeo(viz.axes[0])
+    nrnutil.showCellGeo(viz.axes[0])
 
     def makeBiphasicPulse(amplitude, tstart, pulsedur, trise=None):
         if trise is None:

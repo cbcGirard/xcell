@@ -30,7 +30,7 @@ from . import meshes
 from . import geometry
 from .fem import ADMITTANCE_EDGES
 from . import misc
-
+from . import colors
 
 # @nb.experimental.jitclass([
 #     ('value',float64),
@@ -92,7 +92,7 @@ class Simulation:
 
         self.asDual = False
 
-    def makeAdaptiveGrid(self, metrics, maxdepth, autoExpand=False):
+    def makeAdaptiveGrid(self, refPts, maxdepth, minl0Function, maxl0Function=None, coefs=None):
         """
         Fast utility to construct an octree-based mesh of the domain.
 
@@ -115,7 +115,7 @@ class Simulation:
         self.meshtype = 'adaptive'
 
         # convert to octree mesh
-        if (type(self.mesh) != meshes.Octree) or autoExpand:
+        if (type(self.mesh) != meshes.Octree):
             # xdom=min(self.mesh.span)
             # metBounds=[m(np.array([xdom, 0., 0.])) for m in metrics]
             # # scale=xdom/metric(np.array([xdom,0.,0.]))
@@ -131,7 +131,7 @@ class Simulation:
 
         self.mesh.maxDepth = maxdepth
 
-        changed = self.mesh.refineByMetric(metrics)
+        changed = self.mesh.refineByMetric(minl0Function,  refPts, maxl0Function, coefs)
         self.logTime()
 
         return changed
@@ -413,6 +413,7 @@ class Simulation:
         """
         self.startTiming('Finalize mesh')
         self.mesh.finalize()
+        self.nodeISources=[]
         numEl = len(self.mesh.elements)
         self.logTime()
 
@@ -490,11 +491,13 @@ class Simulation:
             self.nodeRoleTable[indices] = 1
             self.nodeRoleVals[indices] = ii
 
-            # self.vSourceNodes.extend(indices)
-            # self.vSourceVals.extend(src.value*np.ones(len(indices)))
             self.nodeVoltages[indices] = src.value
 
-        meshCurrentSrc = []
+        # meshCurrentSrc=self.nodeISources
+        # meshCurrentSrc=[0 for k in self.nodeISources]
+        meshCurrentSrc=[]
+
+
         for ii in nb.prange(len(self.currentSources)):
             src = self.currentSources[ii]
 
@@ -518,14 +521,10 @@ class Simulation:
                 if self.nodeRoleTable[idx] == 2:
                     # node is already claimed by source
                     sharedIdx = self.nodeRoleVals[idx]
-                    # if sharedIdx<len(meshCurrentSrc):
                     # add to value of existing node source
+                    if sharedIdx>=len(meshCurrentSrc):
+                        print('')
                     meshCurrentSrc[sharedIdx] += src.value
-                    # else:
-                    #     #this shouldn't happen...?
-                    #     self.nodeRoleVals[idx]=len(meshCurrentSrc)
-                    #     meshCurrentSrc.append((src.value))
-
                 else:
                     # normal, set as current dof
                     self.nodeRoleTable[idx] = 2
@@ -688,7 +687,7 @@ class Simulation:
 
         return vDoF
 
-    def iterativeSolve(self, vGuess=None, tol=1e-9):
+    def iterativeSolve(self, vGuess=None, tol=1e-12):
         """
         Solve nodal voltages using conjgate gradient method.
 
@@ -852,11 +851,24 @@ class Simulation:
         ana, anaInt = self.analyticalEstimate()
         analyticInt = anaInt[0]
 
+        netAna=np.sum(ana,axis=0)
+
         for el in self.mesh.elements:
             span = el.span
-            inds = np.array([self.mesh.inverseIdxMap[v] for v in el.vertices])
-            vals = self.nodeVoltages[inds]
-            avals = ana[0][inds]
+            if self.mesh.elementType=='Face':
+                elInd=el.faces
+            else:
+                elInd=el.vertices
+            globalInd = np.array([self.mesh.inverseIdxMap[v] for v in elInd])
+            elVals = self.nodeVoltages[globalInd]
+
+            if self.mesh.elementType=='Face':
+                vals=meshes.fem.interpolateFromFace(elVals, meshes.fem.HEX_VERTEX_COORDS)
+                avals=np.abs(meshes.fem.interpolateFromFace(netAna[globalInd], meshes.fem.HEX_VERTEX_COORDS))
+            else:
+                vals=elVals
+                avals = np.abs(netAna[globalInd])
+
             dvals = np.abs(vals-avals)
 
             if basic:
@@ -1287,7 +1299,24 @@ class Simulation:
         return coords, edges
 
     def interpolateAt(self, coords, elements=None, data=None):
+        """
+        Interpolate values at specified coordinates.
 
+        Parameters
+        ----------
+        coords : float[:,:]
+            Coordinates to interpolate ate.
+        elements : element list, optional
+            Elements to search for the proper interpolation. The default is None, which checks all elements.
+        data : float[:], optional
+            Nodal values used for interpolation. The default is None, which uses node voltages.
+
+        Returns
+        -------
+        vals : float[:]
+            Interpolated values at the specfied points
+
+        """
         vals = np.empty(coords.shape[0])
         unknown = np.ones_like(vals, dtype=bool)
 
@@ -1694,20 +1723,21 @@ class SimStudy:
 
     def savePlot(self, fig, fileName, ext=None):
         if ext is None:
-            fnames = [self.__makepath(fileName, x) for x in ['.png', '.eps']]
+            fnames = [self.__makepath(fileName, x) for x in ['.png', '.svg', '.eps']]
 
-            for f in fnames:
-                fig.savefig(f)
         else:
-            fname = self.__makepath(fileName, ext)
-            fig.savefig(fname)
+            fnames = [self.__makepath(fileName, ext)]
+
+        for f in fnames:
+            fig.savefig(f, transparent=True, dpi=300)
 
     def __makepath(self, fileName, ext):
-        basepath = os.path.join(self.studyPath)
+        fpath = os.path.join(self.studyPath, fileName+ext)
+
+        basepath,_ = os.path.split(fpath)
 
         if not os.path.exists(basepath):
             os.makedirs(basepath)
-        fpath = os.path.join(basepath, fileName+ext)
         return fpath
 
     def saveAnimation(self, animator, filename):
@@ -1882,14 +1912,75 @@ def _analytic(rad, V, I, r):
     return voltage, integral
 
 
-def makeScaledMetrics(pts, ptVals, maxdepth, density=0.2):
+def makeScaledMetrics(maxdepth, density=0.2):
     param = 2**(-maxdepth*density)
 
-    def metric(coord):
-        r = np.linalg.norm(pts-coord, axis=1)
+    @nb.njit()
+    def metric(elBBox,refCoords,coefs):
+        nPts=refCoords.shape[0]
+        coord=(elBBox[:3]+elBBox[3:])/2
+        l0s=np.empty(nPts)
 
-        l0 = min(param*r*ptVals)
+        for ii in nb.prange(nPts):
+            l0s[ii]=param*coefs[ii]*np.linalg.norm(refCoords[ii]-coord)
 
-        return l0
+        return l0s
 
-    return [metric]
+    return metric
+
+
+@nb.njit()
+def generalMetric(elementBBox,refCoords,refCoefs):
+    # param=2**(-maxdepth*density)
+
+    nPts=refCoords.shape[0]
+    coord=(elementBBox[:3]+elementBBox[3:])/2
+    l0s=np.empty(nPts)
+
+    for ii in nb.prange(nPts):
+        l0s[ii]=refCoefs[ii]*np.linalg.norm(refCoords[ii]-coord)
+
+    return l0s
+
+
+def getStandardMeshParams(sources, meshDepth, density=0.2):
+    """
+    #
+
+    Parameters
+    ----------
+    sources : TYPE
+        DESCRIPTION.
+    meshDepth : TYPE
+        DESCRIPTION.
+    density : TYPE, optional
+        DESCRIPTION. The default is 0.2.
+
+    Returns
+    -------
+    srcCoords : TYPE
+        DESCRIPTION.
+    maxDepths : TYPE
+        DESCRIPTION.
+    coefs : TYPE
+        DESCRIPTION.
+
+    """
+    nSrc=len(sources)
+
+    coefs=np.ones(nSrc)*2**(-density*meshDepth)
+    maxDepths = np.ones(nSrc, dtype=int)*meshDepth
+
+
+    srcPts=[]
+    for src in sources:
+        if 'geometry' in dir(src):
+            srcPts.append(src.geometry.center)
+        else:
+            srcPts.append(src.coords)
+
+    srcCoords=np.array(srcPts, ndmin=2)
+
+    # srcCoords = np.array([src.geometry.center for src in sources])
+
+    return srcCoords, maxDepths, coefs

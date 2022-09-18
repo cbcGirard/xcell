@@ -3,6 +3,9 @@
 """
 Created on Thu Mar 17 13:25:55 2022
 
+Illusrates how adaptation parameters affect the generated mesh
+
+
 @author: benoit
 """
 
@@ -12,14 +15,14 @@ import xcell
 import matplotlib.pyplot as plt
 
 
-swept = 'density'
+swept = 'depth'
 dmin = 2
-dmax = 8
+dmax = 6
 
 study, setup = Common.makeSynthStudy('adaptationDemos')
 
 
-sweepval = 1-abs(np.linspace(-1, 1))
+sweepval = 1-abs(np.linspace(-1, 1, 20))
 
 if swept == 'density':
     vrange = 0.5*sweepval
@@ -38,7 +41,7 @@ tdata = {
 }
 
 
-img = xcell.Visualizers.SingleSlice(None, study, timevec=tvec, tdata=tdata)
+img = xcell.visualizers.SingleSlice(None, study, timevec=tvec, tdata=tdata)
 
 
 # data={
@@ -61,16 +64,15 @@ for val in vrange:
         # else:
         #     lastdepth=maxdepth
 
-    metric = xcell.makeExplicitLinearMetric(maxdepth,
-                                            density)
+    metric = xcell.generalMetric
 
-    setup.makeAdaptiveGrid(metric, maxdepth)
+    setup.makeAdaptiveGrid(np.zeros((1, 3)),  maxdepth=np.array(maxdepth,ndmin=1), minl0Function=metric,  coefs=np.ones(1)*2**(-maxdepth*density))
     setup.finalizeMesh()
     # _,_,edgePts=setup.getElementsInPlane()
 
     img.addSimulationData(setup, append=True)
 
-    # ax=xcell.Visualizers.showMesh(setup)
+    # ax=xcell.visualizers.showMesh(setup)
     # ax.set_xticks([])
     # ax.set_yticks([])
     # ax.set_zticks([])
@@ -81,3 +83,7 @@ for val in vrange:
 
 
 ani = img.animateStudy(fname=swept, fps=5.)
+
+lcopy=img.makeLightCopy()
+
+lani=lcopy.animateStudy(fps=5)

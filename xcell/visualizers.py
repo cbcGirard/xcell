@@ -18,7 +18,7 @@ import numba as nb
 from scipy.sparse import tril
 import os
 
-import cmasher as cmr
+# import cmasher as cmr
 
 # import matplotlib.tri as tri
 from mpl_toolkits.axes_grid1 import AxesGrid
@@ -29,125 +29,36 @@ import pandas
 # from util import uniformResample, edgeRoles, getquads, quadsToMaskedArrays, coords2MaskedArrays
 from . import util
 from . import misc
+from . import colors
+from .AAnimation import AAnimation, FWriter
 
 MAX_LOG_SPAN = 2
 
-styleScope = {
-    'axes.prop_cycle': mpl.cycler('color', ['#ffff00', '#00ffff', '#ff00ff', '#00ff00', '#ff0000', '#0000ff', '#ff8000', '#8000ff', '#ff0080', '#0080ff'])}
-
-styleXcell = {
-    'axes.grid': True,
-    'figure.frameon': False,
-    'figure.autolayout': True,
-    'lines.markersize': 1.0,
-    'legend.loc': 'upper right',
-    'image.cmap': 'plasma',
-    'image.aspect': 'equal',
-    'image.origin': 'lower',
-
-    'scatter.marker': '.',
-    'path.simplify': True,
-
-    'axes3d.grid': False,
-
-    'axes.facecolor': '#19232d',
-    'figure.edgecolor': '#19232d',
-    'figure.facecolor': '#19232d',
-    'savefig.edgecolor': '#19232d',
-    'savefig.facecolor': '#19232d',
-
-
-    'axes.edgecolor': '#dcd4c7',
-    'axes.labelcolor': '#dcd4c7',
-    'boxplot.boxprops.color': '#dcd4c7',
-    'boxplot.capprops.color': '#dcd4c7',
-    'boxplot.flierprops.color': '#dcd4c7',
-    'boxplot.flierprops.markeredgecolor': '#dcd4c7',
-    'boxplot.whiskerprops.color': '#dcd4c7',
-    'grid.color': '#dcd4c7',
-    'lines.color': '#dcd4c7',
-    'patch.edgecolor': '#dcd4c7',
-    'text.color': '#dcd4c7',
-    'xtick.color': '#dcd4c7',
-    'ytick.color': '#dcd4c7',
-
-    'grid.alpha': 0.5}
-
-plt.style.use(styleScope)
-plt.style.use(styleXcell)
-# try:
-#     plt.style.use('../scope.mplstyle')
-#     plt.style.use('../xcell.mplstyle')
-# except:
-#     try:
-#         plt.style.use('./scope.mplstyle')
-#         plt.style.use('./xcell.mplstyle')
-#     except:
-#         print('oops')
-#         pass
-
-
-def scoopCmap(baseCmap, fraction=0.1):
-    col = np.array(baseCmap.colors)
-
-    x = np.linspace(-1, 1, col.shape[0]).reshape((-1, 1))
-    alpha = np.abs(x/fraction)
-    alpha[alpha > 1.] = 1.
-
-    newcol = np.hstack((col, alpha))
-
-    newCmap = mpl.colors.LinearSegmentedColormap.from_list(
-        baseCmap.name+'_mod', newcol)
-    return newCmap
-
-
-# Dark mode
-MESH_ALPHA = 0.25
-FAINT = (0xaf/255, 0xcf/255, 1., MESH_ALPHA)
-
-# CM_BIPOLAR=scoopCmap(cmr.wildfire, fraction=0.5)
-# CM_BIPOLAR=scoopCmap(cmr.guppy, fraction=0.1)
-# CM_BIPOLAR=scoopCmap(cmr.neon, fraction=0.2)
-
-colAr = [[0, 0, 1, 1],
-         [.098, .137, .176, 0],
-         [1, 0, 0, 1]]
-# colAr=[[0,1,0,1],[0,0.5,0.5,1],[0,0,1,0],[0.5,0.5,0,1],[1,0,0,1]]
-
-CM_BIPOLAR = mpl.colors.LinearSegmentedColormap.from_list('bipolar',
-                                                          np.array(colAr,
-                                                                   dtype=float))
-
-
-BASE = '#afcfff'
-NULL = '#00000000'
-ACCENT_DARK = '#990000'
-ACCENT_LIGHT = '#FFCC00'
-LINE = '#dcd4c7'
-plx = np.array(mpl.colormaps.get('plasma').colors)
-lint = np.array(np.linspace(0, 1, num=plx.shape[0]), ndmin=2).transpose()
-CM_MONO = mpl.colors.LinearSegmentedColormap.from_list('mono',
-                                                       np.hstack((plx, lint)))
+# colors.useDarkStyle()
 
 
 def engineerTicks(axis, xunit=None, yunit=None):
-    axis.xaxis.set_major_formatter(eform(xunit))
-    axis.yaxis.set_major_formatter(eform(yunit))
+    if xunit is not None:
+        axis.xaxis.set_major_formatter(eform(xunit, places=0))
+    if yunit is not None:
+        axis.yaxis.set_major_formatter(eform(yunit, places = 0 ))
 
 
 class TimingBar:
     def __init__(self, figure, axis, data=None):
         self.maxtime = np.inf
         self.fig = figure
+        self.axes=[]
         if axis is None:
-            self.ax = figure.add_subplot()
+            self.axes.append(figure.add_subplot())
         else:
-            self.ax = axis
+            self.axes.append(axis)
 
-        # self.ax.set_xlabel('Time [ms]')
-        self.ax.xaxis.set_major_formatter(eform('s'))
+        ax=self.axes[0]
 
-        [self.ax.spines[k].set_visible(False) for k in self.ax.spines]
+        ax.xaxis.set_major_formatter(eform('s'))
+
+        [ax.spines[k].set_visible(False) for k in ax.spines]
 
         self.data = data
         if data is not None:
@@ -157,43 +68,44 @@ class TimingBar:
                     alpha = 0.5
                 else:
                     alpha = 1
-                self.ax.plot(data['x'], data['y'], color='C0', alpha=alpha)
-            self.ax.set_ylabel(data['ylabel'])
-            self.ax.yaxis.set_major_formatter(eform(data['unit']))
-            self.ax.set_yticks([0])
-            self.ax.grid(False)
-            self.ax.grid(visible=True,
+                ax.plot(data['x'], data['y'], color='C0', alpha=alpha)
+            ax.set_ylabel(data['ylabel'])
+            ax.yaxis.set_major_formatter(eform(data['unit']))
+            ax.set_yticks([0])
+            ax.grid(False)
+            ax.grid(visible=True,
                          which='major',
                          axis='y')
 
         else:
-            self.ax.yaxis.set_visible(False)
+            ax.yaxis.set_visible(False)
 
     def getArt(self, time, step=None):
-        ymin, ymax = self.ax.get_ylim()
+        ax=self.axes[0]
+        ymin, ymax = ax.get_ylim()
         art = []
 
         if step is not None and self.data is not None:
             if self.data['style'] == 'sweep':
-                art.append(self.ax.plot(self.data['x'][:step],
+                art.append(ax.plot(self.data['x'][:step],
                                         self.data['y'][:step],
                                         color='C0'
                                         )[0])
             elif self.data['style'] == 'rave':
-                art.append(self.ax.plot(self.data['x'][:step],
+                art.append(ax.plot(self.data['x'][:step],
                                         self.data['y'][:step],
                                         )[0])
             elif self.data['style'] == 'dot':
-                art.append(self.ax.scatter(self.data['x'][step],
+                art.append(ax.scatter(self.data['x'][step],
                                            self.data['y'][step],
                                            marker='o',
                                            color='C0',
                                            s=2.))
 
         else:
-            art.append(self.ax.vlines(time, .8*ymin, .8*ymax,
-                                      colors=BASE,
-                                      linewidths=.5))
+            art.append(ax.vlines(time, .8*ymin, .8*ymax,
+                                      colors='C0',
+                                      linewidths=1.5))
 
         return art
 
@@ -262,16 +174,16 @@ class SliceViewer:
     def __init__(self, axis, sim, displayPrefs=None, topoType='mesh'):
         if axis is None:
             self.fig = plt.figure()
-            self.ax = self.fig.add_subplot()
+            self.axes[0] = self.fig.add_subplot()
         else:
-            self.ax = axis
+            self.axes[0] = axis
             self.fig = axis.figure
 
         self.fig.canvas.mpl_connect('key_press_event', self.onKey)
         self.sim = sim
         self.nLevels = 0
 
-        formatXYAxis(self.ax, bounds=None)
+        formatXYAxis(self.axes[0], bounds=None)
         self.topoType = topoType
 
         self.setPlane()
@@ -339,14 +251,14 @@ class SliceViewer:
         # graph formatting
         xyNames = [axNames[i]+" [m]" for i in axlist[otherAxes]]
         titleStr = axNames[self.normAxis]+"=%.2g" % zval
-        self.ax.set_xlabel(xyNames[0])
-        self.ax.set_ylabel(xyNames[1])
-        self.ax.set_title(titleStr)
+        self.axes[0].set_xlabel(xyNames[0])
+        self.axes[0].set_ylabel(xyNames[1])
+        self.axes[0].set_title(titleStr)
 
         bndInds = [d+3*ii for d in axlist[otherAxes] for ii in range(2)]
         bnds = self.sim.mesh.bbox[bndInds]
-        self.ax.set_xlim(bnds[0], bnds[1])
-        self.ax.set_ylim(bnds[2], bnds[3])
+        self.axes[0].set_xlim(bnds[0], bnds[1])
+        self.axes[0].set_ylim(bnds[2], bnds[3])
 
     def showEdges(self, connAngle=None, colors=None, **kwargs):
         # edge=self.sim.getEdges(self.topoType)
@@ -362,7 +274,7 @@ class SliceViewer:
         # if colors is not None:
         #     colors=colors[edgeInPlane]
 
-        art = showEdges2d(self.ax,
+        art = showEdges2d(self.axes[0],
                           edgePts,
                           colors,
                           **kwargs)
@@ -378,7 +290,7 @@ class SliceViewer:
         #                             ndmin=2))
         #     skewPoints=toEdgePoints(self.xyCoords+skew,
         #                             self.sim.getEdges()[edgeAdjacent])
-        #     showEdges2d(self.ax, skewPoints, colors, **kwargs)
+        #     showEdges2d(self.axes[0], skewPoints, colors, **kwargs)
 
         return art
 
@@ -387,7 +299,7 @@ class SliceViewer:
         x, y = np.hsplit(self.pCoords, 2)
 
         if colors is not None:
-            art = self.ax.scatter(x, y,
+            art = self.axes[0].scatter(x, y,
                                   color=colors[self.nInPlane],
                                   **kwargs)
         else:
@@ -395,22 +307,22 @@ class SliceViewer:
                 vals = nodeVals[self.nInPlane]
             else:
                 vals = 'k'
-            art = self.ax.scatter(x, y, c=vals, **kwargs)
+            art = self.axes[0].scatter(x, y, c=vals, **kwargs)
 
         return art
 
     def __drawSet(self):
         # keep limits on redraw
-        undrawAxis(self.ax)
+        undrawAxis(self.axes[0])
 
         if self.prefs.edgePrefs.name is not None:
             plotprefs = self.prefs.edgePrefs.applyPrefs(
-                self.ax, self.edgeData)
+                self.axes[0], self.edgeData)
             self.edgeArtist = self.showEdges(**plotprefs)
 
         if self.prefs.nodePrefs.name is not None:
             plotprefs = self.prefs.nodePrefs.applyPrefs(
-                self.ax, self.nodeData)
+                self.axes[0], self.nodeData)
             self.nodeArtist = self.showNodes(self.nodeData, **plotprefs)
 
         self.fig.canvas.draw()
@@ -622,7 +534,7 @@ def plotBoundEffect(fname, ycat='FVU', xcat='Domain size', groupby='Number of el
     makePlot(l0, 'Element $l_0$ [m]')
 
 
-def groupedScatter(fname, xcat, ycat, groupcat, filtercat=None, df=None):
+def groupedScatter(fname, xcat, ycat, groupcat, filtercat=None, df=None, **kwargs):
     if df is None:
         df, cats = importRunset(fname)
     else:
@@ -642,7 +554,7 @@ def groupedScatter(fname, xcat, ycat, groupcat, filtercat=None, df=None):
     for ii, label in enumerate(catNames):
         sel = dL == label
         plt.loglog(dX[sel], dY[sel], marker='.',
-                   label=groupcat+':\n'+str(label))
+                   label=groupcat+':\n'+str(label), **kwargs)
 
     outsideLegend()
     plt.tight_layout()
@@ -724,7 +636,7 @@ def stackedTimePlot(axis, xvals, stepTimes, stepNames):
     axis.xaxis.set_major_formatter(mpl.ticker.EngFormatter())
 
 
-def outsideLegend(axis=None, **kwargs):
+def outsideLegend(axis=None, flipOrder=False, **kwargs):
     """
     Create legend outside of axes, at top right.
 
@@ -742,7 +654,18 @@ def outsideLegend(axis=None, **kwargs):
     """
     if axis is None:
         axis = plt.gca()
-    axis.legend(bbox_to_anchor=(1.05, 1), loc='upper left',
+
+    handles, labels = axis.get_legend_handles_labels()
+
+    if flipOrder:
+        h=reversed(handles)
+        l=reversed(labels)
+    else:
+        h=handles
+        l=labels
+
+
+    axis.legend(h, l, bbox_to_anchor=(1.05, 1), loc='upper left',
                 borderaxespad=0., **kwargs)
 
 
@@ -763,7 +686,7 @@ def showEdges(axis, coords, edgeIndices, edgeVals=None, colorbar=True, **kwargs)
 
         else:
 
-            kwargs['colors'] = BASE
+            kwargs['colors'] = colors.BASE
             kwargs['alpha'] = 0.05
 
     gCollection = p3d.art3d.Line3DCollection(
@@ -841,16 +764,21 @@ def getCmap(vals, forceBipolar=False, logscale=False):
         Norm function to map data to (0,1) range of colormap.
 
     """
-    mn = min(vals)
-    mx = max(vals)
-    span = mx-mn
-    va = abs(vals)
-    if any(va > 0):
-        knee = min(va[va > 0])
+    if type(vals)== ScaleRange:
+        knee=vals.knee
+        mn=vals.min
+        mx=vals.max
     else:
-        knee = 0
-    ratio = abs(mn/mx)
+        mn = min(vals)
+        mx = max(vals)
+        va = abs(vals)
+        if any(va > 0):
+            knee = min(va[va > 0])
+        else:
+            knee = 0
+        ratio = abs(mn/mx)
 
+    span = mx-mn
     fracPos = abs(mx/span)
     fracNeg = abs(mn/span)
 
@@ -866,7 +794,7 @@ def getCmap(vals, forceBipolar=False, logscale=False):
         #        [1.0, 0.5, 0.5, 1.0],
         #        [1.0, 0.0, 0.0, 1.0]]
         # cMap=mpl.colors.LinearSegmentedColormap.from_list('biBR', clist)
-        cMap = CM_BIPOLAR
+        cMap = colors.CM_BIPOLAR
         if logscale:
             cNorm = mpl.colors.SymLogNorm(linthresh=knee,
                                           vmin=-amax,
@@ -875,12 +803,15 @@ def getCmap(vals, forceBipolar=False, logscale=False):
             cNorm = mpl.colors.CenteredNorm(halfrange=amax)
     else:
         if fracPos > fracNeg:
-            cMap = CM_MONO.copy()
+            cMap = colors.CM_MONO.copy()
         else:
-            cMap = CM_MONO.reversed()
+            cMap = colors.CM_MONO.reversed()
+
         if logscale:
             cNorm = mpl.colors.LogNorm(vmin=knee,
                                        vmax=mx)
+
+
         else:
             # if mx>0:
             #     cNorm = mpl.colors.Normalize(vmin=0, vmax=mx)
@@ -929,7 +860,7 @@ def animatedTitle(figure, text, axis=None):
 
     title = dest.text(0.5, .95, text,
                       horizontalalignment='center',
-                      verticalalignment='bottom',
+                      verticalalignment='top',
                       **kwargs)
     return title
 
@@ -1050,14 +981,15 @@ def showEdges2d(axis, edgePoints, edgeColors=None, **kwargs):
         Artist for displaying the edges.
 
     """
-    if edgeColors is None:
-        # kwargs['colors'] = (0., 0., 0.,)
+    if not 'colors' in kwargs:
+        if edgeColors is None:
+            # kwargs['colors'] = (0., 0., 0.,)
 
-        # kwargs['alpha'] = 0.05
-        kwargs['colors'] = FAINT
-    else:
-        kwargs['colors'] = edgeColors
-        # alpha=0.05
+            # kwargs['alpha'] = 0.05
+            kwargs['colors'] = colors.FAINT
+        else:
+            kwargs['colors'] = edgeColors
+            # alpha=0.05
 
     if not 'linewidths' in kwargs:
         kwargs['linewidths'] = 0.5
@@ -1091,10 +1023,10 @@ def showSourceBoundary(axes, radius, srcCenter=np.zeros(2)):
     y = radius*np.sin(tht)+srcCenter[1]
 
     for ax in axes:
-        ax.plot(x, y, color=BASE)  # , alpha=0.1)
+        ax.plot(x, y, color=colors.BASE)  # , alpha=0.1)
 
 
-def addInset(baseAxis, rInset, xmax, relativeLoc=(.5, -.8)):
+def addInset(baseAxis, rInset, xmax, relativeLoc=(.5, -.65)):
     """
     Create sub-axis for plotting a zoomed-in view of the main axis.
     Plot commands executed in the main axis DO NOT automatically
@@ -1215,42 +1147,6 @@ def toEdgePoints(planeCoords, edges):
 
     return edgePts
 
-
-# class Animator:
-#     def __init__(self,filename=None):
-#         self.dataFrames=[]
-#         self.fig=plt.figure()
-#         self.axes=[]
-#         self.filename=filename
-
-#     def makeFig(self):
-#         pass
-
-#     def getFrameData(self):
-#         pass
-
-#     def getArtists(self):
-#         pass
-
-#     def animate(self,filename=None):
-
-#         animation = ArtistAnimation(self.fig,
-#                                     artists,
-#                                     interval=1000,
-#                                     repeat_delay=2000,
-#                                     blit=False)
-#         if fname is None:
-#             plt.show()
-#         else:
-#             # writer=mpl.animation.FFMpegFileWriter(fps=30)
-#             animation.save(os.path.join(
-#                 self.study.studyPath, fname+'.mp4'),
-#                 # writer=writer)
-#                 fps=1.0)
-
-#         return animation
-
-
 class FigureAnimator:
     def __init__(self, fig, study, prefs=None):
         if fig is None:
@@ -1282,7 +1178,8 @@ class FigureAnimator:
     def __setstate__(self, state):
         self.__dict__.update(state)
 
-        self.fig = plt.figure()
+        self.fig = plt.gcf()
+        self.axes=self.fig.axes
 
     def setupFigure(self):
         pass
@@ -1290,14 +1187,18 @@ class FigureAnimator:
     def addSimulationData(self, sim, append=False):
         pass
 
-    def animateStudy(self, fname=None, artists=None, fps=1.0):
+    def animateStudy(self, fname=None, artists=None, fps=1.0, vectorFrames=[]):
 
         if artists is None:
             artists = []
-            for ii in range(len(self.dataSets)):
+            if len(vectorFrames)>0:
+                frameList=vectorFrames
+            else:
+                frameList=range(len(self.dataSets))
+            for ii in frameList:
                 artists.append(self.getArtists(ii))
 
-        animation = ArtistAnimation(self.fig,
+        animation = AAnimation(self.fig,
                                     artists,
                                     interval=1000/fps,
                                     repeat_delay=2000,
@@ -1309,10 +1210,12 @@ class FigureAnimator:
         else:
             fstem = os.path.join(self.study.studyPath,
                                  fname)
-            # writer=mpl.animation.FFMpegFileWriter(fps=30)
-            animation.save(fstem+'.mp4',
-                           # writer=writer)
-                           fps=fps)
+            if not os.path.exists(fstem):
+                os.makedirs(fstem)
+            writer=FWriter(fps=int(fps))
+            # writer.setup(self.fig, fstem+'.mp4', frame_prefix=fstem)
+            animation.save(fstem+'.mp4', writer=writer, vectorFrames=vectorFrames, frame_prefix=os.path.join(fstem, 'frame'))
+                            # fps=fps)
             # pickle.dump(self.__dict__, open(fstem+'.aData', 'wb'))
             self.study.save(self, fname, '.adata')
 
@@ -1348,34 +1251,90 @@ class FigureAnimator:
             self.dataScales[key].update(otherScales[key].get())
 
 
+    def toLiteMode(self):
+        colors.useLightStyle()
+
+        self.fig.set_facecolor(colors.WHITE)
+        self.fig.set_edgecolor(colors.DARK)
+        for ax in self.axes:
+            ax.tick_params(colors=colors.BASE,
+                           grid_color=colors.BASE)
+            ax.set_facecolor(colors.WHITE)
+
+
+    def copy(self, overridePrefs={}):
+        # colors.useLightStyle()
+        newPrefs=self.prefs.copy()
+        newPrefs.update(overridePrefs)
+        newAni=self.__class__(None, self.study, newPrefs)
+
+        params=self.__dict__.copy()
+        params['fig']=newAni.fig
+        params['axes']=newAni.axes
+
+        newAni.__dict__=params
+
+        return newAni
+
+    def getSnapshots(self,frameNos,name):
+        self.toLiteMode()
+
+        for f in frameNos:
+            self.resetFigure()
+            self.getArtists(f)
+
+            fname=os.path.join(name,'frame-%d'%f)
+            self.study.savePlot(self.fig,
+                                fname,
+                                ext='.svg')
+
+
 class SliceSet(FigureAnimator):
     def __init__(self, fig, study, prefs=None):
-        if prefs is None:
-            prefs = {
-                'showError': True,
-                'showInsets': True,
-                'relativeError': False,
-                'logScale': True,
-                'showNodes': False,
-                'fullInterp': True
+        if len(study.currentSim.currentSources) > 0:
+            rElec = study.currentSim.currentSources[0].radius
+            self.rElec = rElec
 
-            }
+        if len(study.currentSim.voltageSources) > 0:
+            rElec = study.currentSim.voltageSources[0].radius
+            self.rElec = rElec
 
-        super().__init__(fig, study, prefs)
+        stdPrefs = {
+            'showError': True,
+            'showInsets': True,
+            'relativeError': False,
+            'logScale': True,
+            'showNodes': False,
+            'fullInterp': True,
+        }
+
+        if prefs is not None:
+            stdPrefs.update(prefs)
+
+        super().__init__(fig, study, stdPrefs)
         self.dataScales = {
             'vbounds': ScaleRange(),
             'errbounds': ScaleRange()}
 
-    # def __getstate__(self):
-    #     state=self.__dict__.copy()
-    #     del state['insets']
+    def __getstate__(self):
+        state=self.__dict__.copy()
+        # for a in self.insets:
+        #     if a in state['axes']:
+        #         state['axes'].remove(a)
+
+        state['insets']=[]
+        state['fig'] = None
+        state['axes'] = []
+        state['grid'] = []
+
+        return state
 
     def setupFigure(self, resetBounds=False):
         self.bnds = self.study.bbox[[0, 3, 2, 4]]
 
         if self.prefs['showError']:
             nplot = 2
-            pad = (0.5, .15)
+            pad = (0.75, .15)
             arr = 211
         else:
             nplot = 1
@@ -1402,6 +1361,18 @@ class SliceSet(FigureAnimator):
         if self.prefs['showError']:
             self.grid[1].set_title('Absolute error [V]')
 
+
+        insets = []
+        if self.rElec > 0 and self.prefs['showError']:
+            for ax in self.grid:
+                inset = addInset(ax, 3*self.rElec, self.bnds[1])
+                showSourceBoundary([ax, inset], self.rElec)
+                insets.append(inset)
+
+                self.axes.append(inset)
+
+        self.insets=insets
+
         for ax in self.grid[:nplot]:
             formatXYAxis(ax, self.bnds)
 
@@ -1418,18 +1389,12 @@ class SliceSet(FigureAnimator):
 
     def addSimulationData(self, sim, append=False):
 
-        if len(sim.currentSources) > 0:
-            rElec = sim.currentSources[0].radius
-            self.rElec = rElec
-
-        if len(sim.voltageSources) > 0:
-            rElec = sim.voltageSources[0].radius
-            self.rElec = rElec
+        ax=self.axes[0]
 
         els, _, edgePts = sim.getElementsInPlane()
 
         if self.prefs['fullInterp']:
-            vArrays = [resamplePlane(self.grid[0], sim, elements=els)]
+            vArrays = [resamplePlane(ax, sim, elements=els)]
             v1d = vArrays[0].ravel()
         else:
             vArrays, coords = sim.getValuesInPlane(data=None)
@@ -1442,7 +1407,7 @@ class SliceSet(FigureAnimator):
             ana, _ = sim.analyticalEstimate()
             err1d = sim.nodeVoltages-ana[0]
             if self.prefs['fullInterp']:
-                erArrays = [resamplePlane(self.grid[0],
+                erArrays = [resamplePlane(ax,
                                           sim,
                                           elements=els,
                                           data=err1d)]
@@ -1490,53 +1455,55 @@ class SliceSet(FigureAnimator):
 
     def getArtists(self, setnum, data=None):
         artists = []
-        # if data is None:
-        #     dataSet=self.dataSets[setnum]
-        # else:
-        #     dataSet=[data]
+
 
         if data is None:
             data = self.dataSets[setnum]
 
+        imAxV = self.axes[0]
+        imAxes = [imAxV]
+
+        if self.prefs['showError']:
+            cbarAxV=self.axes[2]
+            cbarAxE = self.axes[3]
+            imAxE = self.axes[1]
+            imAxes.append(imAxE)
+            if self.prefs['showInsets']:
+                insets=self.axes[4:]
+                imAxes.extend(insets)
+        else:
+            cbarAxV = self.axes[1]
+            if self.prefs['showInsets']:
+                insets=[self.axes[2]]
+                imAxes.extend(insets)
+
+
         vbounds = self.dataScales['vbounds']
 
-        vmap, vnorm = getCmap(vbounds.get(),
+        vmap, vnorm = getCmap(vbounds,
                               logscale=self.prefs['logScale'])
 
         vmappr = mpl.cm.ScalarMappable(norm=vnorm, cmap=vmap)
-        # vmappr.set_clim((vnorm.vmin, vnorm.vmax))
-        self.grid.cbar_axes[0].colorbar(
-            vmappr)
+
+
+        cbarAxV.colorbar(vmappr)
 
         if self.prefs['showError']:
             errbounds = self.dataScales['errbounds']
-            emap, enorm = getCmap(errbounds.get(),
+            emap, enorm = getCmap(errbounds,
                                   forceBipolar=True,
                                   logscale=self.prefs['logScale'])
             emappr = mpl.cm.ScalarMappable(norm=enorm, cmap=emap)
             # vmappr.set_clim((-enorm.halfrange, enorm.halfrange))
-            self.grid.cbar_axes[1].colorbar(emappr)
-            errArt = patchworkImage(self.grid[1],
+            cbarAxE.colorbar(emappr)
+            errArt = patchworkImage(imAxE,
                                     # self.maskedErrArr[ii],
                                     data['errArrays'],
                                     emap, enorm,
                                     extent=self.bnds)
             artists.extend(errArt)
 
-        insets = []
-        if self.rElec > 0 and self.prefs['showError']:
-            for ax in self.grid:
-                inset = addInset(ax, 3*self.rElec, self.bnds[1])
-                showSourceBoundary([ax, inset], self.rElec)
-                insets.append(inset)
-
-        # for ii in range(len(self.maskedVArr)):
-        # for data in dataSet:
-
-        # edgePoints = self.meshEdges[ii]
-        # sourceEdge = self.sourceEdges[ii]
-
-        vArt = patchworkImage(self.grid[0],
+        vArt = patchworkImage(imAxV,
                               data['vArrays'],
                               vmap, vnorm,
                               extent=self.bnds)
@@ -1546,64 +1513,52 @@ class SliceSet(FigureAnimator):
         if self.prefs['showNodes']:
             px, py = np.hsplit(data['pcoords'], 2)
             pv = data['pvals']
-            ptart = self.grid[0].scatter(
+            ptart = imAxV.scatter(
                 px, py,
                 c=pv, norm=vnorm, cmap=vmap)
 
             artists.append(ptart)
 
-        # errArt=self.grid[1].imshow(err, origin='lower', extent=self.bnds,
-        #             cmap=emap, norm=enorm,interpolation='bilinear')
-        # self.grid.cbar_axes[1].colorbar(errArt)
+        if self.prefs['showInsets']:
+            # insets=self.insets
 
-        if len(insets) > 0:
-            # artists.append(insets[0].imshow(vInterp, origin='lower', extent=self.bnds,
-            #             cmap=vmap, norm=vnorm,interpolation='bilinear'))
-            # artists.append(insets[1].imshow(err, origin='lower', extent=self.bnds,
-            #             cmap=emap, norm=enorm,interpolation='bilinear'))
             artists.extend(patchworkImage(insets[0],
                                           # self.maskedVArr[ii],
                                           data['vArrays'],
                                           vmap, vnorm,
                                           extent=self.bnds))
-            artists.extend(patchworkImage(insets[1],
-                                          # self.maskedErrArr[ii],
-                                          data['errArrays'],
-                                          emap, enorm,
-                                          extent=self.bnds))
+            if self.prefs['showError']:
+                artists.extend(patchworkImage(insets[1],
+                                              # self.maskedErrArr[ii],
+                                              data['errArrays'],
+                                              emap, enorm,
+                                              extent=self.bnds))
 
-        for ax in self.grid:
+        for ax in imAxes:
             artists.append(showEdges2d(ax, data['meshPoints']))
             artists.append(showEdges2d(
                 ax, data['sourcePoints'], edgeColors=(.5, .5, .5), alpha=.25, linestyles=':'))
 
-        for ax in insets:
-            artists.append(showEdges2d(ax, data['meshPoints']))
-            artists.append(showEdges2d(
-                ax, data['sourcePoints'], edgeColors=ACCENT_LIGHT, alpha=.25, linestyles=':'))
-
-        self.axes.extend(insets)
-
-        # artists.append(errArt)
-        # artists.append(vArt)
-        # artistSet.append(artists)
+        # for ax in insets:
+        #     artists.append(showEdges2d(ax, data['meshPoints']))
+        #     artists.append(showEdges2d(
+        #         ax, data['sourcePoints'], edgeColors=colors.ACCENT_LIGHT, alpha=.25, linestyles=':'))
 
         return artists
 
-    # def resetFigure(self):
-    #     for ax in self.axes:
-    #         ax.cla()
-
-
 class ErrorGraph(FigureAnimator):
     def __init__(self, fig, study, prefs=None):
-        if prefs is None:
-            prefs = {
-                'showRelativeError': False,
-                'colorNodeConnectivity': False,
-                'onlyDoF': False,
-                'universalPts': False}
-        super().__init__(fig, study, prefs)
+        stdPrefs = {
+            'showRelativeError': False,
+            'colorNodeConnectivity': False,
+            'onlyDoF': False,
+            'universalPts': True,
+            'infoTitle': False,
+            'printScale':1.0,
+            }
+        if prefs is not None:
+            stdPrefs.update(prefs)
+        super().__init__(fig, study, stdPrefs)
 
         self.dataScales = {
             'vsim': ScaleRange(),
@@ -1614,26 +1569,38 @@ class ErrorGraph(FigureAnimator):
         # axErr = self.fig.add_subplot(5, 1, (3, 4))
         # axL=self.fig.add_subplot(5,1,5)
 
-        self.fig.set_figheight(1.5*self.fig.get_figheight())
+#TODO: sane way to set figure size, aspect ratio for print vs screen
+        figH=self.fig.get_figheight()
+        figW=self.fig.get_figwidth()
+
+        scaler = self.prefs['printScale']
+
+        if type(scaler) is list:
+            kW, kH = scaler
+            self.fig.set_figheight(9.0/kH)
+            self.fig.set_figwidth(6.0/kW)
+        else:
+            self.fig.set_figheight(1.5*figH*scaler)
+            self.fig.set_figwidth(figW*scaler)
+
+        axRatios=[5, 5, 2]
 
         axes = self.fig.subplots(3, 1,
                                  gridspec_kw={
-                                     'height_ratios': [4, 4, 2]})
+                                     'height_ratios': axRatios})
 
         axV, axErr, axL = axes
-        # axV = self.fig.add_subplot(3, 1, 1)
-        # axErr = self.fig.add_subplot(3, 1, 2)
-        # axL = self.fig.add_subplot(3, 1, 3)
 
-        axV.grid(True)
-        axErr.grid(True)
-        axL.grid(True)
+        for a in axes:
+            a.grid(True)
+            a.set_xscale('log')
 
-        axV.xaxis.set_major_formatter(mpl.ticker.EngFormatter('m'))
-        axV.yaxis.set_major_formatter(mpl.ticker.EngFormatter('V'))
-        axL.yaxis.set_major_formatter(mpl.ticker.EngFormatter('m'))
+        axL.set_yscale('log')
 
-        axV.set_xlabel('Distance from source')
+        axErr.sharex(axV)
+        axL.sharex(axV)
+
+        axL.set_xlabel('Distance from source')
         axV.set_ylabel('Voltage')
 
         if self.prefs['showRelativeError']:
@@ -1641,37 +1608,23 @@ class ErrorGraph(FigureAnimator):
         else:
             axErr.set_ylabel('Absolute error')
             axErr.yaxis.set_major_formatter(mpl.ticker.EngFormatter('V'))
+
         axL.set_ylabel(r'Element $\ell_0$')
 
-        axV.set_xscale('log')
-        axErr.set_xscale('log')
-        axL.set_xscale('log')
-        axL.set_yscale('log')
+        axV.yaxis.set_major_formatter(mpl.ticker.EngFormatter('V'))
+        axL.yaxis.set_major_formatter(mpl.ticker.EngFormatter('m'))
+        axL.xaxis.set_major_formatter(mpl.ticker.EngFormatter('m'))
 
-        axErr.sharex(axV)
-        axL.sharex(axV)
-
-        self.axV = axV
-        self.axErr = axErr
-        self.axL = axL
+        [plt.setp(a.get_xticklabels(), visible=False) for a in [axV, axErr]]
 
         self.axes = [axV, axErr, axL]
-
-        # self.titles = []
-        # self.errR = []
-        # self.errors = []
-        # self.rColors = []
-        # self.simR = []
-        # self.sims = []
-
-        # self.elemR=[]
-        # self.elemL=[]
 
         self.analytic = []
         self.analyticR = []
 
     def addSimulationData(self, sim, append=False):
         isDoF = sim.nodeRoleTable == 0
+        dofInds=sim.mesh.indexMap[isDoF]
         # v = sim.nodeVoltages
 
         if self.prefs['universalPts']:
@@ -1715,7 +1668,7 @@ class ErrorGraph(FigureAnimator):
 
             self.dataScales['vsim'].update(vAna)
 
-            self.axV.set_xlim(left=rElec/2, right=2*max(r))
+            self.axes[0].set_xlim(left=rElec/2, right=2*max(r))
 
         ErrSum, err, vAna, sorter, _ = sim.calculateErrors(pts)
 
@@ -1725,6 +1678,8 @@ class ErrorGraph(FigureAnimator):
 
         # filter non DoF
         if self.prefs['onlyDoF']:
+            isDoF=np.isin(pts,dofInds)
+
             filt = isDoF[sorter]
         else:
             filt = np.ones_like(sorter, dtype=bool)
@@ -1744,8 +1699,11 @@ class ErrorGraph(FigureAnimator):
 
         # title = '%s:%d nodes, %d elements, error %.2g, FVU %.2g' % (
         #     sim.meshtype, nNodes, nElems, ErrSum,FVU)
-        title = '%s:%d nodes, %d elements, error %.2g' % (
+        if self.prefs['infoTitle']:
+            title = '%s:%d nodes, %d elements, error %.2g' % (
             sim.meshtype, nNodes, nElems, ErrSum)
+        else:
+            title=''
 
         # self.titles.append(title)
         # self.errR.append(rFilt)
@@ -1788,20 +1746,24 @@ class ErrorGraph(FigureAnimator):
     def getArtists(self, setnum, data=None):
         artistSet = []
 
+        axV=self.axes[0]
+        axErr=self.axes[1]
+        axL=self.axes[2]
+
         if data is None:
             #     dataset=[self.dataSets[setnum]]
             # else:
             #     dataset=[data]
             data = self.dataSets[setnum]
 
-        self.axV.plot(self.analyticR, self.analytic,
-                      c=BASE, label='Analytical')
+        axV.plot(self.analyticR, self.analytic,
+                      c=colors.BASE, label='Analytical')
 
         vbnd = self.dataScales['vsim'].get()
-        self.axV.set_ylim(vbnd[0], vbnd[-1])
+        axV.set_ylim(vbnd[0], vbnd[-1])
 
         errbnd = self.dataScales['error'].get()
-        self.axErr.set_ylim(errbnd[0], errbnd[-1])
+        axErr.set_ylim(errbnd[0], errbnd[-1])
 
         if self.prefs['colorNodeConnectivity']:
             allconn = []
@@ -1811,7 +1773,7 @@ class ErrorGraph(FigureAnimator):
             toN = np.zeros(max(connNs)+1, dtype=int)
             toN[connNs] = np.arange(connNs.shape[0])
 
-            colors = discreteLegend(self.axErr, connNs, loc='upper right')
+            mcolors = discreteLegend(axErr, connNs, loc='upper right')
             # colors,legEntries=discreteColors(connNs)
             # outsideLegend(axis=self.axErr,handles=legEntries)
 
@@ -1819,34 +1781,26 @@ class ErrorGraph(FigureAnimator):
         # for data in dataset:
 
         artists = []
-        simLine = self.axV.plot(
+        simLine = axV.plot(
             # self.simR[ii], self.sims[ii],
             data['simR'], data['simV'],
             c='C1', marker='.', label='Simulated')
         if setnum == 0:
-            self.axV.legend(loc='upper right')
+            axV.legend(loc='upper right')
 
-            # outsideLegend(axis=self.axV)
-        # title=fig.suptitle('%d nodes, %d elements\nFVU= %g'%(nNodes,nElems,FVU))
-        # title = self.fig.text(0.5, 1.01,
-        #                       self.titles[ii],
-        #                       horizontalalignment='center',
-        #                       verticalalignment='bottom',
-        #                       transform=self.axV.transAxes)
-        title = animatedTitle(self.fig,  # self.titles[ii])
-                              data['title'])
+        title = animatedTitle(self.fig, data['title'])
+
 
         if self.prefs['colorNodeConnectivity']:
             rcol = data['rColors']
             nconn = toN[rcol]
-            nodeColors = colors[nconn]
+            nodeColors = mcolors[nconn]
         else:
             nodeColors = 'r'
 
-        errLine = self.axErr.scatter(  # self.errR[ii], self.errors[ii],
-            data['errR'], data['errors'],
+        errLine = axErr.scatter(data['errR'], data['errors'],
             c=nodeColors, marker='.', linestyle='None')
-        errArea = self.axErr.fill_between(data['errR'],
+        errArea = axErr.fill_between(data['errR'],
                                           data['errors'],
                                           #  self.errR[ii],
                                           # self.errors[ii],
@@ -1854,14 +1808,17 @@ class ErrorGraph(FigureAnimator):
                                           alpha=0.75)
 
         # Third pane: element sizes
-        l0line = self.axL.scatter(data['elemR'],
+        l0line = axL.scatter(data['elemR'],
                                   data['elemL'],
                                   # self.elemR[ii],
                                   #                     self.elemL[ii],
-                                  c=BASE, marker='.')
+                                  c=colors.BASE, marker='.')
 
-        # plt.tight_layout()
-        artists.append(title)
+
+        #fix scaling issue
+        self.axes[0].set_xlim(min(self.analyticR))
+        if self.prefs['infoTitle']:
+            artists.append(title)
         artists.append(errLine)
         artists.append(simLine[0])
         artists.append(l0line)
@@ -1891,23 +1848,29 @@ class CurrentPlot(FigureAnimator):
 
         self.inset = None
         if fig is None:
-            self.ax = new3dPlot(study.bbox)
+            ax = new3dPlot(study.bbox)
             self.dim = 3
         else:
             self.dim = 2
             if showInset:
-                self.ax = plt.subplot2grid((3, 3), (0, 1),
+                ax = plt.subplot2grid((3, 3), (0, 1),
                                            colspan=2, rowspan=2,
                                            fig=fig)
-                # self.inset=addInset(self.ax,
+                # self.inset=addInset(self.axes[0],
                 #                  3*self.rElec,
                 #                  self.study.bbox[3],
                 #                  (-.2, -.2))
             else:
-                self.ax = fig.add_subplot()
+                ax = fig.add_subplot()
 
             bnds = study.bbox[[0, 3, 1, 4]]
-            formatXYAxis(self.ax, bnds)
+            formatXYAxis(ax, bnds)
+
+        if len(self.axes)>0:
+            self.axes[0]=ax
+        else:
+            self.axes.append(ax)
+
 
         self.rElec = 0
         self.iSrc = []
@@ -1994,8 +1957,7 @@ class CurrentPlot(FigureAnimator):
         if self.prefs['scaleToSource']:
             dscale.update(np.array(self.iSrc))
 
-        cmap, cnorm = getCmap(dscale.get(
-            self.prefs['logScale']), logscale=self.prefs['logScale'])
+        cmap, cnorm = getCmap(dscale,  logscale = self.prefs['logScale'])
         # cmap=mpl.cm.YlOrBr
         # cnorm=mpl.colors.LogNorm(vmin=self.crange[0],
         #                           vmax=self.crange[1])
@@ -2004,17 +1966,17 @@ class CurrentPlot(FigureAnimator):
 
             if self.prefs['colorbar']:
                 plt.colorbar(mpl.cm.ScalarMappable(norm=cnorm, cmap=cmap),
-                             ax=self.ax)
+                             ax=self.axes[0])
 
             if self.prefs['title']:
                 plt.title('Edge currents')
             inset = None
             if self.showInset & (self.rElec > 0) & (self.dim != 3):
-                self.inset = addInset(self.ax,
+                self.inset = addInset(self.axes[0],
                                       3*self.rElec,
                                       self.study.bbox[3],
                                       (-.2, -.2))
-                showSourceBoundary([self.ax, self.inset],
+                showSourceBoundary([self.axes[0], self.inset],
                                    self.rElec)
 
         artists = []
@@ -2026,7 +1988,7 @@ class CurrentPlot(FigureAnimator):
         # cv = self.cvals[ii]
         pt = data['pts']
         cv = data['currents']
-        colors = cmap(cnorm(cv))
+        ccolors = cmap(cnorm(cv))
 
         x0 = pt[:, 1, :].squeeze()
         d0 = pt[:, 0, :].squeeze()-x0
@@ -2040,8 +2002,8 @@ class CurrentPlot(FigureAnimator):
             v1, v2, v3 = np.hsplit(mags, 3)
 
             artists.append([
-                self.ax.quiver3D(x, y, z, a, b, c,
-                                 colors=colors)
+                self.axes[0].quiver3D(x, y, z, a, b, c,
+                                 colors=ccolors)
             ])
 
         else:
@@ -2049,18 +2011,18 @@ class CurrentPlot(FigureAnimator):
             a, b = np.hsplit(d0, 2)
             m1, m2 = np.hsplit(m0, 2)
             v1, v2 = np.hsplit(mags, 2)
-            axes = [self.ax]
+            axes = [self.axes[0]]
             art = []
             if self.inset is not None:
                 axes.append(self.inset)
 
             for ax in axes:
-                edgecol = mpl.collections.LineCollection(data['mesh'],
-                                                         color=FAINT)
-                art.append(ax.add_collection(edgecol))
+                # edgecol = mpl.collections.LineCollection(data['mesh'],
+                #                                          color=colors.FAINT)
+                # art.append(ax.add_collection(edgecol))
                 if self.fullarrow:
                     art.append(ax.quiver(x, y, a, b,
-                                         color=colors,
+                                         color=ccolors,
                                          angles='xy',
                                          scale_units='xy',
                                          scale=1))  # ,
@@ -2074,7 +2036,7 @@ class CurrentPlot(FigureAnimator):
                     #                        alpha=0.25))
                     art.append(ax.quiver(m1, m2,
                                          a/2, b/2,
-                                         color=colors,
+                                         color=ccolors,
                                          pivot='mid',
                                          angles='xy',
                                          scale_units='xy',
@@ -2101,26 +2063,29 @@ class ScaleRange:
     def update(self, newVals):
         if newVals is not None:
             va = abs(newVals)
-            self.min = min(self.min, min(newVals))
-            self.max = max(self.max, max(newVals))
+            self.min = min(self.min, np.nanmin(newVals))
+            self.max = max(self.max, np.nanmax(newVals))
 
-            fracmax = max(va)/(10**MAX_LOG_SPAN)
 
             nonz = va > 0
             if any(nonz):
-                minva = min(va[nonz])
-                self.knee = min(self.knee, minva, fracmax)
+                minva = np.nanmin(va[nonz])
+                self.knee = min(self.knee, minva)
 
     # TODO: something smarter than hard-coding
+            fracmax = np.nanmax(np.abs(self.get()))/(10**MAX_LOG_SPAN)
+            fracmax = 10**(np.rint(np.log10(fracmax)))
+
             if self.knee < fracmax:
                 self.knee = fracmax
 
     def get(self, forceBipolar=False):
         isBipolar = (self.min < 0) & (self.max > 0)
-        if isBipolar or forceBipolar:
-            out = np.array([self.min, self.knee, self.max])
-        else:
-            out = np.array([self.min, self.max])
+        # if isBipolar or forceBipolar:
+        #     out = np.array([self.min, self.knee, self.max])
+        # else:
+        #     out = np.array([self.min, self.max])
+        out=np.array([self.min,self.knee,self.max])
         return out
 
 
@@ -2132,45 +2097,71 @@ def hideBorders(axis, hidex=False):
 
 
 class SingleSlice(FigureAnimator):
-    def __init__(self, fig, study, timevec=[], tdata=None, datasrc='spaceV'):
+    def __init__(self, fig, study, timevec=[], tdata=None, datasrc='spaceV', prefs=None):
         self.bnds = study.bbox[[0, 3, 2, 4]]
         self.tdata = tdata
         self.dataSrc = datasrc
-        super().__init__(fig, study)
+        self.timevec = timevec
+
+        if prefs is None:
+            prefs={'colorbar':True}
+        super().__init__(fig, study, prefs=prefs)
         self.dataScales = {
             'spaceV': ScaleRange(),
             'absErr': ScaleRange(),
-            'relErr': ScaleRange()
+            'relErr': ScaleRange(),
+            'vAna': ScaleRange(),
         }
 
-        self.timevec = timevec
+
+
+    def copy(self,newPrefs=None):
+        params=self.__dict__.copy()
+        oldPrefs=params['prefs']
+
+        if newPrefs is not None:
+            oldPrefs.update(newPrefs)
+        newAni=self.__class__(None, self.study, timevec=self.timevec, tdata=self.tdata, datasrc=self.dataSrc, prefs=oldPrefs)
+
+        params['fig']=newAni.fig
+        params['axes']=newAni.axes
+        params['tbar']=newAni.tbar
+
+        newAni.__dict__=params
+
+        return newAni
 
     def setupFigure(self):
+        if self.prefs['colorbar']:
+            nCol=2
+        else:
+            nCol=1
 
-        axes = self.fig.subplots(2, 2,
+        ratios = [19,1]
+        axes = self.fig.subplots(2, nCol,
                                  gridspec_kw={
-                                     'height_ratios': [9, 1],
-                                     'width_ratios': [19, 1]})
-        # gridspec_kw={
-        #     'height_ratios': [9,3],
-        #     'width_ratios': [9,1]})
+                                     'height_ratios': ratios,
+                                     'width_ratios': ratios[:nCol]})
 
-        ax = axes[0, 0]
-        tax = axes[1, 0]
-        cax = axes[0, 1]
-        nonax = axes[1, 1]
-        self.fig.delaxes(nonax)
+
+
+
+        if self.prefs['colorbar']:
+            ax = axes[0, 0]
+            tax = axes[1, 0]
+            cax = axes[0, 1]
+            nonax = axes[1, 1]
+            self.fig.delaxes(nonax)
+        else:
+            cax=None
+            ax=axes[0]
+            tax=axes[1]
+
 
         formatXYAxis(ax, self.bnds)
         self.tbar = TimingBar(self.fig, tax, self.tdata)
+        tax.set_xlim(self.timevec[0], self.timevec[-1])
 
-        # plt.tight_layout()
-
-        # tax.set_xlabel('Time [ms]')
-
-        self.ax = ax
-        self.cax = cax
-        self.tax = tax
         self.axes = [ax, cax, tax]
 
     def getArtists(self, setnum, data=None):
@@ -2181,34 +2172,34 @@ class SingleSlice(FigureAnimator):
         if data[self.dataSrc] is None:
             artists = []
             meshAlpha = 1.
-            if self.cax is not None:
-                self.fig.delaxes(self.cax)
-                self.cax = None
+            if self.axes[1] is not None:
+                self.fig.delaxes(self.axes[1])
+                self.axes[1] = None
                 plt.tight_layout()
         else:
-            meshAlpha = MESH_ALPHA
-            cMap, cNorm = getCmap(self.dataScales[self.dataSrc].get(),
+            meshAlpha = colors.MESH_ALPHA
+            cMap, cNorm = getCmap(self.dataScales[self.dataSrc],
                                   logscale=True)
 
-            # if setnum==0:
-            mapper = mpl.cm.ScalarMappable(norm=cNorm, cmap=cMap)
+            if setnum==0 and self.prefs['colorbar']:
+                mapper = mpl.cm.ScalarMappable(norm=cNorm, cmap=cMap)
 
-            if self.dataSrc == 'spaceV' or self.dataSrc == 'absErr':
-                cbarFormat = eform('V')
-            else:
-                cbarFormat = mpl.ticker.PercentFormatter(xmax=1.,
-                                                         decimals=2)
-                self.cax.set_ylabel('Relative error')
-            self.fig.colorbar(mapper, cax=self.cax,
-                              format=cbarFormat)
-            if setnum == 0:
+                if self.dataSrc == 'spaceV' or self.dataSrc == 'absErr' or self.dataSrc == 'vAna':
+                    cbarFormat = eform('V')
+                else:
+                    cbarFormat = mpl.ticker.PercentFormatter(xmax=1.,
+                                                             decimals=2)
+                    self.axes[1].set_ylabel('Relative error')
+                self.fig.colorbar(mapper, cax=self.axes[1],
+                                  format=cbarFormat)
+            # if setnum == 0:
                 plt.tight_layout()
 
-            artists = patchworkImage(self.ax,
+            artists = patchworkImage(self.axes[0],
                                      data[self.dataSrc], cMap, cNorm,
                                      self.bnds)
 
-        artists.append(showEdges2d(self.ax,
+        artists.append(showEdges2d(self.axes[0],
                                    data['meshPts'],
                                    alpha=meshAlpha))
         artists.extend(self.tbar.getArt(self.timevec[setnum],
@@ -2217,28 +2208,31 @@ class SingleSlice(FigureAnimator):
         return artists
 
     def addSimulationData(self, sim, append=False):
+        els, _, edgePts = sim.getElementsInPlane()
 
         if sim.nodeVoltages.shape[0] == 0:
             vArrays = None
-            absArr = None
+            absErr = None
         else:
             vest, _ = sim.analyticalEstimate()
 
-            absErr = sim.nodeVoltages-vest[0]
-            relErr = absErr/np.abs(vest[0])
+            vAna = np.sum(vest,axis=0)
+
+            absErr = sim.nodeVoltages-vAna
+            # relErr = absErr/np.abs(vAna)
 
             # vArrays, _ = sim.getValuesInPlane()
             # absArr, _ = sim.getValuesInPlane(data=absErr)
 
             # v1d = util.unravelArraySet(vArrays)
-            els, _, edgePts = sim.getElementsInPlane()
 
-            vArrays = [resamplePlane(self.ax, sim, elements=els)]
+            vArrays = [resamplePlane(self.axes[0], sim, elements=els)]
             v1d = vArrays[0].ravel()
 
             self.dataScales['spaceV'].update(v1d)
             # self.dataScales['relErr'].update(relErr)
             self.dataScales['absErr'].update(absErr)
+            self.dataScales['vAna'].update(vAna)
 
         data = {
             'meshPts': edgePts}
@@ -2246,22 +2240,31 @@ class SingleSlice(FigureAnimator):
         if self.dataSrc == 'spaceV':
             data['spaceV'] = vArrays
 
-        if self.dataSrc == '':
-            data['absErr'] = absArr
+        if self.dataSrc == 'absErr':
+            data['absErr'] = [resamplePlane(self.axes[0],
+                                            sim,
+                                            elements=els,
+                                            data=absErr)]
+
+        if self.dataSrc == 'vAna':
+            data['vAna'] = [resamplePlane(self.axes[0],
+                                          sim,
+                                          elements=els,
+                                          data=absErr)]
 
         if append:
             self.dataSets.append(data)
 
-    def animateStudy(self, fname=None, artists=None, fps=30.):
+    def animateStudy(self, fname=None, artists=None, fps=30., vectorFrames=[]):
         animation = super().animateStudy(fname=fname,
                                          artists=artists,
-                                         fps=fps)
+                                         fps=fps, vectorFrames=vectorFrames)
 
         return animation
 
 
 class LogError(FigureAnimator):
-    def __init__(self, fig, study):
+    def __init__(self, fig, study, prefs=None):
 
         super().__init__(fig, study)
         if len(self.fig.axes) == 0:
@@ -2306,7 +2309,7 @@ class LogError(FigureAnimator):
         ax = self.fig.axes[0]
 
         er1 = ax.loglog(data['rAna'], data['ana'],
-                        label='Analytic', color=BASE)
+                        label='Analytic', color=colors.BASE)
         er2 = ax.loglog(data['r'], data['err'], label='Error', color='r')
 
         titlestr = "FVU=%.2g, int1=%.2g, %d points in source" % (

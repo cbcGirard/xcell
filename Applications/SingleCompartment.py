@@ -3,6 +3,9 @@
 """
 Created on Sun Feb 27 19:17:41 2022
 
+
+DEPRECATED
+
 @author: benoit
 """
 
@@ -16,28 +19,28 @@ import pickle
 from neuron import h  # , gui
 from neuron.units import ms, mV
 
-import misc
+# import misc
 import time
 
 h.load_file('stdrun.hoc')
 h.CVode().use_fast_imem(1)
 
+strat = 'depth'
 
-datadir = '/home/benoit/smb4k/ResearchData/Results/NEURON/'  # +meshtype
+datadir = '/home/benoit/smb4k/ResearchData/Results/Quals/NEURON/singleCompartment/'  # +meshtype
 # studyPath=datadir+'tmp/coarse/'
-studyPath = datadir+'fixedGroup/'
+studyPath = datadir+strat+'/'
 
 
 generate = True
 vids = True
-post = True
+post = False
 
 
 # generate=False
 # vids=False
 # post=True
 
-strat = 'fixed'
 dmax = 10
 dmin = 3
 maxdepth = 3
@@ -67,7 +70,7 @@ h.continuerun(12)
 
 # plt.scatter(t,ring.cells[0].ivec)
 
-ivec = -ring.cells[0].ivec.as_numpy()*1e-9
+ivec = ring.cells[0].ivec.as_numpy()*1e-9
 tvec = t.as_numpy()*1e-3
 vvec = ring.cells[0].soma_v.as_numpy()*1e-3
 
@@ -93,17 +96,19 @@ tdata = {
 study = xcell.SimStudy(studyPath, bbox)
 
 if vids:
-    img = xcell.Visualizers.SingleSlice(None, study,
+    img = xcell.visualizers.SingleSlice(None, study,
                                         tvec, tdata)
-
-    err = xcell.Visualizers.SingleSlice(None, study,
+    err = xcell.visualizers.SingleSlice(None, study,
                                         tvec, tdata,
                                         datasrc='absErr')
+
+    animators=[img, err]
+    [xcell.nrnutil.showCellGeo(an.axes[0]) for an in animators]
 
 # img.tax.plot(tvec,vvec)
 # img.tax.set_ylabel('Membrane potential [V]')
 
-
+density=0.2
 # if generate:
 def runRecord(strat, dmax, dmin, maxdepth):
 
@@ -114,21 +119,8 @@ def runRecord(strat, dmax, dmin, maxdepth):
                            np.zeros(3),
                            1e-6*ring.cells[0].soma.diam3d(0)/2)
 
-    # # maxdepth=5
-    # maxdepth=6
-
-    # dmin=6
-    # dmax=8
-
     lastNumEl = 0
     lastI = 0
-    numels = []
-    Emax = []
-    Emin = []
-    Eavg = []
-    Esum = []
-    depths = []
-    densities = []
 
     lists = {
         'numels': [],
@@ -153,7 +145,7 @@ def runRecord(strat, dmax, dmin, maxdepth):
     for tval, ival, vval in zip(tvec, ivec, vvec):
 
         t0 = time.monotonic()
-        setup.currentSources[0].value = -ival
+        setup.currentSources[0].value = ival
         setup.currentTime = tval
 
         if strat == 'k':
@@ -168,20 +160,21 @@ def runRecord(strat, dmax, dmin, maxdepth):
             maxdepth = dmin+int(dint)
             print('depth:%d' % maxdepth)
 
-            # density=0.25
+            density=0.2
             if strat == 'd2':
                 density = 0.5
-            else:
-                density = 0.2  # +0.2*dfrac
 
         elif strat == 'fixed':
             # Static mesh
-            maxdepth = 5
-            density = 0.2
+            maxdepth = 3
 
-        metric = xcell.makeExplicitLinearMetric(maxdepth, density)
 
-        changed = setup.makeAdaptiveGrid(metric, maxdepth)
+        srcs, depths, metricCoefs= xcell.getStandardMeshParams(setup.currentSources, maxdepth, density)
+
+        changed=setup.makeAdaptiveGrid(srcs, depths, xcell.generalMetric, coefs=metricCoefs)
+        # metricCoef=np.array(2**(-maxdepth*density),dtype=np.float64,ndmin=1)
+
+        # changed = setup.makeAdaptiveGrid(np.zeros((1,3)), maxdepth, xcell.generalMetric, coefs=metricCoef)
 
         if changed:
             setup.meshnum += 1
@@ -202,8 +195,8 @@ def runRecord(strat, dmax, dmin, maxdepth):
             study.saveData(setup)  # ,baseName=str(setup.iteration))
         else:
 
-            vdof = setup.getDoFs()
-            v = setup.iterativeSolve(vGuess=vdof)
+            # vdof = setup.getDoFs()
+            # v = setup.iterativeSolve(vGuess=vdof)
 
             # #Shortcut for single source
             # scale=ival/lastI
@@ -211,7 +204,7 @@ def runRecord(strat, dmax, dmin, maxdepth):
             # v=setup.nodeVoltages*scale
             # setup.nodeVoltages=v
 
-            # v=setup.solve()
+            v=setup.iterativeSolve()
 
         dt = time.monotonic()-t0
 
@@ -221,7 +214,6 @@ def runRecord(strat, dmax, dmin, maxdepth):
                           setup.currentTime, setup.meshnum])
 
         setup.stepLogs = []
-        numels.append(lastNumEl)
 
         print('%d percent done' % (int(100*tval/tmax)))
 
@@ -315,7 +307,7 @@ if post:
 
     axes[0].legend(loc='upper left')
 
-    # a2.yaxis.set_major_formatter(xcell.Visualizers.eform('A'))
+    # a2.yaxis.set_major_formatter(xcell.visualizers.eform('A'))
     # a2.grid(axis='y',color='C1')
     # axes[1].grid(axis='y',color='C0')
 
@@ -333,7 +325,7 @@ if post:
     axes[1].plot(tvec, lk['numels'])
 
     axes[1].set_ylabel('Number of\nElements')
-    axes[1].xaxis.set_major_formatter(xcell.Visualizers.eform('s'))
+    axes[1].xaxis.set_major_formatter(xcell.visualizers.eform('s'))
 
     axes[1].set_yscale('log')
 

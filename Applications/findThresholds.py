@@ -3,7 +3,7 @@
 """
 Created on Sun May  8 14:00:57 2022
 
-Preliminary results for effect of mesh parameters on activation thresholds
+Based on simulation protocol of Reilly 2016, using the Carnavale biophysics
 
 @author: benoit
 """
@@ -16,23 +16,30 @@ import neuron.units as nUnit
 
 import matplotlib.pyplot as plt
 import pickle
-import argparse
 
-parser=argparse.ArgumentParser()
-parser.add_argument('-Y', '--elecY', help='electrode distance in um', type=int, default=50)
-parser.add_argument('-v', '--stepViz', help='generate animation of refinement', action='store_true')
-parser.add_argument('-a','--analytic', action='store_true', help='use analyic point-sources instead of mesh')
-parser.add_argument('-S', '--summary', action='store_true', help='generate summary graph of results')
 
-parser.add_argument('-f','--folder', default='MonoStim')
-parser.add_argument('-l','--liteMode', help='use light mode', action='store_true')
+xvals=np.array([0,1,50])*1e-2
+yvals=np.array([.25, 1])*1e-2
+pulseTvals=np.array([0.005, 2.0])*nUnit.ms
+
+pulseSet=pulseTvals[[0,1,0,1,1,1,0,1]]
+xAset=xvals[[2,2,2,2,0,0,2,2]]
+yAset=yvals[[0,0,0,0,0,1,0,0]]
+xCset=xvals[[0,0,0,0,2,1,0,0]]
+yCset=yvals[[0,0,1,1,0,1,0,0]]
+biphase=[0,0,0,0,0,0,1,1]
+
+
 
 domX = 250e-6
 
+stepViz = True
 save = True
 
 pairStim = True
-
+analytic = False
+if analytic:
+    stepViz = False
 
 # https://doi.org/10.1109/TBME.2018.2791860
 # 48um diameter +24um insulation; 1ms, 50-650uA
@@ -40,8 +47,10 @@ pairStim = True
 
 # weighted mean of whole-brain conductivity [S/m], as of 5/14/22
 # from https://github.com/Head-Conductivity/Human-Head-Conductivity
-Sigma = 0.3841
-# Sigma=1
+# 300 ohm-cm
+Sigma = 1/3 #S/m
+
+
 
 Imag = -150e-6
 tstop = 20.
@@ -49,24 +58,11 @@ tpulse = 1.
 tstart = 5.
 rElec = 24e-6
 
-
-args=parser.parse_args()
-
-elecY=args.elecY
-combineRuns=args.summary
-stepViz=args.stepViz
-analytic = args.analytic
-if analytic:
-    stepViz = False
-
-if args.liteMode:
-    xc.colors.useLightStyle()
-
-
+elecY = 50
 
 
 study, _ = com.makeSynthStudy(
-    args.folder+'y'+str(elecY), xmax=domX,)
+    'NEURON/Stim2/Dual_fixed_y'+str(elecY), xmax=domX,)
 
 
 if stepViz:
@@ -137,15 +133,13 @@ class ThresholdSim(xc.Simulation):
                               geometry=wire1)
 
     def meshAndSolve(self, depth):
-        # metrics = []
-        # for src in self.currentSources:
-        #     metrics.append(xc.makeExplicitLinearMetric(maxdepth=depth,
-        #                                                meshdensity=0.2,
-        #                                                origin=src.geometry.center))
+        metrics = []
+        for src in self.currentSources:
+            metrics.append(xc.makeExplicitLinearMetric(maxdepth=depth,
+                                                       meshdensity=0.2,
+                                                       origin=src.geometry.center))
 
-        srcCoords, depths, metricCoefs = xc.getStandardMeshParams(self.currentSources, depth)
-
-        self.makeAdaptiveGrid(refPts=srcCoords, maxdepth=depths, minl0Function=xc.generalMetric, coefs=metricCoefs)
+        self.makeAdaptiveGrid(metrics, depth)
 
         self.finalizeMesh()
         self.setBoundaryNodes()
@@ -171,8 +165,10 @@ class ThresholdStudy:
         self.pulsedur = pulsedur
 
     def _buildNeuron(self):
-        cell = com.BallAndStick(1, -50., 0., 0., 0.)
-        cell.dend.nseg = 15
+        h.load_file('estimsurvey/axon10.hoc')
+
+        # cell = com.BallAndStick(1, -50., 0., 0., 0.)
+        # cell.dend.nseg = 15
         h.define_shape()
 
         h.nlayer_extracellular(1)
@@ -194,7 +190,9 @@ class ThresholdStudy:
             # viz.addSimulationData(setup,append=True)
             xc.nrnutil.showCellGeo(self.viz.axes[0])
 
-        return cell
+        resultVec=h.Vector().record(h.node[0](0.5)._ref_v)
+        return resultVec
+        # return cell
 
     def getAnalyticThreshold(self, pmin=1e-6, pmax=1e-2):
 
@@ -245,7 +243,7 @@ class ThresholdStudy:
         return thresh, numEl, numSrc
 
     def _runTrial(self, amplitude, analytic=False):
-        cell = self._buildNeuron()
+        nodeVec=self._buildNeuron()
 
         if self.isBiphasic:
             tstim, vstim = xc.nrnutil.makeBiphasicPulse(
@@ -266,13 +264,12 @@ class ThresholdStudy:
 
         h.continuerun(tstop)
 
-        memVals = cell.soma_v.as_numpy()
+        # memVals = cell.soma_v.as_numpy()
+        memVals=nodeVec.as_numpy()
         t = tvec.as_numpy()
 
-        # spiked = np.any(memVals > 0)
-        spiked = len(cell.spike_times)>0
+        spiked = np.any(memVals > 0)
 
-        del cell
 
         for sec in h.allsec():
             h.delete_section(sec=sec)
@@ -282,6 +279,7 @@ class ThresholdStudy:
         tvec.play_remove()
         tstim.play_remove()
         vstim.play_remove()
+        nodeVec.play_remove()
         # [v.play_remove() for v in vvecs]
         # [v.play_remove() for v in vmems]
 
@@ -315,7 +313,10 @@ class ThresholdStudy:
         return vvecs, vmems
 
 
+# %% run sims
+
 h.load_file('stdrun.hoc')
+h.nrn_load_dll('estimsurvey/x86_64/libnrnmech.so')
 
 
 if analytic:
@@ -351,7 +352,7 @@ else:
     for d in range(3, 14):
         tst = ThresholdStudy(sim, viz=viz)
 
-        t, nT, nE = tst.getThreshold(d, pmin=threshAna*1e-2, pmax=threshAna*1e2)
+        t, nT, nE = tst.getThreshold(d)
         del tst
 
         threshSet.append(t)
@@ -366,8 +367,6 @@ else:
 
     else:
         stimStr = 'mono'
-
-    del tmp
 
     f, ax = plt.subplots()
     simline, = ax.semilogx(nElec, threshSet, marker='o', label='Simulated')
@@ -399,7 +398,7 @@ else:
         ani = viz.animateStudy(aniName)
 
 
-# combineRuns = True
+combineRuns = True
 if combineRuns:
     import os
     bpath, _ = os.path.split(study.studyPath)
@@ -418,18 +417,14 @@ if combineRuns:
     ax.yaxis.set_major_formatter(xc.visualizers.eform('A'))
 
     for d, y in zip(np.array(dx)[order], np.array(Ys)[order]):
-        # simline, = ax.semilogx(
-        simline, = ax.loglog(
-            d['nElec'], d['thresh'], marker='o', linestyle=':', label=r'$%s \mu m$, simulated'%y)
+        simline, = ax.semilogx(d['nElec'], d['thresh'], marker='o', label=y)
         ax.hlines(d['threshAna'],
                   np.nanmin(d['nElec']),
                   np.nanmax(d['nElec']),
-                  linestyles='-',
-                  colors=simline.get_color(),
-                  label=r'$%s \mu m$, analytic'%y)
+                  linestyles=':',
+                  colors=simline.get_color())
 
-    # ax.legend()
-    xc.visualizers.outsideLegend(ax)
+    ax.legend()
     ax.set_title(r'Activation threshold for %.1f ms %sphasic pulse' %
                  (tpulse, stimStr))
 

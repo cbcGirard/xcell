@@ -117,10 +117,8 @@ def pairedDepthSweep(study, depthRange, testCat, testVals, rElec=1e-6, sigma=np.
             elif params['Mesh type'] == r'equal $l_0$':
                 setup.makeUniformGrid(lastmesh['nX'])
             else:
-                metric = [xcell.makeExplicitLinearMetric(maxdepth,
-                                                         meshdensity=0.2)]
-
-                setup.makeAdaptiveGrid(metric, maxdepth)
+                metricCoef=np.array(2**(-maxdepth*0.2), dtype=np.float64, ndmin=1)
+                setup.makeAdaptiveGrid(np.zeros((1,3)),                                        np.array(maxdepth,ndmin=1), xcell.generalMetric, coefs = metricCoef)
 
             setup.mesh.elementType = params['Element type']
             setup.finalizeMesh()
@@ -128,7 +126,6 @@ def pairedDepthSweep(study, depthRange, testCat, testVals, rElec=1e-6, sigma=np.
             def boundaryFun(coord):
                 r = np.linalg.norm(coord)
                 return rElec/(r*np.pi*4)
-            # setup.insertSourcesInMesh()
 
             if params['BoundaryFunction'] == 'Analytic':
                 setup.setBoundaryNodes(boundaryFun)
@@ -146,6 +143,8 @@ def pairedDepthSweep(study, depthRange, testCat, testVals, rElec=1e-6, sigma=np.
             setup.applyTransforms()
 
             setup.getMemUsage(True)
+
+
             errEst, err, ana, _, _ = setup.calculateErrors()
             FVU = xcell.misc.FVU(ana, err)
 
@@ -153,8 +152,16 @@ def pairedDepthSweep(study, depthRange, testCat, testVals, rElec=1e-6, sigma=np.
 
             print('error: %g' % errEst)
 
-            study.newLogEntry(['Error', 'FVU', 'l0min', testCat], [
-                              errEst, FVU, minel, tstVal])
+            dataCats=['Error', 'FVU', 'l0min', testCat]
+            dataVals=[errEst, FVU, minel, tstVal]
+
+            data=xcell.misc.getErrorEstimates(setup)
+
+            for k,v in data.items():
+                dataCats.append(k)
+                dataVals.append(v)
+
+            study.newLogEntry(dataCats, dataVals)
             study.saveData(setup)
             if params['Mesh type'] == 'adaptive':
                 lastmesh = {'numel': len(setup.mesh.elements),
@@ -209,6 +216,37 @@ class Cell:
                 sec.pt3dchange(i, xprime, yprime, sec.z3d(i), sec.diam3d(i))
 
 
+    def rotateLocal(self,theta):
+        """
+        Rotate cell about its soma
+
+        """
+        x0=self.soma.x3d(0)
+        y0=self.soma.y3d(0)
+
+        for sec in self.all:
+            for i in range(sec.n3d()):
+                x = sec.x3d(i) - x0
+                y = sec.y3d(i) - y0
+                c = h.cos(theta)
+                s = h.sin(theta)
+                xprime = x * c - y * s + x0
+                yprime = x * s + y * c + y0
+                sec.pt3dchange(i, xprime, yprime, sec.z3d(i), sec.diam3d(i))
+
+    def forceZ0(self):
+        """
+Hack to fix neurons floating away from plane
+        """
+        for sec in self.all:
+            for i in range(sec.n3d()):
+                x = sec.x3d(i)
+                y = sec.y3d(i)
+
+                sec.pt3dchange(i, x, y, 0, sec.diam3d(i))
+
+
+
 class BallAndStick(Cell):
     name = 'BallAndStick'
 
@@ -255,7 +293,7 @@ class Ring:
     network projects to the first cell.
     """
 
-    def __init__(self, N=5, stim_w=0.04, stim_t=4, stim_delay=1, syn_w=0.01, syn_delay=5, r=50):
+    def __init__(self, N=5, stim_w=0.02, stim_t=4, stim_delay=1, syn_w=0.01, syn_delay=5, r=50, dendSegs=1):
         """
         :param N: Number of cells.
         :param stim_w: Weight of the stimulus
@@ -277,12 +315,21 @@ class Ring:
         self._nc.delay = stim_delay
         self._nc.weight[0] = stim_w
 
+        for cell in self.cells:
+            cell.dend.nseg = dendSegs
+            h.define_shape()
+            cell.forceZ0()
+
+
     def _create_cells(self, N, r):
         self.cells = []
         for i in range(N):
             theta = i * 2 * h.PI / N
-            self.cells.append(BallAndStick(
-                i, h.cos(theta) * r, h.sin(theta) * r, 0, theta))
+            newCell=BallAndStick(
+                i, h.cos(theta) * r, h.sin(theta) * r, 0, theta)
+            newCell.rotateLocal(-h.PI/2)
+            self.cells.append(newCell)
+
 
     def _connect_cells(self):
         for source, target in zip(self.cells, self.cells[1:] + [self.cells[0]]):

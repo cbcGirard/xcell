@@ -34,7 +34,10 @@ def pointCurrentV(tstCoords, iSrc, sigma=1., srcLoc=np.zeros(3, dtype=np.float64
     v = np.array([k/np.linalg.norm(d) for d in dif])
     return v
 
+def oneDigit(x):
+    factor=10**np.floor(np.log10(x))
 
+    return factor*np.ceil(x/factor)
 def makeGridPoints(nx, xmax, xmin=None, ymax=None, ymin=None, centers=False):
     if xmin is None:
         xmin = -xmax
@@ -182,6 +185,9 @@ def condenseIndices(globalMask):
     return whereSubset
 
 # @nb.njit(parallel=True)
+
+
+
 
 
 @nb.njit()
@@ -706,6 +712,21 @@ def pos2index(pos, dX):
     newNdx = intdot(pos, vals)
 
     return newNdx
+
+@nb.njit()
+def reduceFunctions(l0Function, refPts, elBBox, coefs=None, returnUnder=True):
+    nFun=refPts.shape[0]
+
+    l0s=l0Function(elBBox,refPts,coefs)
+
+    actualL0=np.prod(elBBox[3:]-elBBox[:3])**(1/3)
+
+    whichPts=np.logical_xor(l0s>actualL0,returnUnder)
+
+    # nextPts=refPts[whichPts]
+
+    return np.min(l0s),whichPts
+
 
 
 @nb.njit()  # ,parallel=True)
