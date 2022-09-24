@@ -1,5 +1,8 @@
 #!/bin/bash
 
-./Statics.sh
+date
+#./Statics.sh
 ./polySet.sh
 ./monoSet.sh
+date
+

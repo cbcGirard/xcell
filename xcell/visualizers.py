@@ -2255,12 +2255,27 @@ class SingleSlice(FigureAnimator):
         if append:
             self.dataSets.append(data)
 
-    def animateStudy(self, fname=None, artists=None, fps=30., vectorFrames=[]):
+    def animateStudy(self, fname=None, artists=None, fps=30., vectorFrames=[], unitStr=None):
         animation = super().animateStudy(fname=fname,
                                          artists=artists,
                                          fps=fps, vectorFrames=vectorFrames)
 
+        self.solobar(fname=fname, unit=unitStr)
+
+
         return animation
+
+    def solobar(self,fname, unit=None):
+        data=self.dataScales[self.dataSrc]
+
+        fbar, printbar=plt.subplots(figsize=[5., 1.0])
+        cmap, norm = getCmap(data,logscale=True)
+
+        fbar.colorbar(plt.cm.ScalarMappable(norm=norm,cmap=cmap), cax=printbar, orientation='horizontal')
+        engineerTicks(printbar,xunit=unit)
+
+        self.study.savePlot(fbar, fname+'-colorbar')
+        plt.close(fbar)
 
 
 class LogError(FigureAnimator):
