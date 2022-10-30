@@ -13,7 +13,7 @@ import argparse
 import numpy as np
 
 cli=argparse.ArgumentParser()
-cli.add_argument('--comparison', choices=['bounds','mesh','formula'], default='testing')
+cli.add_argument('--comparison', choices=['bounds','mesh','formula','bigPOC', 'fixedDisc'], default='fixedDisc')
 cli.add_argument('-p','--plot-only',help='skip simulation and use existing data', action = 'store_true')
 # cli.add_argument('-a','--animate',help='skip simulation and use existing data', action = 'store_true')
 # cli.add_argument('-p','--plot-only',help='skip simulation and use existing data', action = 'store_true')
@@ -28,12 +28,14 @@ staticPlots = True
 
 depths=np.arange(3,18)
 
-if args.comparison=='mesh':
+xtraParams=None
+xmax=1e-4
+if args.comparison=='mesh' or args.comparison=='bigPOC':
     foldername = 'Quals/PoC'
     tstVals=["adaptive","uniform"]
     # tstVals=['adaptive','equal elements',r'equal $l_0$']
     tstCat='Mesh type'
-if args.comparison=='formula':
+if args.comparison=='formula' or args.comparison=='fixedDisc':
     foldername = 'Quals/formulations'
     tstVals = ['Admittance', 'FEM', 'Face']
     tstCat = 'Element type'
@@ -48,6 +50,14 @@ if args.comparison == 'testing':
     generate = False
     staticPlots = False
     depths=np.arange(3,8)
+
+if args.comparison=='bigPOC':
+    foldername = 'Quals/bigPOC'
+    xmax = 1e-2
+
+if args.comparison=='fixedDisc':
+    foldername = 'Quals/fixedDisc'
+    xtraParams={'BoundaryFunction':'Analytic'}
 
 
 # if args.comparison=='voltage':
@@ -74,14 +84,15 @@ plotPrefs = [
 
 
 
-study, _ = Common.makeSynthStudy(foldername)
+study, _ = Common.makeSynthStudy(foldername, xmax = xmax)
 #%%
 
 if generate and not args.plot_only:
     Common.pairedDepthSweep(study,
                             depthRange=depths,
                             testCat=tstCat,
-                            testVals=tstVals)
+                            testVals=tstVals,
+                            overrides=xtraParams)
 
 #%%
 

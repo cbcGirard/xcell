@@ -124,6 +124,8 @@ def useDarkStyle():
 
     plt.style.use(makeStyleDict(fgColor=OFFWHITE, bgColor=DARK))
     plt.style.use(styleScope)
+    plt.style.use({'font.size':10})
+
 
 
     plx = np.array(mpl.colormaps.get('plasma').colors)
@@ -153,6 +155,7 @@ def useLightStyle():
 
     plt.style.use(makeStyleDict(fgColor=DARK, bgColor=WHITE))
     plt.style.use(styleScope2)
+    plt.style.use({'font.size':11})
 
 
     cm=mpl.colormaps.get('plasma')

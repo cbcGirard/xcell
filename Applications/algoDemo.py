@@ -20,7 +20,7 @@ from xcell import visualizers
 import Common
 
 lite = True
-asDual = True
+asDual = False
 studyPath = '/home/benoit/smb4k/ResearchData/Results/Quals/algoDemo/'
 fname = 'overview'
 if asDual:
@@ -28,8 +28,8 @@ if asDual:
 
 if lite:
     xcell.colors.useLightStyle()
-    mpl.rcParams.update({'figure.figsize':[3.2, 2.4],
-                         'font.size':12.,
+    mpl.rcParams.update({'figure.figsize':[2.0, 2.0],
+                         'font.size':10.,
                          'lines.markersize':5.,
                          })
     fname += '-lite'
@@ -63,6 +63,8 @@ cm.prefs['colorbar'] = False
 cm.prefs['title'] = False
 cm.prefs['logScale'] = True
 ax = cm.fig.axes[0]
+
+ax.set_aspect('equal')
 #hide axes
 ax.set_xticks([])
 ax.set_yticks([])

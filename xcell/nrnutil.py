@@ -167,11 +167,47 @@ class LineDataUnits(Line2D):
     _linewidth = property(_get_lw, _set_lw)
 
 
-def showCellGeo(axis):
+def showCellGeo(axis,polys=None):
+    """
+    Add cell geometry to designated plot.
 
-    tht = np.linspace(0, 2*np.pi)
+    Parameters
+    ----------
+    axis : matplotlib axis
+        Axis to plot on.
+    polys : List of M x 2 arrays, optional
+        DESCRIPTION. The default is None, which queries NEURON for all current compartments.
+
+    Returns
+    -------
+    polys : TYPE
+        DESCRIPTION.
+
+    """
     shade = colors.FAINT
-    polys = []
+    if polys is None:
+        polys =getCellImage()
+
+    polycol = PolyCollection(polys, color=shade)
+    axis.add_collection(polycol)
+
+
+    return polys
+
+
+def getCellImage():
+    """
+    Get plottable representation of cell geometry.
+
+    Returns
+    -------
+    polys : List of M x 2 arrays
+        List of vertices for creating a PolyCollection.
+
+    """
+    tht = np.linspace(0, 2*np.pi)
+
+    polys=[]
     for sec in h.allsec():
         x, y, z, r = returnSegmentCoordinates(sec)
         coords = np.vstack((x, y, z)).transpose()
@@ -180,13 +216,11 @@ def showCellGeo(axis):
             sx = x+r*np.cos(tht)
             sy = y+r*np.sin(tht)
 
-            axis.fill(sx, sy, color=shade)
-        else:
-            # line=LineDataUnits(x,y, linewidth=r,color=shade)
-            # axis.add_line(line)
-            px = []
-            py = []
+            # axis.fill(sx, sy, color=shade)
+            pts=np.vstack((sx,sy))
+            polys.append(pts.transpose())
 
+        else:
             lx = x.shape
             if len(lx) > 0:
                 nseg = x.shape[0]-1
@@ -197,18 +231,10 @@ def showCellGeo(axis):
                     dn = r[ii]*d/np.linalg.norm(d)
                     n = np.array([-dn[1], dn[0]])
                     pts = np.vstack((p0+n, p1+n, p1-n, p0-n))
-                    # a,b=np.hsplit(pts,2)
-
-                    # px.extend(a)
-                    # py.extend(b)
 
                     polys.append(pts)
-            # else:
 
-                # mpl.collections.LineCollection(segments, color=shade)
-
-    polycol = PolyCollection(polys, color=shade)
-    axis.add_collection(polycol)
+    return polys
 
 
 def makeBiphasicPulse(amplitude, tstart, pulsedur, trise=None):

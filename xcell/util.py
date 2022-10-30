@@ -38,6 +38,25 @@ def oneDigit(x):
     factor=10**np.floor(np.log10(x))
 
     return factor*np.ceil(x/factor)
+
+
+def logfloor(val):
+    return 10**np.floor(np.log10(val))
+def logceil(val):
+    return 10**np.ceil(np.log10(val))
+
+def loground(axis,which='both'):
+    # xl=axis.get_xlim()
+    # yl=axis.get_ylim()
+
+    lims = [[logfloor(aa[0]), logceil(aa[1])] for aa in axis.dataLim.get_points().transpose()]#[xl, yl]]
+    if which=='x' or which=='both':
+        axis.set_xlim(lims[0])
+    if which=='y' or which=='both':
+        axis.set_ylim(lims[1])
+
+
+
 def makeGridPoints(nx, xmax, xmin=None, ymax=None, ymin=None, centers=False):
     if xmin is None:
         xmin = -xmax

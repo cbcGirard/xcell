@@ -78,7 +78,23 @@ def toTriSurface(mesh):
 
 
 def toVTK(mesh):
-    rawInd=np.array([el.vertices for el in mesh.elements])
+    '''
+    Export xcell mesh to a VTK Unstructured Grid.
+
+    Enables faster visualizations and mesh operations via pyvista.
+
+    Parameters
+    ----------
+    mesh : xcell Mesh
+        The completed mesh.
+
+    Returns
+    -------
+    vMesh : TYPE
+        DESCRIPTION.
+
+    '''
+    rawInd=np.array([el.vertices[MIO_ORDER] for el in mesh.elements])
     numel=rawInd.shape[0]
     trueInd=renumberIndices(rawInd,mesh.indexMap)
 
@@ -90,3 +106,15 @@ def toVTK(mesh):
     vMesh=pv.UnstructuredGrid(cells, celltypes, mesh.nodeCoords)
 
     return vMesh
+
+
+def saveVTK(simulation,filestr):
+    vtk=toVTK(simulation.mesh)
+    vAna,_ = simulation.analyticalEstimate()
+    analytic = np.sum(vAna, axis = 0)
+    vtk.point_data['voltage']=simulation.nodeVoltages
+    vtk.point_data['vAnalytic']=analytic
+
+    vtk.save(filestr)
+
+    return vtk

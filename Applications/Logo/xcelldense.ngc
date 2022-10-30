@@ -68501,15 +68501,3 @@ G01 X12.965286 Y14.183730 Z-0.125000
 G01 X12.971386 Y14.175730 Z-0.125000
 G01 X12.977486 Y14.167730 Z-0.125000
 G01 X12.981886 Y14.159730 Z-0.125000
-G00 Z5.000000
-
-(End cutting path id: path18700)
-
-
-(Footer)
-M5
-G00 X0.0000 Y0.0000
-M2
-(Using default footer. To add your own footer create file "footer" in the output dir.)
-(end)
-%

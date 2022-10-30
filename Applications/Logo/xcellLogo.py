@@ -9,7 +9,7 @@ Generates the xcell logo from point cloud
 @author: benoit
 """
 
-# import xcell
+import xcell
 import pandas
 import numpy as np
 import matplotlib.pyplot as plt
@@ -19,10 +19,11 @@ import pickle
 csv = 'pts.csv'
 ptsFile = 'logo.xpts'
 
-bbox = np.array([0, 0, -1, 4, 4, 1])
+bbox = np.array([0, 0, -1, 32, 32, 1])
 
-color = 'red'
+#color = 'red'
 
+color = 'base'
 
 # %%
 
@@ -43,11 +44,11 @@ pickle.dump(pts, open(ptsFile, 'wb'))
 
 # %%
 # Generate meshes from points
-pts = pickle.read(open(ptsFile, 'rb'))
+pts = pickle.load(open(ptsFile, 'rb'))
 
 # Optionally visualize guide points
-# x,y,_=np.hsplit(pts,3)
-# plt.scatter(x,y)
+x,y,_=np.hsplit(pts,3)
+plt.scatter(x,y)
 
 fig, ax = plt.subplots()
 xcell.visualizers.formatXYAxis(ax, bbox[np.array([0, 3, 1, 4])])
@@ -57,11 +58,19 @@ setup = xcell.Simulation('', bbox)
 
 meshPts = []
 artists = []
-for d in range(0, 13):
 
-    metrics = xcell.makeScaledMetrics(pts, 1, d, density=0.0)
+npts=pts.shape[0]
+for d in range(0, 6):
 
-    setup.makeAdaptiveGrid(metrics, d)
+    # metrics = xcell.makeScaledMetrics(pts, 1, d, density=0.0)
+
+
+    depths=d*np.ones(npts)
+
+    setup.makeAdaptiveGrid(refPts=pts,
+                           maxdepth=depths,
+                           coefs=np.zeros(npts),
+                           minl0Function=xcell.generalMetric)
     setup.finalizeMesh()
 
     # xcell.visualizers.showMesh(setup)
@@ -80,11 +89,11 @@ xcell.visualizers.formatXYAxis(ax, bbox[np.array([0, 3, 1, 4])])
 ax.axis('Off')
 
 if color == 'red':
-    col = xcell.visualizers.ACCENT_DARK
+    col = xcell.colors.ACCENT_DARK
     artists = [[xcell.visualizers.showEdges2d(ax, p, edgeColors=col, alpha=0.2, linewidth=1.5),
                 xcell.visualizers.showEdges2d(ax, p, edgeColors='r', alpha=0.05, linewidth=0.5)] for p in meshPts[:13]]
 else:
-    col = xcell.visualizers.BASE
+    col = xcell.colors.BASE
     # col=xcell.visualizers.LINE
     artists = [[xcell.visualizers.showEdges2d(
         ax, p, edgeColors=col, alpha=0.2, linewidth=1.5)] for p in meshPts[:13]]

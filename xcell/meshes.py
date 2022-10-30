@@ -313,7 +313,7 @@ class Octree(Mesh):
         elements = self.tree.getIntersectingElement(axis, coordinate)
         return elements
 
-    def refineByMetric(self, minl0Function, refPts, maxl0Function=None, coefs=None):
+    def refineByMetric(self, minl0Function, refPts, maxl0Function=None, coefs=None,coarsen=True):
         """
         Recursively splits elements until l0Function evaluated at the center
         of each element is greater than that element's l0'
@@ -333,13 +333,15 @@ class Octree(Mesh):
         if maxl0Function is None:
             maxl0Function=minl0Function
         changed = self.tree.refineByMetric(minl0Function, refPts, self.maxDepth, coefs)
-        pruned, _ = self.tree.coarsenByMetric(maxl0Function, refPts, self.maxDepth, coefs)
 
-        # if pruned:
-        #     print()
-        #     changed|=pruned
+        if coarsen:
+            pruned, _ = self.tree.coarsenByMetric(maxl0Function, refPts, self.maxDepth, coefs)
 
-        self.changed = changed | pruned
+            # if pruned:
+            #     print()
+            #     changed|=pruned
+
+            self.changed = changed | pruned
 
         return changed
 
@@ -695,7 +697,9 @@ class Octant():
             newIndex = self.index.copy()
             newIndex.append(ii)
             # oxyz=np.array(self.oXYZ+scale*util.OCT_INDEX_BITS[ii],dtype=np.int32)
-            self.children.append(Octant(origin=newOrigin,
+
+            #TODO: EXTREMELYDANGER dynamically choosing own type.
+            self.children.append(self.__class__(origin=newOrigin,
                                         span=newSpan,
                                         depth=self.depth+1,
                                         index=newIndex))

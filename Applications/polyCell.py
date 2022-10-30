@@ -50,13 +50,13 @@ dmin = 4
 
 cli = argparse.ArgumentParser()
 cli.add_argument('-f', '--folder',
-                 help='path from main results folder', default='polyCell/')
+                 help='path from main results folder', default='Quals/polyCell/')
 cli.add_argument('-n', '--nRing', type=int,
                  help='number of cells (default %(default)s) 0->single compartment', default=5)
 cli.add_argument('-s', '--nSegs', type=int,
                  help='segments per dendrite (default %(default)s', default=5)
 cli.add_argument('-k', '--nskip', type=int,
-                 help='timesteps to skip', default=2)
+                 help='timesteps to skip', default=6)
 cli.add_argument('--strat', help='meshing approach', choices=[
                  'fixedMin', 'depth', 'fixedMax', 'depthExt'], default='fixedMin')
 cli.add_argument('-v', '--vids', help='generate animation',
@@ -70,14 +70,15 @@ cli.add_argument(
 args = cli.parse_args()
 
 # Overrides for e.g. debugging in Spyder
-# args.vids=True
+#args.vids=True
 # args.synth=False
-# args.folder='Quals/monoCell'
-# args.strat='depth'
+# args.folder='Quals/polyCell'
+#args.folder='Quals/monoCell'
+#args.strat='depth'
+#args.nSegs = 101
 # args.folder='tst'
-# args.vids=True
-# args.nskip=1
-# args.nRing=0
+#args.nskip=1
+#args.nRing=0
 
 #%%
 if args.strat == 'depthExt':
@@ -87,10 +88,12 @@ if args.nRing == 0:
     ring = Common.Ring(N=1, stim_delay=0, dendSegs=1, r=0)
     tstop = 12
     tPerFrame=2
+    barRatio=[4,1]
 else:
     ring = Common.Ring(N=args.nRing, stim_delay=0, dendSegs=args.nSegs, r=175)
     tstop = 40
     tPerFrame = 5
+    barRatio=[9,1]
 
 ivecs, isSphere, coords, rads = nUtil.getNeuronGeometry()
 if args.nRing == 0:
@@ -120,6 +123,7 @@ else:
 
 I = I[::args.nskip]
 tv = tv[::args.nskip]
+
 
 analyticVmax = I/(4*np.pi*np.array(rads, ndmin=2))
 vPeak = np.max(np.abs(analyticVmax))
@@ -188,6 +192,17 @@ for r, c, v in zip(rads, coords, I[0]):
 
 tmax = tv.shape[0]
 errdicts = []
+
+polygons=nUtil.getCellImage()
+
+simDict={'tv':tv,
+          'I':I,
+          'rads':rads,
+          'coords':coords,
+          'isSphere':isSphere,
+          'polygons':polygons,
+    }
+pickle.dump(simDict, open(os.path.join(os.path.dirname(studyPath), 'commonData.xstudy'), 'wb'))
 
 
 # %%
@@ -300,9 +315,22 @@ for ii in range(0, tmax):
         # img.addSimulationData(setup, append=True)
 
 lists = xcell.misc.transposeDicts(errdicts)
-lists['depths']='Depth [%d:%d]'%(dmin,dmax)
+
+if args.strat[:5]=='fixed':
+    if args.strat[5:]=='Min':
+        dstr=dmin
+    else:
+        dstr=dmax
+    depthStr='Fixed depth %d'%dstr
+else:
+    depthStr='Dynamic depth [%d:%d]'%(dmin,dmax)
+
+
+lists['depths']=depthStr
+
 pickle.dump(lists, open(studyPath+'/'+args.strat+'.pcr', 'wb'))
 
+#%%
 
 if args.vids:
 
@@ -318,13 +346,18 @@ if args.vids:
         nUtil.showCellGeo(an.axes[0])
 
         fname=l+args.strat
-        an.animateStudy(fname, fps=30)
+        # an.animateStudy(fname, fps=30)
 
         xcell.colors.useLightStyle()
 
-        alite=an.copy({'colorbar':False})
-        alite.fig.set_figwidth(3.2)
-        alite.fig.set_figheight(3.2)
+        alite=an.copy({'colorbar':False,
+                       'barRatio':barRatio})
+
+        figw=0.3*6.5
+        alite.fig.set_figwidth(figw)
+        alite.fig.set_figheight(1.2*figw)
+        alite.axes[0].set_xticks([])
+        alite.axes[0].set_yticks([])
 
         nUtil.showCellGeo(alite.axes[0])
 
@@ -333,23 +366,14 @@ if args.vids:
         artists=[alite.getArtists(ii) for ii in frameNs]
         alite.animateStudy(fname+'-lite', fps=30, artists=artists, vectorFrames=np.arange(len(frameNs)), unitStr='V')
 
-        # def solobar(data, unit=None):
-        #     fbar, printbar=plt.subplots(figsize=[5., 1.0])
-        #     cmap, norm = xcell.visualizers.getCmap(data,logscale=True)
 
-        #     fbar.colorbar(plt.cm.ScalarMappable(norm=norm,cmap=cmap), cax=printbar, orientation='horizontal')
-        #     xcell.visualizers.engineerTicks(printbar,xunit=unit)
-
-        #     study.savePlot(fbar, fname+'-colorbar')
-        #     plt.close(fbar)
-
-
-
-
+        # artists=[alite.getArtists(ii) for ii in frameNs]
+        # alite.animateStudy(fname+'-lite', fps=30, vectorFrames=frameNs, unitStr='V')
 
 # %%
 if args.post:
     folderstem = os.path.dirname(studyPath)
+    nuStudy,_=Common.makeSynthStudy(folderstem)
 
     def getdata(strat):
         fname = os.path.join(folderstem, strat, strat+'.pcr')
@@ -357,6 +381,8 @@ if args.post:
         return data
 
     labels=[l for l in os.listdir(folderstem) if os.path.isdir(os.path.join(folderstem,l))]
+    labels.sort()
+    labels=[labels[n] for n in [3,0,2,1]]
     data=[getdata(l) for l in labels]
 
 
@@ -372,7 +398,7 @@ if args.post:
 
             for d, l in zip(data, labels):
                 # ax[0].semilogy(tv, np.abs(d['volErr']), label=d['depths'])
-                ax[0].plot(tv,  np.abs(d['intErr']), label=l)
+                ax[0].plot(tv,  np.abs(d['intErr']), label=d['depths'])
                 ax[1].plot(tv[1:], d['dt'][1:])
 
             ax[0].legend()
@@ -425,3 +451,23 @@ if args.post:
                 folderstem, 'ring%dsummary%s' % (args.nRing, lite)), ext=fmt)
 
             study.savePlot(f, os.path.join(folderstem, 'ring%dcomparison%s' % (args.nRing, lite)), ext=fmt)
+
+
+
+# #%% Semi- manual relabling
+# for l in labels:
+#     d=getdata(l)
+#     if l[:5]=='fixed':
+#         if l[5:]=='Min':
+#             dstr=dmin
+#         else:
+#             dstr=dmax
+#         s='Fixed depth %d'%dstr
+#     else:
+#         if len(l)>5:
+#             dmax=12
+#         else:
+#             dmax=8
+#         s='Dynamic depth [%d:%d]'%(dmin,dmax)
+#     d['depths']=s
+#     pickle.dump(d,open(os.path.join(folderstem,l,l+'.pcr'), 'wb'))

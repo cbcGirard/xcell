@@ -77,25 +77,27 @@ def runAdaptation(setup, maxdepth=8, meshdensity=0.2, metrics=None):
     setup.iterativeSolve(tol=1e-9)
 
 
-def setParams(testCat, testVal):
-
+def setParams(testCat, testVal,overrides=None):
     params = {
         'Mesh type': 'adaptive',
         'Element type': 'Admittance',
         'Vsrc?': False,
         'BoundaryFunction': None}
 
+    if overrides is not None:
+        params.update(overrides)
+
     params[testCat] = testVal
 
     return params
 
 
-def pairedDepthSweep(study, depthRange, testCat, testVals, rElec=1e-6, sigma=np.ones(3)):
+def pairedDepthSweep(study, depthRange, testCat, testVals, rElec=1e-6, sigma=np.ones(3), overrides=None):
     lastmesh = {'numel': 0, 'nX': 0}
     meshnum = 0
     for maxdepth in depthRange:
         for tstVal in testVals:
-            params = setParams(testCat, tstVal)
+            params = setParams(testCat, tstVal,overrides)
 
             setup = study.newSimulation()
             setup.mesh.elementType = params['Element type']

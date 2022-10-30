@@ -92,7 +92,31 @@ class Simulation:
 
         self.asDual = False
 
-    def makeAdaptiveGrid(self, refPts, maxdepth, minl0Function, maxl0Function=None, coefs=None):
+    def makeAdaptiveGrid(self, refPts, maxdepth, minl0Function, maxl0Function=None, coefs=None, coarsen=True):
+        """
+
+
+        Parameters
+        ----------
+        refPts : TYPE
+            DESCRIPTION.
+        maxdepth : TYPE
+            DESCRIPTION.
+        minl0Function : TYPE
+            DESCRIPTION.
+        maxl0Function : TYPE, optional
+            DESCRIPTION. The default is None.
+        coefs : TYPE, optional
+            DESCRIPTION. The default is None.
+        coarsen : TYPE, optional
+            DESCRIPTION. The default is True.
+
+        Returns
+        -------
+        changed : TYPE
+            DESCRIPTION.
+
+        """
         """
         Fast utility to construct an octree-based mesh of the domain.
 
@@ -131,7 +155,7 @@ class Simulation:
 
         self.mesh.maxDepth = maxdepth
 
-        changed = self.mesh.refineByMetric(minl0Function,  refPts, maxl0Function, coefs)
+        changed = self.mesh.refineByMetric(minl0Function,  refPts, maxl0Function, coefs, coarsen=coarsen)
         self.logTime()
 
         return changed

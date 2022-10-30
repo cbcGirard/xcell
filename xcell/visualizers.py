@@ -43,6 +43,10 @@ def engineerTicks(axis, xunit=None, yunit=None):
     if yunit is not None:
         axis.yaxis.set_major_formatter(eform(yunit, places = 0 ))
 
+# def relabelLegend(axis, labels):
+#     h,l = axis.get_legend_handles_labels()
+#     axis.legend
+
 
 class TimingBar:
     def __init__(self, figure, axis, data=None):
@@ -62,8 +66,12 @@ class TimingBar:
 
         self.data = data
         if data is not None:
+
             # if 'style' in data:
             if data['style'] != 'sweep':
+                # ymin=min(data['y'])
+                # ymax=max(data['y'])
+                # ax.set_ylim(ymin,ymax)
                 if data['style'] == 'dot':
                     alpha = 0.5
                 else:
@@ -534,7 +542,7 @@ def plotBoundEffect(fname, ycat='FVU', xcat='Domain size', groupby='Number of el
     makePlot(l0, 'Element $l_0$ [m]')
 
 
-def groupedScatter(fname, xcat, ycat, groupcat, filtercat=None, df=None, **kwargs):
+def groupedScatter(fname, xcat, ycat, groupcat, filtercat=None, df=None, ax=None, **kwargs):
     if df is None:
         df, cats = importRunset(fname)
     else:
@@ -546,17 +554,19 @@ def groupedScatter(fname, xcat, ycat, groupcat, filtercat=None, df=None, **kwarg
 
     catNames = dL.unique()
 
-    ax = plt.figure().add_subplot()
+    if ax is None:
+        ax = plt.figure().add_subplot()
     ax.grid(True)
     ax.set_xlabel(xcat)
     ax.set_ylabel(ycat)
     # outsideLegend()
     for ii, label in enumerate(catNames):
         sel = dL == label
-        plt.loglog(dX[sel], dY[sel], marker='.',
+        ax.loglog(dX[sel], dY[sel], marker='.',
                    label=groupcat+':\n'+str(label), **kwargs)
 
-    outsideLegend()
+    # outsideLegend()
+    # ax.legend()
     plt.tight_layout()
 
 
@@ -578,6 +588,34 @@ def plotStudyPerformance(study, **kwargs):
 
     return [fig1, fig2]
 
+
+def errorCompositePlot(data,sortCat,labels=None):
+
+    f=plt.figure(figsize=[6.5,8])
+    axes=f.subplots(2)
+
+    sortVals=np.unique(data[sortCat])
+    ntraces=len(sortVals)
+
+    for a, xcat in zip(axes,['Number of elements','Total time [Wall]']):
+        a.set_xlabel(xcat)
+        a.set_ylabel('Error')
+        for ii,trace in enumerate(sortVals):
+            toPlot=data[sortCat]==trace
+            if xcat[0]=='T':
+                toPlot[:ntraces]=False
+            x=data[xcat][toPlot]
+            y=data['Error'][toPlot]
+
+            if labels is None:
+                label=trace
+            else:
+                label=labels[ii]
+
+            a.loglog(x,y,label=label)
+
+
+    axes[0].legend()
 
 def importAndPlotTimes(fname, timeType='Wall', ax=None, onlyCat=None, onlyVal=None, xCat='Number of elements'):
     df, cats = importRunset(fname)
@@ -614,7 +652,7 @@ def importAndPlotTimes(fname, timeType='Wall', ax=None, onlyCat=None, onlyVal=No
 
         ax.set_ylabel('Estimated parallel speedup')
         ax.set_xlabel(xCat)
-        outsideLegend(ax)
+        # outsideLegend(ax)
         ax.set_yscale('log')
         ax.xaxis.set_major_formatter(mpl.ticker.EngFormatter())
 
@@ -631,12 +669,12 @@ def importAndPlotTimes(fname, timeType='Wall', ax=None, onlyCat=None, onlyVal=No
 def stackedTimePlot(axis, xvals, stepTimes, stepNames):
     axis.stackplot(xvals, stepTimes, baseline='zero', labels=stepNames)
     # plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
-    outsideLegend(axis)
+    # outsideLegend(axis)
     # axis.figure.tight_layout()
     axis.xaxis.set_major_formatter(mpl.ticker.EngFormatter())
 
 
-def outsideLegend(axis=None, flipOrder=False, **kwargs):
+def outsideLegend(axis=None, flipOrder=False, where='right', **kwargs):
     """
     Create legend outside of axes, at top right.
 
@@ -665,8 +703,19 @@ def outsideLegend(axis=None, flipOrder=False, **kwargs):
         l=labels
 
 
-    axis.legend(h, l, bbox_to_anchor=(1.05, 1), loc='upper left',
-                borderaxespad=0., **kwargs)
+    legargs={'borderaxespad':0.,}
+    if where=='right':
+        legargs.update({'bbox_to_anchor':(1.05,1),
+             'loc':'upper left'})
+    else:
+        legargs.update({'bbox_to_anchor':(0.,0.,1.,0.3),
+                        'bbox_transform':axis.figure.transFigure,
+                        'mode':'expand',
+                        'loc':'lower left'})
+
+    legargs.update(kwargs)
+
+    axis.legend(h, l, **legargs)
 
 
 def showEdges(axis, coords, edgeIndices, edgeVals=None, colorbar=True, **kwargs):
@@ -1214,7 +1263,7 @@ class FigureAnimator:
                 os.makedirs(fstem)
             writer=FWriter(fps=int(fps))
             # writer.setup(self.fig, fstem+'.mp4', frame_prefix=fstem)
-            animation.save(fstem+'.mp4', writer=writer, vectorFrames=vectorFrames, frame_prefix=os.path.join(fstem, 'frame'))
+            animation.save(fstem+'.mp4', writer=writer, vectorFrames=vectorFrames, frame_prefix=os.path.join(fstem, fname))
                             # fps=fps)
             # pickle.dump(self.__dict__, open(fstem+'.aData', 'wb'))
             self.study.save(self, fname, '.adata')
@@ -1262,11 +1311,11 @@ class FigureAnimator:
             ax.set_facecolor(colors.WHITE)
 
 
-    def copy(self, overridePrefs={}):
+    def copy(self, newFigure=None, overridePrefs={}):
         # colors.useLightStyle()
         newPrefs=self.prefs.copy()
         newPrefs.update(overridePrefs)
-        newAni=self.__class__(None, self.study, newPrefs)
+        newAni=self.__class__(newFigure, self.study, newPrefs)
 
         params=self.__dict__.copy()
         params['fig']=newAni.fig
@@ -1555,6 +1604,7 @@ class ErrorGraph(FigureAnimator):
             'universalPts': True,
             'infoTitle': False,
             'printScale':1.0,
+            'showLegend':True,
             }
         if prefs is not None:
             stdPrefs.update(prefs)
@@ -1564,30 +1614,35 @@ class ErrorGraph(FigureAnimator):
             'vsim': ScaleRange(),
             'error': ScaleRange()}
 
-    def setupFigure(self):
+    def setupFigure(self, labelX=True, labelY=True, newAxes=True):
         # axV = self.fig.add_subplot(5, 1, (1, 2))
         # axErr = self.fig.add_subplot(5, 1, (3, 4))
         # axL=self.fig.add_subplot(5,1,5)
 
 #TODO: sane way to set figure size, aspect ratio for print vs screen
-        figH=self.fig.get_figheight()
-        figW=self.fig.get_figwidth()
+        if type(self.fig)==mpl.figure.Figure:
+            figH=self.fig.get_figheight()
+            figW=self.fig.get_figwidth()
 
-        scaler = self.prefs['printScale']
+            scaler = self.prefs['printScale']
 
-        if type(scaler) is list:
-            kW, kH = scaler
-            self.fig.set_figheight(9.0/kH)
-            self.fig.set_figwidth(6.0/kW)
+            if type(scaler) is list:
+                kW, kH = scaler
+                self.fig.set_figheight(9.0/kH)
+                self.fig.set_figwidth(6.0/kW)
+            else:
+                self.fig.set_figheight(1.5*figH*scaler)
+                self.fig.set_figwidth(figW*scaler)
+
+
+        if newAxes:
+            axRatios=[5, 5, 2]
+
+            axes = self.fig.subplots(3, 1,
+                                     gridspec_kw={
+                                         'height_ratios': axRatios})
         else:
-            self.fig.set_figheight(1.5*figH*scaler)
-            self.fig.set_figwidth(figW*scaler)
-
-        axRatios=[5, 5, 2]
-
-        axes = self.fig.subplots(3, 1,
-                                 gridspec_kw={
-                                     'height_ratios': axRatios})
+            axes=self.axes
 
         axV, axErr, axL = axes
 
@@ -1600,22 +1655,32 @@ class ErrorGraph(FigureAnimator):
         axErr.sharex(axV)
         axL.sharex(axV)
 
-        axL.set_xlabel('Distance from source')
-        axV.set_ylabel('Voltage')
+        hideXticks=[axV, axErr]
 
-        if self.prefs['showRelativeError']:
-            axErr.set_ylabel('Relative error')
+        if labelX:
+            axL.set_xlabel('Distance from source')
+            axL.xaxis.set_major_formatter(mpl.ticker.EngFormatter('m'))
         else:
-            axErr.set_ylabel('Absolute error')
-            axErr.yaxis.set_major_formatter(mpl.ticker.EngFormatter('V'))
+            hideXticks.append(axL)
 
-        axL.set_ylabel(r'Element $\ell_0$')
+        if labelY:
+            axV.set_ylabel('Voltage')
 
-        axV.yaxis.set_major_formatter(mpl.ticker.EngFormatter('V'))
-        axL.yaxis.set_major_formatter(mpl.ticker.EngFormatter('m'))
-        axL.xaxis.set_major_formatter(mpl.ticker.EngFormatter('m'))
+            if self.prefs['showRelativeError']:
+                axErr.set_ylabel('Relative error')
+            else:
+                axErr.set_ylabel('Absolute error')
+                axErr.yaxis.set_major_formatter(mpl.ticker.EngFormatter('V'))
 
-        [plt.setp(a.get_xticklabels(), visible=False) for a in [axV, axErr]]
+            axL.set_ylabel(r'$\ell_0$')
+
+            axV.yaxis.set_major_formatter(mpl.ticker.EngFormatter('V'))
+            axL.yaxis.set_major_formatter(mpl.ticker.EngFormatter('m'))
+        else:
+            [plt.setp(a.get_yticklabels(),visible=False) for a in axes]
+
+
+        [plt.setp(a.get_xticklabels(), visible=False) for a in hideXticks]
 
         self.axes = [axV, axErr, axL]
 
@@ -1785,7 +1850,9 @@ class ErrorGraph(FigureAnimator):
             # self.simR[ii], self.sims[ii],
             data['simR'], data['simV'],
             c='C1', marker='.', label='Simulated')
-        if setnum == 0:
+
+
+        if setnum == 0 and self.prefs['showLegend']:
             axV.legend(loc='upper right')
 
         title = animatedTitle(self.fig, data['title'])
@@ -2104,7 +2171,8 @@ class SingleSlice(FigureAnimator):
         self.timevec = timevec
 
         if prefs is None:
-            prefs={'colorbar':True}
+            prefs={'colorbar':True,
+                   'barRatio':[9,1]}
         super().__init__(fig, study, prefs=prefs)
         self.dataScales = {
             'spaceV': ScaleRange(),
@@ -2137,7 +2205,7 @@ class SingleSlice(FigureAnimator):
         else:
             nCol=1
 
-        ratios = [19,1]
+        ratios = self.prefs['barRatio']
         axes = self.fig.subplots(2, nCol,
                                  gridspec_kw={
                                      'height_ratios': ratios,
@@ -2341,3 +2409,15 @@ class LogError(FigureAnimator):
         artists.append(title)
 
         return artists
+
+
+# class FrameSet:
+#     def __init__(self,frameSize=[6.5,9.0], nrow=1, ncol=1):
+#         fig=plt.figure(figsize=frameSize)
+
+#         self.mainfig=fig
+#         self.subfigs=fig.subfigures(nrow,ncol)
+
+
+#     def plotFrames(self,frameNums):
+#         for num in frameNums:
