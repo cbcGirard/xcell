@@ -123,7 +123,7 @@ def useDarkStyle():
     BASE = HILITE
 
     plt.style.use(makeStyleDict(fgColor=OFFWHITE, bgColor=DARK))
-    plt.style.use(styleScope)
+    plt.style.use(styleScope2)
     plt.style.use({'font.size':10})
 
 

@@ -52,30 +52,86 @@ class Composite(xc.visualizers.FigureAnimator):
         if data is None:
             data = self.dataSets[setnumber]
 
+        titles = ['Admittance', 'Trilinear FEM', 'Mesh dual']
 
-        titles = ['Admittance', 'FEM', 'Dual']
+        # if titles is None:
+            # titles = ['Admittance', 'FEM', 'Dual']
 
         artists = []
         for n,title in enumerate(titles):
             artists.extend(ax.loglog(data['r'+title],
                                        data['v'+title],
                                        color = 'C'+str(n),
-                                       label = title))
+                                       label = title,
+                                       alpha=0.75))
 
 
 
         if setnumber==0:
-            artists.append(ax.legend(loc='upper right'))
+            if 'keepLegend' in self.prefs:
+                ax.legend(loc='upper right')
+            else:
+                artists.append(ax.legend(loc='upper right'))
+
+
+
+        return artists
+
+
+class ErrorComp(xc.visualizers.FigureAnimator):
+    def setupFigure(self, resetBounds=False):
+        self.fig, self.axes =plt.subplots(2,1,sharey=True, sharex=True)
+        self.axes[0].set_title('Admittance')
+        self.axes[1].set_title('Mesh dual')
+
+        [a.set_xscale('log') for a in self.axes]
+        [a.set_xlim(left=5e-7) for a in self.axes]
+
+        self.axes[1].set_xlabel('Distance [m]')
+
+    def getArtists(self, setnumber, data=None):
+        ax = self.axes[0]
+
+
+        if data is None:
+            data = self.dataSets[setnumber]
+
+        titles = ['Admittance', 'Mesh dual']
+
+        # if titles is None:
+            # titles = ['Admittance', 'FEM', 'Dual']
+
+
+
+        artists = []
+
+        for n,title in enumerate(titles):
+            vs=data['v'+title]
+            r=data['r'+title]
+
+            rana=r.copy()
+            rana[rana<1e-6]=1e-6
+            vAna=1e-6/rana
+
+            sel = r>1e-6
+
+            d=(vs-vAna)[sel]
+
+            artists.append(self.axes[n].fill_between(r[sel],
+                                       d,
+                                       color = 'r',
+                                       alpha=0.75))
+
 
         return artists
 
 
 
-# folder = 'Quals/formulations'
-folder = 'Quals/fixedDisc'
+folder = 'Quals/formulations'
+# folder = 'Quals/fixedDisc'
 
 
-study, _ = com.makeSynthStudy('folder')
+study, _ = com.makeSynthStudy(folder)
 folder = study.studyPath
 xc.colors.useDarkStyle()
 
@@ -90,6 +146,7 @@ f=plt.figure(figsize=[6.5*.6, 8/3])
 
 newGraph = Composite(f, study)
 ax = newGraph.axes[0]
+
 
 for form,title in zip(formulations, titles):
     graph = pickle.load(open(os.path.join(folder, 'ErrorGraph_'+form+'.adata'),'rb'))
@@ -110,7 +167,32 @@ for form,title in zip(formulations, titles):
 
 
 
-# newGraph.animateStudy('Composite')#,artists = artists)
+newGraph.animateStudy('Composite')#,artists = artists)
+
+
+#%%
+with plt.rc_context({'figure.figsize':[4,4],
+                     'figure.dpi':250,
+                     'font.size':10,
+                     }):
+    # g=newGraph.copy()
+    g=Composite(plt.figure(), study)
+    g.dataSets=newGraph.dataSets
+    g.prefs.update({'keepLegend':True})
+    g.animateStudy('Composite')
+
+
+#%% paired error graphs
+
+with plt.rc_context({'figure.figsize':[4,6],
+                     'figure.dpi':250,
+                     'font.size':10,
+                     }):
+    # g=newGraph.copy()
+    g=ErrorComp(None, study)
+    g.dataSets=newGraph.dataSets
+    g.axes[0].set_xlim(right=max(g.dataSets[0]['rAdmittance']))
+    g.animateStudy('ErrorAreas')
 
 
 #%%

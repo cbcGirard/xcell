@@ -263,3 +263,22 @@ f.align_labels()
 axes[0,0].set_xlim(left=0)
 
 # axes[1].stackplot(df['Number of elements'][isoct], newtime, baseline='zero',color=0.5*np.ones(4))
+
+
+
+
+#%% Image slice redux
+# v=pickle.load(open('/home/benoit/smb4k/ResearchData/Results/Quals/PoC/SliceSet_adaptive.adata','rb'))
+
+with plt.rc_context({'figure.figsize':[7,6.5],
+                     'figure.dpi':144}):
+    # v2=v.copy(overridePrefs={'logScale':True})
+    study,_=com.makeSynthStudy('Quals/bigPOC')
+    v=xc.visualizers.SliceSet(None, study)
+    v.getStudyData()
+    v.animateStudy('ImageTst')
+
+    # v2.prefs['logScale']=True
+    # v2.dataScales['vbounds'].knee=1e-3
+    # v2.dataScales['errbounds'].knee=0.1
+    # v2.animateStudy('Image')

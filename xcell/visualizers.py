@@ -463,6 +463,7 @@ def formatXYAxis(axis, bounds=None, symlog=False, lindist=None, axlabels=False, 
     None.
 
     """
+    axis.set_aspect('equal')
     engform = mpl.ticker.EngFormatter('m')
     axis.xaxis.set_major_formatter(engform)
     axis.yaxis.set_major_formatter(engform)
@@ -2172,7 +2173,8 @@ class SingleSlice(FigureAnimator):
 
         if prefs is None:
             prefs={'colorbar':True,
-                   'barRatio':[9,1]}
+                   'barRatio':[9,1],
+                   'labelAxes':True}
         super().__init__(fig, study, prefs=prefs)
         self.dataScales = {
             'spaceV': ScaleRange(),
@@ -2200,15 +2202,23 @@ class SingleSlice(FigureAnimator):
         return newAni
 
     def setupFigure(self):
+        ratios = self.prefs['barRatio']
+
         if self.prefs['colorbar']:
             nCol=2
+            widths=self.fig.get_figwidth()*np.array(ratios)/sum(ratios)
+            vratios=[widths[0],(1.1*self.fig.get_figheight()-widths[0])]
         else:
             nCol=1
+            vratios=ratios
+        # if self.prefs['colorbar']:
+        #     nCol=2
+        # else:
+        #     nCol=1
 
-        ratios = self.prefs['barRatio']
         axes = self.fig.subplots(2, nCol,
                                  gridspec_kw={
-                                     'height_ratios': ratios,
+                                     'height_ratios': vratios,
                                      'width_ratios': ratios[:nCol]})
 
 
@@ -2226,7 +2236,7 @@ class SingleSlice(FigureAnimator):
             tax=axes[1]
 
 
-        formatXYAxis(ax, self.bnds)
+        formatXYAxis(ax, self.bnds,axlabels=self.prefs['labelAxes'])
         self.tbar = TimingBar(self.fig, tax, self.tdata)
         tax.set_xlim(self.timevec[0], self.timevec[-1])
 
@@ -2258,7 +2268,7 @@ class SingleSlice(FigureAnimator):
                     cbarFormat = mpl.ticker.PercentFormatter(xmax=1.,
                                                              decimals=2)
                     self.axes[1].set_ylabel('Relative error')
-                self.fig.colorbar(mapper, cax=self.axes[1],
+                self.fig.colorbar(mapper, ax=self.axes[0], cax=self.axes[1],
                                   format=cbarFormat)
             # if setnum == 0:
                 plt.tight_layout()

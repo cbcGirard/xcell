@@ -45,7 +45,7 @@ coords=comDict['coords']
 isSphere=comDict['isSphere']
 polygons=comDict['polygons']
 # %%
-
+skipExt=True
 def getdata(strat):
     fname = os.path.join(folderstem, strat, strat+'.pcr')
     data = pickle.load(open(fname, 'rb'))
@@ -56,33 +56,40 @@ labels.sort()
 labels=[labels[n] for n in [3,0,2,1]]
 data=[getdata(l) for l in labels]
 
+if skipExt:
+    data.pop()
+    labels.pop()
 
-for fmt in ['.png','.svg','.eps']:
-    for lite in ['','-lite']:
-        if lite=='':
-            xcell.colors.useDarkStyle()
-        else:
-            xcell.colors.useLightStyle()
+for lite in ['']:#,'-lite']:
+    if lite=='':
+        xcell.colors.useDarkStyle()
+    else:
+        xcell.colors.useLightStyle()
 
-        f, ax = plt.subplots(3, gridspec_kw={'height_ratios': [5, 5, 2]})
-        ax[2].plot(tv, I)
+    f, ax = plt.subplots(3, gridspec_kw={'height_ratios': [5, 5, 2]})
+    ax[2].plot(tv, I)
 
-        for d, l in zip(data, labels):
-            # ax[0].semilogy(tv, np.abs(d['volErr']), label=d['depths'])
-            ax[0].plot(tv,  np.abs(d['intErr']), label=d['depths'])
-            ax[1].plot(tv[1:], d['dt'][1:])
+    for d, l in zip(data, labels):
+        # ax[0].semilogy(tv, np.abs(d['volErr']), label=d['depths'])
+        ax[0].plot(tv,  np.abs(d['intErr']), label=d['depths'])
+        ax[1].plot(tv[1:], d['dt'][1:])
 
-        ax[0].legend()
-        ax[0].set_ylabel('Error')
-        ax[1].set_ylabel('Wall time')
-        ax[2].set_ylabel('Activity')
-        ax[2].set_xlabel('Simulated time')
+    ax[0].legend()
+    ax[0].set_ylabel('Error')
+    ax[1].set_ylabel('Wall time')
+    ax[2].set_ylabel('Activity')
+    ax[2].set_xlabel('Simulated time')
 
-        xcell.visualizers.engineerTicks(ax[2], xunit='s')
-        [a.set_xticks([]) for a in ax[:-1]]
-
+    xcell.visualizers.engineerTicks(ax[2], xunit='s')
+    [a.set_xticks([]) for a in ax[:-1]]
 
 
+
+# bar plot
+    with plt.rc_context({'font.size':12,
+                         'figure.figsize':[6,4]}):
+        errColor='#990000'
+        # errColor='C1'
         f2,ax=plt.subplots(1,1)
         aright=ax.twinx()
 
@@ -93,14 +100,16 @@ for fmt in ['.png','.svg','.eps']:
         # terr=[sum(np.abs(l['intErr']))/sum(np.abs(l['intAna'])) for l in data]
         # terr=[sum(np.abs(l['SSE']))/sum(np.abs(l['SSTot'])) for l in data]
 
-        categories=[d['depths'] for d in data]
+
+        # categories=[d['depths'] for d in data]
+        categories=['Fixed depth\n4', 'Dynamic depth\n[4:8]','Fixed depth\n8']#,'Dynamic depth\n[4:12]']
         barpos=np.arange(len(categories))
         barw=0.25
 
         tart=ax.bar(barpos-barw/2,height=ttime, width=barw, color='C0', label='Time')
         ax.set_ylabel('Total simulation time')
 
-        eart=aright.bar(barpos+barw/2, height=terr, width= barw, color='C1', label='Error')
+        eart=aright.bar(barpos+barw/2, height=terr, width= barw, color=errColor, label='Error')
         aright.set_ylabel('Total simulation error')
 
         ax.set_xticks(barpos)
@@ -119,9 +128,9 @@ for fmt in ['.png','.svg','.eps']:
 
 
         study.savePlot(f2, os.path.join(
-            folderstem, 'ring%dsummary%s' % (nRing, lite)), ext=fmt)
+            folderstem, 'ring%dsummary%s' % (nRing, lite)))
 
-        study.savePlot(f, os.path.join(folderstem, 'ring%dcomparison%s' % (nRing, lite)), ext=fmt)
+        study.savePlot(f, os.path.join(folderstem, 'ring%dcomparison%s' % (nRing, lite)))
 
 
 
@@ -165,3 +174,34 @@ nUtil.showCellGeo(alite.axes[0])
 frameNs=[int(f*len(alite.dataSets)/tstop) for f in np.arange(0,tstop, tPerFrame)]
 artists=[alite.getArtists(ii) for ii in frameNs]
 alite.animateStudy(fname+'-lite', fps=30, artists=artists, vectorFrames=np.arange(len(frameNs)), unitStr='V')
+
+
+#%% voltage for screen
+
+# xcell.colors.CM_BIPOLAR=xcell.colors.scoopCmap(cm.guppy_r,0.5)
+
+viz=pickle.load(open(folderstem+'/depth/volt-depth.adata','rb'))
+
+
+
+with plt.rc_context({
+        'figure.dpi':144,
+        # 'figure.figsize':[6.75,7.5],
+        'figure.figsize':[6.75,5.],
+        'toolbar':'none'
+        }):
+    barRatio=[4,1]
+    vd=viz.copy({'colorbar':False,'barRatio':barRatio,'labelAxes':False})
+    # vd.dataScales['spaceV'].knee=1e-8
+    # vd.dataScales['spaceV'].min=-1e-5
+    ax=vd.axes[0]
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_aspect('equal')
+    nUtil.showCellGeo(ax)
+
+
+    vd.getArtists(0)
+
+
+    vd.animateStudy('Showcase')

@@ -19,7 +19,7 @@ from xcell import util
 from xcell import visualizers
 import Common
 
-lite = True
+lite = False
 asDual = False
 studyPath = '/home/benoit/smb4k/ResearchData/Results/Quals/algoDemo/'
 fname = 'overview'
@@ -27,12 +27,17 @@ if asDual:
     fname += '-dual'
 
 if lite:
+    fname += '-lite'
     xcell.colors.useLightStyle()
     mpl.rcParams.update({'figure.figsize':[2.0, 2.0],
-                         'font.size':10.,
-                         'lines.markersize':5.,
-                         })
-    fname += '-lite'
+                             'font.size':10.,
+                             'lines.markersize':5.,
+                             })
+else:
+    mpl.rcParams.update({'figure.figsize':[2.,2.],
+                          'font.size':9,
+                          'figure.dpi':500
+                          })
 
 showSrcCircuit = True
 lastGen = 4
