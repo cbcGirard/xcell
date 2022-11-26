@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sun Dec 19 20:28:33 2021
+Simulation overview
+===================================
 
-@author: benoit
+A simplified view of the meshing process, electrical network generation, and solution
+
 """
 
-# %%
-import re
-from matplotlib.markers import MarkerStyle
 import numpy as np
-import numba as nb
 import xcell
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -89,7 +87,6 @@ src = ax.fill(arcX, arcY, color=mpl.cm.plasma(1.0), alpha=0.5, label='Source')
 
 noteColor = xcell.colors.ACCENT_DARK
 
-
 for maxdepth in range(1, lastGen+1):
     l0Param = 2**(-maxdepth*0.2)
 
@@ -137,7 +134,6 @@ for maxdepth in range(1, lastGen+1):
         ctrArt = ax.scatter(cpts[:, 0], cpts[:, 1],
                             c=noteColor, marker='o')
         arts.append([ctrArt, art, title])
-
 
 # %%
 if showSrcCircuit:
@@ -206,7 +202,6 @@ if showSrcCircuit:
 
     for ii in range(2):
         arts.append(artset)
-# %%
 
     # replace with single source node
     srcIdx = inSrc.nonzero()[0][0]

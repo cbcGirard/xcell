@@ -2338,7 +2338,8 @@ class SingleSlice(FigureAnimator):
                                          artists=artists,
                                          fps=fps, vectorFrames=vectorFrames)
 
-        self.solobar(fname=fname, unit=unitStr)
+        if self.prefs['colorbar']:
+            self.solobar(fname=fname, unit=unitStr)
 
 
         return animation
