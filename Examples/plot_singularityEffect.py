@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sat Mar  5 19:29:09 2022
+Singularity
+==========================
 
 Get a detailed sweep of the behavior as element l0 approaches the source's radius
 
-@author: benoit
 """
 
 import xcell

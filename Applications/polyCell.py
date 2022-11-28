@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Thu Jan 20 14:58:31 2022
+LFP estimation
+=============================
 
-@author: benoit
+Plot LFP from toy neurons
+
 """
 
 from neuron import h  # , gui
@@ -12,7 +14,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.animation import ArtistAnimation
-# from xcell import visualizers
 import xcell
 
 import Common
@@ -50,7 +51,7 @@ dmin = 4
 
 cli = argparse.ArgumentParser()
 cli.add_argument('-f', '--folder',
-                 help='path from main results folder', default='Quals/polyCell/')
+                 help='path from main results folder', default='/tmp')
 cli.add_argument('-n', '--nRing', type=int,
                  help='number of cells (default %(default)s) 0->single compartment', default=5)
 cli.add_argument('-s', '--nSegs', type=int,

@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sat Jun 25 14:22:35 2022
-
+Logo
+=============
 Generates the xcell logo from point cloud
 
 Original text layout in Inkscape, text bounds resampled using Roughen path effect with all displacements=0, then exported with Path to Gcode extension.
 
 Original canvas bounds are ((0,32), (0,32))
 
-
-@author: benoit
 """
 
 import xcell
@@ -27,17 +25,17 @@ ptsFile = 'logo.xpts'
 convertGcode=False
 showOriginalPoints=False
 
-# bbox = np.array([0, 0, -1, 32, 32, 1])
 bbox = np.array([0, 0, -32, 32, 32, 32])
 
-
-
-#color = 'red'
-
+xcell.colors.useDarkStyle()
 color = 'base'
 logoFPS = 6
 
 # %%
+# Convert gcode to array of points
+# ---------------------------------------
+# 
+
 if convertGcode:
 
     f = open('xcelldense.ngc', 'r')
@@ -58,6 +56,9 @@ if convertGcode:
 
 # %%
 # Generate meshes from points
+# ---------------------------------
+#
+
 pts = pickle.load(open(ptsFile, 'rb'))
 
 tstart=time.monotonic()
@@ -89,8 +90,9 @@ pickle.dump(meshPts, open('logoMesh.p', 'wb'))
 
 # %%
 # Make logo image and animation
+# -------------------------------
+# 
 
-# imageBbox=np.array([0.3,31.7, 0.3, 23.,])
 dpi=100
 
 with plt.rc_context({'figure.figsize':[19.2, 10.8],
@@ -99,13 +101,10 @@ with plt.rc_context({'figure.figsize':[19.2, 10.8],
                      }):
 
     fig, ax = plt.subplots()
-    # xcell.visualizers.formatXYAxis(ax, imageBbox)
     ax.set_xlim(1.,31.)
     ax.set_ylim(1., 23.)
     ax.axis('Off')
     ax.margins(0)
-    # fig.set_figheight(1.08)
-    # fig.set_figwidth(1.44)
 
     col = xcell.colors.BASE
     artists = [[xcell.visualizers.showEdges2d(
@@ -114,9 +113,6 @@ with plt.rc_context({'figure.figsize':[19.2, 10.8],
     #pad ending frame
     artists.append(artists[-1])
     artists.append(artists[-1])
-
-
-    # plt.subplots_adjust(-.1,-.1,1.1,1.1)
 
     ani = xcell.visualizers.ArtistAnimation(fig, artists, interval=1000//logoFPS)
 

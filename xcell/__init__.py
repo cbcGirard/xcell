@@ -1,5 +1,8 @@
 """
+Main xcell package
+==================================
 
+description needed?
 """
 from . import util
 from . import misc

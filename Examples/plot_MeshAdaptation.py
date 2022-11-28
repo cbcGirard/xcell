@@ -79,3 +79,4 @@ for swept in ['density','depth']:
 
 
         ani = img.animateStudy(fname=swept, fps=5.)
+# sphinx_gallery_thumbnail_number = 2

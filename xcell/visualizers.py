@@ -182,9 +182,9 @@ class SliceViewer:
     def __init__(self, axis, sim, displayPrefs=None, topoType='mesh'):
         if axis is None:
             self.fig = plt.figure()
-            self.axes[0] = self.fig.add_subplot()
+            self.axes = [self.fig.add_subplot()]
         else:
-            self.axes[0] = axis
+            self.axes = [axis]
             self.fig = axis.figure
 
         self.fig.canvas.mpl_connect('key_press_event', self.onKey)
@@ -195,8 +195,6 @@ class SliceViewer:
         self.topoType = topoType
 
         self.setPlane()
-        # self.drawFns=[]
-        # self.drawArgs=[]
 
         if displayPrefs is None:
             displayPrefs = DisplayPrefs()

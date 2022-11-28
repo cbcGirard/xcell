@@ -1,70 +1,58 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Tue Jan  4 17:02:59 2022
-Regularization tests
-@author: benoit
+Single timestep
+=====================
+
+Illustrates setting up a simulation and solving at a single time step
+
 """
 
-
 import numpy as np
-# import numba as nb
 import xcell
 import matplotlib.pyplot as plt
 
+
+# %%
+# Simulation preferences
+
+# Misc parameters
 xcell.colors.useLightStyle()
-# meshtype = 'uniform'
-meshtype= 'adaptive'
-# studyPath='Results/studyTst/miniCur/'#+meshtype
 studyPath = '/dev/null'
 
+# options = uniform, adaptive
+meshtype= 'adaptive'
+
+maxdepth = 10 # Maximum successive splits allowed for octree mesh
+nX = 10 # Number of elements along an axis for a uniform mesh
+
+# options: Admittance, Face, FEM
 elementType = 'Admittance'
-
-# elementType='Face'
-
-xmax = 1e-4
-maxdepth = 12
-nX = 10
-
-sigma = np.ones(3)
-
-
-vMode = False
-showGraphs = False
-generate = False
-saveGraphs = False
-
 dual = True
 regularize = False
 
-vsrc = 1.
-isrc = vsrc*4*np.pi*sigma*1e-6
+# options: analytical, ground
+boundaryType = 'ground'
+
+fixedVoltageSource = False # otherwise, simulate current injection
+
+# %%
+# Setup simulation
+
+
+xmax = 1e-4 # domain boundary
+rElec = 1e-6 # center source radius
+
+sigma = np.ones(3)
 
 bbox = np.append(-xmax*np.ones(3), xmax*np.ones(3))
-# bbox=np.append(np.zeros(3),xmax*np.ones(3))
-# if dual:
-#     bbox+=xmax*2**(-maxdepth)
-
-
 study = xcell.SimStudy(studyPath, bbox)
-
-l0Min = 1e-6
-rElec = 1e-6
-
-lastNumEl = 0
-meshTypes = ["adaptive", "uniform"]
-
-
-l0Param = 2**(-maxdepth*0.2)
-# l0Param=0.2
 
 setup = study.newSimulation()
 setup.mesh.elementType = elementType
 setup.meshtype = meshtype
-# setup.mesh.minl0=2*xmax/(2**maxdepth)
-# setup.ptPerAxis=1+2**maxdepth
 
-if vMode:
+if fixedVoltageSource:
     setup.addVoltageSource(1, np.zeros(3), rElec)
     srcMag = 1.
     srcType = 'Voltage'
@@ -77,36 +65,30 @@ if meshtype == 'uniform':
     setup.makeUniformGrid(nX)
     print('uniform, %d per axis' % nX)
 else:
-
-    # metric=xcell.makeBoundedLinearMetric(l0min=2e-6,
-    #                                      l0max=1e-5,
-    #                                      domainX=xmax)
-
-    l0min=np.array(rElec/2, ndmin=1)
-
     setup.makeAdaptiveGrid(refPts=np.zeros((1,3)),
                            maxdepth=np.array(maxdepth, ndmin=1),
                            minl0Function=xcell.generalMetric,
                            # coefs=np.array(2**(-0.2*maxdepth), ndmin=1))
                            coefs=np.array(0.2,ndmin=1))
 
-
-boundaryFun = None
-# def boundaryFun(coord):
-#     r=np.linalg.norm(coord)
-#     return rElec/(r*np.pi*4)
+if boundaryType=='analytical':
+    boundaryFun = None
+else:
+    def boundaryFun(coord):
+        r=np.linalg.norm(coord)
+        return rElec/(r*np.pi*4)
 
 
 setup.finalizeMesh()
 
 setup.setBoundaryNodes(boundaryFun, sigma=1)
 
-# v=setup.solve()
 v = setup.iterativeSolve(None, 1e-9)
 setup.applyTransforms()
+
+
 setup.getMemUsage(True)
 setup.printTotalTime()
-
 
 setup.startTiming('Estimate error')
 # srcMag,srcType,showPlots=showGraphs)
@@ -116,9 +98,12 @@ setup.logTime()
 
 
 # %%
-# Interactive slice viewer (use arrow keys to change location)
+# SliceViewer
+# ----------------------
+# Interactive slice viewer (use arrow keys to change location within ipython session)
+# 
+
 sv=xcell.visualizers.SliceViewer(axis=None, sim=setup)
-# sv.nodeData=pt
 
 # %%
 # 2d image
@@ -129,6 +114,9 @@ cMap,cNorm=xcell.visualizers.getCmap(setup.nodeVoltages,forceBipolar=True)
 xcell.visualizers.patchworkImage(plt.figure().gca(),
                                   arr, cMap, cNorm,
                                   extent=bnd)
+
+# %%
+# 
 
 ax=plt.figure().add_subplot()
 xcell.visualizers.formatXYAxis(ax,bnd)
@@ -144,7 +132,7 @@ xcell.visualizers.showEdges2d(ax, edgePoints)
 
 
 # %%
-##### TOPOLOGY/connectivity
+# TOPOLOGY/connectivity
 ax = xcell.visualizers.showMesh(setup)
 ax.set_xticks([])
 ax.set_yticks([])
@@ -169,12 +157,20 @@ xcell.visualizers.showNodes3d(ax,
 
 
 # %%
+# SliceSet
+# --------------------
+#
+
+# sphinx_gallery_thumbnail_number = 5
 img=xcell.visualizers.SliceSet(plt.figure(),study)
 img.addSimulationData(setup,append=True)
 img.getArtists(0)
 
 # %%
-# ERROR GRAPH
+# ErrorGraph
+# ------------------
+# 
+
 ptr = xcell.visualizers.ErrorGraph(plt.figure(), study)
 ptr.prefs['universalPts'] = True
 pdata = ptr.addSimulationData(setup)
@@ -182,7 +178,10 @@ ptr.getArtists(0, pdata)
 
 
 # %%
-# LOGLOG Error
+# LogError
+# -----------
+# 
+
 P = xcell.visualizers.LogError(None, study)
 P.addSimulationData(setup, True)
 P.getArtists(0)
