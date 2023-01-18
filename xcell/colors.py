@@ -1,12 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Aug  3 16:24:37 2022
-
-Color schemes for xcell
-
-@author: benoit
-"""
+"""Color schemes for xcell."""
 
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -14,18 +8,54 @@ import numpy as np
 
 from os import path
 import re
+import cmasher as cm
+
 
 # Dark mode
 MESH_ALPHA = 0.25
 FAINT = (0xaf/255, 0xcf/255, 1., MESH_ALPHA)
 
-colAr = [[0, 0, 1, 1],
-         [.098, .137, .176, 0],
-         [1, 0, 0, 1]]
+# colAr = [[0, 0, 1, 1],
+#          [.098, .137, .176, 0],
+#          [1, 0, 0, 1]]
 
-CM_BIPOLAR = mpl.colors.LinearSegmentedColormap.from_list('bipolar',
-                                                          np.array(colAr,
-                                                                   dtype=float))
+# CM_BIPOLAR = mpl.colors.LinearSegmentedColormap.from_list('bipolar',
+#                                                           np.array(colAr,
+#                                                                    dtype=float))
+
+
+def scoopCmap(baseCmap, fraction=0.1):
+    """
+    Fades colormap transparency as values approach 0.0.
+
+    Parameters
+    ----------
+    baseCmap : colormap
+        Colormap to modify.
+    fraction : float, optional
+        Fraction of colormap range to apply alpha fade. The default is 0.1.
+
+    Returns
+    -------
+    newCmap : colormap
+        Modified colormap.
+
+    """
+    col = np.array(baseCmap.colors)
+
+    x = np.linspace(-1, 1, col.shape[0]).reshape((-1, 1))
+    alpha = np.abs(x/fraction)
+    alpha[alpha > 1.] = 1.
+
+    newcol = np.hstack((col, alpha))
+
+    newCmap = mpl.colors.LinearSegmentedColormap.from_list(
+        baseCmap.name+'_mod', newcol)
+    return newCmap
+
+
+
+CM_BIPOLAR = scoopCmap(cm.guppy_r,0.5)
 
 DARK = '#19232d'
 HILITE = '#afcfff'
@@ -165,39 +195,24 @@ def useLightStyle():
 
 
 
-def scoopCmap(baseCmap, fraction=0.1):
-    """
-    Fades colormap transparency as values approach 0.0.
-
-    Parameters
-    ----------
-    baseCmap : colormap
-        Colormap to modify.
-    fraction : float, optional
-        Fraction of colormap range to apply alpha fade. The default is 0.1.
-
-    Returns
-    -------
-    newCmap : colormap
-        Modified colormap.
-
-    """
-    col = np.array(baseCmap.colors)
-
-    x = np.linspace(-1, 1, col.shape[0]).reshape((-1, 1))
-    alpha = np.abs(x/fraction)
-    alpha[alpha > 1.] = 1.
-
-    newcol = np.hstack((col, alpha))
-
-    newCmap = mpl.colors.LinearSegmentedColormap.from_list(
-        baseCmap.name+'_mod', newcol)
-    return newCmap
-
-
 
 
 def recolorSVG(fname,toLight=True):
+    """
+    Post-process SVG to change color scheme.
+
+    Parameters
+    ----------
+    fname : str
+        File name.
+    toLight : bool, optional
+        Set conversion direction from dark to light. The default is True.
+
+    Returns
+    -------
+    None.
+
+    """
     fstr=open(fname)
     rawtxt=fstr.read()
     fstr.close()

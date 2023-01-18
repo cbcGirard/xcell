@@ -96,7 +96,9 @@ else:
     tPerFrame = 5
     barRatio=[9,1]
 
-ivecs, isSphere, coords, rads = nUtil.getNeuronGeometry()
+coords, rads, isSphere = nUtil.getNeuronGeometry()
+ivecs = nUtil.getMembraneCurrents()
+
 if args.nRing == 0:
     ivecs.pop()
     coords.pop()

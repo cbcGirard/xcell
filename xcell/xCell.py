@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Fri Oct 15 12:22:58 2021
-Main API for handling extracellular simulations
-@author: benoit
-"""
+"""Main API for handling extracellular simulations."""
 
 import numpy as np
 import numba as nb
@@ -37,6 +33,8 @@ from . import colors
 #     ('coords',float64[:]),
 #     ('radius',float64)
 #      ])
+
+
 class CurrentSource:
     def __init__(self, value, coords, radius=0):
         self.value = value
@@ -92,41 +90,37 @@ class Simulation:
 
         self.asDual = False
 
+    def quickAdaptiveGrid(self, maxdepth):
+        pts = np.array([a.coords for a in self.currentSources])
+
+        npt = pts.shape[0]
+
+        self.makeAdaptiveGrid(refPts=pts,
+                              maxdepth=maxdepth*np.ones(npt),
+                              minl0Function=generalMetric,
+                              coefs=0.2*np.ones(npt),
+                              coarsen=False)
+
+        self.finalizeMesh()
+
     def makeAdaptiveGrid(self, refPts, maxdepth, minl0Function, maxl0Function=None, coefs=None, coarsen=True):
         """
-
-
-        Parameters
-        ----------
-        refPts : TYPE
-            DESCRIPTION.
-        maxdepth : TYPE
-            DESCRIPTION.
-        minl0Function : TYPE
-            DESCRIPTION.
-        maxl0Function : TYPE, optional
-            DESCRIPTION. The default is None.
-        coefs : TYPE, optional
-            DESCRIPTION. The default is None.
-        coarsen : TYPE, optional
-            DESCRIPTION. The default is True.
-
-        Returns
-        -------
-        changed : TYPE
-            DESCRIPTION.
-
-        """
-        """
-        Fast utility to construct an octree-based mesh of the domain.
+        Construct octree mesh.
 
         Parameters
         ----------
-        metric : list of functions
-            Must take a 1d array of xyz coordinates and return target l0
-            for that location.
+        refPts : float[:,3]
+            DESCRIPTION.
         maxdepth : int
-            Maximum allowable rounds of subdivision.
+            Maximum recursion depth.
+        minl0Function : function
+            Function to calculate l0. cf :meth:`xcell.generalMetric`.
+        maxl0Function : function, optional
+            DESCRIPTION. minl0Function used if None.
+        coefs : float[:], optional
+            Coefficents passed to l0 function. The default is None.
+        coarsen : bool, optional
+            Whether to prune following splits. The default is True.
 
         Returns
         -------
@@ -137,6 +131,9 @@ class Simulation:
         self.startTiming("Make elements")
         self.ptPerAxis = 2**maxdepth+1
         self.meshtype = 'adaptive'
+
+        if coefs is None:
+            coefs = np.ones(refPts.shape[0])
 
         # convert to octree mesh
         if (type(self.mesh) != meshes.Octree):
@@ -155,7 +152,8 @@ class Simulation:
 
         self.mesh.maxDepth = maxdepth
 
-        changed = self.mesh.refineByMetric(minl0Function,  refPts, maxl0Function, coefs, coarsen=coarsen)
+        changed = self.mesh.refineByMetric(
+            minl0Function,  refPts, maxl0Function, coefs, coarsen=coarsen)
         self.logTime()
 
         return changed
@@ -238,6 +236,11 @@ class Simulation:
     def logTime(self, logger=None):
         """
         Signals completion of step.
+
+        Parameters
+        ----------
+        logger : TYPE, optional
+            DESCRIPTION. The default is None.
 
         Returns
         -------
@@ -437,7 +440,7 @@ class Simulation:
         """
         self.startTiming('Finalize mesh')
         self.mesh.finalize()
-        self.nodeISources=[]
+        self.nodeISources = []
         numEl = len(self.mesh.elements)
         self.logTime()
 
@@ -490,6 +493,14 @@ class Simulation:
         self.logTime()
 
     def applyTransforms(self):
+        """
+        Calculate implicitly defined node voltages from explicit ones.
+
+        Returns
+        -------
+        None.
+
+        """
         targetPts = [self.mesh.inverseIdxMap[xf.pop()]
                      for xf in self.transforms]
 
@@ -519,8 +530,7 @@ class Simulation:
 
         # meshCurrentSrc=self.nodeISources
         # meshCurrentSrc=[0 for k in self.nodeISources]
-        meshCurrentSrc=[]
-
+        meshCurrentSrc = []
 
         for ii in nb.prange(len(self.currentSources)):
             src = self.currentSources[ii]
@@ -546,7 +556,7 @@ class Simulation:
                     # node is already claimed by source
                     sharedIdx = self.nodeRoleVals[idx]
                     # add to value of existing node source
-                    if sharedIdx>=len(meshCurrentSrc):
+                    if sharedIdx >= len(meshCurrentSrc):
                         print('')
                     meshCurrentSrc[sharedIdx] += src.value
                 else:
@@ -875,22 +885,24 @@ class Simulation:
         ana, anaInt = self.analyticalEstimate()
         analyticInt = anaInt[0]
 
-        netAna=np.sum(ana,axis=0)
+        netAna = np.sum(ana, axis=0)
 
         for el in self.mesh.elements:
             span = el.span
-            if self.mesh.elementType=='Face':
-                elInd=el.faces
+            if self.mesh.elementType == 'Face':
+                elInd = el.faces
             else:
-                elInd=el.vertices
+                elInd = el.vertices
             globalInd = np.array([self.mesh.inverseIdxMap[v] for v in elInd])
             elVals = self.nodeVoltages[globalInd]
 
-            if self.mesh.elementType=='Face':
-                vals=meshes.fem.interpolateFromFace(elVals, meshes.fem.HEX_VERTEX_COORDS)
-                avals=np.abs(meshes.fem.interpolateFromFace(netAna[globalInd], meshes.fem.HEX_VERTEX_COORDS))
+            if self.mesh.elementType == 'Face':
+                vals = meshes.fem.interpolateFromFace(
+                    elVals, meshes.fem.HEX_VERTEX_COORDS)
+                avals = np.abs(meshes.fem.interpolateFromFace(
+                    netAna[globalInd], meshes.fem.HEX_VERTEX_COORDS))
             else:
-                vals=elVals
+                vals = elVals
                 avals = np.abs(netAna[globalInd])
 
             dvals = np.abs(vals-avals)
@@ -1458,10 +1470,27 @@ class Simulation:
 
         return elements, np.array(coords), np.array(edgePts)
 
+    def _getUniformPlane(self, axis, point, data):
+        inplane = self.mesh.nodeCoords[:, axis] == point
+
+        otherAxes = np.array([n != axis for n in range(3)])
+
+        planeCoords = self.mesh.nodeCoords[:, otherAxes][inplane]
+
+        vals = data[inplane]
+
+        nx = int(np.sqrt(vals.shape[0]))
+
+        return [vals.reshape((nx, nx))], planeCoords
+
     def getValuesInPlane(self, axis=2, point=0., data=None):
 
         if data is None:
             data = self.nodeVoltages
+
+        if self.meshtype == 'uniform':
+
+            return self._getUniformPlane(axis=axis, point=point, data=data)
 
         elements, coords, _ = self.getElementsInPlane(axis, point)
 
@@ -1747,7 +1776,8 @@ class SimStudy:
 
     def savePlot(self, fig, fileName, ext=None):
         if ext is None:
-            fnames = [self.__makepath(fileName, x) for x in ['.png', '.svg', '.eps']]
+            fnames = [self.__makepath(fileName, x)
+                      for x in ['.png', '.svg', '.eps']]
 
         else:
             fnames = [self.__makepath(fileName, ext)]
@@ -1758,7 +1788,7 @@ class SimStudy:
     def __makepath(self, fileName, ext):
         fpath = os.path.join(self.studyPath, fileName+ext)
 
-        basepath,_ = os.path.split(fpath)
+        basepath, _ = os.path.split(fpath)
 
         if not os.path.exists(basepath):
             os.makedirs(basepath)
@@ -1940,13 +1970,13 @@ def makeScaledMetrics(maxdepth, density=0.2):
     param = 2**(-maxdepth*density)
 
     @nb.njit()
-    def metric(elBBox,refCoords,coefs):
-        nPts=refCoords.shape[0]
-        coord=(elBBox[:3]+elBBox[3:])/2
-        l0s=np.empty(nPts)
+    def metric(elBBox, refCoords, coefs):
+        nPts = refCoords.shape[0]
+        coord = (elBBox[:3]+elBBox[3:])/2
+        l0s = np.empty(nPts)
 
         for ii in nb.prange(nPts):
-            l0s[ii]=param*coefs[ii]*np.linalg.norm(refCoords[ii]-coord)
+            l0s[ii] = param*coefs[ii]*np.linalg.norm(refCoords[ii]-coord)
 
         return l0s
 
@@ -1954,15 +1984,15 @@ def makeScaledMetrics(maxdepth, density=0.2):
 
 
 @nb.njit()
-def generalMetric(elementBBox,refCoords,refCoefs):
+def generalMetric(elementBBox, refCoords, refCoefs):
     # param=2**(-maxdepth*density)
 
-    nPts=refCoords.shape[0]
-    coord=(elementBBox[:3]+elementBBox[3:])/2
-    l0s=np.empty(nPts)
+    nPts = refCoords.shape[0]
+    coord = (elementBBox[:3]+elementBBox[3:])/2
+    l0s = np.empty(nPts)
 
     for ii in nb.prange(nPts):
-        l0s[ii]=refCoefs[ii]*np.linalg.norm(refCoords[ii]-coord)
+        l0s[ii] = refCoefs[ii]*np.linalg.norm(refCoords[ii]-coord)
 
     return l0s
 
@@ -1990,20 +2020,19 @@ def getStandardMeshParams(sources, meshDepth, density=0.2):
         DESCRIPTION.
 
     """
-    nSrc=len(sources)
+    nSrc = len(sources)
 
-    coefs=np.ones(nSrc)*2**(-density*meshDepth)
+    coefs = np.ones(nSrc)*2**(-density*meshDepth)
     maxDepths = np.ones(nSrc, dtype=int)*meshDepth
 
-
-    srcPts=[]
+    srcPts = []
     for src in sources:
         if 'geometry' in dir(src):
             srcPts.append(src.geometry.center)
         else:
             srcPts.append(src.coords)
 
-    srcCoords=np.array(srcPts, ndmin=2)
+    srcCoords = np.array(srcPts, ndmin=2)
 
     # srcCoords = np.array([src.geometry.center for src in sources])
 

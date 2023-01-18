@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed Jun 22 15:46:30 2022
+Depth sweep
+================
 
-@author: benoit
+Compare performance as mesh resolution increases. Generates ch3-4 data.
 """
 
 import xcell
@@ -12,9 +13,11 @@ import matplotlib.pyplot as plt
 import argparse
 import numpy as np
 
-cli=argparse.ArgumentParser()
-cli.add_argument('--comparison', choices=['bounds','mesh','formula','bigPOC', 'fixedDisc'], default='fixedDisc')
-cli.add_argument('-p','--plot-only',help='skip simulation and use existing data', action = 'store_true')
+cli = argparse.ArgumentParser()
+cli.add_argument('--comparison', choices=['bounds', 'mesh',
+                 'formula', 'bigPOC', 'fixedDisc'], default='fixedDisc')
+cli.add_argument('-p', '--plot-only',
+                 help='skip simulation and use existing data', action='store_true')
 # cli.add_argument('-a','--animate',help='skip simulation and use existing data', action = 'store_true')
 # cli.add_argument('-p','--plot-only',help='skip simulation and use existing data', action = 'store_true')
 
@@ -26,38 +29,38 @@ generate = True
 # plot performance info
 staticPlots = True
 
-depths=np.arange(3,18)
+depths = np.arange(3, 12)
 
-xtraParams=None
-xmax=1e-4
-if args.comparison=='mesh' or args.comparison=='bigPOC':
+xtraParams = None
+xmax = 1e-4
+if args.comparison == 'mesh' or args.comparison == 'bigPOC':
     foldername = 'Quals/PoC'
-    tstVals=["adaptive","uniform"]
+    tstVals = ["adaptive", "uniform"]
     # tstVals=['adaptive','equal elements',r'equal $l_0$']
-    tstCat='Mesh type'
-if args.comparison=='formula' or args.comparison=='fixedDisc':
+    tstCat = 'Mesh type'
+if args.comparison == 'formula' or args.comparison == 'fixedDisc':
     foldername = 'Quals/formulations'
     tstVals = ['Admittance', 'FEM', 'Face']
     tstCat = 'Element type'
 if args.comparison == 'bounds':
     foldername = 'Quals/boundaries'
-    tstVals=['Analytic','Ground','Rubik0']
-    tstCat='Boundary'
+    tstVals = ['Analytic', 'Ground', 'Rubik0']
+    tstCat = 'Boundary'
 if args.comparison == 'testing':
     foldername = 'Quals/miniset'
     tstVals = ['adaptive', 'uniform']
     tstCat = 'Mesh type'
     generate = False
     staticPlots = False
-    depths=np.arange(3,8)
+    depths = np.arange(3, 8)
 
-if args.comparison=='bigPOC':
+if args.comparison == 'bigPOC':
     foldername = 'Quals/bigPOC'
     xmax = 1e-2
 
-if args.comparison=='fixedDisc':
+if args.comparison == 'fixedDisc':
     foldername = 'Quals/fixedDisc'
-    xtraParams={'BoundaryFunction':'Analytic'}
+    xtraParams = {'BoundaryFunction': 'Analytic'}
 
 
 # if args.comparison=='voltage':
@@ -82,10 +85,8 @@ plotPrefs = [
 ]
 
 
-
-
-study, _ = Common.makeSynthStudy(foldername, xmax = xmax)
-#%%
+study, _ = Common.makeSynthStudy(foldername, xmax=xmax)
+# %%
 
 if generate and not args.plot_only:
     Common.pairedDepthSweep(study,
@@ -94,19 +95,16 @@ if generate and not args.plot_only:
                             testVals=tstVals,
                             overrides=xtraParams)
 
-#%%
+# %%
 
 costcat = 'Error'
 # costcat='FVU'
 # xcat='l0min'
 
-xcell.colors.useLightStyle()
-
-xvalues=['Number of elements','l0min','Total time [Wall]']
-xtags=['numel','l0','totTime']
+xvalues = ['Number of elements', 'l0min', 'Total time [Wall]']
+xtags = ['numel', 'l0', 'totTime']
 if staticPlots:
-    for xcat,xtag in zip(xvalues,xtags):
-
+    for xcat, xtag in zip(xvalues, xtags):
 
         xcell.visualizers.groupedScatter(study.studyPath+'/log.csv',
                                          xcat=xcat,
@@ -118,7 +116,6 @@ if staticPlots:
         study.savePlot(nufig, fname)
         for fv in tstVals:
 
-
             fstack, fratio = xcell.visualizers.plotStudyPerformance(study,
                                                                     onlyCat=tstCat,
                                                                     onlyVal=fv)
@@ -129,10 +126,7 @@ if staticPlots:
             study.savePlot(fratio, 'Ratio'+fstem)
 
 
-
-
-#%%
-xcell.colors.useDarkStyle()
+# %%
 
 
 for ii, p in enumerate(plotters):
@@ -143,13 +137,12 @@ for ii, p in enumerate(plotters):
     for fv in tstVals:
         fname = p.__name__+'_'+str(fv)
         fname.replace(' ', '_')
-        plotr = p(plt.figure(), study, prefs = plotPrefs[ii])
+        plotr = p(plt.figure(), study, prefs=plotPrefs[ii])
         if 'universalPts' in plotr.prefs:
             plotr.prefs['universalPts'] = True
         if 'onlyDoF' in plotr.prefs:
             if plotr.prefs['onlyDoF']:
-                fname+='-detail'
-
+                fname += '-detail'
 
         plotr.getStudyData(filterCategories=[tstCat],
                            filterVals=[fv])
@@ -164,13 +157,4 @@ for ii, p in enumerate(plotters):
     for plot, name in zip(plots, names):
         plot.dataScales = ranges
 
-        xcell.colors.useDarkStyle()
         plot.animateStudy(fname=name, fps=1.0)
-
-        xcell.colors.useLightStyle()
-        nuprefs={}
-        if ii<2:
-            nuprefs.update({'printScale':[2,3],})
-
-        liteplot=plot.copy(nuprefs)
-        liteplot.animateStudy(fname=name+'-lite', fps=1)

@@ -1,36 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Thu Jan 13 20:26:52 2022
-
-format conversions for gmsh
-
-@author: benoit
-
-
-
-
-field_data:
-    {'physName1':[tag,dim],
-     'physName2':[tag,dim]...}
-
-point_data:
-    {'gmsh:dim_tags': [
-        [entDim,entTag],
-        [entDim,entTag],
-        ...]}
-
-
-
-cell_data:
-    {'gmsh:physical':
-     element physical group tag}
-
-
-
-
-
-
+Converters for other meshing libraries
 """
 import numpy as np
 import numba as nb
@@ -46,26 +17,53 @@ MIO_ORDER=np.array([0, 1, 3, 2, 4, 5, 7, 6])
 
 
 def toMeshIO(mesh):
+    """
+    Format mesh for meshio.
 
-   hexInds=np.array([el.vertices[MIO_ORDER] for el in mesh.elements])
-   listInds=renumberIndices(hexInds,mesh.indexMap)
+    Parameters
+    ----------
+    mesh : xcell Mesh
+        DESCRIPTION.
 
-   uniqueInds=np.unique(listInds.ravel())
+    Returns
+    -------
+    mioMesh : meshio Mesh
+        DESCRIPTION.
 
-   if mesh.nodeCoords.shape[0]!=uniqueInds.shape[0]:
-       pts=mesh.nodeCoords[uniqueInds]
+    """
+    hexInds=np.array([el.vertices[MIO_ORDER] for el in mesh.elements])
+    listInds=renumberIndices(hexInds,mesh.indexMap)
 
-       listInds=renumberIndices(listInds,uniqueInds)
-   else:
-       pts=mesh.nodeCoords
+    uniqueInds=np.unique(listInds.ravel())
 
-   cells=[('hexahedron', listInds)]
+    if mesh.nodeCoords.shape[0]!=uniqueInds.shape[0]:
+        pts=mesh.nodeCoords[uniqueInds]
 
-   mioMesh = meshio.Mesh(pts, cells)
+        listInds=renumberIndices(listInds,uniqueInds)
+    else:
+        pts=mesh.nodeCoords
 
-   return mioMesh
+    cells=[('hexahedron', listInds)]
+
+    mioMesh = meshio.Mesh(pts, cells)
+
+    return mioMesh
 
 def toTriSurface(mesh):
+    """
+    Generate surface triangulation of mesh.
+
+    Parameters
+    ----------
+    mesh : xcell Mesh
+        Input xcell mesh.
+
+    Returns
+    -------
+    mioMesh : meshio Mesh
+        Output triangulated mesh.
+
+    """
     Del=Delaunay(mesh.nodeCoords)
 
     surf=fixTriNormals(mesh.nodeCoords, Del.convex_hull)
@@ -78,7 +76,7 @@ def toTriSurface(mesh):
 
 
 def toVTK(mesh):
-    '''
+    """
     Export xcell mesh to a VTK Unstructured Grid.
 
     Enables faster visualizations and mesh operations via pyvista.
@@ -90,10 +88,10 @@ def toVTK(mesh):
 
     Returns
     -------
-    vMesh : TYPE
-        DESCRIPTION.
+    vMesh : VTK Unstructured Grid
+        Mesh in VTK format, for further manipulations.
 
-    '''
+    """
     rawInd=np.array([el.vertices[MIO_ORDER] for el in mesh.elements])
     numel=rawInd.shape[0]
     trueInd=renumberIndices(rawInd,mesh.indexMap)
@@ -109,6 +107,22 @@ def toVTK(mesh):
 
 
 def saveVTK(simulation,filestr):
+    """
+    Save mesh in VTK format.
+
+    Parameters
+    ----------
+    simulation : xcell Simulation
+        DESCRIPTION.
+    filestr : str
+        Name of file.
+
+    Returns
+    -------
+    vtk : VTK Unstructured Grid
+        VTK mesh for further manipulations.
+
+    """
     vtk=toVTK(simulation.mesh)
     vAna,_ = simulation.analyticalEstimate()
     analytic = np.sum(vAna, axis = 0)

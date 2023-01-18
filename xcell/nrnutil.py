@@ -1,18 +1,33 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Apr 20 15:16:59 2022
-
-@author: benoit
-"""
+"""Utilities for interfacing with NEURON."""
 
 
 from neuron import h
+import neuron.units as nUnit
 
 import numpy as np
 from matplotlib.lines import Line2D
 from matplotlib.collections import PolyCollection
 from . import colors
+
+from .xCell import Simulation, getStandardMeshParams, generalMetric
+from . import util
+
+
+def setVext(vext, vstim, tstim):
+    vvecs = []
+    vmems = []
+    for sec, V in zip(h.allsec(), vext):
+        for seg in sec.allseg():
+            vseg = V*nUnit.V
+
+            vvecs.append(h.Vector(vseg*vstim.as_numpy()))
+            vvecs[-1].play(seg.extracellular._ref_e, tstim, False)
+            vmems.append(h.Vector().record(seg._ref_v))
+            # vvecs[-1].play(seg._ref_e_extracellular, tstim, False)
+
+    return vvecs, vmems
 
 
 def returnSegmentCoordinates(section):
@@ -25,7 +40,7 @@ def returnSegmentCoordinates(section):
 
     Parameters
     ----------
-    section : TYPE
+    section : NEURON section
         DESCRIPTION.
 
     Returns
@@ -105,15 +120,26 @@ def returnSegmentCoordinates(section):
 
 
 def getNeuronGeometry():
+    """
+    Get geometric info of all compartments.
 
-    ivecs = []
+    Returns
+    -------
+    coords : float[:,3]
+        Cartesian coordinates of compartment centers.
+    rads : float[:]
+        Radius of each compatment.
+    isSphere : bool[:]
+        Whether compartment is assumed to represent a sphere.
+
+    """
     coords = []
     rads = []
     isSphere = []
     for sec in h.allsec():
         N = sec.n3d()-1
         x, y, z, r = returnSegmentCoordinates(sec)
-        r = r
+
         coord = np.vstack((x, y, z)).transpose()
         coords.extend(coord)
         if coord.shape[0] == 1:
@@ -125,28 +151,39 @@ def getNeuronGeometry():
                 if ii == 0 or ii == N:
                     continue
                 else:
-                    ivec = h.Vector().record(seg._ref_i_membrane_)
-
-                    # where=ii/N
-                    # x=sec.x3d(ii)
-                    # y=sec.y3d(ii)
-                    # z=sec.z3d(ii)
-                    # rad=sec.diam3d(ii)
-
-                    # coords.append(np.array([x,y,z]))
-                    # rads.append(rad)
-                    ivecs.append(ivec)
-
                     sph = sec.hname().split('.')[-1] == 'soma'
 
                     isSphere.append(sph)
-    return ivecs, isSphere, coords, rads
+    return coords, rads, isSphere
+
+
+def getMembraneCurrents():
+    """
+    Record total membrane current of every compartment.
+
+    Returns
+    -------
+    ivecs : list of Vector
+        List of vectors of membrane current.
+
+    """
+    ivecs = []
+    for sec in h.allsec():
+        N = sec.n3d()-1
+        if N > 0:
+            for ii, seg in enumerate(sec.allseg()):
+                if ii == 0 or ii == N:
+                    continue
+                else:
+                    ivec = h.Vector().record(seg._ref_i_membrane_)
+
+                    ivecs.append(ivec)
+
+    return ivecs
 
 
 class LineDataUnits(Line2D):
-    """
-        Yoinked from https://stackoverflow.com/a/42972469
-    """
+    """Yoinked from https://stackoverflow.com/a/42972469"""
 
     def __init__(self, *args, **kwargs):
         _lw_data = kwargs.pop("linewidth", 1)
@@ -167,7 +204,7 @@ class LineDataUnits(Line2D):
     _linewidth = property(_get_lw, _set_lw)
 
 
-def showCellGeo(axis,polys=None):
+def showCellGeo(axis, polys=None):
     """
     Add cell geometry to designated plot.
 
@@ -176,7 +213,7 @@ def showCellGeo(axis,polys=None):
     axis : matplotlib axis
         Axis to plot on.
     polys : List of M x 2 arrays, optional
-        DESCRIPTION. The default is None, which queries NEURON for all current compartments.
+        DESCRIPTION. The default is None, which queries NEURON for all compartments.
 
     Returns
     -------
@@ -186,11 +223,10 @@ def showCellGeo(axis,polys=None):
     """
     shade = colors.FAINT
     if polys is None:
-        polys =getCellImage()
+        polys = getCellImage()
 
     polycol = PolyCollection(polys, color=shade)
     axis.add_collection(polycol)
-
 
     return polys
 
@@ -207,7 +243,7 @@ def getCellImage():
     """
     tht = np.linspace(0, 2*np.pi)
 
-    polys=[]
+    polys = []
     for sec in h.allsec():
         x, y, z, r = returnSegmentCoordinates(sec)
         coords = np.vstack((x, y, z)).transpose()
@@ -217,27 +253,57 @@ def getCellImage():
             sy = y+r*np.sin(tht)
 
             # axis.fill(sx, sy, color=shade)
-            pts=np.vstack((sx,sy))
+            pts = np.vstack((sx, sy))
             polys.append(pts.transpose())
 
         else:
-            lx = x.shape
-            if len(lx) > 0:
-                nseg = x.shape[0]-1
-                for ii in range(nseg):
-                    p0 = coords[ii, :2]
-                    p1 = coords[ii+1, :2]
-                    d = p1-p0
-                    dn = r[ii]*d/np.linalg.norm(d)
-                    n = np.array([-dn[1], dn[0]])
-                    pts = np.vstack((p0+n, p1+n, p1-n, p0-n))
+            # lx = x.shape
+            lx = coords.shape[0]
+            if lx == 1:
+                # special case of single node
+                coords = np.array([[sec.x3d(i),
+                                    sec.y3d(i),
+                                    sec.z3d(i)]
+                                   for i in [0, sec.n3d()-1]])
+                lx = 2
+                r = [r]
 
-                    polys.append(pts)
+                # TODO: handle projections other than xy plane
+            for ii in range(lx-1):
+                p0 = coords[ii, :2]
+                p1 = coords[ii+1, :2]
+                d = p1-p0
+                dn = r[ii]*d/np.linalg.norm(d)
+                n = np.array([-dn[1], dn[0]])
+                pts = np.vstack((p0+n, p1+n, p1-n, p0-n))
+
+                polys.append(pts)
 
     return polys
 
 
 def makeBiphasicPulse(amplitude, tstart, pulsedur, trise=None):
+    """
+    Create pair of Vectors for biphasic (positive first) stimulus.
+
+    Parameters
+    ----------
+    amplitude : float
+        Amplitude of pulse in amperes.
+    tstart : float
+        Delay before stimulus begins in ms.
+    pulsedur : float
+        Duration of float in ms.
+    trise : TYPE, optional
+        DESCRIPTION. Set to pulsedur/1000 if None.
+
+    Returns
+    -------
+    stimTvec : Vector
+        Times at which stimulus is specified.
+    stimVvec : Vector
+        Amplitudes stimulus takes on.
+    """
     if trise is None:
         trise = pulsedur/1000
     dts = [0, tstart, trise, pulsedur, trise, pulsedur, trise]
@@ -252,6 +318,27 @@ def makeBiphasicPulse(amplitude, tstart, pulsedur, trise=None):
 
 
 def makeMonophasicPulse(amplitude, tstart, pulsedur, trise=None):
+    """
+    Create pair of Vectors for monophasic stimulus.
+
+    Parameters
+    ----------
+    amplitude : float
+        Amplitude of pulse in amperes.
+    tstart : float
+        Delay before stimulus begins in ms.
+    pulsedur : float
+        Duration of float in ms.
+    trise : TYPE, optional
+        DESCRIPTION. Set to pulsedur/1000 if None.
+
+    Returns
+    -------
+    stimTvec : Vector
+        Times at which stimulus is specified.
+    stimVvec : Vector
+        Amplitudes stimulus takes on.
+    """
     if trise is None:
         trise = pulsedur/1000
     dts = [0, tstart, trise, pulsedur, trise]
@@ -263,3 +350,232 @@ def makeMonophasicPulse(amplitude, tstart, pulsedur, trise=None):
     stimVvec = h.Vector(amps)
 
     return stimTvec, stimVvec
+
+
+def makeInterface():
+    """
+    Add extracellular mechanism to join NEURON and xcell.
+
+    Returns
+    -------
+    float[:,3]
+        Coordinates of compartment centers in meters.
+
+    """
+    h.define_shape()
+
+    # h.nlayer_extracellular(1)
+    cellcoords = []
+    inds = []
+    for nsec, sec in enumerate(h.allsec()):
+        sec.insert('extracellular')
+
+        ptN = sec.n3d()
+
+        for ii in range(ptN):
+            cellcoords.append([sec.x3d(ii), sec.y3d(ii), sec.z3d(ii)])
+            inds.append([[nsec, ii]])
+
+    return np.array(cellcoords)/nUnit.m
+
+
+class ThresholdSim(Simulation):
+    def __init__(self, name, xdom, srcAmps, srcGeometry, sigma=1.):
+        bbox = xdom*np.concatenate((-np.ones(3), np.ones(3)))
+        super().__init__(name, bbox)
+        self.sigma = sigma
+
+        for amp, geo in zip(srcAmps, srcGeometry):
+            self.addCurrentSource(amp,
+                                  coords=geo.center,
+                                  geometry=geo)
+
+    def meshAndSolve(self, depth):
+
+        srcCoords, depths, metricCoefs = getStandardMeshParams(
+            self.currentSources, depth)
+
+        self.makeAdaptiveGrid(refPts=srcCoords, maxdepth=depths,
+                              minl0Function=generalMetric, coefs=metricCoefs)
+
+        self.finalizeMesh()
+        self.setBoundaryNodes()
+        v = self.iterativeSolve(tol=1e-9)
+
+    def getAnalyticVals(self, coords):
+        anaVals = np.zeros(coords.shape[0])
+        for src in self.currentSources:
+            anaVals += util.pointCurrentV(coords, iSrc=src.value,
+                                          sigma=self.sigma,
+                                          srcLoc=src.coords)
+
+        return anaVals
+
+
+class ThresholdStudy:
+    def __init__(self, simulation, pulsedur=1., biphasic=True, viz=None):
+        self.segCoords = None
+        self.vExt = None
+        self.sim = simulation
+        self.viz = viz
+        self.isBiphasic = biphasic
+        self.pulsedur = pulsedur
+
+        self.cellImg = []
+
+    def _buildNeuron(self):
+        cell = []
+
+        return cell
+
+    def getThreshold(self, depth, pmin=0, pmax=1e2, analytic=False):
+
+        if not analytic:
+            self.sim.meshAndSolve(depth)
+            if self.viz is not None:
+                self.viz.addSimulationData(self.sim, append=True)
+            numEl = len(self.sim.mesh.elements)
+            numSrc = sum(self.sim.nodeRoleTable == 2)
+        else:
+            numSrc = np.nan
+            numEl = np.nan
+
+        if numSrc < len(self.sim.currentSources):
+            numEl = np.nan
+            thresh = np.nan
+            numSrc = np.nan
+        else:
+            assert self._runTrial(pmax, analytic=analytic)
+            assert not self._runTrial(pmin, analytic=analytic)
+
+            while (pmax-pmin) > 1e-6:
+                md = 0.5*(pmin+pmax)
+                # print(md)
+                spike = self._runTrial(md, analytic=analytic)
+
+                if spike:
+                    pmax = md
+                else:
+                    pmin = md
+
+            thresh = md
+            # in amps
+
+        return thresh, numEl, numSrc
+
+    def _runTrial(self, amplitude, analytic=False):
+        cell = self._buildNeuron()
+
+        if self.isBiphasic:
+            tstim, vstim = makeBiphasicPulse(
+                amplitude, 2., self.pulsedur)
+        else:
+            tstim, vstim = makeMonophasicPulse(
+                amplitude, 2., self.pulsedur)
+
+        self.tstim = tstim
+        self.vstim = vstim
+        tstop = 10*max(tstim.as_numpy())
+
+        vvecs, vmems = self._setVext(analytic=analytic)
+
+        tvec = h.Vector().record(h._ref_t)
+
+        h.finitialize(cell.vrest)
+
+        h.continuerun(tstop)
+
+        # memVals = np.array([v.as_numpy() for v in cell.vrecs])
+        # t = tvec.as_numpy()
+
+        # spiked = np.any(memVals > 0)
+        spiked = len(cell.spike_times) > 0
+
+        del cell
+
+        for sec in h.allsec():
+            h.delete_section(sec=sec)
+
+        # # for vec in h.allobjects('Vector'):
+        # #     vec.play_remove()
+        tvec.play_remove()
+        tstim.play_remove()
+        vstim.play_remove()
+        # [v.play_remove() for v in vvecs]
+        # [v.play_remove() for v in vmems]
+
+        return spiked
+
+    def _setVext(self, analytic=False):
+
+        setup = self.sim
+        if self.vExt is None:
+            if analytic:
+                vext = self.sim.getAnalyticVals(self.segCoords)
+            else:
+                vext = setup.interpolateAt(self.segCoords)
+            self.vExt = vext
+        else:
+            vext = self.vExt
+
+        # tstim,vstim =xc.nrnutil.makeBiphasicPulse(k, tstart, tpulse)
+
+        vvecs = []
+        vmems = []
+        for sec, V in zip(h.allsec(), vext):
+            for seg in sec.allseg():
+                vseg = V*nUnit.V
+
+                vvecs.append(h.Vector(vseg*self.vstim.as_numpy()))
+                vvecs[-1].play(seg.extracellular._ref_e, self.tstim, False)
+                vmems.append(h.Vector().record(seg._ref_v))
+                # vvecs[-1].play(seg._ref_e_extracellular, tstim, False)
+
+        return vvecs, vmems
+
+
+class RecordedCell():
+    def attachSpikeDetector(self, section):
+        """
+        Attach spike detector to section.
+
+        Parameters
+        ----------
+        section : NEURON section
+            Section to check for spikes.
+
+        Returns
+        -------
+        None.
+
+        """
+        self._spike_detector = h.NetCon(
+            section(0.5)._ref_v, None, sec=section)
+        self.spike_times = h.Vector()
+        self._spike_detector.record(self.spike_times)
+
+    def attachMembraneRecordings(self, sections=None):
+        """
+        Attach recorders for membrane voltage & current.
+
+        Parameters
+        ----------
+        sections : TYPE, optional
+            NEURON sections to record, or all sections if None (default)
+
+        Returns
+        -------
+        None.
+
+        """
+        if sections is None:
+            sections = h.allsec()
+
+        if 'vrecs' not in dir(self):
+            self.vrecs = []
+        if 'irecs' not in dir(self):
+            self.irecs = []
+
+        for section in sections:
+            self.vrecs.append(h.Vector().record(section(0.5)._ref_v))
+            self.irecs.append(h.Vector().record(section(0.5)._ref_i_membrane_))

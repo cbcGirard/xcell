@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Mar 15 18:54:34 2022
-
-@author: benoit
-"""
+"""Convenience functions."""
 
 import numpy as np
 
@@ -68,8 +64,8 @@ def getErrorEstimates(simulation):
         'avg': np.mean(absErr),
         'int1': errSummary,
         'int3': vol,
-        'volErr':volErr,
-        'volAna':volAna,
+        'volErr': volErr,
+        'volAna': volAna,
         'intErr': intErr,
         'intAna': intErr/errSummary,
         'SSE': sse,
@@ -78,7 +74,7 @@ def getErrorEstimates(simulation):
         # 'powerSim': powerSim,
         # 'powerTrue': powerTrue,
         # 'powerError': powerErr,
-        }
+    }
 
     return data
 

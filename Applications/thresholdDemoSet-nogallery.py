@@ -10,14 +10,26 @@ Quick and dirty replotting of threshold tests
 
 import os
 
-folder='Quals/Threshold/'
+# folder='Ball2mm/'
 
-for d in range(50,200,50):
+# x=2000
+
+color=''
+# color='l'
+
+folder = 'axon5cm/'
+x=10000
+
+ymax=250
+
+ystep=50
+
+for d in range(ystep,ymax,ystep):
 
 
-        cmd='python MonoStim.py -Y %d -f %s -vl'%(d, folder)
+        cmd='python MonoStim.py -Y %d -x %d -f %s -v'%(d, x, folder)+color
         # print(cmd)
         os.system(cmd)
 
 
-os.system('python MonoStim.py -Y %d -f %s -vlS'%(200,folder))
+os.system('python MonoStim.py -Y %d -x %d -f %s -vS'%(ymax,x,folder)+color)

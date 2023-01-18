@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Feb 23 10:07:45 2022
-
-@author: benoit
-"""
+"""Geometric primitives."""
 
 import numpy as np
 import numba as nb
@@ -29,13 +25,13 @@ class Sphere:
 
         return isIn
 
-# @nb.experimental.jitclass([
-#     ('center',float64[:]),
-#     ('radius', float64),
-#     ('axis',float64[:])
-#     ])
 
-
+@nb.experimental.jitclass([
+    ('center', float64[:]),
+    ('radius', float64),
+    ('axis', float64[:]),
+    ('tol', float64)
+])
 class Disk:
     def __init__(self, center, radius, axis, tol=1e-2):
         self.center = center
@@ -62,12 +58,12 @@ class Disk:
         return isIn
 
 
-# @nb.experimental.jitclass([
-#     ('center',float64[:]),
-#     ('radius', float64),
-#     ('length',float64),
-#     ('axis',float64[:])
-#     ])
+@nb.experimental.jitclass([
+    ('center', float64[:]),
+    ('radius', float64),
+    ('length', float64),
+    ('axis', float64[:])
+])
 class Cylinder:
     def __init__(self, center, radius, length, axis):
         self.center = center
@@ -80,7 +76,7 @@ class Cylinder:
         isIn = np.empty(N, dtype=np.bool_)
 
         delta = coords-self.center
-        deviation = np.dot(delta, self.axis)
+        deviation = np.abs(np.dot(delta, self.axis))
 
         for ii in nb.prange(N):
 
@@ -89,65 +85,68 @@ class Cylinder:
             dr = np.sqrt(np.dot(vec, vec)-dz**2)
             # dist=np.linalg.norm(vec)
 
-            isIn[ii] = 0 <= dz <= self.length and dr <= self.radius
+        # for ii in nb.prange(N):
+        #     delta = coords[N] - self.center
+        #     dz = np.abs(np.dot(delta, self.axis))
+        #     dr = np.sqrt(np.dot(delta, delta) - dz**2)
+
+            isIn[ii] = 0 <= dz <= self.length/2 and dr <= self.radius
         return isIn
 
 
 @nb.njit()
-def isInBBox(bbox,point):
-    gt=np.greater_equal(point, bbox[:3])
-    lt=np.less_equal(point,bbox[3:])
+def isInBBox(bbox, point):
+    gt = np.greater_equal(point, bbox[:3])
+    lt = np.less_equal(point, bbox[3:])
 
-    return np.all(np.logical_and(lt,gt))
+    return np.all(np.logical_and(lt, gt))
 
 
 @nb.njit()
 def avgPoints(pts):
-    center=np.zeros(3)
+    center = np.zeros(3)
 
     for ii in nb.prange(pts.shape[0]):
-        center+=pts[ii,:]
+        center += pts[ii, :]
 
-    center/=pts.shape[0]
+    center /= pts.shape[0]
 
     return center
 
 
-
 @nb.njit()
-def calcTriNormals(pts,surf):
-    ntris=surf.shape[0]
-    norms=np.empty((ntris,3))
+def calcTriNormals(pts, surf):
+    ntris = surf.shape[0]
+    norms = np.empty((ntris, 3))
 
     for ii in nb.prange(ntris):
-        inds=surf[ii,:]
-        a=pts[inds[0],:]-pts[inds[1],:]
-        b=pts[inds[1],:]-pts[inds[2],:]
+        inds = surf[ii, :]
+        a = pts[inds[0], :]-pts[inds[1], :]
+        b = pts[inds[1], :]-pts[inds[2], :]
 
-        tmp=np.cross(a, b)
-        norms[ii,:]=tmp/np.linalg.norm(tmp)
+        tmp = np.cross(a, b)
+        norms[ii, :] = tmp/np.linalg.norm(tmp)
 
     return norms
 
 
 # @nb.njit()
-def fixTriNormals(pts,surf):
-    norms=calcTriNormals(pts,surf)
+def fixTriNormals(pts, surf):
+    norms = calcTriNormals(pts, surf)
 
-    uniqueInds=np.unique(surf.ravel())
-    ctr=avgPoints(pts[uniqueInds])
+    uniqueInds = np.unique(surf.ravel())
+    ctr = avgPoints(pts[uniqueInds])
 
-    fixedSurf=np.empty_like(surf)
-    ntri=surf.shape[0]
-
+    fixedSurf = np.empty_like(surf)
+    ntri = surf.shape[0]
 
     for ii in nb.prange(ntri):
-        triCtr=avgPoints(pts[surf[ii],:])
-        ok=np.dot(norms[ii,:],triCtr-ctr)>0
+        triCtr = avgPoints(pts[surf[ii], :])
+        ok = np.dot(norms[ii, :], triCtr-ctr) > 0
 
         if ok:
-            fixedSurf[ii,:]=surf[ii,:]
+            fixedSurf[ii, :] = surf[ii, :]
         else:
-            fixedSurf[ii,:]=np.flip(surf[ii,:])
+            fixedSurf[ii, :] = np.flip(surf[ii, :])
 
     return fixedSurf

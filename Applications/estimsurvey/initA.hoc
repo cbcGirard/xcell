@@ -123,7 +123,7 @@ fzap = new Fzap(0.5) // swept sine wave generator
                      // used here to produce a fixed frequency sine wave
 setpointer fzap.x, dummy
 
-/*
+
 ///// graphical user interface
 
 load_file("basicrig.ses") // RunControl
@@ -161,7 +161,7 @@ proc plotrx() { localobj rvp
 }
 
 plotrx()
-/*==*/
+// ==
 
 ///// automatic detection of threshold stimulus intensity
 

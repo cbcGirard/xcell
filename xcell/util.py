@@ -1,17 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Sun Dec 19 13:40:44 2021
-Utilities
-@author: benoit
-"""
-
+"""Low-level helpers."""
 
 import numpy as np
 import numba as nb
 import scipy
 import time
-import resource
 import matplotlib.ticker as tickr
 
 import psutil
@@ -21,40 +15,60 @@ from .fem import HEX_POINT_INDICES
 MAXDEPTH = np.array(20, dtype=np.uint64)[()]
 MAXPT = np.array(2**(MAXDEPTH+1)+1, dtype=np.uint64)[()]
 
-
-# insert subset in global: main[subIndices]=subValues
-# get subset: subVals=main[boolMask]
-# subInGlobalIndices=nonzero(boolMask)
-# globalInSubIndices=(-ones()[boolMask])
-
 # @nb.njit()
+
+
 def pointCurrentV(tstCoords, iSrc, sigma=1., srcLoc=np.zeros(3, dtype=np.float64)):
+    """
+    Calculate field from point current source.
+
+    Parameters
+    ----------
+    tstCoords : TYPE
+        Points at which to evaluate field.
+    iSrc : float
+        Source current in amperes.
+    sigma : float, optional
+        Local conductivity in S/m. The default is 1..
+    srcLoc : TYPE, optional
+        Center of source. The default is np.zeros(3, dtype=np.float64).
+
+    Returns
+    -------
+    v : float[:]
+        Potential at specified points.
+
+    """
     dif = tstCoords-srcLoc
-    k = 1./(4*np.pi*sigma)
+    k = iSrc/(4*np.pi*sigma)
     v = np.array([k/np.linalg.norm(d) for d in dif])
     return v
 
+
 def oneDigit(x):
-    factor=10**np.floor(np.log10(x))
+    factor = 10**np.floor(np.log10(x))
 
     return factor*np.ceil(x/factor)
 
 
 def logfloor(val):
     return 10**np.floor(np.log10(val))
+
+
 def logceil(val):
     return 10**np.ceil(np.log10(val))
 
-def loground(axis,which='both'):
+
+def loground(axis, which='both'):
     # xl=axis.get_xlim()
     # yl=axis.get_ylim()
 
-    lims = [[logfloor(aa[0]), logceil(aa[1])] for aa in axis.dataLim.get_points().transpose()]#[xl, yl]]
-    if which=='x' or which=='both':
+    lims = [[logfloor(aa[0]), logceil(aa[1])]
+            for aa in axis.dataLim.get_points().transpose()]  # [xl, yl]]
+    if which == 'x' or which == 'both':
         axis.set_xlim(lims[0])
-    if which=='y' or which=='both':
+    if which == 'y' or which == 'both':
         axis.set_ylim(lims[1])
-
 
 
 def makeGridPoints(nx, xmax, xmin=None, ymax=None, ymin=None, centers=False):
@@ -204,9 +218,6 @@ def condenseIndices(globalMask):
     return whereSubset
 
 # @nb.njit(parallel=True)
-
-
-
 
 
 @nb.njit()
@@ -732,20 +743,20 @@ def pos2index(pos, dX):
 
     return newNdx
 
+
 @nb.njit()
 def reduceFunctions(l0Function, refPts, elBBox, coefs=None, returnUnder=True):
-    nFun=refPts.shape[0]
+    nFun = refPts.shape[0]
 
-    l0s=l0Function(elBBox,refPts,coefs)
+    l0s = l0Function(elBBox, refPts, coefs)
 
-    actualL0=np.prod(elBBox[3:]-elBBox[:3])**(1/3)
+    actualL0 = np.prod(elBBox[3:]-elBBox[:3])**(1/3)
 
-    whichPts=np.logical_xor(l0s>actualL0,returnUnder)
+    whichPts = np.logical_xor(l0s > actualL0, returnUnder)
 
     # nextPts=refPts[whichPts]
 
-    return np.min(l0s),whichPts
-
+    return np.min(l0s), whichPts
 
 
 @nb.njit()  # ,parallel=True)
@@ -796,18 +807,19 @@ def indicesWithinOctant(elList, relativePos):
 
 #     return inds
 
-@nb.njit(parallel=True)
+@nb.njit()  # parallel=True, fastmath=True) # 10x slower when parallel...
 def xyzWithinOctant(elList, relativePos):
     origin = octantListToXYZ(elList)
 
     npt = relativePos.shape[0]
     depth = MAXDEPTH-elList.shape[0]
-    scale = 2**depth
+    # scale = 2**depth
+    scale = 1 << depth
 
     absPos = np.empty_like(relativePos, dtype=np.uint64)
     for ii in nb.prange(npt):
         for jj in nb.prange(3):
-            absPos[ii, jj] = origin[jj]+scale*relativePos[ii, jj]
+            absPos[ii, jj] = origin[jj] + scale*relativePos[ii, jj]
 
     return absPos
 
@@ -846,10 +858,10 @@ def indexToCoords(indices, origin, span):
 # @nb.njit(parallel=True)
 
 
-@nb.njit()  # ,parallel=True)
+@nb.njit()  # parallel=True) #2x slower if parallel
 def octantListToXYZ(octList):
     """
-
+    Get xyz indices at octant origin.
 
     Parameters
     ----------
@@ -865,7 +877,7 @@ def octantListToXYZ(octList):
     depth = octList.shape[0]
     xyz = np.zeros(3, dtype=np.uint64)
     for ii in nb.prange(depth):
-        scale = 2**(MAXDEPTH-ii)
+        scale = 1 << (MAXDEPTH-ii)
         ind = octList[ii]
         for ax in nb.prange(3):
             if (ind >> ax) & 1:
@@ -1023,7 +1035,24 @@ def __xyzToOList(xyz, depth):
 
 
 class Logger():
+    """Monitor timing, memory use, and step progress."""
+
     def __init__(self, stepName, printout=False):
+        """
+        Start timing step execution.
+
+        Parameters
+        ----------
+        stepName : string
+            Name of the step.
+        printout : bool, optional
+            Whether to print progress to stdout. The default is False.
+
+        Returns
+        -------
+        None.
+
+        """
         self.name = stepName
         self.printout = printout
         if printout:
@@ -1035,6 +1064,14 @@ class Logger():
         self.memory = 0
 
     def logCompletion(self):
+        """
+        Log completion of step and prints duration if configured to.
+
+        Returns
+        -------
+        None.
+
+        """
         tWall = time.monotonic()
         tend = time.process_time()
         durationCPU = tend-self.start

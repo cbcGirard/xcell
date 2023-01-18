@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Tue Jan  4 14:43:26 2022
-
-@author: benoit
+Mesh topology
 """
 import numpy as np
 import numba as nb
@@ -313,7 +311,7 @@ class Octree(Mesh):
         elements = self.tree.getIntersectingElement(axis, coordinate)
         return elements
 
-    def refineByMetric(self, minl0Function, refPts, maxl0Function=None, coefs=None,coarsen=True):
+    def refineByMetric(self, minl0Function, refPts, maxl0Function=None, coefs=None, coarsen=True):
         """
         Recursively splits elements until l0Function evaluated at the center
         of each element is greater than that element's l0'
@@ -331,11 +329,14 @@ class Octree(Mesh):
         """
 
         if maxl0Function is None:
-            maxl0Function=minl0Function
-        changed = self.tree.refineByMetric(minl0Function, refPts, self.maxDepth, coefs)
+            maxl0Function = minl0Function
+
+        changed = self.tree.refineByMetric(
+            minl0Function, refPts, self.maxDepth, coefs)
 
         if coarsen:
-            pruned, _ = self.tree.coarsenByMetric(maxl0Function, refPts, self.maxDepth, coefs)
+            pruned, _ = self.tree.coarsenByMetric(
+                maxl0Function, refPts, self.maxDepth, coefs)
 
             # if pruned:
             #     print()
@@ -628,7 +629,8 @@ class Octant():
         self.origin = origin
         self.span = span
         self.center = origin+span/2
-        self.bbox=np.hstack((self.origin,self.origin+self.span))
+        # self.bbox = np.hstack((self.origin, self.origin+self.span))
+        self.bbox = np.concatenate((origin, origin + span))
         self.l0 = np.prod(span)**(1/3)
 
         self.children = []
@@ -698,8 +700,9 @@ class Octant():
             newIndex.append(ii)
             # oxyz=np.array(self.oXYZ+scale*util.OCT_INDEX_BITS[ii],dtype=np.int32)
 
-            #TODO: EXTREMELYDANGER dynamically choosing own type.
-            self.children.append(self.__class__(origin=newOrigin,
+            # TODO: EXTREMELYDANGER dynamically choosing own type.
+            # self.children.append(self.__class__(origin=newOrigin,
+            self.children.append(Octant(origin=newOrigin,
                                         span=newSpan,
                                         depth=self.depth+1,
                                         index=newIndex))
@@ -734,30 +737,31 @@ class Octant():
     # @nb.njit(parallel=True)
     def refineByMetric(self, l0Function, refPts, maxDepth, coefs):
         changed = False
-        l0Target,whichPts=util.reduceFunctions(l0Function,refPts, self.bbox, coefs=coefs)
-        filt=np.logical_and(whichPts,maxDepth>self.depth)
-        nextPts=refPts[filt]
-        nextMaxDepths=maxDepth[filt]
+        l0Target, whichPts = util.reduceFunctions(
+            l0Function, refPts, self.bbox, coefs=coefs)
+        filt = np.logical_and(whichPts, maxDepth > self.depth)
+        nextPts = refPts[filt]
+        nextMaxDepths = maxDepth[filt]
 
         if coefs is not None:
-            nextCoefs=coefs[filt]
+            nextCoefs = coefs[filt]
         else:
-            nextCoefs=coefs
+            nextCoefs = coefs
 
-        if nextPts.shape[0]>0:# and self.depth<maxDepth:
-            if len(self.children)==0:
-                changed=True
+        if nextPts.shape[0] > 0:  # and self.depth<maxDepth:
+            if len(self.children) == 0:
+                changed = True
                 self.split()
             for ii in nb.prange(8):
-                changed|=self.children[ii].refineByMetric(l0Function,
-                                                          nextPts,
-                                                          nextMaxDepths, nextCoefs)
+                changed |= self.children[ii].refineByMetric(l0Function,
+                                                            nextPts,
+                                                            nextMaxDepths, nextCoefs)
 
         return changed
 
     def coarsenByMetric(self, metric, refPts, maxdepth, coefs):
         """
-        If element and all children are smaller than target, delete children
+        Delete children if element and all children are smaller than target.
 
         Parameters
         ----------
@@ -779,30 +783,32 @@ class Octant():
 
         """
         changed = False
-        _,whichPts=util.reduceFunctions(metric, refPts, self.bbox, coefs=coefs, returnUnder=False)
+        _, whichPts = util.reduceFunctions(
+            metric, refPts, self.bbox, coefs=coefs, returnUnder=False)
 
-        #let metric implicitly prune if maxdepth lowered
-        #causes insufficient meshing otherwise
+        # let metric implicitly prune if maxdepth lowered
+        # causes insufficient meshing otherwise
         # undersize=np.all(whichPts) #or self.depth<maxdepth
 
-        filt=np.logical_or(whichPts,maxdepth<self.depth)
-        undersize=np.all(filt)
+        filt = np.logical_or(whichPts, maxdepth < self.depth)
+        undersize = np.all(filt)
 
         if self.isTerminal():
-            #end condition
+            # end condition
             pass
         else:
-            #recurse to end
+            # recurse to end
             for ch in self.children:
-                chChanged,chUnder=ch.coarsenByMetric(metric, refPts, maxdepth, coefs)
+                chChanged, chUnder = ch.coarsenByMetric(
+                    metric, refPts, maxdepth, coefs)
                 changed |= chChanged
                 undersize &= chUnder
 
             if undersize:
-                changed=True
+                changed = True
                 for ch in self.children:
                     del ch
-                self.children=[]
+                self.children = []
                 self.calcIndices()
 
         return changed, undersize

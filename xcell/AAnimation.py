@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sat Aug  6 14:20:00 2022
 Animator tweaks to save intermediated frames
-@author: benoit
 """
 
 from matplotlib.animation import writers, ArtistAnimation, PillowWriter, _log, FFMpegFileWriter
