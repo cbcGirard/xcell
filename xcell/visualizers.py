@@ -611,7 +611,7 @@ def errorCompositePlot(data, sortCat, labels=None):
     axes[0].legend()
 
 
-def importAndPlotTimes(fname, timeType='Wall', ax=None, onlyCat=None, onlyVal=None, xCat='Number of elements'):
+def importAndPlotTimes(fname, timeType='Wall', ax=None, onlyCat=None, onlyVal=None, xCat='Number of elements', **kwargs):
     df, cats = importRunset(fname)
     if onlyVal is not None:
         df = df[df[onlyCat] == onlyVal]
@@ -642,7 +642,7 @@ def importAndPlotTimes(fname, timeType='Wall', ax=None, onlyCat=None, onlyVal=No
 
     if timeType == 'Ratio':
         for val, lbl in zip(stepTimes, stepNames):
-            ax.plot(xvals, val, label=lbl)
+            ax.plot(xvals, val, label=lbl, **kwargs)
 
         ax.set_ylabel('Estimated parallel speedup')
         ax.set_xlabel(xCat)
@@ -651,7 +651,7 @@ def importAndPlotTimes(fname, timeType='Wall', ax=None, onlyCat=None, onlyVal=No
         ax.xaxis.set_major_formatter(mpl.ticker.EngFormatter())
 
     else:
-        stackedTimePlot(ax, xvals, stepTimes, stepNames)
+        stackedTimePlot(ax, xvals, stepTimes, stepNames, **kwargs)
         ax.set_xlabel(xCat)
         ax.set_ylabel(timeType+" time [s]")
 
@@ -660,8 +660,22 @@ def importAndPlotTimes(fname, timeType='Wall', ax=None, onlyCat=None, onlyVal=No
     return fig, ax
 
 
-def stackedTimePlot(axis, xvals, stepTimes, stepNames):
-    axis.stackplot(xvals, stepTimes, baseline='zero', labels=stepNames)
+def stackedTimePlot(axis, xvals, stepTimes, stepNames, **kwargs):
+
+    # if hatch:
+    #     nval = len(stepNames)
+    #     hatchopts = ['|', '-', '.', '/', '*', '\\']
+    #     nopt = len(hatchopts)
+    #     hatches = hatchopts*(nval//nopt)+hatchopts[:nval % nopt]
+    # else:
+    #     hatches = None
+
+    blobs = axis.stackplot(xvals, stepTimes, baseline='zero',
+                           labels=stepNames, **kwargs)
+
+    if 'hatch' in kwargs:
+        for b, h in zip(blobs, kwargs['hatch']):
+            b.set_hatch(h)
     # plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
     # outsideLegend(axis)
     # axis.figure.tight_layout()
