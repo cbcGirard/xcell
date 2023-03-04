@@ -10,6 +10,9 @@ from os import path
 import re
 import cmasher as cm
 
+import pyvista as pv
+from pyvista import themes
+
 
 # Dark mode
 MESH_ALPHA = 0.25
@@ -168,6 +171,14 @@ def useDarkStyle():
                        [1,0,0,1]))
 
     CM_BIPOLAR = mpl.colors.LinearSegmentedColormap.from_list('bipolar', biArray)
+    
+    pvtheme = setupPVtheme(themes.DarkTheme())
+    pvtheme.background = pv.colors.Color(DARK)
+    pvtheme.edge_color = pv.colors.Color(FAINT)
+    pvtheme.font.color = pv.colors.Color(OFFWHITE)
+    pvtheme.name = 'xcellDark'
+    
+    pv.global_theme.load_theme(pvtheme)
 
 
 def useLightStyle():
@@ -192,10 +203,25 @@ def useLightStyle():
     CM_MONO = cm.copy()
 
     CM_BIPOLAR = mpl.colormaps.get('seismic').copy()
+    
+    pvtheme = setupPVtheme(themes.DarkTheme())
+    pvtheme.background = pv.colors.Color(WHITE)
+    pvtheme.edge_color = pv.colors.Color(DARK)
+    pvtheme.font.color = pv.colors.Color(DARK)
+    pvtheme.name = 'xcellLight'
+    
+    pv.global_theme.load_theme(pvtheme)
 
-
-
-
+def setupPVtheme(theme):
+    
+    theme.show_edges = False
+    theme.axes.box = True
+    theme.axes.show = True
+    theme.jupyter_backend='pythreejs'
+    theme.color_cycler = 'matplotlib'
+    theme.transparent_background = True
+    
+    return theme
 
 def recolorSVG(fname,toLight=True):
     """

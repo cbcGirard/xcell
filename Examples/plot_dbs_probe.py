@@ -13,6 +13,17 @@ from scipy.spatial.transform import Rotation
 import pyvista as pv
 
 from matplotlib.colors import to_rgba_array
+pv.global_theme.jupyter_backend='pythreejs'
+
+#bodies, misc, oriens, and hilus
+sigmas = 1/np.array([6.429,
+3.215,
+2.879,
+2.605])
+
+#latest from https://github.com/Head-Conductivity/Human-Head-Conductivity
+sigma_0=0.3841
+
 
 xdom = 5e-2
 
@@ -28,9 +39,22 @@ nmicro = 24  # 10-24
 microRows = 5
 microCols = 3
 
+orientation = np.array([1., 0., 0.])
+
+tipPt = 1e-3*np.array([-5., 2., 0])
+bodyL = 0.05
+
 tpulse = 1e-3  # per phase
 ipulse = 150e-6
 vpulse = 1.
+
+
+hippo=pv.read('./Geometry/slice77600_ext10000.vtk')
+brainXform=-np.array(hippo.center)
+hippo.translate(brainXform,inplace=True)
+
+xdom = max(np.array(hippo.bounds[1::2])-np.array(hippo.bounds[::2]))
+
 
 bbox = xdom * np.concatenate((-np.ones(3), np.ones(3)))
 
@@ -39,10 +63,7 @@ maxdepth = int(np.log2(xdom / dmicro)) + 2
 sim = xcell.Simulation('test', bbox=bbox)
 
 
-orientation = np.array([1., 0., 0.])
 
-tipPt = np.zeros(3)
-bodyL = 0.1
 
 body = xcell.geometry.Cylinder(
     tipPt+bodyL*orientation/2, radius=dbody/2, length=bodyL, axis=orientation)
@@ -104,11 +125,19 @@ for ii in range(microRows):
 
 
 p = pv.Plotter()
-# p.add_mesh(bodyMesh, color='white')
-[p.add_mesh(m, color='gold') for m in elecMeshes]
+p.add_mesh(hippo, #show_edges=True, scalars='sigma', style='surface')#, 
+opacity=0.5)
+p.show_bounds()
+p.add_mesh(bodyMesh, color='white')
+# [p.add_mesh(m, color='gold') for m in elecMeshes]
 p.show(auto_close=False)
 
 
+
+
+
+
+# %% Octree mesh visualization
 sim.quickAdaptiveGrid(maxdepth)
 
 inCyl = body.isInside(sim.mesh.nodeCoords).astype(int)
@@ -123,7 +152,6 @@ colors = to_rgba_array([xcell.colors.NULL,
 colors[1, -1] = 0.02
 
 vals = inCyl+inElec
-
 
 ax = xcell.visualizers.new3dPlot(bbox)
 
@@ -142,3 +170,23 @@ ax.set_zlim3d(-k*pitchMacro, k*pitchMacro)
 ax.view_init(elev=30, azim=-135)
 
 # %%
+
+
+vpts=pv.wrap(sim.mesh.nodeCoords)
+vpts.cell_data['sigma']=sigma_0
+
+files=['bodies','misc','oriens','hilus']
+
+
+for f,sig in zip(files,sigmas):
+    region=pv.read('Geometry/'+f+'.stl')
+    
+    enc=vpts.select_enclosed_points(region)
+
+    vpts.cell_data['sigma'][ enc['SelectedPoints']==1]=sig
+
+ins=vpts.select_enclosed_points(bodyMesh)
+vpts.cell_data['sigma'][enc['SelectedPoints']==1]=0
+
+vpts.set_active_scalars('sigma')
+vpts.plot()
