@@ -13,16 +13,15 @@ from scipy.spatial.transform import Rotation
 import pyvista as pv
 
 from matplotlib.colors import to_rgba_array
-pv.global_theme.jupyter_backend='pythreejs'
 
-#bodies, misc, oriens, and hilus
+# bodies, misc, oriens, and hilus
 sigmas = 1/np.array([6.429,
-3.215,
-2.879,
-2.605])
+                     3.215,
+                     2.879,
+                     2.605])
 
-#latest from https://github.com/Head-Conductivity/Human-Head-Conductivity
-sigma_0=0.3841
+# latest from https://github.com/Head-Conductivity/Human-Head-Conductivity
+sigma_0 = 0.3841
 
 
 xdom = 5e-2
@@ -49,9 +48,9 @@ ipulse = 150e-6
 vpulse = 1.
 
 
-hippo=pv.read('./Geometry/slice77600_ext10000.vtk')
-brainXform=-np.array(hippo.center)
-hippo.translate(brainXform,inplace=True)
+hippo = pv.read('./Geometry/slice77600_ext10000.vtk')
+brainXform = -np.array(hippo.center)
+hippo.translate(brainXform, inplace=True)
 
 xdom = max(np.array(hippo.bounds[1::2])-np.array(hippo.bounds[::2]))
 
@@ -61,8 +60,6 @@ bbox = xdom * np.concatenate((-np.ones(3), np.ones(3)))
 maxdepth = int(np.log2(xdom / dmicro)) + 2
 
 sim = xcell.Simulation('test', bbox=bbox)
-
-
 
 
 body = xcell.geometry.Cylinder(
@@ -124,17 +121,15 @@ for ii in range(microRows):
                                   normal=geo.axis))
 
 
+# %% plots
 p = pv.Plotter()
-p.add_mesh(hippo, #show_edges=True, scalars='sigma', style='surface')#, 
-opacity=0.5)
+p.add_mesh(hippo,  # show_edges=True, scalars='sigma', style='surface')#,
+           opacity=0.5)
 p.show_bounds()
 p.add_mesh(bodyMesh, color='white')
-# [p.add_mesh(m, color='gold') for m in elecMeshes]
-p.show(auto_close=False)
-
-
-
-
+[p.add_mesh(m, color='gold') for m in elecMeshes]
+# p.show(auto_close=False)
+p.show()
 
 
 # %% Octree mesh visualization
@@ -153,40 +148,59 @@ colors[1, -1] = 0.02
 
 vals = inCyl+inElec
 
-ax = xcell.visualizers.new3dPlot(bbox)
 
-xcell.visualizers.showNodes3d(
-    ax, sim.mesh.nodeCoords, vals, colors=colors[vals])
+# #%%
+# ax = xcell.visualizers.new3dPlot(bbox)
 
-# ax.set_axis_off() #hides axes too
-[a.pane.set_alpha(0) for a in [ax.xaxis, ax.yaxis, ax.zaxis]
- ]  # only hides background planes
+# xcell.visualizers.showNodes3d(
+#     ax, sim.mesh.nodeCoords, vals, colors=colors[vals])
 
-k = 4
+# # ax.set_axis_off() #hides axes too
+# [a.pane.set_alpha(0) for a in [ax.xaxis, ax.yaxis, ax.zaxis]
+#  ]  # only hides background planes
 
-ax.set_xlim3d(-(k-1)*pitchMacro, (k+1)*pitchMacro)
-ax.set_ylim3d(-k*pitchMacro, k*pitchMacro)
-ax.set_zlim3d(-k*pitchMacro, k*pitchMacro)
-ax.view_init(elev=30, azim=-135)
+# k = 4
+
+# ax.set_xlim3d(-(k-1)*pitchMacro, (k+1)*pitchMacro)
+# ax.set_ylim3d(-k*pitchMacro, k*pitchMacro)
+# ax.set_zlim3d(-k*pitchMacro, k*pitchMacro)
+# ax.view_init(elev=30, azim=-135)
 
 # %%
 
 
-vpts=pv.wrap(sim.mesh.nodeCoords)
-vpts.cell_data['sigma']=sigma_0
+vmesh = xcell.io.toVTK(sim.mesh)
+vmesh.cell_data['sigma'] = sigma_0
+vpts = vmesh.cell_centers()
 
-files=['bodies','misc','oriens','hilus']
+
+files = ['bodies', 'misc', 'oriens', 'hilus']
 
 
-for f,sig in zip(files,sigmas):
-    region=pv.read('Geometry/'+f+'.stl')
-    
-    enc=vpts.select_enclosed_points(region)
+for f, sig in zip(files, sigmas):
+    region = pv.read('Geometry/'+f+'.stl').translate(brainXform)
 
-    vpts.cell_data['sigma'][ enc['SelectedPoints']==1]=sig
+    enc = vpts.select_enclosed_points(region)
 
-ins=vpts.select_enclosed_points(bodyMesh)
-vpts.cell_data['sigma'][enc['SelectedPoints']==1]=0
+    vmesh['sigma'][enc['SelectedPoints'] == 1] = sig
 
-vpts.set_active_scalars('sigma')
-vpts.plot()
+ins = body.isInside(vpts.points)
+
+vmesh['sigma'][ins] = 0
+
+vmesh.slice_orthogonal().plot()
+
+# vmesh.set_active_scalars('sigma')
+# vpts.plot(jupyter_backend='pythreejs')
+# %% Map back to elements
+for el, s in zip(sim.mesh.elements, vmesh['sigma']):
+    el.sigma = np.array(s, ndmin=1)
+
+sim.currentSources[nmacro+1].value = 1e-5
+sim.finalizeMesh()
+sim.setBoundaryNodes()
+v = sim.iterativeSolve()
+vmesh.point_data['voltage'] = v
+
+vmesh.set_active_scalars('voltage')
+vmesh.slice_orthogonal().plot()
