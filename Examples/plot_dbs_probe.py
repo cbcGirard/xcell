@@ -27,7 +27,8 @@ sigma_0 = 0.3841
 xdom = 5e-2
 
 dbody = 1.3e-3
-dmicro = 17e-6
+# dmicro = 17e-6
+dmicro = 5e-4
 wmacro = 2e-3
 
 pitchMacro = 5e-3
@@ -52,11 +53,13 @@ hippo = pv.read('./Geometry/slice77600_ext10000.vtk')
 brainXform = -np.array(hippo.center)
 hippo.translate(brainXform, inplace=True)
 
-xdom = max(np.array(hippo.bounds[1::2])-np.array(hippo.bounds[::2]))
+# xdom = max(np.array(hippo.bounds[1::2])-np.array(hippo.bounds[::2]))
+xdom = pitchMacro*(nmacro+1)
 
 
 bbox = xdom * np.concatenate((-np.ones(3), np.ones(3)))
 
+# set smallest element to microelectrode radius or smaller
 maxdepth = int(np.log2(xdom / dmicro)) + 2
 
 sim = xcell.Simulation('test', bbox=bbox)
@@ -101,8 +104,11 @@ for ii in range(microRows):
     rowpt = tipPt+(ii+.5)*pitchMacro*orientation
 
     for jj in range(microCols):
-        rot = Rotation.from_rotvec(np.array([0, 2*jj/microCols*np.pi, 0]))
+        # rot = Rotation.from_rotvec(np.array([0, 2*jj/microCols*np.pi, 0]))
+        rot = Rotation.from_rotvec(orientation*2*jj/microCols*np.pi)
+
         microOrientation = rot.apply(0.5*dbody*np.array([0., 0., 1.]))
+        # microOrientation = rot.apply(0.5*dbody*orientation)
 
         geo = xcell.geometry.Disk(
             center=rowpt+microOrientation,
@@ -121,14 +127,19 @@ for ii in range(microRows):
                                   normal=geo.axis))
 
 
+def showElectrode(plotter, opacity=1.0):
+    plotter.add_mesh(bodyMesh, color='white', opacity=opacity)
+    for m in elecMeshes:
+        plotter.add_mesh(m, color='gold', opacity=opacity)
+
+
 # %% plots
 p = pv.Plotter()
 p.add_mesh(hippo,  # show_edges=True, scalars='sigma', style='surface')#,
            opacity=0.5)
 p.show_bounds()
-p.add_mesh(bodyMesh, color='white')
-[p.add_mesh(m, color='gold') for m in elecMeshes]
-# p.show(auto_close=False)
+showElectrode(p)
+
 p.show()
 
 
@@ -190,17 +201,28 @@ vmesh['sigma'][ins] = 0
 
 vmesh.slice_orthogonal().plot()
 
-# vmesh.set_active_scalars('sigma')
-# vpts.plot(jupyter_backend='pythreejs')
 # %% Map back to elements
 for el, s in zip(sim.mesh.elements, vmesh['sigma']):
     el.sigma = np.array(s, ndmin=1)
 
 sim.currentSources[nmacro+1].value = 1e-5
-sim.finalizeMesh()
+
+
+# sim.finalizeMesh()
 sim.setBoundaryNodes()
 v = sim.iterativeSolve()
 vmesh.point_data['voltage'] = v
 
 vmesh.set_active_scalars('voltage')
-vmesh.slice_orthogonal().plot()
+
+# %%
+
+p = pv.Plotter()
+p.add_mesh(hippo, opacity=0.1, color='gray')
+p.camera.tight(padding=0.1)
+p.add_mesh(vmesh.slice(normal='z'), show_edges=True, cmap=xcell.colors.CM_MONO)
+showElectrode(p, opacity=0.25)
+# p.view_xy()
+# p.set_focus(np.zeros(3))
+p.show()
+# sphinx_gallery_thumbnail_number = 3

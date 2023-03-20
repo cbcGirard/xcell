@@ -17,9 +17,9 @@ from pyvista import themes
 # pyvista startup for remote server
 # pv.start_xvfb()
 
-# pv.set_jupyter_backend('server')
-# pv.global_theme.trame.server_proxy_enabled=True
-# pv.global_theme.trame.server_proxy_prefix='/proxy/'
+pv.set_jupyter_backend('trame')
+pv.global_theme.trame.server_proxy_enabled = True
+pv.global_theme.trame.server_proxy_prefix = '/proxy/'
 
 # Dark mode
 MESH_ALPHA = 0.25
@@ -210,7 +210,7 @@ def useLightStyle():
 
     pvtheme = setupPVtheme(themes.DarkTheme())
     pvtheme.background = pv.colors.Color(WHITE)
-    pvtheme.edge_color = pv.colors.Color(DARK)
+    pvtheme.edge_color = pv.colors.Color(DARK, opacity=MESH_ALPHA)
     pvtheme.font.color = pv.colors.Color(DARK)
     pvtheme.name = 'xcellLight'
 

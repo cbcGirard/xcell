@@ -535,11 +535,14 @@ class Simulation:
         for ii in nb.prange(len(self.currentSources)):
             src = self.currentSources[ii]
 
-            if 'geometry' in dir(src):
-                indices = np.nonzero(
-                    src.geometry.isInside(self.mesh.nodeCoords))[0]
-            else:
-                indices = self.__nodesInSource(src)
+            ######
+            # #TODO: introduces bugs?
+            # if 'geometry' in dir(src):
+            #     indices = np.nonzero(
+            #         src.geometry.isInside(self.mesh.nodeCoords))[0]
+            # else:
+
+            indices = self.__nodesInSource(src)
 
             indNodeSrc = len(meshCurrentSrc)
             for ni, idx in enumerate(indices):
