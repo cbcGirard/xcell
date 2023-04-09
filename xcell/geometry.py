@@ -5,6 +5,9 @@
 import numpy as np
 import numba as nb
 from numba import int64, float64
+import pyvista as pv
+from .visualizers import PVScene
+# from .io import toVTK
 
 
 @nb.experimental.jitclass([
@@ -47,9 +50,6 @@ class Disk:
         deviation = np.dot(delta, self.axis)
 
         for ii in nb.prange(N):
-            # c=coords[ii]
-
-            # vec=c-self.center
             dist = np.linalg.norm(delta[ii])
 
             isIn[ii] = abs(deviation[ii]) < (
@@ -83,12 +83,6 @@ class Cylinder:
             vec = delta[ii]
             dz = deviation[ii]
             dr = np.sqrt(np.dot(vec, vec)-dz**2)
-            # dist=np.linalg.norm(vec)
-
-        # for ii in nb.prange(N):
-        #     delta = coords[N] - self.center
-        #     dz = np.abs(np.dot(delta, self.axis))
-        #     dr = np.sqrt(np.dot(delta, delta) - dz**2)
 
             isIn[ii] = 0 <= dz <= self.length/2 and dr <= self.radius
         return isIn
@@ -150,3 +144,28 @@ def fixTriNormals(pts, surf):
             fixedSurf[ii, :] = np.flip(surf[ii, :])
 
     return fixedSurf
+
+
+def toPV(geometry, **kwargs):
+    t = str(type(geometry))
+    tstring = t.split('.')[-1].split('\'')[0]
+    if tstring == 'Cylinder':
+        rawmesh = pv.Cylinder(radius=geometry.radius,
+                              center=geometry.center,
+                              height=geometry.length,
+                              direction=geometry.axis,
+                              **kwargs)
+        tets = rawmesh.delaunay_3d()
+        mesh = tets.extract_surface()
+    elif tstring == 'Sphere':
+        mesh = pv.Sphere(radius=geometry.radius,
+                         center=geometry.center,
+                         **kwargs)
+    elif tstring == 'Disk':
+        mesh = pv.Disc(outer=geometry.radius,
+                       inner=0,
+                       center=geometry.center,
+                       normal=geometry.axis,
+                       **kwargs)
+
+    return mesh

@@ -22,7 +22,9 @@ pv.global_theme.trame.server_proxy_enabled = True
 pv.global_theme.trame.server_proxy_prefix = '/proxy/'
 
 # Dark mode
+#: Opacity of edges
 MESH_ALPHA = 0.25
+#: Color of edges
 FAINT = (0xaf/255, 0xcf/255, 1., MESH_ALPHA)
 
 # colAr = [[0, 0, 1, 1],
@@ -64,8 +66,11 @@ def scoopCmap(baseCmap, fraction=0.1):
     return newCmap
 
 
+#: Default colormap for bipolar data
 CM_BIPOLAR = scoopCmap(cm.guppy_r, 0.5)
 
+
+#color palette
 DARK = '#19232d'
 HILITE = '#afcfff'
 OFFWHITE = '#dcd4c7'
@@ -79,6 +84,8 @@ BASE = HILITE
 
 plx = np.array(mpl.colormaps.get('plasma').colors)
 lint = np.array(np.linspace(0, 1, num=plx.shape[0]), ndmin=2).transpose()
+
+#: Default colormap for monopolar data
 CM_MONO = mpl.colors.LinearSegmentedColormap.from_list('mono',
                                                        np.hstack((plx, lint)))
 
@@ -218,7 +225,19 @@ def useLightStyle():
 
 
 def setupPVtheme(theme):
+    """
+    Set PyVista to match current xcell theme.
 
+    Parameters
+    ----------
+    theme : PyVista theme
+        Built-in theme to use as a starting point
+
+    Returns
+    -------
+    theme : PyVista theme
+        Customized theme
+    """
     theme.show_edges = False
     theme.axes.box = True
     theme.axes.show = True

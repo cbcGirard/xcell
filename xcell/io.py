@@ -13,7 +13,7 @@ from .geometry import fixTriNormals
 import pyvista as pv
 import vtk
 
-MIO_ORDER=np.array([0, 1, 3, 2, 4, 5, 7, 6])
+MIO_ORDER = np.array([0, 1, 3, 2, 4, 5, 7, 6])
 
 
 def toMeshIO(mesh):
@@ -31,23 +31,24 @@ def toMeshIO(mesh):
         DESCRIPTION.
 
     """
-    hexInds=np.array([el.vertices[MIO_ORDER] for el in mesh.elements])
-    listInds=renumberIndices(hexInds,mesh.indexMap)
+    hexInds = np.array([el.vertices[MIO_ORDER] for el in mesh.elements])
+    listInds = renumberIndices(hexInds, mesh.indexMap)
 
-    uniqueInds=np.unique(listInds.ravel())
+    uniqueInds = np.unique(listInds.ravel())
 
-    if mesh.nodeCoords.shape[0]!=uniqueInds.shape[0]:
-        pts=mesh.nodeCoords[uniqueInds]
+    if mesh.nodeCoords.shape[0] != uniqueInds.shape[0]:
+        pts = mesh.nodeCoords[uniqueInds]
 
-        listInds=renumberIndices(listInds,uniqueInds)
+        listInds = renumberIndices(listInds, uniqueInds)
     else:
-        pts=mesh.nodeCoords
+        pts = mesh.nodeCoords
 
-    cells=[('hexahedron', listInds)]
+    cells = [('hexahedron', listInds)]
 
     mioMesh = meshio.Mesh(pts, cells)
 
     return mioMesh
+
 
 def toTriSurface(mesh):
     """
@@ -64,13 +65,13 @@ def toTriSurface(mesh):
         Output triangulated mesh.
 
     """
-    Del=Delaunay(mesh.nodeCoords)
+    Del = Delaunay(mesh.nodeCoords)
 
-    surf=fixTriNormals(mesh.nodeCoords, Del.convex_hull)
+    surf = fixTriNormals(mesh.nodeCoords, Del.convex_hull)
 
-    cells=[('triangle',surf)]
+    cells = [('triangle', surf)]
 
-    mioMesh=meshio.Mesh(mesh.nodeCoords,cells)
+    mioMesh = meshio.Mesh(mesh.nodeCoords, cells)
 
     return mioMesh
 
@@ -92,21 +93,22 @@ def toVTK(mesh):
         Mesh in VTK format, for further manipulations.
 
     """
-    rawInd=np.array([el.vertices[MIO_ORDER] for el in mesh.elements])
-    numel=rawInd.shape[0]
-    trueInd=renumberIndices(rawInd,mesh.indexMap)
+    rawInd = np.array([el.vertices[MIO_ORDER] for el in mesh.elements])
+    numel = rawInd.shape[0]
+    trueInd = renumberIndices(rawInd, mesh.indexMap)
 
-    cells=np.hstack((8*np.ones((numel,1),dtype=np.uint64), trueInd)).ravel()
+    cells = np.hstack(
+        (8*np.ones((numel, 1), dtype=np.uint64), trueInd)).ravel()
 
-    celltypes=np.empty(numel,dtype=np.uint8)
-    celltypes[:]=vtk.VTK_HEXAHEDRON
+    celltypes = np.empty(numel, dtype=np.uint8)
+    celltypes[:] = vtk.VTK_HEXAHEDRON
 
-    vMesh=pv.UnstructuredGrid(cells, celltypes, mesh.nodeCoords)
+    vMesh = pv.UnstructuredGrid(cells, celltypes, mesh.nodeCoords)
 
     return vMesh
 
 
-def saveVTK(simulation,filestr):
+def saveVTK(simulation, filestr):
     """
     Save mesh in VTK format.
 
@@ -123,12 +125,47 @@ def saveVTK(simulation,filestr):
         VTK mesh for further manipulations.
 
     """
-    vtk=toVTK(simulation.mesh)
-    vAna,_ = simulation.analyticalEstimate()
-    analytic = np.sum(vAna, axis = 0)
-    vtk.point_data['voltage']=simulation.nodeVoltages
-    vtk.point_data['vAnalytic']=analytic
+    vtk = toVTK(simulation.mesh)
+    vAna, _ = simulation.analyticalEstimate()
+    analytic = np.sum(vAna, axis=0)
+    vtk.point_data['voltage'] = simulation.nodeVoltages
+    vtk.point_data['vAnalytic'] = analytic
 
     vtk.save(filestr)
 
     return vtk
+
+
+class Regions(pv.MultiBlock):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self['Conductors'] = pv.MultiBlock()
+        self["Insulators"] = pv.MultiBlock()
+        self['Electrodes'] = pv.MultiBlock()
+
+        self.mesh = None
+
+    def addMesh(self, mesh, category=None):
+        if category is not None:
+            self[category].append(mesh)
+        else:
+            self.mesh = mesh
+
+    def assignSigma(self, mesh, defaultSigma=1.):
+        vtkMesh = toVTK(mesh)
+        vtkMesh.cell_data['sigma'] = defaultSigma
+        vtkPts = vtkMesh.cell_centers()
+
+        for region in self['Conductors']:
+            sig = region['sigma'][0]
+            enclosed = vtkPts.select_enclosed_points(region)
+            inside = enclosed['SelectedPoints'] == 1
+            vtkMesh['sigma'][inside] = sig
+
+        for region in self['Insulators']:
+            enclosed = vtkPts.select_enclosed_points(region)
+            inside = enclosed['SelectedPoints'] == 1
+            vtkMesh['sigma'][inside] = 0
+
+        for el, s in zip(mesh.elements, vtkMesh['sigma']):
+            el.sigma = np.array(s, ndmin=1)

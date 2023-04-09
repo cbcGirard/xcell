@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Visualization routines for meshes."""
 
+import pyvista as pv
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d as p3d
 import matplotlib as mpl
@@ -2508,3 +2509,29 @@ class LogError(FigureAnimator):
 
 #     def plotFrames(self,frameNums):
 #         for num in frameNums:
+
+
+class PVScene(pv.Plotter):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        f, ax = plt.subplots(tight_layout=True)
+        self.tbar = TimingBar(figure=f, axis=ax)
+        self.pvchart = pv.ChartMPL(f, size=(1.0, 0.1),
+                                   loc=(0, 0))
+        self.add_chart(self.pvchart)
+
+    def setTime(self, time):
+        self.tbar.getArt(time)
+
+    def setup(self, regions, mesh=None, simData=None, **meshkwargs):
+        for msh in regions['Conductors']:
+            self.add_mesh(msh, scalars='sigma', opacity=0.5)
+
+        for msh in regions['Insulators']:
+            self.add_mesh(msh, color='white', opacity=0.5)
+
+        for msh in regions['Electrodes']:
+            self.add_mesh(msh, color='gold')
+
+        if mesh is not None and simData is not None:
+            self.add_mesh(mesh, scalars=simData, **meshkwargs)

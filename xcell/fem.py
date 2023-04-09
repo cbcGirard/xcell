@@ -13,6 +13,21 @@ from . import util
 
 @nb.njit()
 def getHexConductances(span, sigma):
+    """
+    Calculate the conductances of a trilinear FEM hexahedron.
+
+    Parameters
+    ----------
+    span : float[3]
+        Size of element along each axis
+    sigma : float[3] or float
+        Conductivity of element
+
+    Returns
+    -------
+    float[28]
+        
+    """
     if sigma.shape[0] == 1:
         sigma = sigma*np.ones(3)
     else:
@@ -49,6 +64,13 @@ def getHexConductances(span, sigma):
 
 @nb.njit()
 def getHexIndices():
+    """Generate indices of conductance nodes for trilinear FEM hexahedron.
+
+    Returns
+    -------
+    int64[28,2]
+        Edges within the hex
+    """
     edges = np.empty((28, 2), dtype=np.int64)
     nn = 0
     for ii in range(8):
@@ -61,6 +83,22 @@ def getHexIndices():
 
 @nb.njit()
 def getFaceConductances(span, sigma):
+    """
+    Calculate the conductances of a mesh-dual (face-oriented) hexahedron.
+
+    Parameters
+    ----------
+    span : float[3]
+        Size of element along each axis
+    sigma : float[3] or float
+        Conductivity of element
+
+    Returns
+    -------
+    float[6]
+        Conductances, in order -x, +x, -y, +y, ...
+        
+    """
     if sigma.shape[0] == 1:
         sigma = sigma*np.ones(3)
     else:
@@ -72,15 +110,7 @@ def getFaceConductances(span, sigma):
 
 
 @nb.njit()
-def getFaceIndices():
-    # subsets=np.array([
-    #     [2,3],
-    #     [3,4],
-    #     [1,3],
-    #     [3,5],
-    #     [0,3],
-    #     [3,6]
-    #     ],dtype=np.int64)
+def _getFaceIndices():
     subsets = np.array([
         [0, 6],
         [1, 6],
@@ -94,6 +124,19 @@ def getFaceIndices():
 
 @nb.njit()
 def getTetConductance(pts):
+    """
+    Calculate conductances between nodes of tetrahedron.
+
+    Parameters
+    ----------
+    pts : float[4,3]
+        Cartesian coordinates of tet vertices
+
+    Returns
+    -------
+    float[4]
+        Conductances between vertices
+    """
     g = np.empty(6, dtype=np.float64)
     pairs = getTetIndices()
     for ii in range(6):
@@ -153,44 +196,12 @@ def getAdmittanceIndices():
     edges = np.vstack((nodesA, nodesA+offsets)).transpose()
     return edges
 
-
+#: Indices of conductances within admittance element
 ADMITTANCE_EDGES = getAdmittanceIndices()
+#: Indices of conductances within tetrahedral element
 TET_EDGES = getTetIndices()
-FACE_EDGES = getFaceIndices()
-# # @nb.njit()
-# def faceVtoVertexV(faceValues):
-#     """
-#     Interpolate voltage on element's vertices from values on its face.
-
-#     Assumes interpolating function of form
-#     V(x,y,z)=a+bx+cy+dz+Bx^2+Cy^2+Dz^2
-
-
-#     Parameters
-#     ----------
-#     faceValues : TYPE
-#         DESCRIPTION.
-
-#     Returns
-#     -------
-#     vertexV : TYPE
-#         DESCRIPTION.
-
-#     """
-
-#     #coefficents like a=1/2(v1-v0), A=1/2(v1+v0)
-
-#     vpos=faceValues[1::2]
-#     vneg=faceValues[0::2]
-
-#     coefs=np.hstack((vpos-vneg,vpos+vneg))/2
-#     coords=__toFaceCoefOrder(HEX_VERTEX_COORDS)
-
-#     # vertexV=np.array([np.dot(coefs,coord) for coord in coords])
-#     vertexV=np.dot(coords,coefs)
-
-#     return vertexV
-
+#: Indices of conductances within mesh-dual element
+FACE_EDGES = _getFaceIndices()
 
 @nb.njit()
 def interpolateFromFace(faceValues, localCoords):
@@ -280,7 +291,7 @@ def __toFaceCoefOrder(coords):
     ordered[:, 6] = 1
     return ordered
 
-
+#: Local coordinates of vertices for interpolation
 HEX_VERTEX_COORDS = np.array([[-1, -1, -1],
                               [1, -1, -1],
                               [-1, 1, -1],
@@ -291,6 +302,7 @@ HEX_VERTEX_COORDS = np.array([[-1, -1, -1],
                               [1, 1, 1]
                               ], dtype=np.float64)
 
+#: Local coordinates of faces for interpolation
 HEX_FACE_COORDS = np.array([[-1, 0, 0],
                             [1, 0, 0],
                             [0, -1, 0],
@@ -300,6 +312,7 @@ HEX_FACE_COORDS = np.array([[-1, 0, 0],
                             [0, 0, 0]
                             ], dtype=np.float64)
 
+#: Universal points within 
 HEX_POINT_INDICES = np.vstack(
     (1+HEX_VERTEX_COORDS, 1+HEX_FACE_COORDS)).astype(np.int32)
 

@@ -86,6 +86,8 @@ class AAnimation(ArtistAnimation):
         construct a `.MovieWriter` instance and can only be passed if
         *writer* is a string.  If they are passed as non-*None* and *writer*
         is a `.MovieWriter`, a `RuntimeError` will be raised.
+
+        Mostly copied from canonical "save" method of ArtistAnimation.
         """
 
         if writer is None:

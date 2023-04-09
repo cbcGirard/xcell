@@ -8,7 +8,7 @@ Element type routines
 import numpy as np
 import numba as nb
 from numba import int64, float64
-
+import math
 
 @nb.experimental.jitclass([
     ('origin', float64[:]),
@@ -18,7 +18,22 @@ from numba import int64, float64
     ('globalNodeIndices', int64[:])
 ])
 class Element:
+    """
+    Base class for cuboid elements
+    """
     def __init__(self, origin, span, sigma):
+        """
+        Construct new cuboid element.
+
+        Parameters
+        ----------
+        origin : float[3]
+            Global Cartestian coordinates of local origin
+        span : float[3]
+            Size of element in each axis
+        sigma : float[3] or float
+            Conductivity within region
+        """
         self.origin = origin
         self.span = span
         self.l0 = np.prod(span)**(1/3)
@@ -26,6 +41,14 @@ class Element:
         self.globalNodeIndices = np.empty(8, dtype=np.int64)
 
     def getCoordsRecursively(self):
+        """
+        Calculates the global coordinates of the element's vertices.
+
+        Returns
+        -------
+        coords : float[:,3]
+            Cartesian coordinates of element vertices
+        """
         coords = np.empty((8, 3))
         for ii in range(8):
             weights = np.array(

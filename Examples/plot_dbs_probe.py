@@ -11,8 +11,12 @@ import xcell
 import numpy as np
 from scipy.spatial.transform import Rotation
 import pyvista as pv
+import pickle
 
 from matplotlib.colors import to_rgba_array
+
+composite = pv.MultiBlock()
+regions = xcell.io.Regions()
 
 # bodies, misc, oriens, and hilus
 sigmas = 1/np.array([6.429,
@@ -27,8 +31,8 @@ sigma_0 = 0.3841
 xdom = 5e-2
 
 dbody = 1.3e-3
-# dmicro = 17e-6
-dmicro = 5e-4
+dmicro = 17e-6
+# dmicro = 5e-4
 wmacro = 2e-3
 
 pitchMacro = 5e-3
@@ -53,6 +57,14 @@ hippo = pv.read('./Geometry/slice77600_ext10000.vtk')
 brainXform = -np.array(hippo.center)
 hippo.translate(brainXform, inplace=True)
 
+files = ['bodies', 'misc', 'oriens', 'hilus']
+
+for f, sig in zip(files, sigmas):
+    region = pv.read('Geometry/'+f+'.stl').translate(brainXform)
+    region.cell_data['sigma'] = sig
+    regions.addMesh(region, 'Conductors')
+    composite.append(region, name=f)
+
 # xdom = max(np.array(hippo.bounds[1::2])-np.array(hippo.bounds[::2]))
 xdom = pitchMacro*(nmacro+1)
 
@@ -68,10 +80,14 @@ sim = xcell.Simulation('test', bbox=bbox)
 body = xcell.geometry.Cylinder(
     tipPt+bodyL*orientation/2, radius=dbody/2, length=bodyL, axis=orientation)
 
-bodyMesh = pv.Cylinder(center=body.center,
-                       direction=body.axis,
-                       radius=body.radius,
-                       height=body.length)
+# bugfix to force detection of points inside cylindrical body
+bodyMesh = xcell.geometry.toPV(body)
+regions.addMesh(bodyMesh, category='Insulators')
+
+# bodyMesh = pv.Cylinder(center=body.center,
+# direction=body.axis,
+# radius=body.radius,
+# height=body.length)
 
 macroElectrodes = []
 microElectrodes = []
@@ -80,6 +96,7 @@ elecMeshes = []
 refPts = []
 refSizes = []
 
+# Generate macroelectrodes (bands)
 for ii in range(nmacro):
     pt = tipPt+(ii+1)*pitchMacro*orientation
 
@@ -93,22 +110,17 @@ for ii in range(nmacro):
 
     refPts.append(geo.center)
 
-    elecMeshes.append(pv.Cylinder(center=geo.center,
-                                  direction=geo.axis,
-                                  radius=geo.radius,
-                                  height=geo.length,
-                                  ))
+    regions.addMesh(xcell.geometry.toPV(geo), category='Electrodes')
 
 
+# Generate microelectrodes
 for ii in range(microRows):
     rowpt = tipPt+(ii+.5)*pitchMacro*orientation
 
     for jj in range(microCols):
-        # rot = Rotation.from_rotvec(np.array([0, 2*jj/microCols*np.pi, 0]))
         rot = Rotation.from_rotvec(orientation*2*jj/microCols*np.pi)
 
         microOrientation = rot.apply(0.5*dbody*np.array([0., 0., 1.]))
-        # microOrientation = rot.apply(0.5*dbody*orientation)
 
         geo = xcell.geometry.Disk(
             center=rowpt+microOrientation,
@@ -121,108 +133,43 @@ for ii in range(microRows):
         microElectrodes.append(geo)
 
         refPts.append(geo.center)
-        elecMeshes.append(pv.Disc(center=geo.center,
-                                  inner=0,
-                                  outer=geo.radius,
-                                  normal=geo.axis))
+        regions.addMesh(xcell.geometry.toPV(geo), category='Electrodes')
 
-
-def showElectrode(plotter, opacity=1.0):
-    plotter.add_mesh(bodyMesh, color='white', opacity=opacity)
-    for m in elecMeshes:
-        plotter.add_mesh(m, color='gold', opacity=opacity)
-
-
-# %% plots
-p = pv.Plotter()
-p.add_mesh(hippo,  # show_edges=True, scalars='sigma', style='surface')#,
-           opacity=0.5)
-p.show_bounds()
-showElectrode(p)
-
+p = xcell.visualizers.PVScene()
+p.setup(regions, opacity=0.5)
 p.show()
 
 
-# %% Octree mesh visualization
+# %% Map back to elements and simulate pulse
 sim.quickAdaptiveGrid(maxdepth)
-
-inCyl = body.isInside(sim.mesh.nodeCoords).astype(int)
-inElec = np.any([a.geometry.isInside(sim.mesh.nodeCoords)
-                 for a in sim.currentSources], axis=0).astype(int)
-
-
-colors = to_rgba_array([xcell.colors.NULL,
-                        xcell.colors.FAINT,
-                        xcell.colors.scopeColors[0]]
-                       )
-colors[1, -1] = 0.02
-
-vals = inCyl+inElec
-
-
-# #%%
-# ax = xcell.visualizers.new3dPlot(bbox)
-
-# xcell.visualizers.showNodes3d(
-#     ax, sim.mesh.nodeCoords, vals, colors=colors[vals])
-
-# # ax.set_axis_off() #hides axes too
-# [a.pane.set_alpha(0) for a in [ax.xaxis, ax.yaxis, ax.zaxis]
-#  ]  # only hides background planes
-
-# k = 4
-
-# ax.set_xlim3d(-(k-1)*pitchMacro, (k+1)*pitchMacro)
-# ax.set_ylim3d(-k*pitchMacro, k*pitchMacro)
-# ax.set_zlim3d(-k*pitchMacro, k*pitchMacro)
-# ax.view_init(elev=30, azim=-135)
-
-# %%
-
 
 vmesh = xcell.io.toVTK(sim.mesh)
 vmesh.cell_data['sigma'] = sigma_0
-vpts = vmesh.cell_centers()
+
+regions.assignSigma(sim.mesh, defaultSigma=sigma_0)
+
+sim.currentSources[nmacro+1].value = 150e-6
 
 
-files = ['bodies', 'misc', 'oriens', 'hilus']
-
-
-for f, sig in zip(files, sigmas):
-    region = pv.read('Geometry/'+f+'.stl').translate(brainXform)
-
-    enc = vpts.select_enclosed_points(region)
-
-    vmesh['sigma'][enc['SelectedPoints'] == 1] = sig
-
-ins = body.isInside(vpts.points)
-
-vmesh['sigma'][ins] = 0
-
-vmesh.slice_orthogonal().plot()
-
-# %% Map back to elements
-for el, s in zip(sim.mesh.elements, vmesh['sigma']):
-    el.sigma = np.array(s, ndmin=1)
-
-sim.currentSources[nmacro+1].value = 1e-5
-
-
-# sim.finalizeMesh()
 sim.setBoundaryNodes()
 v = sim.iterativeSolve()
 vmesh.point_data['voltage'] = v
 
 vmesh.set_active_scalars('voltage')
 
-# %%
+# %% Plot and save
 
-p = pv.Plotter()
-p.add_mesh(hippo, opacity=0.1, color='gray')
-p.camera.tight(padding=0.1)
-p.add_mesh(vmesh.slice(normal='z'), show_edges=True, cmap=xcell.colors.CM_MONO)
-showElectrode(p, opacity=0.25)
-# p.view_xy()
-# p.set_focus(np.zeros(3))
+p = xcell.visualizers.PVScene()
+p.setup(regions)  # , mesh=vmesh, simData='voltage')
+# p.camera.tight(padding=0.1)
+p.add_mesh(vmesh.slice(normal='z'), show_edges=True,
+           cmap=xcell.colors.CM_BIPOLAR)
+cambox = np.array(hippo.bounds)
+cambox[4:] = 0.
+# p.reset_camera(bounds=cambox)
+p.view_xy()
 p.show()
 # sphinx_gallery_thumbnail_number = 3
+
+# Save outputs
+regions.save('Geometry/composite.vtm')
