@@ -204,7 +204,7 @@ class LineDataUnits(Line2D):
     _linewidth = property(_get_lw, _set_lw)
 
 
-def showCellGeo(axis, polys=None):
+def showCellGeo(axis, polys=None, showNodes=False):
     """
     Add cell geometry to designated plot.
 
@@ -227,6 +227,10 @@ def showCellGeo(axis, polys=None):
 
     polycol = PolyCollection(polys, color=shade)
     axis.add_collection(polycol)
+    if showNodes:
+        coords = np.array([returnSegmentCoordinates(sec)
+                          for sec in h.allsec()])
+        axis.scatter(coords[:, 0], coords[:, 1], color='C0', marker='*')
 
     return polys
 

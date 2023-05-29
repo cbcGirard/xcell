@@ -18,7 +18,7 @@ import os
 
 # import matplotlib.tri as tri
 from mpl_toolkits.axes_grid1 import AxesGrid
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes, zoomed_inset_axes, mark_inset
+from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes, mark_inset
 
 import pickle
 import pandas
@@ -63,24 +63,27 @@ class TimingBar:
         self.data = data
         if data is not None:
 
-            # if 'style' in data:
-            if data['style'] != 'sweep':
-                # ymin=min(data['y'])
-                # ymax=max(data['y'])
-                # ax.set_ylim(ymin,ymax)
-                if data['style'] == 'dot':
-                    alpha = 0.5
-                else:
-                    alpha = 1
-                ax.plot(data['x'], data['y'], color='C0', alpha=alpha)
-            ax.set_ylabel(data['ylabel'])
-            ax.yaxis.set_major_formatter(eform(data['unit']))
-            ax.set_yticks([0])
-            ax.grid(False)
-            ax.grid(visible=True,
-                    which='major',
-                    axis='y')
-
+            if 'style' in data:
+                if data['style'] != 'sweep':
+                    # ymin=min(data['y'])
+                    # ymax=max(data['y'])
+                    # ax.set_ylim(ymin,ymax)
+                    if data['style'] == 'dot':
+                        alpha = 0.5
+                    else:
+                        alpha = 1
+                    ax.plot(data['x'], data['y'], color='C0', alpha=alpha)
+                ax.set_ylabel(data['ylabel'])
+                ax.yaxis.set_major_formatter(eform(data['unit']))
+                ax.set_yticks([0])
+                ax.grid(False)
+                ax.grid(visible=True,
+                        which='major',
+                        axis='y')
+            else:
+                if 'shape' in dir(data):
+                    ax.set_xlim(min(data), max(data))
+                    ax.yaxis.set_visible(False)
         else:
             ax.yaxis.set_visible(False)
 
@@ -107,9 +110,10 @@ class TimingBar:
                                       s=2.))
 
         else:
-            art.append(ax.vlines(time, .8*ymin, .8*ymax,
-                                 colors='C0',
-                                 linewidths=1.5))
+            # art.append(ax.vlines(time, .8*ymin, .8*ymax,
+            #                      colors='C0',
+            #                      linewidths=1.5))
+            art.append(ax.barh(0, time, color='C0'))
 
         return art
 
@@ -2229,13 +2233,17 @@ class ScaleRange:
             if self.knee < fracmax:
                 self.knee = fracmax
 
-    def get(self, forceBipolar=False):
+    def get(self, forceBipolar=False, forceSymmetric=False):
         isBipolar = (self.min < 0) & (self.max > 0)
         # if isBipolar or forceBipolar:
         #     out = np.array([self.min, self.knee, self.max])
         # else:
         #     out = np.array([self.min, self.max])
-        out = np.array([self.min, self.knee, self.max])
+        if forceSymmetric:
+            maxamp = max(abs(self.min), abs(self.max))
+            out = np.array([-maxamp, maxamp])
+        else:
+            out = np.array([self.min, self.knee, self.max])
         return out
 
 
@@ -2423,15 +2431,23 @@ class SingleSlice(FigureAnimator):
     def solobar(self, fname, unit=None):
         data = self.dataScales[self.dataSrc]
 
-        fbar, printbar = plt.subplots(figsize=[5., 1.0])
-        cmap, norm = getCmap(data, logscale=True)
-
-        fbar.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap),
-                      cax=printbar, orientation='horizontal')
-        engineerTicks(printbar, xunit=unit)
+        fbar = makeSoloColorbar(data, unit=unit)
 
         self.study.savePlot(fbar, fname+'-colorbar')
         plt.close(fbar)
+
+
+def makeSoloColorbar(data, cmap=None, norm=None, unit=None, **kwargs):
+    fbar, printbar = plt.subplots(figsize=[5., 0.75])
+
+    if cmap is None and norm is None:
+        cmap, norm = getCmap(data, logscale=True)
+
+    fbar.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap),
+                  cax=printbar, orientation='horizontal', **kwargs)
+    engineerTicks(printbar, xunit=unit)
+
+    return fbar
 
 
 class LogError(FigureAnimator):
@@ -2512,26 +2528,215 @@ class LogError(FigureAnimator):
 
 
 class PVScene(pv.Plotter):
-    def __init__(self, **kwargs):
+    def __init__(self, study=None, time=None, **kwargs):
+        dpi = None
+        hfrac = 0.1
+        figsize = None
+        if 'figsize' in kwargs:
+            figsize = kwargs.pop('figsize')
+            if 'dpi' in kwargs:
+                dpi = kwargs.pop('dpi')
+                winsize = dpi*np.array(figsize)
+                hfrac = 0.5/figsize[1]
+                kwargs['window_size'] = winsize.astype(int)
+                figsize[1] *= 1+hfrac
+                pv.global_theme.line_width = 1.*7./figsize[0]
+
         super().__init__(**kwargs)
-        f, ax = plt.subplots(tight_layout=True)
-        self.tbar = TimingBar(figure=f, axis=ax)
-        self.pvchart = pv.ChartMPL(f, size=(1.0, 0.1),
-                                   loc=(0, 0))
-        self.add_chart(self.pvchart)
+        if time is None:
+            f = None
+            ax = None
+        else:
+            # f, ax = plt.subplots(tight_layout=True, figsize=figsize, dpi=dpi, )
+
+            f = plt.figure(dpi=dpi, figsize=figsize)
+            ax = f.add_axes((0.1, 0.5, 0.8, 0.5))
+            self.tbar = TimingBar(figure=f, axis=ax, data=time)
+            self.pvchart = pv.ChartMPL(f, size=(1.0, hfrac),
+                                       loc=(0, 0))
+            self.add_chart(self.pvchart)
+
+        self.f = f
+        self.ax = ax
+        self.study = study
+        self.edgeMesh = None
 
     def setTime(self, time):
         self.tbar.getArt(time)
 
     def setup(self, regions, mesh=None, simData=None, **meshkwargs):
+        sigargs = {'opacity': 0.5}
         for msh in regions['Conductors']:
-            self.add_mesh(msh, scalars='sigma', opacity=0.5)
+            if mesh is None:
+                sigargs.update(meshkwargs)
+
+            self.add_mesh(msh, scalars='sigma', **sigargs)
+            # show_scalar_bar=False)
+        # hiding scalar bar in mesh add removes color-coding of regions
+        if simData != 'sigma':
+            self.remove_scalar_bar()
 
         for msh in regions['Insulators']:
-            self.add_mesh(msh, color='white', opacity=0.5)
+            self.add_mesh(msh, color=colors.BASE, opacity=0.5)
 
         for msh in regions['Electrodes']:
             self.add_mesh(msh, color='gold')
 
-        if mesh is not None and simData is not None:
-            self.add_mesh(mesh, scalars=simData, **meshkwargs)
+        # if mesh is not None and simData is not None:
+        #     if 'symlog' in meshkwargs:
+        #         meshkwargs.pop('symlog')
+        #         self.add_symlog(mesh, **meshkwargs)
+        #     else:
+        #         self.add_mesh(mesh, scalars=simData, **meshkwargs)
+
+        if mesh is not None:
+            if simData is not None:
+                meshkwargs['scalars'] = simData
+
+            self.add_mesh(mesh, **meshkwargs)
+
+    def planeview(self, planeBox, scale=1., normal='z'):
+
+        self.enable_parallel_projection()
+
+        # position, focus, and up vector, I think?
+        self.camera_position = [
+            (0., 0., 1.),
+            (0., 0., 0.),
+            (0., 1., 0)]
+        spans = np.diff(planeBox)
+        self.camera.parallel_scale = scale*max(spans)/2
+
+        if len(planeBox) == 6:
+            self.camera.focal_point = 0.5*(planeBox[::2]+planeBox[1::2])
+
+    def clear(self):
+        super().clear()
+        plt.close(self.f)
+
+    def close(self, **kwargs):
+        plt.close(self.f)
+        super().close(**kwargs)
+
+    def add_symlog(self, mesh, data=None, **kwargs):
+        if 'scalars' not in kwargs:
+            scalars = mesh.active_scalars_name
+            kwargs['scalars'] = scalars
+        else:
+            scalars = kwargs['scalars']
+
+        if data is None:
+            data = mesh[scalars]
+
+        if 'scalar_range' not in kwargs:
+            vrange = np.array([min(data), max(data)])
+        else:
+            vrange = kwargs.pop('scalar_range')
+
+        vspan = np.sign(vrange)*max(np.abs(vrange))
+
+        # constrain
+        vspan[0] = vspan[1]/10**(MAX_LOG_SPAN)
+
+        kwargs['show_scalar_bar'] = False
+        pvBG = pv.Color(colors.BG, opacity=0)
+        bgHSV = mpl.colors.rgb_to_hsv(pvBG.float_rgb)
+
+        lutargs = {
+            'log_scale': True,
+            'scalar_range': vspan,
+            'below_range_color': pvBG,
+            'alpha_range': (0.0, 1.),
+            'value_range': (bgHSV[2], 1.),
+        }
+
+        # if 'show_edges' in kwargs:
+        #     edge = kwargs.pop('show_edges')
+        #     if edge:
+        #         self.show_edges(mesh)
+
+        negmesh = mesh.copy()
+        negmesh[scalars] = -mesh[scalars]
+
+        neghue = 2/3
+        if bgHSV[1] == 0:
+            poshue = 0.
+            bgHSV[0] = 1/3
+            lutPos = pv.LookupTable(hue_range=(0, 0),
+                                    **lutargs)
+            lutNeg = pv.LookupTable(hue_range=(2/3, 2/3),
+                                    **lutargs)
+
+        else:
+            posrange = bgHSV[0]
+            poshue = 1.
+
+            lutPos = pv.LookupTable(hue_range=(bgHSV[0], poshue),
+                                    **lutargs)
+            lutNeg = pv.LookupTable(hue_range=(bgHSV[0], neghue),
+                                    **lutargs)
+
+        kwargs.pop('cmap')
+        super().add_mesh(mesh, cmap=lutPos, **kwargs)
+        super().add_mesh(negmesh, cmap=lutNeg, **kwargs)
+
+        # super().add_mesh(mesh, cmap='Reds', opacity='geom', **kwargs)
+        # super().add_mesh(negmesh, cmap='Blues', opacity='geom', **kwargs)
+
+    def show_edges(self, mesh):
+        self.edgeMesh = mesh
+        super().add_mesh(mesh, style='wireframe',
+                         opacity=0.2, edge_color=colors.BASE,
+                         color=pv.global_theme.background)
+
+    def add_mesh(self, mesh, **kwargs):
+        if 'show_edges' in kwargs:
+            edges = kwargs.pop('show_edges')
+            if edges:
+                self.show_edges(mesh.copy())
+
+        if 'symlog' in kwargs:
+            symlog = kwargs.pop('symlog')
+
+            if symlog:
+                if 'clim' in kwargs:
+                    clim = kwargs.pop('clim')
+                    kwargs['scalar_range'] = clim
+                self.add_symlog(mesh, **kwargs)
+                return
+
+        super().add_mesh(mesh, **kwargs)
+
+    def save_graphic(self, filename, **kwargs):
+        if self.study is not None:
+            fname = os.path.join(self.study.studyPath, filename)
+        else:
+            fname = filename
+        super().save_graphic(filename, **kwargs)
+
+
+class Symlogizer():
+    def __init__(self, valRange, linrange=0.1):
+
+        self.crange = np.max(np.abs(valRange))*np.array([-1, 1])
+        self.linrange = linrange
+
+    def change_data(self, newData):
+        knee = self.crange[1]/10**(MAX_LOG_SPAN)
+        poslog = np.greater_equal(newData, knee)
+        neglog = np.less_equal(newData, -knee)
+
+        logspans = 0.5*(1-self.linrange)
+
+        xformed = np.empty_like(newData)
+
+        linpts = np.logical_not(np.logical_or(poslog, neglog))
+
+        xformed[poslog] = 1-np.log(
+            newData[poslog]/self.crange[1])*logspans/np.log(knee)
+        xformed[neglog] = np.log(
+            newData[neglog]/self.crange[0])*logspans/np.log(knee)
+        xformed[linpts] = logspans+self.linrange * \
+            (newData[linpts]+knee)/(2*knee)
+
+        return xformed

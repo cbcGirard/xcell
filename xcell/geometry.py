@@ -7,7 +7,8 @@ import numba as nb
 from numba import int64, float64
 import pyvista as pv
 from .visualizers import PVScene
-# from .io import toVTK
+
+from vtk import VTK_POLYGON
 
 
 @nb.experimental.jitclass([
@@ -150,13 +151,34 @@ def toPV(geometry, **kwargs):
     t = str(type(geometry))
     tstring = t.split('.')[-1].split('\'')[0]
     if tstring == 'Cylinder':
-        rawmesh = pv.Cylinder(radius=geometry.radius,
-                              center=geometry.center,
-                              height=geometry.length,
-                              direction=geometry.axis,
-                              **kwargs)
-        tets = rawmesh.delaunay_3d()
-        mesh = tets.extract_surface()
+        rawmesh = pv.Cylinder(
+            radius=geometry.radius,
+            center=geometry.center,
+            height=geometry.length,
+            direction=geometry.axis,
+            capping=False,
+            **kwargs)
+        cells = []
+        celltypes = []
+
+        for c in rawmesh.cell:
+            cells.append(c.n_points)
+            cells.extend(c.point_ids)
+            celltypes.append(c.type)
+
+        npoly = rawmesh.points.shape[0]//2
+
+        cells.append(npoly)
+        cells.extend(np.arange(0, 2*npoly, 2, dtype=int))
+        cells.append(npoly)
+        cells.extend(np.arange(2*npoly-1, 0, -2, dtype=int))
+
+        mesh = pv.PolyData(var_inp=rawmesh.points.copy(),
+                           faces=cells,
+                           n_faces=rawmesh.n_faces+2)
+
+        # tets = rawmesh.delaunay_3d()
+        # mesh = tets.extract_surface()
     elif tstring == 'Sphere':
         mesh = pv.Sphere(radius=geometry.radius,
                          center=geometry.center,

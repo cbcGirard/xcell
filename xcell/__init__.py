@@ -14,4 +14,5 @@ from . import visualizers
 from . import nrnutil
 from . import io
 from . import colors
+from . import signals
 from .xCell import *

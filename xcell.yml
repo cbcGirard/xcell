@@ -14,3 +14,10 @@ dependencies:
   - setuptools=62.2.*
   - cmasher
   - gcc_linux-64  
+  - tqdm
+  - trame
+  - meshio
+  - sphinx-gallery
+  - imageio
+  - imageio-ffmpeg
+  - pyvista

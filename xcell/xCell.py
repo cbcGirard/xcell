@@ -27,6 +27,7 @@ from . import geometry
 from .fem import ADMITTANCE_EDGES
 from . import misc
 from . import colors
+from .signals import Signal
 
 # @nb.experimental.jitclass([
 #     ('value',float64),
@@ -90,7 +91,20 @@ class Simulation:
 
         self.asDual = False
 
-    def quickAdaptiveGrid(self, maxdepth):
+    def quickAdaptiveGrid(self, maxdepth, coefficent=0.2):
+        """
+        Make a generic octree mesh where resolution increases near current sources.
+
+        Parameters
+        ----------
+        maxdepth : int
+            Maximum subdivision depth.
+
+        Returns
+        -------
+        None.
+
+        """
         pts = np.array([a.coords for a in self.currentSources])
 
         npt = pts.shape[0]
@@ -98,7 +112,7 @@ class Simulation:
         self.makeAdaptiveGrid(refPts=pts,
                               maxdepth=maxdepth*np.ones(npt),
                               minl0Function=generalMetric,
-                              coefs=0.2*np.ones(npt),
+                              coefs=coefficent*np.ones(npt),
                               coarsen=False)
 
         self.finalizeMesh()
@@ -426,7 +440,7 @@ class Simulation:
         f.close()
 
         # TODO: doc better
-    def finalizeMesh(self, regularize=False):
+    def finalizeMesh(self, regularize=False, sigmaMesh=None, defaultSigma=1.):
         """
         Prepare mesh for simulation.
 
@@ -441,12 +455,18 @@ class Simulation:
         self.startTiming('Finalize mesh')
         self.mesh.finalize()
         self.nodeISources = []
-        numEl = len(self.mesh.elements)
         self.logTime()
 
-        print('%d elem' % numEl)
+        # print('%d elem' % numEl)
 
         # self.insertSourcesInMesh()
+
+        if sigmaMesh is not None:
+            self.startTiming('Assign sigma')
+
+            vmesh = sigmaMesh.assignSigma(
+                self.mesh, defaultSigma=defaultSigma)
+            self.logTime()
 
         self.startTiming("Calculate conductances")
         edges, conductances, transforms = self.mesh.getConductances()
@@ -526,7 +546,9 @@ class Simulation:
             self.nodeRoleTable[indices] = 1
             self.nodeRoleVals[indices] = ii
 
-            self.nodeVoltages[indices] = src.value
+            # self.nodeVoltages[indices] = src.value
+            self.nodeVoltages[indices] = src.value.getCurrentValue(
+                self.currentTime)
 
         # meshCurrentSrc=self.nodeISources
         # meshCurrentSrc=[0 for k in self.nodeISources]
@@ -534,6 +556,8 @@ class Simulation:
 
         for ii in nb.prange(len(self.currentSources)):
             src = self.currentSources[ii]
+            currentValue = src.value.getValueAtTime(
+                self.currentTime)
 
             ######
             # #TODO: introduces bugs?
@@ -560,14 +584,20 @@ class Simulation:
                     sharedIdx = self.nodeRoleVals[idx]
                     # add to value of existing node source
                     if sharedIdx >= len(meshCurrentSrc):
-                        print('')
-                    meshCurrentSrc[sharedIdx] += src.value
+                        # TODO: Is this a bugfix, or just dumb?
+                        # print('')
+                        meshCurrentSrc.append(currentValue)
+                    else:
+                        if ii != sharedIdx:
+                            meshCurrentSrc[sharedIdx] += currentValue
+                    # src.value
                 else:
                     # normal, set as current dof
                     self.nodeRoleTable[idx] = 2
 
                     if ni == 0:
-                        meshCurrentSrc.append(src.value)
+                        meshCurrentSrc.append(currentValue)
+                        # .src.value)
 
                     self.nodeRoleVals[idx] = indNodeSrc
 
@@ -576,9 +606,11 @@ class Simulation:
     def __nodesInSource(self, source):
 
         if 'geometry' in dir(source):
+            srcCenter = source.geometry.center
             inside = source.geometry.isInside(self.mesh.nodeCoords)
         else:
-            d = np.linalg.norm(source.coords-self.mesh.nodeCoords, axis=1)
+            srcCenter = source.coords
+            d = np.linalg.norm(srcCenter-self.mesh.nodeCoords, axis=1)
             inside = d <= source.radius
 
         if sum(inside) > 0:
@@ -587,7 +619,7 @@ class Simulation:
 
         else:
             # Get closest mesh node
-            el = self.mesh.getContainingElement(source.coords)
+            el = self.mesh.getContainingElement(srcCenter)
 
             if self.mesh.elementType == 'Face':
                 elUinds = el.faces
@@ -705,6 +737,15 @@ class Simulation:
         return voltages
 
     def getDoFs(self):
+        """
+        Get the voltage of every degree of freedom.
+
+        Returns
+        -------
+        vDoF : float[:]
+            Voltages of all degrees of freedom [floating nodes + current sources].
+
+        """
         isDoF = self.nodeRoleTable == 0
         ndof = np.nonzero(isDoF)[0].shape[0]
 
@@ -822,7 +863,7 @@ class Simulation:
         srcV = []
 
         for ii in nb.prange(len(self.currentSources)):
-            I = self.currentSources[ii].value
+            I = self.currentSources[ii].value.getCurrentValue(self.currentTime)
             rad = self.currentSources[ii].radius
             srcI.append(I)
             srcLocs.append(self.currentSources[ii].coords)
@@ -833,7 +874,7 @@ class Simulation:
             srcV.append(V)
 
         for ii in nb.prange(len(self.voltageSources)):
-            V = self.voltageSources[ii].value
+            V = self.voltageSources[ii].value.getCurrentValue(self.currentTime)
             srcV.append(V)
             srcLocs.append(self.voltageSources[ii].coords)
             rad = self.voltageSources[ii].radius
@@ -1396,7 +1437,22 @@ class Simulation:
 
         return vals
 
-    def getOrdering(self, orderType):  # ,maskArray):
+    def getOrdering(self, orderType):
+        """
+        Get integer tag for each node according to the designated numbering scheme.
+
+        Parameters
+        ----------
+        orderType : string
+            Whether to order by corresponding degree of freedom 'dof'
+            or electrical .
+
+        Returns
+        -------
+        int[:]
+            Tag for each node.
+
+        """
         isSrc = self.nodeRoleTable == 2
         isFix = self.nodeRoleTable == 1
 
@@ -1425,7 +1481,10 @@ class Simulation:
 
     def getElementsInPlane(self, axis=2, point=0.):
         """
+        Get all elements that intersect a plane orthogonal to the axes.
 
+        .. deprecated
+            Use PyVista slicing routines instead for greater robustness.
 
         Parameters
         ----------
@@ -1487,7 +1546,26 @@ class Simulation:
         return [vals.reshape((nx, nx))], planeCoords
 
     def getValuesInPlane(self, axis=2, point=0., data=None):
+        """
+        Extract values in a plane.
 
+        .. deprecated
+            Use PyVista slicing routines instead for greater robustness.
+
+        Parameters
+        ----------
+        axis : TYPE, optional
+            DESCRIPTION. The default is 2.
+        point : TYPE, optional
+            DESCRIPTION. The default is 0..
+        data : TYPE, optional
+            DESCRIPTION. The default is None.
+
+        Returns
+        -------
+        None.
+
+        """
         if data is None:
             data = self.nodeVoltages
 
@@ -1720,6 +1798,21 @@ class SimStudy:
         return mesh
 
     def newLogEntry(self, extraCols=None, extraVals=None):
+        """
+        Log current simulation stats to csv file.
+
+        Parameters
+        ----------
+        extraCols : string[:], optional
+            Additional column labels. The default is None.
+        extraVals : [:], optional
+            Additional column data. The default is None.
+
+        Returns
+        -------
+        None.
+
+        """
         fname = os.path.join(self.studyPath, 'log.csv')
         self.currentSim.logAsTableEntry(
             fname, extraCols=extraCols, extraVals=extraVals)
@@ -1766,7 +1859,10 @@ class SimStudy:
 
     def save(self, obj, fname, ext='.p'):
         fpath = self.__makepath(fname, ext)
-        pickle.dump(obj, open(fpath, 'wb'))
+        if 'read' in dir(obj):
+            obj.read(fpath)
+        else:
+            pickle.dump(obj, open(fpath, 'wb'))
 
     def load(self, fname, ext='.p'):
         fpath = self.getfile(fname, ext)
@@ -1797,9 +1893,78 @@ class SimStudy:
             os.makedirs(basepath)
         return fpath
 
-    def saveAnimation(self, animator, filename):
+    def saveAnimation(self, animator, filename, **kwargs):
+        """
+        Save matplotlib-based animation.
+
+        Parameters
+        ----------
+        animator : TYPE
+            DESCRIPTION.
+        filename : TYPE
+            DESCRIPTION.
+        **kwargs : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        """
         fname = self.__makepath(filename, '.adata')
         pickle.dump(animator, open(fname, 'wb'))
+
+    def savePVimage(self, plotter, filename, **kwargs):
+        """
+        Save PyVista plot to image.
+
+        Parameters
+        ----------
+        plotter : PyVista Plotter
+            Active plotter.
+        filename : str
+            File name, with or without extension.
+            Saves as .png if not specified.
+        ** kwargs : 
+            Options for plotter.show()
+
+        Returns
+        -------
+        None.
+
+        """
+        f, ext = os.path.splitext(filename)
+        if ext == '':
+            ext = '.pdf'
+        fname = self.__makepath(f, ext)
+
+        plotter.save_graphic(fname, **kwargs)
+
+    def makePVmovie(self, plotter, filename, **kwargs):
+        """
+        Open movie file for PyVista animation.
+
+        Parameters
+        ----------
+        plotter : PyVista Plotter
+            Active plotter.
+        filename : str
+            File name, with or without extension.
+            Saves as .mp4 if not specified.
+        ** kwargs : 
+            Options for plotter.open_movie()
+
+        Returns
+        -------
+        None.
+
+        """
+        f, ext = os.path.splitext(filename)
+        if ext == '':
+            ext = '.mp4'
+        fname = self.__makepath(f, ext)
+
+        plotter.open_movie(fname, **kwargs)
 
     def loadLogfile(self):
         """

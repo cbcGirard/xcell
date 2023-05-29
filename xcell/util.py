@@ -9,7 +9,7 @@ import time
 import matplotlib.ticker as tickr
 
 import psutil
-from .fem import HEX_POINT_INDICES
+
 
 # Atrocious typing hack to force use of uint64
 MAXDEPTH = np.array(20, dtype=np.uint64)[()]
@@ -617,7 +617,7 @@ def coord2InterpVals(coord):
 def getCurrentVector(interpolant, location):
     # coeffs are
     # 0  1   2   3    4    5    6    7
-    #a, bx, cy, dz, exy, fxz, gyz, hxyz
+    # a, bx, cy, dz, exy, fxz, gyz, hxyz
     # gradient is [
     #   [b + ey + fz + hyz],
     #   [c + ex + gz + hxz],
@@ -642,8 +642,8 @@ def getCurrentVector(interpolant, location):
 
 @nb.njit()  # ,parallel=True)
 # @nb.njit(['int64[:](int64, int64)', 'int64[:](int64, Omitted(int64))'])
-def toBitArray(val, nBits=3):
-    return np.array([(val >> n) & 1 for n in range(nBits)])
+def toBitArray(val):  # , nBits=3):
+    return np.array([(val >> n) & 1 for n in range(3)])
 
 
 OCT_INDEX_BITS = np.array([toBitArray(ii) for ii in range(8)])
@@ -1094,3 +1094,21 @@ def unravelArraySet(maskedArrays):
         vals.extend(goodvals.ravel())
 
     return np.array(vals)
+
+
+def fastcount(boolArray):
+    """
+    Faster equivalent to summing boolean array
+
+    Parameters
+    ----------
+    array : bool[:]
+        Logical array.
+
+    Returns
+    -------
+    int
+        number of true elements.
+
+    """
+    return np.nonzero(boolArray)[0].shape[0]

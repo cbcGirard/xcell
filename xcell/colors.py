@@ -11,7 +11,7 @@ import re
 import cmasher as cm
 
 import pyvista as pv
-from pyvista import themes
+from pyvista import themes, LookupTable
 
 
 # pyvista startup for remote server
@@ -70,7 +70,7 @@ def scoopCmap(baseCmap, fraction=0.1):
 CM_BIPOLAR = scoopCmap(cm.guppy_r, 0.5)
 
 
-#color palette
+# color palette
 DARK = '#19232d'
 HILITE = '#afcfff'
 OFFWHITE = '#dcd4c7'
@@ -80,6 +80,7 @@ ACCENT_DARK = '#990000'
 ACCENT_LIGHT = '#FFCC00'
 
 BASE = HILITE
+BG = DARK
 
 
 plx = np.array(mpl.colormaps.get('plasma').colors)
@@ -164,9 +165,10 @@ def useDarkStyle():
     None.
 
     """
-    global BASE, CM_MONO, CM_BIPOLAR, MESH_ALPHA
+    global BASE, CM_MONO, CM_BIPOLAR, MESH_ALPHA, BG
     MESH_ALPHA = 0.25
     BASE = HILITE
+    BG = DARK
 
     plt.style.use(makeStyleDict(fgColor=OFFWHITE, bgColor=DARK))
     plt.style.use(styleScope2)
@@ -185,8 +187,7 @@ def useDarkStyle():
         'bipolar', biArray)
 
     pvtheme = setupPVtheme(themes.DarkTheme())
-    pvtheme.background = pv.colors.Color(DARK)
-    pvtheme.edge_color = pv.colors.Color(FAINT)
+    pvtheme.edge_color = pv.colors.Color(HILITE, opacity=0.01)
     pvtheme.font.color = pv.colors.Color(OFFWHITE)
     pvtheme.name = 'xcellDark'
 
@@ -202,9 +203,10 @@ def useLightStyle():
     None.
 
     """
-    global BASE, CM_MONO, CM_BIPOLAR, MESH_ALPHA
+    global BASE, CM_MONO, CM_BIPOLAR, MESH_ALPHA, BG
     MESH_ALPHA = 0.5
     BASE = DARK
+    BG = WHITE
 
     plt.style.use(makeStyleDict(fgColor=DARK, bgColor=WHITE))
     plt.style.use(styleScope2)
@@ -216,7 +218,6 @@ def useLightStyle():
     CM_BIPOLAR = mpl.colormaps.get('seismic').copy()
 
     pvtheme = setupPVtheme(themes.DarkTheme())
-    pvtheme.background = pv.colors.Color(WHITE)
     pvtheme.edge_color = pv.colors.Color(DARK, opacity=MESH_ALPHA)
     pvtheme.font.color = pv.colors.Color(DARK)
     pvtheme.name = 'xcellLight'
@@ -244,6 +245,8 @@ def setupPVtheme(theme):
     theme.jupyter_backend = 'server'
     theme.color_cycler = 'matplotlib'
     theme.transparent_background = True
+    theme.background = pv.colors.Color(BG, opacity=0)
+    theme.colorbar_orientation = 'vertical'
 
     return theme
 
@@ -293,6 +296,9 @@ def recolorSVG(fname, toLight=True):
 
     newfile.write(rawtxt)
     newfile.close()
+
+# class SymlogTable(LookupTable):
+#     def get
 
 
 useDarkStyle()

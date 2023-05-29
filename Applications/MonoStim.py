@@ -9,16 +9,18 @@ import numpy as np
 import Common as com
 from neuron import h  # , gui
 import neuron.units as nUnit
+from xcell.signals import Signal
 
 import matplotlib.pyplot as plt
 import pickle
 import argparse
+from tqdm import trange
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
     '-Y', '--elecY', help='electrode distance in um', type=int, default=50)
 parser.add_argument(
-    '-x', '--xmax', help='span of domain in um', type=int, default=10000)
+    '-x', '--xmax', help='span of domain in um', type=int, default=1000)
 parser.add_argument(
     '-v', '--stepViz', help='generate animation of refinement', action='store_true')
 parser.add_argument('-a', '--analytic', action='store_true',
@@ -34,7 +36,7 @@ parser.add_argument('-l', '--liteMode',
 
 save = True
 
-pairStim = True
+pairStim = False
 
 
 # https://doi.org/10.1109/TBME.2018.2791860
@@ -63,8 +65,9 @@ domX = 1e-6*args.xmax/2
 
 
 # #overrides
-# domX=5e-2
+domX = rElec*2**7
 # tpulse=0.1
+stepViz = True
 
 if analytic:
     stepViz = False
@@ -130,7 +133,7 @@ class ThisSim(xc.nrnutil.ThresholdSim):
                                      np.array([0., 0., 1.]))
 
             geoms.append(wire2)
-            amps.append(-1.)
+            amps.append(Signal(-1.))
 
             if viz is not None:
                 xc.visualizers.showSourceBoundary(viz.axes, rElec,
@@ -145,34 +148,18 @@ class ThisSim(xc.nrnutil.ThresholdSim):
                                  np.array([0., 0., 1.], dtype=float))
 
         geoms.append(wire1)
-        amps.append(1.)
+        amps.append(Signal(1.))
 
         super().__init__(name, xdom,
                          srcAmps=amps,
                          srcGeometry=geoms,
                          sigma=sigma)
 
-    def meshAndSolve(self, depth):
-        # metrics = []
-        # for src in self.currentSources:
-        #     metrics.append(xc.makeExplicitLinearMetric(maxdepth=depth,
-        #                                                meshdensity=0.2,
-        #                                                origin=src.geometry.center))
-
-        srcCoords, depths, metricCoefs = xc.getStandardMeshParams(
-            self.currentSources, depth)
-
-        self.makeAdaptiveGrid(refPts=srcCoords, maxdepth=depths,
-                              minl0Function=xc.generalMetric, coefs=metricCoefs)
-
-        self.finalizeMesh()
-        self.setBoundaryNodes()
-        v = self.iterativeSolve(tol=1e-9)
-
     def getAnalyticVals(self, coords):
         anaVals = np.zeros(coords.shape[0])
         for src in self.currentSources:
-            anaVals += xc.util.pointCurrentV(coords, iSrc=src.value,
+            anaVals += xc.util.pointCurrentV(coords,
+                                             iSrc=src.value.getValueAtTime(0.),
                                              sigma=self.sigma,
                                              srcLoc=src.coords)
 
@@ -187,19 +174,23 @@ class ThisStudy(xc.nrnutil.ThresholdStudy):
         # cell = com.BallAndStick(1, -50., 0., 0., 0.)
         # cell.dend.nseg = 15
 
-        # xx=self.sim.mesh.span[0]*1e6/2
-
+        # nnodes = 21
         nnodes = 101
-        cell = com.Axon10(1, -(nnodes//2)*1000, 0, 0, nnodes)
+        segL = 10.
+        cell = com.Axon10(1, -(nnodes//2)*segL, 0, 0, nnodes, segL=segL)
+        # cell = com.MRG(1, -(nnodes//2)*1e3, 0., 0., 0., axonNodes=nnodes)
 
         self.segCoords = xc.nrnutil.makeInterface()
 
         # optional visualization
         if self.viz is not None:
             # viz.addSimulationData(setup,append=True)
-            self.cellImg = xc.nrnutil.showCellGeo(self.viz.axes[0])
+            self.cellImg = xc.nrnutil.showCellGeo(
+                self.viz.axes[0], showNodes=True)
 
         return cell
+
+# %%
 
 
 if __name__ == '__main__':
@@ -228,6 +219,7 @@ if __name__ == '__main__':
         threshSet = []
         nElec = []
         nTot = []
+        l0ratio = []
 
         sim = ThisSim('', domX, elecY=elecY,
                       dualElectrode=pairStim, viz=viz)
@@ -235,10 +227,28 @@ if __name__ == '__main__':
         threshAna, _, _ = tmp.getThreshold(0, analytic=True)
         del tmp
 
-        for d in range(3, 14):
+        # depthvec = trange(3, 14, desc='Simulating')
+        # # for d in range(3, 14):
+        # for d in depthvec:
+        d = 7
+        rcenter = 2**d
+        xvec = 48e-6*np.geomspace(10*rcenter, rcenter/10)
+        xstepper = trange(len(xvec))
+        for xx in xstepper:
+            xdom = xvec[xx]
+
+            sim = ThisSim('', xdom, elecY=elecY,
+                          dualElectrode=pairStim,
+                          viz=viz)
             tst = ThisStudy(sim, viz=viz)
 
-            t, nT, nE = tst.getThreshold(d, pmin=0, pmax=threshAna*1e6)
+            t, nT, nE = tst.getThreshold(d, pmin=0, pmax=threshAna*1e2)
+            minl0 = min([el.l0 for el in tst.sim.mesh.elements])
+            l0ratio.append(minl0/rElec)
+            plt.figure()
+            plt.scatter(tst.segCoords[:, 0].squeeze(),
+                        t*tst.vExt)
+
             del tst
 
             threshSet.append(t)
@@ -255,13 +265,18 @@ if __name__ == '__main__':
             stimStr = 'mono'
 
         f, ax = plt.subplots()
-        simline, = ax.semilogx(nElec, threshSet, marker='o', label='Simulated')
+        # simline, = ax.semilogx(nElec, threshSet,
+        simline, = ax.semilogx(l0ratio, threshSet,
+                               marker='o', label='Simulated')
         ax.set_xlabel('Source nodes')
 
         ax.set_ylabel('Threshold')
         ax.yaxis.set_major_formatter(xc.visualizers.eform('A'))
 
-        ax.hlines(threshAna, 1, np.nanmax(nElec), label='Analytic value', linestyles=':',
+        ax.hlines(threshAna,
+                  # 1, np.nanmax(nElec),
+                  l0ratio[0], l0ratio[-1],
+                  label='Analytic value', linestyles=':',
                   colors=simline.get_color())
         ax.legend()
 

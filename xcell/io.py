@@ -8,12 +8,16 @@ import numba as nb
 import meshio
 from .util import renumberIndices
 from scipy.spatial import Delaunay
+from scipy.sparse import tril
 from .geometry import fixTriNormals
 
 import pyvista as pv
 import vtk
 
 MIO_ORDER = np.array([0, 1, 3, 2, 4, 5, 7, 6])
+
+PV_BOUND_ORDER = np.array([0, 3, 1, 4, 2, 5])
+XCELL_BOUND_ORDER = np.array([0, 2, 4, 1, 2, 5])
 
 
 def toMeshIO(mesh):
@@ -105,6 +109,9 @@ def toVTK(mesh):
 
     vMesh = pv.UnstructuredGrid(cells, celltypes, mesh.nodeCoords)
 
+    sigmas = np.array([np.linalg.norm(el.sigma) for el in mesh.elements])
+    vMesh.cell_data['sigma'] = sigmas
+
     return vMesh
 
 
@@ -136,6 +143,30 @@ def saveVTK(simulation, filestr):
     return vtk
 
 
+def toEdgeMesh(simulation, currents=False):
+
+    if currents:
+        ivals, iedges = simulation.getEdgeCurrents()
+        nEdges = iedges.shape[0]
+        lines = np.hstack((2*np.ones((nEdges, 1), dtype=int),
+                           iedges)).astype(int)
+
+        gmat = tril(simulation.getEdgeMat())
+        conds = np.abs(gmat.data)
+    else:
+        lines = np.hstack(
+            (2*np.ones((simulation.edges.shape[0], 1), dtype=int), simulation.edges)).astype(int)
+        conds = simulation.conductances
+
+    edgemesh = pv.PolyData(simulation.mesh.nodeCoords,
+                           faces=lines, n_faces=lines.shape[0])
+    edgemesh.cell_data['Conductances'] = conds
+    if currents:
+        edgemesh.cell_data['Currents'] = ivals
+
+    return edgemesh
+
+
 class Regions(pv.MultiBlock):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -152,20 +183,40 @@ class Regions(pv.MultiBlock):
             self.mesh = mesh
 
     def assignSigma(self, mesh, defaultSigma=1.):
-        vtkMesh = toVTK(mesh)
-        vtkMesh.cell_data['sigma'] = defaultSigma
-        vtkPts = vtkMesh.cell_centers()
+        # vtkMesh = toVTK(mesh)
+        # vtkMesh.cell_data['sigma'] = defaultSigma
+        # vtkPts = vtkMesh.cell_centers()
+        vtkPts = pv.wrap(np.array([el.center for el in mesh.elements]))
+        sigs = defaultSigma*np.ones(vtkPts.n_points)
 
         for region in self['Conductors']:
             sig = region['sigma'][0]
             enclosed = vtkPts.select_enclosed_points(region)
             inside = enclosed['SelectedPoints'] == 1
-            vtkMesh['sigma'][inside] = sig
+            # vtkMesh['sigma'][inside] = sig
+            sigs[inside] = sig
 
         for region in self['Insulators']:
             enclosed = vtkPts.select_enclosed_points(region)
             inside = enclosed['SelectedPoints'] == 1
-            vtkMesh['sigma'][inside] = 0
+            # vtkMesh['sigma'][inside] = 0
+            sigs[inside] = 0
 
-        for el, s in zip(mesh.elements, vtkMesh['sigma']):
+        for el, s in zip(mesh.elements, sigs):  # vtkMesh['sigma']):
             el.sigma = np.array(s, ndmin=1)
+
+        # return vtkMesh
+
+    def toPlane(self, origin=np.zeros(3), normal=[0., 0., 1.]):
+        planeRegions = Regions()
+        for k in self.keys():
+            for region in self[k]:
+                tmp = region.slice(normal=normal,
+                                   origin=origin)
+                if tmp.n_points == 0:
+                    tmp = region.project_points_to_plane(
+                        origin=origin, normal=normal)
+
+                planeRegions[k].append(tmp)
+
+        return planeRegions

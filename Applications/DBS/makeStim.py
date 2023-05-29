@@ -1,7 +1,9 @@
 # %%
 import numpy as np
 import matplotlib.pyplot as plt
+import pickle
 
+from xcell.signals import BiphasicSignal
 stimV = 1.
 stimI = 150e-6
 stimPhase = 1e-3  # 2ms total biphasic
@@ -9,7 +11,9 @@ stimPhase = 1e-3  # 2ms total biphasic
 stimLambda = 10
 
 simDuration = 2
-nMicro = 24
+minDt = 50e-3
+
+# nMicro = 9
 
 # Provide consistently seeded RNG
 rngSeed = 0
@@ -18,64 +22,53 @@ for ii, c in enumerate('xcell'):
 
 rng = np.random.default_rng(rngSeed)
 
-dts = rng.exponential(1/stimLambda, (nMicro, stimLambda*simDuration))
+
+def getSignals(nMicro, step=None):
+    dts = rng.exponential(1/stimLambda, (nMicro, stimLambda*simDuration))
+
+    # Enforce specified miniumum 50ms between pulses
+    tooSoon = dts < minDt
+    tooSoon[:, 0] = False
+
+    dts[tooSoon] = 5e-2
+    times = np.cumsum(dts, axis=1)
+
+    # Rounding to simplify simulation
+    # step = minDt
+    if step is not None:
+        times = np.round(times/step)*step
+
+    channels = []
+
+    for tstarts in times:
+        chan = BiphasicSignal()
+        for t in tstarts:
+            if t >= (simDuration - 2e-2):
+                continue
+            else:
+                chan.addPulse(t, pulseDur=stimPhase, pulseAmp=stimI)
+
+        channels.append(chan)
+
+    return channels
 
 
-class PiecewiseSignal:
-    def __init__(self, t0=0, y0=0):
-        self.times = [t0]
-        self.values = [y0]
+if __name__ == '__main__':
+    nMicro = 24
+    channels = getSignals(nMicro)
+    f, axes = plt.subplots(nMicro, ncols=1, sharex=True)
+    axes[0].set_xlim(0, simDuration)
 
-        self._currentIdx = 0
+    times = []
+    for chan, ax in zip(channels, axes):
+        ax.step(chan.times, chan.values, where='post')
+        ax.axis('off')
+        times.extend(chan.times)
 
-    def getCurrentValue(self, t):
-        if self.times[self._currentIdx] <= t:
-            self._currentIdx += 1
+    axes[-1].set_xlabel('Time [s]')
 
-        return self.values[self._currentIdx]
+    plt.show()
 
+    pickle.dump(channels, open('pattern.xstim', 'wb'))
 
-class BiphasicSignal(PiecewiseSignal):
-    def __init__(self, t0=0, y0=0):
-        super().__init__(t0, y0)
-
-    def addPulse(self, tstart, pulseDur, pulseAmp):
-        times = [tstart, tstart+pulseDur, tstart+2*pulseDur]
-        vals = [pulseAmp, -pulseAmp, 0]
-
-        self.times.extend(times)
-        self.values.extend(vals)
-
-
-# Enforce specified miniumum 50ms between pulses
-tooSoon = dts < 5e-3
-tooSoon[:, 0] = False
-
-dts[tooSoon] = 5e-2
-times = np.cumsum(dts, axis=1)
-# %%
-
-channels = []
-
-for tstarts in times:
-    chan = BiphasicSignal()
-    for t in tstarts:
-        if t > simDuration:
-            continue
-        else:
-            chan.addPulse(t, pulseDur=stimPhase, pulseAmp=stimPhase)
-
-    channels.append(chan)
-
-
-f, axes = plt.subplots(nMicro, ncols=1, sharex=True)
-axes[0].set_xlim(0, simDuration)
-
-for chan, ax in zip(channels, axes):
-    ax.step(chan.times, chan.values, where='post')
-    ax.axis('off')
-
-axes[-1].set_xlabel('Time [s]')
-
-plt.show()
-# %%
+    print('%d steps' % np.unique(times).shape)

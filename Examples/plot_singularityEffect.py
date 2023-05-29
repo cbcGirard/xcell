@@ -20,7 +20,7 @@ fname = 'Singularity_sweep'
 # fname="Singularity"
 generate = False
 animate = False
-lite=True
+lite = True
 
 if lite:
     xcell.colors.useLightStyle()
@@ -38,10 +38,11 @@ ks = [0.2, 0.4]
 # elRs=1e-6*np.array([1])
 # x0s=np.array([200])
 # ks=[0.2]
-with mpl.rc_context({'lines.markersize':3,
-                     'lines.marker':'o',
-                     'lines.linewidth':2,
-                    'figure.figsize':[6.5,6]}):
+with mpl.rc_context({'lines.markersize': 2,
+                     'lines.marker': 'o',
+                     'lines.linewidth': 1,
+                     'font.size': 10,
+                    'figure.figsize': [3.25, 5]}):
 
     f2, axes = plt.subplots(3, sharex=True, gridspec_kw={
                             'height_ratios': [4, 4, 2]})
@@ -49,7 +50,6 @@ with mpl.rc_context({'lines.markersize':3,
     ax = axes[0]
     ax2 = axes[1]
     a3 = axes[2]
-
 
     ax.set_xscale('log')
     ax.set_yscale('log')
@@ -176,16 +176,16 @@ with mpl.rc_context({'lines.markersize':3,
 
 # xcell.visualizers.outsideLegend(axis=ax)
 # ax.legend()
-xcell.util.loground(ax,which='y')
+xcell.util.loground(ax, which='y')
 f2.align_labels()
 
 for a in axes:
-    y0,y1=a.get_ylim()
-    a.vlines(np.pi,y0,y1,linestyle='dashed',color=xcell.colors.BASE)
+    y0, y1 = a.get_ylim()
+    a.vlines(np.pi, y0, y1, linestyle='dashed', color=xcell.colors.BASE)
 # [a.vline(a.)]
 
-figname='multiplot'
+figname = 'multiplot'
 if lite:
-    figname+='-lite'
+    figname += '-lite'
 
 study0.savePlot(f2, figname)

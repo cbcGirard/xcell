@@ -71,30 +71,31 @@ cli.add_argument(
 args = cli.parse_args()
 
 # Overrides for e.g. debugging in Spyder
-#args.vids=True
+args.vids = True
 # args.synth=False
-# args.folder='Quals/polyCell'
-#args.folder='Quals/monoCell'
-#args.strat='depth'
+args.folder = 'Quals/polyCell'
+# args.folder='Quals/monoCell'
+# args.strat='depth'
 #args.nSegs = 101
 # args.folder='tst'
-#args.nskip=1
-#args.nRing=0
+# args.nskip=1
+# args.nRing=0
+xcell.colors.useLightStyle()
 
-#%%
+# %%
 if args.strat == 'depthExt':
     dmax += 4
 
 if args.nRing == 0:
     ring = Common.Ring(N=1, stim_delay=0, dendSegs=1, r=0)
     tstop = 12
-    tPerFrame=2
-    barRatio=[4,1]
+    tPerFrame = 2
+    barRatio = [4, 1]
 else:
     ring = Common.Ring(N=args.nRing, stim_delay=0, dendSegs=args.nSegs, r=175)
     tstop = 40
     tPerFrame = 5
-    barRatio=[9,1]
+    barRatio = [9, 1]
 
 coords, rads, isSphere = nUtil.getNeuronGeometry()
 ivecs = nUtil.getMembraneCurrents()
@@ -140,8 +141,8 @@ xmax = 2*np.max(np.concatenate(
     (np.max(coord, axis=0), np.min(coord, axis=0))
 ))
 
-#round up
-xmax=xcell.util.oneDigit(xmax)
+# round up
+xmax = xcell.util.oneDigit(xmax)
 if xmax <= 0 or np.isnan(xmax):
     xmax = 1e-4
 
@@ -159,16 +160,16 @@ studyPath = study.studyPath
 dspan = dmax-dmin
 
 
-if args.nRing==0:
-    tdata={
+if args.nRing == 0:
+    tdata = {
         'x': tv,
         'y': I,
         'style': 'sweep',
         'ylabel': '',
-        'unit':'A',
-            }
+        'unit': 'A',
+    }
 else:
-    tdata=None
+    tdata = None
 
 if args.vids:
     img = xcell.visualizers.SingleSlice(None, study,
@@ -185,7 +186,6 @@ if args.vids:
     # animators = [img]
     # aniNames = ['volt-']
 
-
     # animators=[xcell.visualizers.ErrorGraph(None, study)]
     # animators.append(xcell.visualizers.LogError(None,study))
 
@@ -196,16 +196,17 @@ for r, c, v in zip(rads, coords, I[0]):
 tmax = tv.shape[0]
 errdicts = []
 
-polygons=nUtil.getCellImage()
+polygons = nUtil.getCellImage()
 
-simDict={'tv':tv,
-          'I':I,
-          'rads':rads,
-          'coords':coords,
-          'isSphere':isSphere,
-          'polygons':polygons,
-    }
-pickle.dump(simDict, open(os.path.join(os.path.dirname(studyPath), 'commonData.xstudy'), 'wb'))
+simDict = {'tv': tv,
+           'I': I,
+           'rads': rads,
+           'coords': coords,
+           'isSphere': isSphere,
+           'polygons': polygons,
+           }
+pickle.dump(simDict, open(os.path.join(
+    os.path.dirname(studyPath), 'commonData.xstudy'), 'wb'))
 
 
 # %%
@@ -221,7 +222,6 @@ for ii in range(0, tmax):
 
     changed = False
     # metrics=[]
-
 
     for jj in range(len(setup.currentSources)):
         ival = ivals[jj]
@@ -254,10 +254,10 @@ for ii in range(0, tmax):
         density = 0.2
         if args.strat == 'fixedMax':
             maxdepth = dmax*np.ones_like(vScale)
-            dmin=dmax
+            dmin = dmax
         elif args.strat == 'fixedMin':
             maxdepth = dmin*np.ones_like(vScale)
-            dmax=dmin
+            dmax = dmin
         else:
             maxdepth = 5
         metricCoef = 2**(-maxdepth*density)
@@ -319,21 +319,21 @@ for ii in range(0, tmax):
 
 lists = xcell.misc.transposeDicts(errdicts)
 
-if args.strat[:5]=='fixed':
-    if args.strat[5:]=='Min':
-        dstr=dmin
+if args.strat[:5] == 'fixed':
+    if args.strat[5:] == 'Min':
+        dstr = dmin
     else:
-        dstr=dmax
-    depthStr='Fixed depth %d'%dstr
+        dstr = dmax
+    depthStr = 'Fixed depth %d' % dstr
 else:
-    depthStr='Dynamic depth [%d:%d]'%(dmin,dmax)
+    depthStr = 'Dynamic depth [%d:%d]' % (dmin, dmax)
 
 
-lists['depths']=depthStr
+lists['depths'] = depthStr
 
 pickle.dump(lists, open(studyPath+'/'+args.strat+'.pcr', 'wb'))
 
-#%%
+# %%
 
 if args.vids:
 
@@ -344,19 +344,19 @@ if args.vids:
     #         xcell.colors.useDarkStyle()
     #         anis=[an.animateStudy(l+args.strat,fps=30) for an,l in zip(animators, aniNames)]
 
-    for an,l in zip(animators, aniNames):
+    for an, l in zip(animators, aniNames):
         xcell.colors.useDarkStyle()
         nUtil.showCellGeo(an.axes[0])
 
-        fname=l+args.strat
+        fname = l+args.strat
         # an.animateStudy(fname, fps=30)
 
         xcell.colors.useLightStyle()
 
-        alite=an.copy({'colorbar':False,
-                       'barRatio':barRatio})
+        alite = an.copy({'colorbar': False,
+                         'barRatio': barRatio})
 
-        figw=0.3*6.5
+        figw = 0.3*6.5
         alite.fig.set_figwidth(figw)
         alite.fig.set_figheight(1.2*figw)
         alite.axes[0].set_xticks([])
@@ -364,11 +364,12 @@ if args.vids:
 
         nUtil.showCellGeo(alite.axes[0])
 
-        #get closest frames to 5ms intervals
-        frameNs=[int(f*len(alite.dataSets)/tstop) for f in np.arange(0,tstop, tPerFrame)]
-        artists=[alite.getArtists(ii) for ii in frameNs]
-        alite.animateStudy(fname+'-lite', fps=30, artists=artists, vectorFrames=np.arange(len(frameNs)), unitStr='V')
-
+        # get closest frames to 5ms intervals
+        frameNs = [int(f*len(alite.dataSets)/tstop)
+                   for f in np.arange(0, tstop, tPerFrame)]
+        artists = [alite.getArtists(ii) for ii in frameNs]
+        alite.animateStudy(fname+'-lite', fps=30, artists=artists,
+                           vectorFrames=np.arange(len(frameNs)), unitStr='V')
 
         # artists=[alite.getArtists(ii) for ii in frameNs]
         # alite.animateStudy(fname+'-lite', fps=30, vectorFrames=frameNs, unitStr='V')
@@ -376,85 +377,101 @@ if args.vids:
 # %%
 if args.post:
     folderstem = os.path.dirname(studyPath)
-    nuStudy,_=Common.makeSynthStudy(folderstem)
+    nuStudy, _ = Common.makeSynthStudy(folderstem)
 
     def getdata(strat):
         fname = os.path.join(folderstem, strat, strat+'.pcr')
         data = pickle.load(open(fname, 'rb'))
         return data
 
-    labels=[l for l in os.listdir(folderstem) if os.path.isdir(os.path.join(folderstem,l))]
+    labels = [l for l in os.listdir(folderstem) if os.path.isdir(
+        os.path.join(folderstem, l))]
     labels.sort()
-    labels=[labels[n] for n in [3,0,2,1]]
-    data=[getdata(l) for l in labels]
+    # labels = [labels[n] for n in [3, 0, 2, 1]]
+    labels = [labels[n] for n in [3, 0, 2]]
+    data = [getdata(l) for l in labels]
 
+    with mpl.rc_context({
+        'lines.markersize': 2.5,
+        'lines.linewidth': 1,
+        'figure.figsize': [3.25, 2.5],
+        'font.size': 10,
+        'legend.fontsize': 9,
+    }):
 
-    for fmt in ['.png','.svg','.eps']:
-        for lite in ['','-lite']:
-            if lite=='':
+        for lite in ['', '-lite']:
+            if lite == '':
                 xcell.colors.useDarkStyle()
             else:
                 xcell.colors.useLightStyle()
 
-            f, ax = plt.subplots(3, gridspec_kw={'height_ratios': [5, 5, 2]})
+            f, ax = plt.subplots(3, gridspec_kw={'height_ratios': [5, 5, 2]},
+                                 figsize=[3.25, 3.5])
             ax[2].plot(tv, I)
 
             for d, l in zip(data, labels):
                 # ax[0].semilogy(tv, np.abs(d['volErr']), label=d['depths'])
-                ax[0].plot(tv,  np.abs(d['intErr']), label=d['depths'])
-                ax[1].plot(tv[1:], d['dt'][1:])
+                ax[1].plot(tv,  np.abs(d['intErr']), label=d['depths'])
+                ax[0].plot(tv[1:], d['dt'][1:], label=d['depths'])
 
-            ax[0].legend()
-            ax[0].set_ylabel('Error')
-            ax[1].set_ylabel('Wall time')
+            ax[0].legend(loc='right')
+            ax[1].set_ylabel('Error')
+            ax[0].set_ylabel('Wall time [s]')
             ax[2].set_ylabel('Activity')
             ax[2].set_xlabel('Simulated time')
+            ax[2].set_xlim(0, tstop*1e-3)
 
             xcell.visualizers.engineerTicks(ax[2], xunit='s')
             [a.set_xticks([]) for a in ax[:-1]]
+            f.align_ylabels()
 
-
-
-            f2,ax=plt.subplots(1,1)
-            aright=ax.twinx()
+            f2, ax = plt.subplots(1, 1)
+            aright = ax.twinx()
 
             # [a.set_yscale('log') for a in [ax,aright]]
 
-            ttime=[sum(l['dt']) for l in data]
-            terr=[sum(np.abs(l['intErr'])) for l in data]
+            ttime = [sum(l['dt']) for l in data]
+            terr = [sum(np.abs(l['intErr'])) for l in data]
             # terr=[sum(np.abs(l['intErr']))/sum(np.abs(l['intAna'])) for l in data]
             # terr=[sum(np.abs(l['SSE']))/sum(np.abs(l['SSTot'])) for l in data]
 
-            categories=[d['depths'] for d in data]
-            barpos=np.arange(len(categories))
-            barw=0.25
+            categories = [d['depths'] for d in data]
+            # tweak labels
+            categories = [c.replace(
+                'depth ', '\n[')+']' for c in categories]
+            categories = [c.replace('[[', '[').replace(']]', ']')
+                          for c in categories]
 
-            tart=ax.bar(barpos-barw/2,height=ttime, width=barw, color='C0', label='Time')
-            ax.set_ylabel('Total simulation time')
+            barpos = np.arange(len(categories))
+            barw = 0.25
 
-            eart=aright.bar(barpos+barw/2, height=terr, width= barw, color='C1', label='Error')
+            tart = ax.bar(barpos-barw/2, height=ttime,
+                          width=barw, color='C0', label='Time')
+            ax.set_ylabel('Total simulation time [s]')
+
+            eart = aright.bar(barpos+barw/2, height=terr,
+                              width=barw, color='C8', label='Error')
             aright.set_ylabel('Total simulation error')
 
             ax.set_xticks(barpos)
             ax.set_xticklabels(categories)
 
-            ax.legend(handles=[tart, eart])
+            ax.legend(handles=[tart, eart], loc='upper center')
 
-            axes=[ax, aright]
-            ntick=0
+            axes = [ax, aright]
+            ntick = 0
 
-            nticks=[len(a.get_yticks()) for a in axes]
-            ntick=max(nticks)
+            nticks = [len(a.get_yticks()) for a in axes]
+            ntick = max(nticks)
             for a in axes:
-                dtick=a.get_yticks()[1]
+                dtick = a.get_yticks()[1]
                 a.set_yticks(np.arange(ntick)*dtick)
 
-
             study.savePlot(f2, os.path.join(
-                folderstem, 'ring%dsummary%s' % (args.nRing, lite)), ext=fmt)
+                folderstem, 'ring%dsummary%s' % (args.nRing, lite)))
 
-            study.savePlot(f, os.path.join(folderstem, 'ring%dcomparison%s' % (args.nRing, lite)), ext=fmt)
-
+            study.savePlot(f, os.path.join(
+                folderstem, 'ring%dcomparison%s' % (args.nRing, lite)))
 
 
 # #%% Semi- manual relabling

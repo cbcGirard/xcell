@@ -9,6 +9,7 @@ from . import elements
 from . import util
 from . import fem
 from . import geometry as geo
+from tqdm import trange
 
 
 class Mesh:
@@ -569,7 +570,8 @@ class Octree(Mesh):
 
         adjacencies = []
 
-        for ii in nb.prange(numel):
+        # for ii in nb.prange(numel):
+        for ii in trange(numel, desc='Calculating adjacency'):
             el = self.elements[ii]
 
             maybeNeighbors = util.octantNeighborIndexLists(np.array(el.index))

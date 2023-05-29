@@ -185,6 +185,7 @@ class Cell:
         self._rotate_z(theta)
         self._set_position(x, y, z)
         self.vrest = -65
+        self._ncs = []
 
     def __repr__(self):
         return '{}[{}]'.format(self.name, self._gid)
@@ -250,7 +251,7 @@ class BallAndStick(Cell, xcell.nrnutil.RecordedCell):
 
         self._set_position(self.x-dx, self.y-dy, self.z)
 
-        self.attachProbes(self.soma)
+        self.attachMembraneRecordings([self.soma])
 
     def _setup_morphology(self):
         self.soma = h.Section(name='soma', cell=self)
@@ -292,8 +293,11 @@ class Axon10(Cell, xcell.nrnutil.RecordedCell):
     RHOI = 100  # cytoplasmic resistivity in ohm cm
     CM = 2  # specific membrane capacitance in uf/cm2
 
-    def __init__(self, gid, x, y, z, nnodes):
+    def __init__(self, gid, x, y, z, nnodes, segL=None):
         self.nnodes = nnodes
+
+        if segL is not None:
+            self.ELD = segL
 
         # super().__init__(gid, x, y, z,0)
         self._gid = gid

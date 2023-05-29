@@ -27,9 +27,9 @@ datadir = '/home/benoit/smb4k/ResearchData/Results/studyTst/'
 # filterCategories=['Source']
 # filterVals=['current','voltage']
 
-# studyPath=datadir+'uniVsAdapt'
-# filterCategories=["Mesh type"]
-# filterVals=["adaptive","uniform"]
+studyPath = datadir+'uniVsAdapt'
+filterCategories = ["Mesh type"]
+filterVals = ["adaptive", "uniform"]
 # filterVals=['adaptive']
 
 # studyPath=datadir+"dualComp2"
@@ -49,10 +49,10 @@ datadir = '/home/benoit/smb4k/ResearchData/Results/studyTst/'
 # filterCategories=None
 # filterVals=[None]
 
-studyPath = datadir+'Boundary_large/rubik0'
-filterCategories = ['Boundary']
-# filterVals=['Analytic','Ground','Rubik0']
-filterVals = ['Analytic']  # ,'Ground','Rubik0']
+# studyPath = datadir+'Boundary_large/rubik0'
+# filterCategories = ['Boundary']
+# # filterVals=['Analytic','Ground','Rubik0']
+# filterVals = ['Analytic']  # ,'Ground','Rubik0']
 
 
 xmax = 1e-4
@@ -72,11 +72,11 @@ study = xcell.SimStudy(studyPath, bbox)
 # aniImg2=study.animatePlot(xcell.centerSlice,'img_uniform',['Mesh type'],['uniform'])
 
 
-# staticPlots=True
-staticPlots = False
+staticPlots = True
+# staticPlots = False
 
 plotters = [
-    xcell.Visualizers.ErrorGraph,
+    xcell.visualizers.ErrorGraph,
     #     xcell.Visualizers.SliceSet,
     # xcell.Visualizers.CurrentPlot,
     # xcell.Visualizers.LogError
@@ -90,6 +90,8 @@ plotters = [
 # # ptr=xcell.Visualizers.SliceSet(plt.figure(), study)
 # ptr.getStudyData(sortCategory=filterCategories[0])
 # ani=ptr.animateStudy()
+
+# %%
 
 
 if staticPlots:

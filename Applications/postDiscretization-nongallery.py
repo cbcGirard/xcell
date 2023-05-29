@@ -117,17 +117,18 @@ class ErrorComp(xc.visualizers.FigureAnimator):
         return artists
 
 
-folder = 'Quals/formulations'
+# folder = 'Quals/formulations'
 # folder = 'Quals/fixedDisc'
+# formulations = ['Admittance', 'FEM', 'Face']
+# titles = ['Admittance', 'Trilinear FEM', 'Mesh dual']
 
+folder = 'Quals/PoC'
+formulations = ['Adaptive', 'Uniform']
+titles = ['Octree', 'Uniform']
 
 study, _ = com.makeSynthStudy(folder)
 folder = study.studyPath
 xc.colors.useDarkStyle()
-
-
-formulations = ['Admittance', 'FEM', 'Face']
-titles = ['Admittance', 'Trilinear FEM', 'Mesh dual']
 
 
 # %%
@@ -222,12 +223,13 @@ logfile = study.studyPath+'/log.csv'
 df, cats = study.loadLogfile()
 
 # xaxes=['Number of elements','Total time [Wall]']
-xaxes = ['Number of elements']
-# group = 'Mesh type'
-
-group = 'Element type'
+# xaxes = ['Number of elements']
+# group = 'Element type'
 # xaxes=['adaptive','FEM','Face']
 l0string = r'Smallest $\ell_0$ [m]'
+
+group = 'Mesh type'
+xaxes = ['adaptive', 'uniform']
 
 
 def logfloor(val):
@@ -259,7 +261,7 @@ with mpl.rc_context({
         'font.size': 10,
         'legend.fontsize': 10,
         'axes.prop_cycle': plt.rcParams['axes.prop_cycle'][:4] + plt.cycler('linestyle', ['-', '--', ':', '-.'])}):
-    f, axes = plt.subplots(1, 1, sharey=True)
+    f, axes = plt.subplots(2, 1, sharey=True)
 
     xc.visualizers.groupedScatter(
         logfile, xcat='Number of elements', ycat='Error', groupcat=group, ax=axes)
