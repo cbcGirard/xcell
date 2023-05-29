@@ -12,7 +12,7 @@ from vtk import VTK_POLYGON
 
 
 @nb.experimental.jitclass([
-    ('center', float64[:]),
+    ('center', float64[::1]),
     ('radius', float64)
 ])
 class Sphere:
@@ -31,9 +31,9 @@ class Sphere:
 
 
 @nb.experimental.jitclass([
-    ('center', float64[:]),
+    ('center', float64[::1]),
     ('radius', float64),
-    ('axis', float64[:]),
+    ('axis', float64[::1]),
     ('tol', float64)
 ])
 class Disk:
@@ -60,10 +60,10 @@ class Disk:
 
 
 @nb.experimental.jitclass([
-    ('center', float64[:]),
+    ('center', float64[::1]),
     ('radius', float64),
     ('length', float64),
-    ('axis', float64[:])
+    ('axis', float64[::1])
 ])
 class Cylinder:
     def __init__(self, center, radius, length, axis):
@@ -148,6 +148,22 @@ def fixTriNormals(pts, surf):
 
 
 def toPV(geometry, **kwargs):
+    """
+    Hackishly convert xcell geometry to PyVista representation.
+
+    Parameters
+    ----------
+    geometry : xcell Disk, Sphere, or Cylinder
+        Geometry to convert.
+    **kwargs : PyVista arguments
+        Parameters for PyVista mesh generation.
+
+    Returns
+    -------
+    mesh : PyVista PolyData
+        Geometry as a PyVista mesh for visualization.
+
+    """
     t = str(type(geometry))
     tstring = t.split('.')[-1].split('\'')[0]
     if tstring == 'Cylinder':

@@ -307,7 +307,8 @@ class Axon10(Cell, xcell.nrnutil.RecordedCell):
         self.x = self.y = self.z = 0
         h.define_shape()
 
-        origin = xcell.nrnutil.returnSegmentCoordinates(self.nodes[nnodes//2])
+        origin = xcell.nrnutil.returnSegmentCoordinates(
+            self.nodes[nnodes//2], inMicrons=True)
 
         self._set_position(x - origin[0],
                            y - origin[1],

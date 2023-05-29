@@ -175,10 +175,11 @@ class ThisStudy(xc.nrnutil.ThresholdStudy):
         # cell.dend.nseg = 15
 
         # nnodes = 21
-        nnodes = 101
         segL = 10.
-        cell = com.Axon10(1, -(nnodes//2)*segL, 0, 0, nnodes, segL=segL)
-        # cell = com.MRG(1, -(nnodes//2)*1e3, 0., 0., 0., axonNodes=nnodes)
+        nnodes = 101
+
+        # cell = com.Axon10(1, -(nnodes//2)*segL, 0, 0, nnodes, segL=segL)
+        cell = com.MRG(1, -(nnodes//2)*1e3, 0., 0., 0., axonNodes=nnodes)
 
         self.segCoords = xc.nrnutil.makeInterface()
 

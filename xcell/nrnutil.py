@@ -30,7 +30,7 @@ def setVext(vext, vstim, tstim):
     return vvecs, vmems
 
 
-def returnSegmentCoordinates(section):
+def returnSegmentCoordinates(section, inMicrons=False):
     """
     Get geometry info at segment centers.
 
@@ -41,16 +41,21 @@ def returnSegmentCoordinates(section):
     Parameters
     ----------
     section : NEURON section
-        DESCRIPTION.
+        The section to return info about.
+    inMicrons : bool, default False
+        Whether to return values in microns (NEURON default)
+        or in meters (xcell default)
 
     Returns
     -------
-    xCoord : TYPE
-        DESCRIPTION.
-    yCoord : TYPE
-        DESCRIPTION.
-    zCoord : TYPE
-        DESCRIPTION.
+    xCoord : float
+        x coordinate.
+    yCoord : float
+        y coordinate.
+    zCoord : float
+        z coordinate.
+    rads : float
+        radius of segment
 
     """
     # Get section 3d coordinates and put in numpy array
@@ -116,7 +121,13 @@ def returnSegmentCoordinates(section):
                     (z3d[cIdxStart+1] - z3d[cIdxStart])
                 rads[n] = rad[cIdxStart] + cFraction3dLength * \
                     (rad[cIdxStart+1] - rad[cIdxStart])
-    return xCoord*1e-6, yCoord*1e-6, zCoord*1e-6, rads*1e-6
+
+    if inMicrons:
+        scale = 1.
+    else:
+        scale = 1e-6
+
+    return xCoord*scale, yCoord*scale, zCoord*scale, rads*scale
 
 
 def getNeuronGeometry():
