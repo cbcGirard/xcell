@@ -102,7 +102,7 @@ for ii in range(nmacro):
 
     geo = xcell.geometry.Cylinder(pt, dbody/2, wmacro, orientation)
 
-    sim.addCurrentSource(0,
+    sim.addCurrentSource(xcell.signals.Signal(0),
                          coords=pt,
                          geometry=geo)
 
@@ -127,7 +127,7 @@ for ii in range(microRows):
             radius=dmicro/2, axis=microOrientation,
             tol=0.5)
 
-        sim.addCurrentSource(0, coords=geo.center,
+        sim.addCurrentSource(xcell.signals.Signal(0), coords=geo.center,
                              geometry=geo)
 
         microElectrodes.append(geo)
@@ -148,7 +148,7 @@ vmesh.cell_data['sigma'] = sigma_0
 
 regions.assignSigma(sim.mesh, defaultSigma=sigma_0)
 
-sim.currentSources[nmacro+1].value = 150e-6
+sim.currentSources[nmacro+1].value.value = 150e-6
 
 
 sim.setBoundaryNodes()

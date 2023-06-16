@@ -117,7 +117,7 @@ class ErrorComp(xc.visualizers.FigureAnimator):
         return artists
 
 
-# folder = 'Quals/formulations'
+folder = 'Quals/formulations'
 # folder = 'Quals/fixedDisc'
 # formulations = ['Admittance', 'FEM', 'Face']
 # titles = ['Admittance', 'Trilinear FEM', 'Mesh dual']
@@ -226,7 +226,7 @@ df, cats = study.loadLogfile()
 # xaxes = ['Number of elements']
 # group = 'Element type'
 # xaxes=['adaptive','FEM','Face']
-l0string = r'Smallest $\ell_0$ [m]'
+# l0string = r'Smallest $\ell_0$ [m]'
 
 group = 'Mesh type'
 xaxes = ['adaptive', 'uniform']
@@ -255,13 +255,15 @@ def loground(axis, which='both'):
 # plt.rcParams['axes.prop_cycle'] +cycler('linestyle', ['-', '--', ':', '-.'])
 
 with mpl.rc_context({
-        'lines.markersize': 2.5,
-        'lines.linewidth': 1,
-        'figure.figsize': [3.25, 2],
+        'lines.markersize': 6,
+        'lines.linewidth': 2,
+        # 'figure.figsize': [3.25, 2],
+        'figure.figsize': [6.5, 4.],
         'font.size': 10,
         'legend.fontsize': 10,
         'axes.prop_cycle': plt.rcParams['axes.prop_cycle'][:4] + plt.cycler('linestyle', ['-', '--', ':', '-.'])}):
-    f, axes = plt.subplots(2, 1, sharey=True)
+    # f, axes = plt.subplots(2, 1, sharey=True)
+    f, axes = plt.subplots()
 
     xc.visualizers.groupedScatter(
         logfile, xcat='Number of elements', ycat='Error', groupcat=group, ax=axes)
@@ -275,7 +277,9 @@ with mpl.rc_context({
     axes.legend(labels=titles)
     # axes.set_xlabel(l0string)
 
-study.savePlot(f, 'Error_composite')
+# study.savePlot(f, 'Error_composite')
+study.savePlot(f, 'Error_composite-fullpage')
+
 # study.savePlot(f2, 'PerformanceSummary')
 
 

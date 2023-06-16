@@ -5,7 +5,6 @@ Created on Sun Apr  9 16:42:08 2023
 
 @author: benoit
 """
-# %%
 import xcell
 import pyvista as pv
 import pickle
@@ -19,24 +18,18 @@ from matplotlib.colors import SymLogNorm
 from makeStim import getSignals
 import electrode
 import argparse
-
-
-xcell.colors.useLightStyle()
-
-fontsize = 20
-pv.global_theme.font.size = fontsize
-pv.global_theme.font.label_size = fontsize
-pv.global_theme.font.title_size = fontsize
-
+import cmasher as cmr
 
 cli = argparse.ArgumentParser()
 cli.add_argument('-D', '--maxDepth', type=int,
-                 help='Max depth', default=15)
+                 help='Max depth', default=16)
 cli.add_argument('-r', '--remote', action='store_true')
 cli.add_argument('-a', '--adaptive',
                  action='store_true')
 cli.add_argument('-i', '--iso', action='store_true')
-cli.add_argument('-l', '--log', action='store_true')
+cli.add_argument('-L', '--log', action='store_true')
+cli.add_argument('-l', '--liteMode',
+                 action='store_true')
 
 
 args = cli.parse_args()
@@ -45,11 +38,26 @@ Depth = args.maxDepth
 adaptive = args.adaptive
 viewIso = args.iso
 symlog = args.log
+liteMode = args.liteMode
 
+# overrides
 Depth = 16
 adaptive = True
 symlog = True
 amplitude = False
+liteMode = False
+preview = False
+
+if liteMode:
+    xcell.colors.useLightStyle()
+else:
+    xcell.colors.useDarkStyle()
+
+fontsize = 20
+pv.global_theme.font.size = fontsize
+pv.global_theme.font.label_size = fontsize
+pv.global_theme.font.title_size = fontsize
+
 
 sigma_0 = 0.3841
 Coef = 0.1
@@ -352,6 +360,12 @@ study.save(infos, fstem+'info')
 moviename = 'voltage'
 meshname = 'sim0'
 
+# reloading pickled data
+if not 'infos' in dir():
+    infos = study.load(fstem+'info')
+if not 'volts' in dir():
+    volts = study.load(fstem+'Volts')
+
 if viewIso:
     mesh = vmesh
     data = volts
@@ -367,6 +381,7 @@ else:
         if ii == 0:
             msh.point_data['voltage'] = np.zeros(msh.n_points)
             vmesh = msh.copy()
+            mesh = msh.copy()
         else:
             msh.point_data['voltage'] = v.copy()
         # print('%d\t%d' % (len(v), msh.n_points))
@@ -416,7 +431,7 @@ else:
     cma = 'seismic'
 
 
-p = xcell.visualizers.PVScene(time=tvec, figsize=[3.25, 2.5], dpi=300)
+p = xcell.visualizers.PVScene(time=tvec)  # , figsize=[3.25, 2.5], dpi=300)
 
 # p.open_movie(fstem+'.mp4')
 study.makePVmovie(p, filename=moviename)
@@ -425,6 +440,7 @@ study.makePVmovie(p, filename=moviename)
 # cma = mcmap['bwr']
 # cma = xcell.colors.CM_BIPOLAR
 # cma=mcmap['seismic']
+cma = xcell.colors.scoopCmap(cmr.guppy_r)
 
 
 if viewIso:
@@ -483,12 +499,15 @@ for ii in viz:
     while t < tnext:
         p.setTime(t)
         p.write_frame()
+        # if liteMode:
         study.savePVimage(p,
-                          os.path.join(moviename, moviename+'frame%03d' % ii))
+                          os.path.join(moviename,
+                                       moviename+'frame%03d.eps' % ii))
         t += 0.005
         break
 
-study.savePlot(cbarfig,
-               os.path.join(moviename, moviename+'colorbar'))
+if liteMode:
+    study.savePlot(cbarfig,
+                   os.path.join(moviename, moviename+'colorbar'))
 
 p.close()

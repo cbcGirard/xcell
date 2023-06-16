@@ -1,35 +1,33 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Tue Aug 16 15:19:45 2022
-
-Quick and dirty replotting of threshold tests
-
-@author: benoit
+Generate the full set of data for one neuron's threshold study
 """
 
 import os
 
-# folder='Ball2mm/'
+# color = ''
+color = 'l'
 
-# x=2000
+celltype = 'MRG'
+# celltype = 'Ax10'
+x = 10000
+# celltype = 'ball'
+# x = 1000
 
-color=''
-# color='l'
+folder = '"tthreshold-%s"' % celltype
 
-folder = 'axon5cm/'
-x=10000
+ymax = 150
 
-ymax=250
+ystep = 25
 
-ystep=50
+for d in range(0, ymax, ystep):
 
-for d in range(ystep,ymax,ystep):
-
-
-        cmd='python MonoStim.py -Y %d -x %d -f %s -v'%(d, x, folder)+color
-        # print(cmd)
-        os.system(cmd)
+    cmd = 'python Thresholds.py -C %s -Y %d -x %d -f %s -v' % (
+        celltype, d, x, folder)+color
+    # print(cmd)
+    os.system(cmd)
 
 
-os.system('python MonoStim.py -Y %d -x %d -f %s -vS'%(ymax,x,folder)+color)
+os.system('python Thresholds.py -C %s -Y %d -x %d -f %s -vS' %
+          (celltype, ymax, x, folder)+color)

@@ -16,62 +16,80 @@ import matplotlib.pyplot as plt
 import numpy as np
 import xcell.nrnutil as nUtil
 
-# studyPath='Quals/polyCell'
-# nRing=5
-# ring = Common.Ring(N=nRing, stim_delay=0, dendSegs=101, r=175)
-# tstop = 40
-# tPerFrame = 5
-# barRatio=[9,1]
+studyPath = 'Quals/polyCell'
+nRing = 5
+ring = Common.Ring(N=nRing, stim_delay=0, dendSegs=101, r=175)
+tstop = 40
+tPerFrame = 5
+barRatio = [9, 1]
 
-studyPath='Quals/monoCell'
-nRing=0
-tstop = 12
-tPerFrame=2
-barRatio = [4, 1]
+fullwidth = True
+if fullwidth:
+    widthtag = '-fullwidth'
+else:
+    widthtag = ''
 
-study,_=Common.makeSynthStudy(studyPath)
-folderstem=study.studyPath
-
-
-dmin=4
-dmin=8
+skipExt = False
 
 
-comDict=study.load('commonData','.xstudy')
-tv=comDict['tv']
-I=comDict['I']
-rads=comDict['rads']
-coords=comDict['coords']
-isSphere=comDict['isSphere']
-polygons=comDict['polygons']
+# studyPath = 'Quals/monoCell'
+# nRing = 0
+# tstop = 12
+# tPerFrame = 2
+# barRatio = [4, 1]
+
+study, _ = Common.makeSynthStudy(studyPath)
+folderstem = study.studyPath
+
+
+dmin = 4
+dmin = 8
+
+
+comDict = study.load('commonData', '.xstudy')
+tv = comDict['tv']
+I = comDict['I']
+rads = comDict['rads']
+coords = comDict['coords']
+isSphere = comDict['isSphere']
+polygons = comDict['polygons']
 # %%
-skipExt=True
+
+
 def getdata(strat):
     fname = os.path.join(folderstem, strat, strat+'.pcr')
     data = pickle.load(open(fname, 'rb'))
     return data
 
-labels=[l for l in os.listdir(folderstem) if os.path.isdir(os.path.join(folderstem,l))]
+
+labels = [l for l in os.listdir(folderstem) if os.path.isdir(
+    os.path.join(folderstem, l))]
 labels.sort()
-labels=[labels[n] for n in [3,0,2,1]]
-data=[getdata(l) for l in labels]
+labels = [labels[n] for n in [3, 0, 2, 1]]
+data = [getdata(l) for l in labels]
+
+
+# categories=[d['depths'] for d in data]
+# Override category labels
+categories = ['Fixed\n[4]', 'Dynamic\n[4:8]',
+              'Fixed\n[8]', 'Dynamic\n[4:12]']
 
 if skipExt:
     data.pop()
     labels.pop()
 
-for lite in ['']:#,'-lite']:
-    if lite=='':
+for lite in ['lite']:  # ,'-lite']:
+    if lite == '':
         xcell.colors.useDarkStyle()
     else:
         xcell.colors.useLightStyle()
 
-    f, ax = plt.subplots(3, gridspec_kw={'height_ratios': [5, 5, 2]})
+    f, ax = plt.subplots(3, gridspec_kw={'height_ratios': [
+                         5, 5, 2]}, layout='constrained')
     ax[2].plot(tv, I)
 
-    for d, l in zip(data, labels):
-        # ax[0].semilogy(tv, np.abs(d['volErr']), label=d['depths'])
-        ax[0].plot(tv,  np.abs(d['intErr']), label=d['depths'])
+    for d, l in zip(data, categories):
+        ax[0].plot(tv,  np.abs(d['intErr']), label=l.replace('\n', ' '))
         ax[1].plot(tv[1:], d['dt'][1:])
 
     ax[0].legend()
@@ -81,35 +99,35 @@ for lite in ['']:#,'-lite']:
     ax[2].set_xlabel('Simulated time')
 
     xcell.visualizers.engineerTicks(ax[2], xunit='s')
-    [a.set_xticks([]) for a in ax[:-1]]
-
+    for a in ax[:-1]:
+        a.set_xticks([])
+        a.grid(True, axis='both')
 
 
 # bar plot
-    with plt.rc_context({'font.size':12,
-                         'figure.figsize':[6,4]}):
-        errColor='#990000'
+    with plt.rc_context({'font.size': 12,
+                         'figure.figsize': [6, 4]}):
+        errColor = '#990000'
         # errColor='C1'
-        f2,ax=plt.subplots(1,1)
-        aright=ax.twinx()
+        f2, ax = plt.subplots(1, 1)
+        aright = ax.twinx()
 
         # [a.set_yscale('log') for a in [ax,aright]]
 
-        ttime=[sum(l['dt']) for l in data]
-        terr=[sum(np.abs(l['intErr'])) for l in data]
+        ttime = [sum(l['dt']) for l in data]
+        terr = [sum(np.abs(l['intErr'])) for l in data]
         # terr=[sum(np.abs(l['intErr']))/sum(np.abs(l['intAna'])) for l in data]
         # terr=[sum(np.abs(l['SSE']))/sum(np.abs(l['SSTot'])) for l in data]
 
+        barpos = np.arange(len(categories))
+        barw = 0.25
 
-        # categories=[d['depths'] for d in data]
-        categories=['Fixed depth\n4', 'Dynamic depth\n[4:8]','Fixed depth\n8']#,'Dynamic depth\n[4:12]']
-        barpos=np.arange(len(categories))
-        barw=0.25
-
-        tart=ax.bar(barpos-barw/2,height=ttime, width=barw, color='C0', label='Time')
+        tart = ax.bar(barpos-barw/2, height=ttime,
+                      width=barw, color='C0', label='Time')
         ax.set_ylabel('Total simulation time')
 
-        eart=aright.bar(barpos+barw/2, height=terr, width= barw, color=errColor, label='Error')
+        eart = aright.bar(barpos+barw/2, height=terr,
+                          width=barw, color=errColor, label='Error')
         aright.set_ylabel('Total simulation error')
 
         ax.set_xticks(barpos)
@@ -117,21 +135,21 @@ for lite in ['']:#,'-lite']:
 
         ax.legend(handles=[tart, eart])
 
-        axes=[ax, aright]
-        ntick=0
+        axes = [ax, aright]
+        ntick = 0
 
-        nticks=[len(a.get_yticks()) for a in axes]
-        ntick=max(nticks)
+        nticks = [len(a.get_yticks()) for a in axes]
+        ntick = max(nticks)
         for a in axes:
-            dtick=a.get_yticks()[1]
+            dtick = a.get_yticks()[1]
             a.set_yticks(np.arange(ntick)*dtick)
-
+            a.grid(axis='x')
 
         study.savePlot(f2, os.path.join(
-            folderstem, 'ring%dsummary%s' % (nRing, lite)))
+            folderstem, 'ring%dsummary%s' % (nRing, lite)+widthtag))
 
-        study.savePlot(f, os.path.join(folderstem, 'ring%dcomparison%s' % (nRing, lite)))
-
+        study.savePlot(f, os.path.join(
+            folderstem, 'ring%dcomparison%s' % (nRing, lite)+widthtag))
 
 
 # #%% Semi- manual relabling
@@ -152,16 +170,17 @@ for lite in ['']:#,'-lite']:
 #     d['depths']=s
 #     pickle.dump(d,open(os.path.join(folderstem,l,l+'.pcr'), 'wb'))
 
-#%% voltage plots
-an=pickle.load(open(os.path.join(folderstem,'depth','volt-depth.adata'),'rb'))
-fname='volt-depth'
+# %% voltage plots
+an = pickle.load(
+    open(os.path.join(folderstem, 'depth', 'volt-depth.adata'), 'rb'))
+fname = 'volt-depth'
 
 xcell.colors.useLightStyle()
 
-alite=an.copy({'colorbar':False,
-               'barRatio':barRatio})
+alite = an.copy({'colorbar': False,
+                 'barRatio': barRatio})
 
-figw=0.3*6.5
+figw = 0.3*6.5
 alite.fig.set_figwidth(figw)
 alite.fig.set_figheight(1.2*figw)
 alite.axes[0].set_xticks([])
@@ -170,38 +189,38 @@ alite.tbar.axes[0].set_xlim(right=tstop/1000)
 
 nUtil.showCellGeo(alite.axes[0])
 
-#get closest frames to 5ms intervals
-frameNs=[int(f*len(alite.dataSets)/tstop) for f in np.arange(0,tstop, tPerFrame)]
-artists=[alite.getArtists(ii) for ii in frameNs]
-alite.animateStudy(fname+'-lite', fps=30, artists=artists, vectorFrames=np.arange(len(frameNs)), unitStr='V')
+# get closest frames to 5ms intervals
+frameNs = [int(f*len(alite.dataSets)/tstop)
+           for f in np.arange(0, tstop, tPerFrame)]
+artists = [alite.getArtists(ii) for ii in frameNs]
+alite.animateStudy(fname+'-lite', fps=30, artists=artists,
+                   vectorFrames=np.arange(len(frameNs)), unitStr='V')
 
 
-#%% voltage for screen
+# %% voltage for screen
 
 # xcell.colors.CM_BIPOLAR=xcell.colors.scoopCmap(cm.guppy_r,0.5)
 
-viz=pickle.load(open(folderstem+'/depth/volt-depth.adata','rb'))
-
+viz = pickle.load(open(folderstem+'/depth/volt-depth.adata', 'rb'))
 
 
 with plt.rc_context({
-        'figure.dpi':144,
+        'figure.dpi': 144,
         # 'figure.figsize':[6.75,7.5],
-        'figure.figsize':[6.75,5.],
-        'toolbar':'none'
-        }):
-    barRatio=[4,1]
-    vd=viz.copy({'colorbar':False,'barRatio':barRatio,'labelAxes':False})
+        'figure.figsize': [6.75, 5.],
+        'toolbar': 'none'
+}):
+    barRatio = [4, 1]
+    vd = viz.copy(
+        {'colorbar': False, 'barRatio': barRatio, 'labelAxes': False})
     # vd.dataScales['spaceV'].knee=1e-8
     # vd.dataScales['spaceV'].min=-1e-5
-    ax=vd.axes[0]
+    ax = vd.axes[0]
     ax.set_xticks([])
     ax.set_yticks([])
     ax.set_aspect('equal')
     nUtil.showCellGeo(ax)
 
-
     vd.getArtists(0)
-
 
     vd.animateStudy('Showcase')

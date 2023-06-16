@@ -22,7 +22,7 @@ from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes, mark_inset
 
 import pickle
 import pandas
-# from util import uniformResample, edgeRoles, getquads, quadsToMaskedArrays, coords2MaskedArrays
+
 from . import util
 from . import misc
 from . import colors
@@ -113,7 +113,7 @@ class TimingBar:
             # art.append(ax.vlines(time, .8*ymin, .8*ymax,
             #                      colors='C0',
             #                      linewidths=1.5))
-            art.append(ax.barh(0, time, color='C0'))
+            art.append(ax.barh(0, time, color='C0')[0])
 
         return art
 

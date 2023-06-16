@@ -45,7 +45,48 @@ def pointCurrentV(tstCoords, iSrc, sigma=1., srcLoc=np.zeros(3, dtype=np.float64
     return v
 
 
+def diskCurrentV(tstCoords, iSrc, sigma=1., srcLoc=np.zeros(3, dtype=np.float64)):
+    """
+    Calculate field from a disk current source.
+
+    Parameters
+    ----------
+    tstCoords : TYPE
+        Points at which to evaluate field.
+    iSrc : float
+        Source current in amperes.
+    sigma : float, optional
+        Local conductivity in S/m. The default is 1..
+    srcLoc : TYPE, optional
+        Center of source. The default is np.zeros(3, dtype=np.float64).
+
+    Returns
+    -------
+    v : float[:]
+        Potential at specified points.
+
+    """
+    dif = tstCoords-srcLoc
+    k = iSrc/(4*sigma)
+    v = np.array([k/np.linalg.norm(d) for d in dif])
+    return v
+
+
 def oneDigit(x):
+    """
+    Round to one significant digit.
+
+    Parameters
+    ----------
+    x : float
+        number to round.
+
+    Returns
+    -------
+    float
+        Rounded number.
+
+    """
     factor = 10**np.floor(np.log10(x))
 
     return factor*np.ceil(x/factor)
@@ -178,6 +219,24 @@ def __eliminateRowsLoop(rowIdx, colIdx, count):
 
 
 def deduplicateEdges(edges, conductances):
+    """
+    Combine conductances in parallel
+
+    Parameters
+    ----------
+    edges : int[:,2]
+        Global indices of the edge endpoints.
+    conductances : float[:]
+        Discrete conductance between the nodes.
+
+    Returns
+    -------
+    newEdges : int[:,2]
+        Minimal set of conductances' endpoints.
+    newConds : float[:]
+        Minimal set of conductances.
+
+    """
     N = max(edges.ravel())+1
     mat = scipy.sparse.coo_matrix((conductances,
                                    (edges[:, 0], edges[:, 1])),
@@ -248,6 +307,20 @@ def getIndexDict(sparseIndices):
 
 
 def getPyDict(sparseIndices):
+    """
+    Get dictionary mapping a sparse index number to its position in the list of indices.
+
+    Parameters
+    ----------
+    sparseIndices : int[]
+        DESCRIPTION.
+
+    Returns
+    -------
+    dic : dict
+        Dictionary for A[ii]=n such that dic[n]=ii.
+
+    """
     dic = {}
     for ii, v in enumerate(sparseIndices):
         dic[v] = ii
@@ -286,22 +359,33 @@ def renumberIndices(sparseIndices, denseList):
 
     return renumbered
 
-    # dic=getIndexDict(denseList)
-    # renumbered=dic[sparseIndices]
+# TODO: marked for deletion
+# @nb.njit(parallel=True)
+# def octreeLoop_GetBoundaryNodesLoop(nX, indexMap):
+#     """
+#     Numba loop to return the boundary nodes of a mesh.
 
-    # return renumbered
+#     Parameters
+#     ----------
+#     nX : TYPE
+#         DESCRIPTION.
+#     indexMap : TYPE
+#         DESCRIPTION.
 
+#     Returns
+#     -------
+#     TYPE
+#         DESCRIPTION.
 
-@nb.njit(parallel=True)
-def octreeLoop_GetBoundaryNodesLoop(nX, indexMap):
-    bnodes = []
-    for ii in nb.prange(indexMap.shape[0]):
-        nn = indexMap[ii]
-        xyz = index2pos(nn, nX)
-        if np.any(xyz == 0) or np.any(xyz == (nX-1)):
-            bnodes.append(ii)
+#     """
+#     bnodes = []
+#     for ii in nb.prange(indexMap.shape[0]):
+#         nn = indexMap[ii]
+#         xyz = index2pos(nn, nX)
+#         if np.any(xyz == 0) or np.any(xyz == (nX-1)):
+#             bnodes.append(ii)
 
-    return np.array(bnodes, dtype=np.int64)
+#     return np.array(bnodes, dtype=np.int64)
 
 
 @nb.njit()
@@ -327,46 +411,44 @@ def reindex(sparseVal, denseList):
         index where sparseVal occurs in denseList.
 
     """
-    # startguess=sparseVal//denseList[-1]
-    # for n,val in np.ndenumerate(denseList):
     for n, val in enumerate(denseList):
         if val == sparseVal:
             return n
 
-    # raise ValueError('%d not a member of denseList'%sparseVal)
     raise ValueError('not a member of denseList')
 
 
-def coords2MaskedArrays(intCoords, edges, planeMask, vals):
-    pcoords = np.ma.masked_array(intCoords, mask=~planeMask.repeat(2))
-    edgeInPlane = np.all(planeMask[edges], axis=1)
-    pEdges = np.ma.masked_array(edges, mask=~edgeInPlane.repeat(2))
-    edgeLs = abs(np.diff(np.diff(pcoords[pEdges], axis=2), axis=1)).squeeze()
+# TODO: marked for deletion
+# def coords2MaskedArrays(intCoords, edges, planeMask, vals):
+#     pcoords = np.ma.masked_array(intCoords, mask=~planeMask.repeat(2))
+#     edgeInPlane = np.all(planeMask[edges], axis=1)
+#     pEdges = np.ma.masked_array(edges, mask=~edgeInPlane.repeat(2))
+#     edgeLs = abs(np.diff(np.diff(pcoords[pEdges], axis=2), axis=1)).squeeze()
 
-    span = pcoords.max()
-    edgeSizes = getUnmasked(np.unique(edgeLs))
+#     span = pcoords.max()
+#     edgeSizes = getUnmasked(np.unique(edgeLs))
 
-    arrays = []
-    for s in edgeSizes:
-        nArray = span//s+1
-        arr = np.nan*np.empty((nArray, nArray))
+#     arrays = []
+#     for s in edgeSizes:
+#         nArray = span//s+1
+#         arr = np.nan*np.empty((nArray, nArray))
 
-        # get
-        edgesThisSize = np.ma.array(pEdges, mask=(edgeLs != s).repeat(2))
-        nodesThisSize, nConn = np.unique(
-            edgesThisSize.compressed(), return_counts=True)
+#         # get
+#         edgesThisSize = np.ma.array(pEdges, mask=(edgeLs != s).repeat(2))
+#         nodesThisSize, nConn = np.unique(
+#             edgesThisSize.compressed(), return_counts=True)
 
-        # nodesThisSize[nConn<2]=np.ma.masked
-        # whichNodes=getUnmasked(nodesThisSize)
-        whichNodes = nodesThisSize
+#         # nodesThisSize[nConn<2]=np.ma.masked
+#         # whichNodes=getUnmasked(nodesThisSize)
+#         whichNodes = nodesThisSize
 
-        arrCoords = getUnmasked(pcoords[whichNodes])//s
-        arrI, arrJ = np.hsplit(arrCoords, 2)
+#         arrCoords = getUnmasked(pcoords[whichNodes])//s
+#         arrI, arrJ = np.hsplit(arrCoords, 2)
 
-        arr[arrI.squeeze(), arrJ.squeeze()] = vals[whichNodes]
-        arrays.append(np.ma.masked_invalid(arr))
+#         arr[arrI.squeeze(), arrJ.squeeze()] = vals[whichNodes]
+#         arrays.append(np.ma.masked_invalid(arr))
 
-    return arrays
+#     return arrays
 
 
 def getUnmasked(maskArray):
@@ -376,140 +458,134 @@ def getUnmasked(maskArray):
         isValid = ~maskArray.mask
     return maskArray.data[isValid]
 
+# TODO: marked for deletion
+# def quadsToMaskedArrays(quadInds, quadVals):
+#     arrays = []
+#     quadSize = quadInds[:, 1]-quadInds[:, 0]
+#     nmax = max(quadInds.ravel())
 
-def quadsToMaskedArrays(quadInds, quadVals):
-    arrays = []
-    quadSize = quadInds[:, 1]-quadInds[:, 0]
-    nmax = max(quadInds.ravel())
+#     sizes = np.unique(quadSize)
 
-    sizes = np.unique(quadSize)
+#     for s in sizes:
+#         which = quadSize == s
+#         nGrid = nmax//s+1
+#         vArr = np.nan*np.empty((nGrid, nGrid))
+#         grid0s = quadInds[:, [0, 2]][which]//s
+#         vgrids = quadVals[which]
 
-    for s in sizes:
-        which = quadSize == s
-        nGrid = nmax//s+1
-        vArr = np.nan*np.empty((nGrid, nGrid))
-        grid0s = quadInds[:, [0, 2]][which]//s
-        vgrids = quadVals[which]
+#         # if nGrid==9:
+#         #     print()
 
-        # if nGrid==9:
-        #     print()
+#         for ii in range(vgrids.shape[0]):
+#             a, b = grid0s[ii]
+#             v = vgrids[ii]
+#             vArr[a, b] = v[0]
+#             vArr[a+1, b] = v[1]
+#             vArr[a, b+1] = v[2]
+#             vArr[a+1, b+1] = v[3]
 
-        for ii in range(vgrids.shape[0]):
-            a, b = grid0s[ii]
-            v = vgrids[ii]
-            vArr[a, b] = v[0]
-            vArr[a+1, b] = v[1]
-            vArr[a, b+1] = v[2]
-            vArr[a+1, b+1] = v[3]
+#         vmask = np.ma.masked_invalid(vArr)
+#         arrays.append(vmask)
+#     return arrays
 
-        vmask = np.ma.masked_invalid(vArr)
-        arrays.append(vmask)
-    return arrays
-
-# TODO: deprecate?
-
-
-@nb.njit(parallel=True)
-def edgeCurrentLoop(gList, edgeMat, dof2Global, vvec, gCoords, srcCoords):
-    currents = np.empty_like(gList, dtype=np.float64)
-    nEdges = gList.shape[0]
-    edges = np.empty((nEdges, 2, 3),
-                     dtype=np.float64)
-    for ii in nb.prange(nEdges):
-        g = gList[ii]
-        dofEdge = edgeMat[ii]
-        globalEdge = dof2Global[dofEdge]
-
-        vs = vvec[dofEdge]
-        dv = vs[1]-vs[0]
-
-        if dv < 0:
-            dv = -dv
-            globalEdge = np.array([globalEdge[1], globalEdge[0]])
-
-        for pp in np.arange(2):
-            p = globalEdge[pp]
-            if p < 0:
-                c = srcCoords[-1-p]
-            else:
-                c = gCoords[p]
-
-            edges[ii, pp] = c
-
-        # i=g*dv
-
-        currents[ii] = g*dv
-        # edges[ii]=np.array(coords)
-
-    return (currents, edges)
-
-
-@nb.njit()
-def edgeRoles(edges, nodeRoleTable):
-    edgeRoles = np.empty_like(edges)
-    for ii in nb.prange(edges.shape[0]):
-        edgeRoles[ii] = nodeRoleTable[edges[ii]]
-
-    return edgeRoles
-
-
-# TODO: deprecate, unused?
-@nb.njit()
-def edgeNodesOfType(edges, nodeSelect):
-    N = edges.shape[0]
-    matches = np.empty(N, dtype=np.int64)
-
-    for ii in nb.prange(N):
-        e = edges[ii]
-        matches[ii] = np.sum(e)
-
-    return matches
-
-# TODO: deprecate, unused?
-
-
-def getquads(x, y, xInt, yInt, values):
-    # x,y=np.hsplit(xy,2)
-    # x=xy[:,0]
-    # y=xy[:,1]
-    _, kx, nx = np.unique(xInt, return_index=True, return_inverse=True)
-    _, ky, ny = np.unique(yInt, return_index=True, return_inverse=True)
-
-    quadVals, quadCoords = __getquadLoop(x, y, kx, ky, nx, ny, values)
-
-    return quadVals, quadCoords
-
-# TODO: deprecate, unused?
+# TODO: marked for deletion?
 # @nb.njit(parallel=True)
+# def edgeCurrentLoop(gList, edgeMat, dof2Global, vvec, gCoords, srcCoords):
+#     currents = np.empty_like(gList, dtype=np.float64)
+#     nEdges = gList.shape[0]
+#     edges = np.empty((nEdges, 2, 3),
+#                      dtype=np.float64)
+#     for ii in nb.prange(nEdges):
+#         g = gList[ii]
+#         dofEdge = edgeMat[ii]
+#         globalEdge = dof2Global[dofEdge]
+
+#         vs = vvec[dofEdge]
+#         dv = vs[1]-vs[0]
+
+#         if dv < 0:
+#             dv = -dv
+#             globalEdge = np.array([globalEdge[1], globalEdge[0]])
+
+#         for pp in np.arange(2):
+#             p = globalEdge[pp]
+#             if p < 0:
+#                 c = srcCoords[-1-p]
+#             else:
+#                 c = gCoords[p]
+
+#             edges[ii, pp] = c
+
+#         # i=g*dv
+
+#         currents[ii] = g*dv
+#         # edges[ii]=np.array(coords)
+
+#     return (currents, edges)
+
+# TODO: marked for deletion
+# @nb.njit()
+# def edgeRoles(edges, nodeRoleTable):
+#     edgeRoles = np.empty_like(edges)
+#     for ii in nb.prange(edges.shape[0]):
+#         edgeRoles[ii] = nodeRoleTable[edges[ii]]
+
+#     return edgeRoles
 
 
-def __getquadLoop(x, y, kx, ky, nx, ny, values):
-    quadVals = []
-    quadCoords = []
+# TODO: marked for deletion
+# @nb.njit()
+# def edgeNodesOfType(edges, nodeSelect):
+#     N = edges.shape[0]
+#     matches = np.empty(N, dtype=np.int64)
 
-    sel = np.empty((4, x.shape[0]), dtype=np.bool8)
+#     for ii in nb.prange(N):
+#         e = edges[ii]
+#         matches[ii] = np.sum(e)
 
-    for yy in nb.prange(len(ky)-1):
-        for xx in nb.prange(len(kx)-1):
+#     return matches
 
-            indices = __getSel(nx, ny, xx, yy)
+# TODO: marked for deletion
+# def getquads(x, y, xInt, yInt, values):
+#     # x,y=np.hsplit(xy,2)
+#     # x=xy[:,0]
+#     # y=xy[:,1]
+#     _, kx, nx = np.unique(xInt, return_index=True, return_inverse=True)
+#     _, ky, ny = np.unique(yInt, return_index=True, return_inverse=True)
 
-            if indices.shape[0] > 0:
-                # x0,y0=xy[sel[0]][0]
-                # x1,y1=xy[sel[3]][0]
-                x0 = x[indices[0]]
-                y0 = y[indices[0]]
-                x1 = x[indices[3]]
-                y1 = y[indices[3]]
-                qcoords = np.array([x0, x1, y0, y1])
-                # where=np.array([np.nonzero(s)[0][0] for s in sel])
-                qvals = values[indices]
-                # qvals=np.array([values[sel[n,:]] for n in np.arange(4)]).squeeze()
+#     quadVals, quadCoords = __getquadLoop(x, y, kx, ky, nx, ny, values)
 
-                quadVals.append(qvals)
-                quadCoords.append(qcoords)
+#     return quadVals, quadCoords
 
-    return np.array(quadVals), np.array(quadCoords)
+# TODO: marked for deletion
+# @nb.njit(parallel=True)
+# def __getquadLoop(x, y, kx, ky, nx, ny, values):
+#     quadVals = []
+#     quadCoords = []
+
+#     sel = np.empty((4, x.shape[0]), dtype=np.bool8)
+
+#     for yy in nb.prange(len(ky)-1):
+#         for xx in nb.prange(len(kx)-1):
+
+#             indices = __getSel(nx, ny, xx, yy)
+
+#             if indices.shape[0] > 0:
+#                 # x0,y0=xy[sel[0]][0]
+#                 # x1,y1=xy[sel[3]][0]
+#                 x0 = x[indices[0]]
+#                 y0 = y[indices[0]]
+#                 x1 = x[indices[3]]
+#                 y1 = y[indices[3]]
+#                 qcoords = np.array([x0, x1, y0, y1])
+#                 # where=np.array([np.nonzero(s)[0][0] for s in sel])
+#                 qvals = values[indices]
+#                 # qvals=np.array([values[sel[n,:]] for n in np.arange(4)]).squeeze()
+
+#                 quadVals.append(qvals)
+#                 quadCoords.append(qcoords)
+
+#     return np.array(quadVals), np.array(quadCoords)
 
 
 @nb.njit

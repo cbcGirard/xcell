@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sun May 28 17:00:57 2023
-
-@author: benoit
+Test for creating PyVista animation with changing mesh topology.
 """
 
 import xcell as xc

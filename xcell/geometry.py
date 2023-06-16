@@ -29,6 +29,15 @@ class Sphere:
 
         return isIn
 
+    def getSignedDistance(self, coords):
+        N = coords.shape[0]
+        dist = np.empty(N, dtype=np.float)
+        for ii in nb.prange(N):
+            c = coords[ii]
+            isIn[ii] = np.linalg.norm(c-self.center) - self.radius
+
+        return dist
+
 
 @nb.experimental.jitclass([
     ('center', float64[::1]),
@@ -57,6 +66,32 @@ class Disk:
                 self.radius*self.tol) and dist <= self.radius
 
         return isIn
+
+# todo: check math
+    def getSignedDistance(self, coords):
+        N = coords.shape[0]
+        signedDist = np.empty(N, dtype=np.float)
+
+        delta = coords-self.center
+        deviation = np.dot(delta, self.axis)
+        # distance along axis
+
+        for ii in nb.prange(N):
+            dist = np.linalg.norm(delta[ii])
+            # distance to center
+            dz = deviation[ii]*self.axis-coords[ii]
+            vr = dz-self.center
+            dr = np.linalg.norm(vr)
+
+            if dr < self.radius:
+                # signedDist[ii] = np.linalg.norm(dz)
+                signedDist[ii] = np.abs(deviation[ii])
+                # projected point inside disk
+            else:
+                signedDist[ii] = np.sqrt(dist**2-(dr-self.radius)**2)
+            # else:
+
+        return signedDist
 
 
 @nb.experimental.jitclass([

@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.animation import ArtistAnimation
 import xcell
+from tqdm import trange
 
 import Common
 import time
@@ -73,9 +74,9 @@ args = cli.parse_args()
 # Overrides for e.g. debugging in Spyder
 args.vids = True
 # args.synth=False
-args.folder = 'Quals/polyCell'
+args.folder = 'Final/polyCell'
 # args.folder='Quals/monoCell'
-# args.strat='depth'
+args.strat = 'depth'
 #args.nSegs = 101
 # args.folder='tst'
 # args.nskip=1
@@ -118,15 +119,19 @@ if args.synth:
     I = np.array([synthPulse(k) for k in range(ncomp)]).transpose()
 else:
     t = h.Vector().record(h._ref_t)
+    t.append(tstop)
     h.finitialize(-65 * mV)
     h.continuerun(tstop)
 
     tv = np.array(t)*1e-3
     I = 1e-9*np.array(ivecs).transpose()
 
+whichPts = list(range(0, tv.shape[0], args.nskip))
+whichPts.append(tv.shape[0]-1)
+whichInds = np.array(whichPts)
 
-I = I[::args.nskip]
-tv = tv[::args.nskip]
+I = I[whichInds]
+tv = tv[whichInds]
 
 
 analyticVmax = I/(4*np.pi*np.array(rads, ndmin=2))
@@ -148,7 +153,6 @@ if xmax <= 0 or np.isnan(xmax):
 
 
 lastNumEl = 0
-lastI = 0
 
 
 resultFolder = os.path.join(args.folder, args.strat)
@@ -190,8 +194,11 @@ if args.vids:
     # animators.append(xcell.visualizers.LogError(None,study))
 
 iEffective = []
-for r, c, v in zip(rads, coords, I[0]):
-    setup.addCurrentSource(v, c, r)
+for r, c, v in zip(rads, coords, I.transpose()):
+    signal = xcell.signals.PiecewiseSignal()
+    signal.times = tv
+    signal.values = v
+    setup.addCurrentSource(signal, c, r)
 
 tmax = tv.shape[0]
 errdicts = []
@@ -211,7 +218,8 @@ pickle.dump(simDict, open(os.path.join(
 
 # %%
 # run simulatios
-for ii in range(0, tmax):
+stepper = trange(0, tmax)
+for ii in stepper:
 
     t0 = time.monotonic()
     ivals = I[ii]
@@ -223,9 +231,10 @@ for ii in range(0, tmax):
     changed = False
     # metrics=[]
 
-    for jj in range(len(setup.currentSources)):
-        ival = ivals[jj]
-        setup.currentSources[jj].value = ival
+    # for jj in range(len(setup.currentSources)):
+    #     ival = ivals[jj]
+    #     setup.currentSources[jj].value = ival
+    setup.currentTime = tval
 
     if args.strat == 'k':
         # k-param strategy
@@ -280,7 +289,8 @@ for ii in range(0, tmax):
         setup.iteration += 1
 
         study.saveData(setup)  # ,baseName=str(setup.iteration))
-        print('%d source nodes' % sum(setup.nodeRoleTable == 2))
+        stepper.set_postfix_str('%d source nodes' %
+                                sum(setup.nodeRoleTable == 2))
     else:
         # vdof = setup.getDoFs()
         # v=setup.iterativeSolve(vGuess=vdof)
@@ -292,14 +302,10 @@ for ii in range(0, tmax):
 
     dt = time.monotonic()-t0
 
-    lastI = ival
-
     study.newLogEntry(['Timestep', 'Meshnum'], [
                       setup.currentTime, setup.meshnum])
 
     setup.stepLogs = []
-
-    print('%d percent done' % (int(100*ii/tmax)))
 
     errdict = xcell.misc.getErrorEstimates(setup)
     errdict['densities'] = density
@@ -331,7 +337,11 @@ else:
 
 lists['depths'] = depthStr
 
-pickle.dump(lists, open(studyPath+'/'+args.strat+'.pcr', 'wb'))
+# pickle.dump(lists, open(studyPath+'/'+args.strat+'.pcr', 'wb'))
+study.save(lists, args.strat)
+if args.vids:
+    for ani, aniName in zip(animators, aniNames):
+        study.saveAnimation(ani, aniName)
 
 # %%
 
@@ -348,28 +358,34 @@ if args.vids:
         xcell.colors.useDarkStyle()
         nUtil.showCellGeo(an.axes[0])
 
+        if len(an.dataSets) == 0:
+            # reload data
+            an = study.load(l, ext='.adata')
+
         fname = l+args.strat
         # an.animateStudy(fname, fps=30)
 
         xcell.colors.useLightStyle()
 
         alite = an.copy({'colorbar': False,
-                         'barRatio': barRatio})
+                         'barRatio': barRatio,
+                         'labelAxes': False})
 
-        figw = 0.3*6.5
+        figw = 0.3*7
         alite.fig.set_figwidth(figw)
-        alite.fig.set_figheight(1.2*figw)
+        alite.fig.set_figheight(1.1*figw)
         alite.axes[0].set_xticks([])
         alite.axes[0].set_yticks([])
 
         nUtil.showCellGeo(alite.axes[0])
 
         # get closest frames to 5ms intervals
-        frameNs = [int(f*len(alite.dataSets)/tstop)
-                   for f in np.arange(0, tstop, tPerFrame)]
+        frameNs = np.linspace(0, len(alite.dataSets)-1,
+                              1+int(tstop/tPerFrame), dtype=int)
         artists = [alite.getArtists(ii) for ii in frameNs]
         alite.animateStudy(fname+'-lite', fps=30, artists=artists,
                            vectorFrames=np.arange(len(frameNs)), unitStr='V')
+        alite.solobar(fname+'-lite')
 
         # artists=[alite.getArtists(ii) for ii in frameNs]
         # alite.animateStudy(fname+'-lite', fps=30, vectorFrames=frameNs, unitStr='V')

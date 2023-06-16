@@ -276,10 +276,10 @@ def getCellImage():
             lx = coords.shape[0]
             if lx == 1:
                 # special case of single node
-                coords = np.array([[sec.x3d(i),
-                                    sec.y3d(i),
-                                    sec.z3d(i)]
-                                   for i in [0, sec.n3d()-1]])
+                coords = 1e-6*np.array([[sec.x3d(i),
+                                         sec.y3d(i),
+                                         sec.z3d(i)]
+                                        for i in [0, sec.n3d()-1]])
                 lx = 2
                 r = [r]
 
@@ -443,12 +443,10 @@ class ThresholdStudy:
 
         return cell
 
-    def getThreshold(self, depth, pmin=0, pmax=1e2, analytic=False):
+    def getThreshold(self, depth, pmin=0, pmax=1e2, analytic=False, strict=True):
 
         if not analytic:
             self.sim.meshAndSolve(depth)
-            if self.viz is not None:
-                self.viz.addSimulationData(self.sim, append=True)
             numEl = len(self.sim.mesh.elements)
             numSrc = sum(self.sim.nodeRoleTable == 2)
         else:
@@ -460,8 +458,13 @@ class ThresholdStudy:
             thresh = np.nan
             numSrc = np.nan
         else:
-            assert self._runTrial(pmax, analytic=analytic)
-            assert not self._runTrial(pmin, analytic=analytic)
+
+            if strict:
+                assert self._runTrial(pmax, analytic=analytic)
+                assert not self._runTrial(pmin, analytic=analytic)
+            else:
+                if self._runTrial(pmax, analytic=analytic) and not self._runTrial(pmin, analytic=analytic):
+                    return np.nan, np.nan, np.nan
 
             while (pmax-pmin) > 1e-6:
                 md = 0.5*(pmin+pmax)
@@ -475,6 +478,10 @@ class ThresholdStudy:
 
             thresh = md
             # in amps
+
+        if self.viz is not None and not analytic:
+            self.sim.nodeVoltages *= thresh
+            self.viz.addSimulationData(self.sim, append=True)
 
         return thresh, numEl, numSrc
 

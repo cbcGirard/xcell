@@ -547,7 +547,7 @@ class Simulation:
             self.nodeRoleVals[indices] = ii
 
             # self.nodeVoltages[indices] = src.value
-            self.nodeVoltages[indices] = src.value.getCurrentValue(
+            self.nodeVoltages[indices] = src.value.getValueAtTime(
                 self.currentTime)
 
         # meshCurrentSrc=self.nodeISources
@@ -723,7 +723,7 @@ class Simulation:
         nDoF = dof2Global.shape[0]
 
         M, b = self.getSystem()
-        self.startTiming('Solving')
+        self.startTiming('Solve')
         vDoF = spsolve(M.tocsc(), b)
         self.logTime()
 
@@ -804,7 +804,7 @@ class Simulation:
 
         M, b = self.getSystem()
 
-        self.startTiming('Solving')
+        self.startTiming('Solve')
         vDoF, cginfo = cg(M.tocsc(), b, vGuess, tol)
         self.logTime()
 
@@ -863,7 +863,7 @@ class Simulation:
         srcV = []
 
         for ii in nb.prange(len(self.currentSources)):
-            I = self.currentSources[ii].value.getCurrentValue(self.currentTime)
+            I = self.currentSources[ii].value.getValueAtTime(self.currentTime)
             rad = self.currentSources[ii].radius
             srcI.append(I)
             srcLocs.append(self.currentSources[ii].coords)
@@ -874,7 +874,7 @@ class Simulation:
             srcV.append(V)
 
         for ii in nb.prange(len(self.voltageSources)):
-            V = self.voltageSources[ii].value.getCurrentValue(self.currentTime)
+            V = self.voltageSources[ii].value.getValueAtTime(self.currentTime)
             srcV.append(V)
             srcLocs.append(self.voltageSources[ii].coords)
             rad = self.voltageSources[ii].radius
@@ -1247,7 +1247,7 @@ class Simulation:
         # Nd=Nx+Ns
         # Nf=np.nonzero(isFix)[0].shape[0]
 
-        self.startTiming("Filtering conductances")
+        self.startTiming("Filter conductances")
         # #renumber nodes in order of dof, current source, fixed v
         # dofNumbering=self.nodeRoleVals.copy()
         # dofNumbering[isSrc]=Nx+dofNumbering[isSrc]
@@ -1276,7 +1276,7 @@ class Simulation:
         c = cdup[isRowDoF]
 
         self.logTime()
-        self.startTiming("assembling system")
+        self.startTiming("Assemble system")
         G = scipy.sparse.coo_matrix(
             (-c, (E[:, 0], E[:, 1])),
             shape=(Nd, N_ext))
@@ -1397,7 +1397,7 @@ class Simulation:
             Interpolated values at the specfied points
 
         """
-        vals = np.empty(coords.shape[0])
+        vals = np.zeros(coords.shape[0])
         unknown = np.ones_like(vals, dtype=bool)
 
         if elements is None:

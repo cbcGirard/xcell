@@ -212,7 +212,7 @@ def useLightStyle():
     plt.style.use(styleScope2)
     plt.style.use({'font.size': 11})
 
-    cm = mpl.colormaps.get('plasma')
+    cm = mpl.colormaps.get('YlOrRd')
     CM_MONO = cm.copy()
 
     CM_BIPOLAR = mpl.colormaps.get('seismic').copy()

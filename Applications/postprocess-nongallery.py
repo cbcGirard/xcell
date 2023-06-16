@@ -105,7 +105,7 @@ if staticPlots:
 
     for fv in filterVals:
 
-        fstack, fratio = xcell.Visualizers.plotStudyPerformance(study,
+        fstack, fratio = xcell.visualizers.plotStudyPerformance(study,
                                                                 onlyCat=filterCategories[0],
                                                                 onlyVal=fv)
         fstem = '_'+filterCategories[0]+str(fv)

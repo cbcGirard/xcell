@@ -6,10 +6,10 @@ import numpy as np
 
 class Signal:
     def __init__(self, value):
-        self._value = value
+        self.value = value
 
     def getValueAtTime(self, t):
-        return self._value
+        return self.value
 
     def reset(self):
         pass

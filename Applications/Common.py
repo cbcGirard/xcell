@@ -252,6 +252,7 @@ class BallAndStick(Cell, xcell.nrnutil.RecordedCell):
         self._set_position(self.x-dx, self.y-dy, self.z)
 
         self.attachMembraneRecordings([self.soma])
+        self.attachSpikeDetector(self.soma)
 
     def _setup_morphology(self):
         self.soma = h.Section(name='soma', cell=self)
