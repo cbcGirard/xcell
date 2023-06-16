@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<VTKFile type="vtkMultiBlockDataSet" version="1.0" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
+  <vtkMultiBlockDataSet>
+    <DataSet index="0" name="bodies" file="composite/composite_0.vtp"/>
+    <DataSet index="1" name="misc" file="composite/composite_1.vtp"/>
+    <DataSet index="2" name="oriens" file="composite/composite_2.vtp"/>
+    <DataSet index="3" name="hilus" file="composite/composite_3.vtp"/>
+    <DataSet index="4" name="ElectrodeBody" file="composite/composite_4.vtp"/>
+    <DataSet index="5" name="Macroelectrode0" file="composite/composite_5.vtp"/>
+    <DataSet index="6" name="Macroelectrode1" file="composite/composite_6.vtp"/>
+    <DataSet index="7" name="Macroelectrode2" file="composite/composite_7.vtp"/>
+    <DataSet index="8" name="Macroelectrode3" file="composite/composite_8.vtp"/>
+    <DataSet index="9" name="Macroelectrode4" file="composite/composite_9.vtp"/>
+    <DataSet index="10" name="Macroelectrode5" file="composite/composite_10.vtp"/>
+    <DataSet index="11" name="Microelectrode0" file="composite/composite_11.vtp"/>
+    <DataSet index="12" name="Microelectrode1" file="composite/composite_12.vtp"/>
+    <DataSet index="13" name="Microelectrode2" file="composite/composite_13.vtp"/>
+    <DataSet index="14" name="Microelectrode3" file="composite/composite_14.vtp"/>
+    <DataSet index="15" name="Microelectrode4" file="composite/composite_15.vtp"/>
+    <DataSet index="16" name="Microelectrode5" file="composite/composite_16.vtp"/>
+    <DataSet index="17" name="Microelectrode6" file="composite/composite_17.vtp"/>
+    <DataSet index="18" name="Microelectrode7" file="composite/composite_18.vtp"/>
+    <DataSet index="19" name="Microelectrode8" file="composite/composite_19.vtp"/>
+    <DataSet index="20" name="Microelectrode9" file="composite/composite_20.vtp"/>
+    <DataSet index="21" name="Microelectrode10" file="composite/composite_21.vtp"/>
+    <DataSet index="22" name="Microelectrode11" file="composite/composite_22.vtp"/>
+    <DataSet index="23" name="Microelectrode12" file="composite/composite_23.vtp"/>
+    <DataSet index="24" name="Microelectrode13" file="composite/composite_24.vtp"/>
+    <DataSet index="25" name="Microelectrode14" file="composite/composite_25.vtp"/>
+  </vtkMultiBlockDataSet>
+</VTKFile>
