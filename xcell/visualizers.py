@@ -919,15 +919,20 @@ def new3dPlot(boundingBox=None, *args, fig=None):
     return axis
 
 
-def animatedTitle(figure, text, axis=None):
-    kwargs = {}
+def animatedTitle(figure, text, axis=None, **kwargs):
+    # kwargs = {}
     if figure is None:
         dest = axis
         kwargs['transform'] = axis.transAxes
     else:
         dest = figure
 
-    title = dest.text(0.5, .95, text,
+    if 'vspace' in kwargs:
+        d = 1.-kwargs.pop('vspace')
+    else:
+        d = 1.
+
+    title = dest.text(0.5, d, text,
                       horizontalalignment='center',
                       verticalalignment='top',
                       **kwargs)
@@ -2365,8 +2370,9 @@ class SingleSlice(FigureAnimator):
         artists.append(showEdges2d(self.axes[0],
                                    data['meshPts'],
                                    alpha=meshAlpha))
-        artists.extend(self.tbar.getArt(self.timevec[setnum],
-                                        setnum))
+        if self.tbar is not None:
+            artists.extend(self.tbar.getArt(self.timevec[setnum],
+                                            setnum))
 
         return artists
 
@@ -2528,6 +2534,8 @@ class LogError(FigureAnimator):
 
 
 class PVScene(pv.Plotter):
+    # for future ref:
+    # pdf seems to be fixed at 72 dpi
     def __init__(self, study=None, time=None, **kwargs):
         dpi = None
         hfrac = 0.1
@@ -2540,12 +2548,17 @@ class PVScene(pv.Plotter):
                 hfrac = 0.5/figsize[1]
                 kwargs['window_size'] = winsize.astype(int)
                 figsize[1] *= 1+hfrac
-                pv.global_theme.line_width = 1.*7./figsize[0]
+                if 'line_width' in kwargs:
+                    lw = kwargs.pop('line_width')
+                else:
+                    lw = 1.0
+                pv.global_theme.line_width = lw*dpi/72
 
         super().__init__(**kwargs)
         if time is None:
             f = None
             ax = None
+            self.tbar = None
         else:
             # f, ax = plt.subplots(tight_layout=True, figsize=figsize, dpi=dpi, )
 
@@ -2562,7 +2575,8 @@ class PVScene(pv.Plotter):
         self.edgeMesh = None
 
     def setTime(self, time):
-        self.tbar.getArt(time)
+        if self.tbar is not None:
+            self.tbar.getArt(time)
 
     def setup(self, regions, mesh=None, simData=None, **meshkwargs):
         sigargs = {'opacity': 0.5}

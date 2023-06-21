@@ -45,7 +45,7 @@ Depth = 16
 adaptive = True
 symlog = True
 amplitude = False
-liteMode = False
+liteMode = True
 preview = False
 
 if liteMode:
@@ -53,10 +53,11 @@ if liteMode:
 else:
     xcell.colors.useDarkStyle()
 
-fontsize = 20
+fontsize = 10
 pv.global_theme.font.size = fontsize
 pv.global_theme.font.label_size = fontsize
 pv.global_theme.font.title_size = fontsize
+pv.global_theme.line_width = 15.0
 
 
 sigma_0 = 0.3841
@@ -126,23 +127,33 @@ rdisp['Conductors'] = rc.clip('z')
 simbb = bbox[xcell.io.PV_BOUND_ORDER]
 
 linecolor = pv.Color(xcell.colors.BASE)
-# windowInch = np.array([3.5,6])
-# DPI = 300
-# windowPx = DPI*windowInch
-p = xcell.visualizers.PVScene()
+windowInch = np.array([3.5, 2.5])
+DPI = 300
+adj = int(DPI/72)
+windowPx = np.array(DPI*windowInch, dtype=int)
+
+p = xcell.visualizers.PVScene(
+    figsize=windowInch, dpi=DPI, off_screen=True, line_width=1.5)
 p.setup(rdisp, opacity=1.,
         # rdisp['Conductors'],
         simData='sigma',
-        scalar_bar_args={'title': r'$\sigma [S/m]$'}
+        scalar_bar_args={'title': r'$\sigma[S/m]$',
+                         'title_font_size': 9*adj,
+                         'label_font_size': 9*adj,
+                         'fmt': '%.2f'}
         )
 p.add_ruler(pointa=(ROI[0], 1.2*ROI[2], 0.),
-            pointb=(ROI[1], 1.2*ROI[2], 0.),
+            pointb=(ROI[0]+5e-3, 1.2*ROI[2], 0.),
             font_size_factor=1.,
             tick_color='black',
             label_color='black',
-            label_format='%''.1e',
-            title='Length [m]',
+            title='5 mm',
+            # label_format='%''.0e',
+            # title='Length [m]',
             tick_length=15,
+            number_labels=0,
+            show_labels=False,
+            number_minor_ticks=0
             )
 p.planeview(1.1*np.array(ROI))
 
@@ -151,7 +162,9 @@ p.planeview(1.1*np.array(ROI))
 microcenters = np.array([m.center for m in regions['Electrodes'][:nmicro]])
 p.add_mesh(pv.wrap(microcenters), color='gold',
            render_points_as_spheres=True, point_size=10.)
-study.savePVimage(p, 'setup')
+study.savePVimage(p, 'setup2.svg', raster=False)
+study.savePVimage(p, 'setup2.png', window_size=windowPx)
+
 if preview:
     p.show()
 else:
@@ -360,6 +373,9 @@ study.save(infos, fstem+'info')
 moviename = 'voltage'
 meshname = 'sim0'
 
+# plotTime =tvec
+plotTime = None
+
 # reloading pickled data
 if not 'infos' in dir():
     infos = study.load(fstem+'info')
@@ -431,16 +447,17 @@ else:
     cma = 'seismic'
 
 
-p = xcell.visualizers.PVScene(time=tvec)  # , figsize=[3.25, 2.5], dpi=300)
+p = xcell.visualizers.PVScene(time=plotTime, figsize=[
+                              3.25, 2.5], dpi=300, off_screen=True)
 
-# p.open_movie(fstem+'.mp4')
-study.makePVmovie(p, filename=moviename)
+p.open_movie(fstem+'.mp4')
+# study.makePVmovie(p, filename=moviename)
 
 
 # cma = mcmap['bwr']
 # cma = xcell.colors.CM_BIPOLAR
 # cma=mcmap['seismic']
-cma = xcell.colors.scoopCmap(cmr.guppy_r)
+# cma = xcell.colors.scoopCmap(cmr.guppy_r)
 
 
 if viewIso:
@@ -467,7 +484,8 @@ if not viewIso:
 # p.show(auto_close=False)
 
 # %%
-viz = tqdm.trange(len(tvec), desc='Animating')
+# viz = tqdm.trange(len(tvec), desc='Animating')
+viz = [0, 14, 43, 59, 79, 102, ]
 for ii in viz:
     t = tvec[ii]
     if ii+1 == len(tvec):
@@ -496,15 +514,19 @@ for ii in viz:
     else:
         mesh['voltage'] = data[ii]
 
-    while t < tnext:
-        p.setTime(t)
-        p.write_frame()
-        # if liteMode:
-        study.savePVimage(p,
-                          os.path.join(moviename,
-                                       moviename+'frame%03d.eps' % ii))
-        t += 0.005
-        break
+    p.setTime(t)
+    p.write_frame()
+    p.screenshot('f%03d.png' % ii)
+
+    # while t < tnext:
+    #     p.setTime(t)
+    #     # p.write_frame()
+    #     # if liteMode:
+    #     study.savePVimage(p,
+    #                       os.path.join(moviename,
+    #                                    moviename+'frame%03d.png' % ii))
+    #     t += 0.005
+    #     break
 
 if liteMode:
     study.savePlot(cbarfig,

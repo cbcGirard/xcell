@@ -165,6 +165,8 @@ with mpl.rc_context({
     'figure.figsize': [3.25, 4],
     'font.size': 10,
     'legend.fontsize': 9,
+    'axes.grid': False,
+    'axes.prop_cycle': plt.cycler(color=plt.colormaps['tab10'].colors)
 }):
     f, axes = plt.subplots(3,
                            sharex=True,
@@ -174,7 +176,7 @@ with mpl.rc_context({
     axes[1].set_ylabel('Normalized error')
 
     axes[0].plot(tvec, fixDict['Total time [Wall]'], label='Static')
-    axes[0].plot(tvec, adaptDict['Total time [Wall]'], label='Dynamic')
+    axes[0].plot(tvec, adaptDict['Total time [Wall]'][:-1], label='Dynamic')
     axes[0].set_ylabel('Wall time [s]')
     axes[0].legend()
 
@@ -191,14 +193,14 @@ with mpl.rc_context({
     f.align_ylabels()
     # [a.set_xticks([]) for a in axes[:-1]]
 
-    study.savePlot(f, 'timeSteps')
+    # study.savePlot(f, 'timeSteps')
 
     f2, ax2 = plt.subplots(figsize=[3.25, 2.5])
     ax2.bar([0, 1], [sum(fixDict['Total time [Wall]']),
                      sum(adaptDict['Total time [Wall]'])],
             tick_label=['Static', 'Dynamic'])
     ax2.set_ylabel('Wall time [s]')
-    study.savePlot(f2, 'Time Comparison')
+    # study.savePlot(f2, 'Time Comparison')
 
 
 stdErr = np.std(dels)

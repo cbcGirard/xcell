@@ -119,7 +119,7 @@ with plt.rc_context({'figure.figsize':[19.2, 10.8],
     outFile = 'logo'
 
     ani.save(outFile+'.mp4', fps=logoFPS, dpi=dpi)
-    fig.savefig(outFile+'.png', dpi=dpi)
+    fig.savefig(outFile+'.svg', dpi=dpi)
 
     tlogo=len(artists)/logoFPS
     print('%.2f second logo made in %.0f seconds'%(tlogo, t_tot))

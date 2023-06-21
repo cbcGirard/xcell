@@ -1924,7 +1924,7 @@ class SimStudy:
             Active plotter.
         filename : str
             File name, with or without extension.
-            Saves as .png if not specified.
+            Saves as .pdf if not specified.
         ** kwargs : 
             Options for plotter.show()
 
@@ -1938,7 +1938,10 @@ class SimStudy:
             ext = '.pdf'
         fname = self.__makepath(f, ext)
 
-        plotter.save_graphic(fname, **kwargs)
+        if ext == '.png':
+            plotter.screenshot(fname, **kwargs)
+        else:
+            plotter.save_graphic(fname, **kwargs)
 
     def makePVmovie(self, plotter, filename, **kwargs):
         """

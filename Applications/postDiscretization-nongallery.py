@@ -119,12 +119,12 @@ class ErrorComp(xc.visualizers.FigureAnimator):
 
 folder = 'Quals/formulations'
 # folder = 'Quals/fixedDisc'
-# formulations = ['Admittance', 'FEM', 'Face']
-# titles = ['Admittance', 'Trilinear FEM', 'Mesh dual']
+formulations = ['Admittance', 'FEM', 'Face']
+titles = ['Admittance', 'Trilinear FEM', 'Mesh dual']
 
-folder = 'Quals/PoC'
-formulations = ['Adaptive', 'Uniform']
-titles = ['Octree', 'Uniform']
+# folder = 'Quals/PoC'
+# formulations = ['Adaptive', 'Uniform']
+# titles = ['Octree', 'Uniform']
 
 study, _ = com.makeSynthStudy(folder)
 folder = study.studyPath
@@ -133,9 +133,13 @@ xc.colors.useDarkStyle()
 
 # %%
 
-f = plt.figure(figsize=[6.5*.6, 8/3])
+f = plt.figure(
+    # figsize=[6.5*.6, 8/3]
+    figsize=[6.4, 4.8],
+    dpi=150,
+)
 
-newGraph = Composite(f, study)
+newGraph = Composite(f, study, prefs={'keeplegend': True})
 ax = newGraph.axes[0]
 
 
@@ -156,7 +160,8 @@ for form, title in zip(formulations, titles):
     # finalData['v'+title]=graphdata['simV']
     # finalData['r'+title]=graphdata['simR']
 
-
+newGraph.study.studyPath = os.getcwd()
+ax.set_ylabel('')
 newGraph.animateStudy('Composite')  # ,artists = artists)
 
 

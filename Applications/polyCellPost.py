@@ -173,29 +173,57 @@ for lite in ['lite']:  # ,'-lite']:
 # %% voltage plots
 an = pickle.load(
     open(os.path.join(folderstem, 'depth', 'volt-depth.adata'), 'rb'))
-fname = 'volt-depth'
+# fname = 'volt-depth'
+fname = 'tmp'
 
 xcell.colors.useLightStyle()
 
-alite = an.copy({'colorbar': False,
-                 'barRatio': barRatio})
+# alite = an.copy({'colorbar': False,
+#                  'barRatio': barRatio})
 
-figw = 0.3*6.5
-alite.fig.set_figwidth(figw)
-alite.fig.set_figheight(1.2*figw)
-alite.axes[0].set_xticks([])
-alite.axes[0].set_yticks([])
-alite.tbar.axes[0].set_xlim(right=tstop/1000)
+alite = an
+# %%
+f = plt.figure(figsize=(2., 2.), dpi=300, tight_layout=False)
 
-nUtil.showCellGeo(alite.axes[0])
+ax = f.add_axes([0, 0, 1, 1], xticks=[], yticks=[])
+alite.axes = [ax]
+alite.fig = f
+vizlim = 4e-4
+ax.set_ylim(-vizlim, vizlim)
+ax.set_xlim(-vizlim, vizlim)
+
+# figw = 0.3*6.5
+
+# alite.tbar.axes[0].set_xlim(right=tstop/1000)
+
+
+_ = nUtil.showCellGeo(alite.axes[0])
 
 # get closest frames to 5ms intervals
 frameNs = [int(f*len(alite.dataSets)/tstop)
            for f in np.arange(0, tstop, tPerFrame)]
-artists = [alite.getArtists(ii) for ii in frameNs]
-alite.animateStudy(fname+'-lite', fps=30, artists=artists,
-                   vectorFrames=np.arange(len(frameNs)), unitStr='V')
+frameNs.append(len(alite.dataSets)-1)
+# artists = [alite.getArtists(ii) for ii in frameNs]
+# alite.animateStudy(fname+'-lite', fps=30, artists=artists,
+#                     vectorFrames=np.arange(len(frameNs)), unitStr='V')
 
+for ii in range(len(frameNs)):
+    alite.resetFigure()
+    # figw = 2.
+    # alite.fig.set_figwidth(figw)
+    # alite.fig.set_figheight(1.*figw)
+    # ax.set_xticks([])
+    # ax.set_yticks([])
+    # alite.tbar.axes[0].set_xlim(right=tstop/1000)
+    alite.getArtists(frameNs[ii])
+    nUtil.showCellGeo(ax)
+
+    tag = ax.text(0.1, 0.9, '%d ms' % (5*ii), transform=ax.transAxes,
+                  bbox=dict(facecolor='white', alpha=0.8, edgecolor='gray', boxstyle='round'))
+
+    alite.fig.canvas.draw()
+    alite.fig.savefig('f%d.eps' % ii, dpi=300)
+    tag.remove()
 
 # %% voltage for screen
 
