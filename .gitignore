@@ -68,4 +68,8 @@ Thumbs.db
 *.flv
 *.mov
 *.wmv
-
+*.vtk
+*.eps
+*.pdf
+*.ply
+*.obj
