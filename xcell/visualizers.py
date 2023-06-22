@@ -2701,7 +2701,7 @@ class PVScene(pv.Plotter):
         self.edgeMesh = mesh
         super().add_mesh(mesh, style='wireframe',
                          opacity=0.2, edge_color=colors.BASE,
-                         color=pv.global_theme.background)
+                         color=colors.BASE)
 
     def add_mesh(self, mesh, **kwargs):
         if 'show_edges' in kwargs:

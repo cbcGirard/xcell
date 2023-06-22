@@ -186,8 +186,14 @@ class Regions(pv.MultiBlock):
         # vtkMesh = toVTK(mesh)
         # vtkMesh.cell_data['sigma'] = defaultSigma
         # vtkPts = vtkMesh.cell_centers()
-        vtkPts = pv.wrap(np.array([el.center for el in mesh.elements]))
+        isPV = isinstance(mesh, pv.DataSet)
+        if isPV:
+            vtkPts = pv.wrap(mesh.cell_centers())
+        else:
+            vtkPts = pv.wrap(np.array([el.center for el in mesh.elements]))
+
         sigs = defaultSigma*np.ones(vtkPts.n_points)
+
 
         for region in self['Conductors']:
             sig = region['sigma'][0]
@@ -202,8 +208,11 @@ class Regions(pv.MultiBlock):
             # vtkMesh['sigma'][inside] = 0
             sigs[inside] = 0
 
-        for el, s in zip(mesh.elements, sigs):  # vtkMesh['sigma']):
-            el.sigma = np.array(s, ndmin=1)
+        if isPV:
+            mesh.cell_data['sigma'] = sigs.copy()
+        else:
+            for el, s in zip(mesh.elements, sigs):  # vtkMesh['sigma']):
+                el.sigma = np.array(s, ndmin=1)
 
         # return vtkMesh
 

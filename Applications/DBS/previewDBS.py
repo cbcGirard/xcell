@@ -5,7 +5,8 @@ Created on Sun Apr  9 16:42:08 2023
 
 @author: benoit
 """
-import xcell
+#%%
+import xcell as xc
 import pyvista as pv
 import pickle
 import os
@@ -49,9 +50,9 @@ liteMode = True
 preview = False
 
 if liteMode:
-    xcell.colors.useLightStyle()
+    xc.colors.useLightStyle()
 else:
-    xcell.colors.useDarkStyle()
+    xc.colors.useDarkStyle()
 
 fontsize = 10
 pv.global_theme.font.size = fontsize
@@ -73,8 +74,8 @@ if args.remote:
     pv.start_xvfb()
 
 # hack for reloading regions
-rsave = pv.read('../../Examples/Geometry/composite.vtm')
-regions = xcell.io.Regions()
+rsave = pv.read('composite.vtm')
+regions = xc.io.Regions()
 regions['Conductors'] = rsave['Conductors']
 
 
@@ -101,7 +102,7 @@ fstem = 'full-d%dx%d' % (Depth, int(Coef*10))
 if adaptive:
     fstem = 'adaptive-'+fstem
 
-study = xcell.SimStudy(os.path.join(os.getcwd(), fstem), bbox)
+study = xc.SimStudy(os.path.join(os.getcwd(), fstem), bbox)
 
 sim = study.newSimulation()
 
@@ -124,16 +125,13 @@ rc = rdisp['Conductors']
 
 rdisp['Insulators'][0] = rdisp.toPlane()['Insulators'][0]
 rdisp['Conductors'] = rc.clip('z')
-simbb = bbox[xcell.io.PV_BOUND_ORDER]
+simbb = bbox[xc.io.PV_BOUND_ORDER]
 
-linecolor = pv.Color(xcell.colors.BASE)
-windowInch = np.array([3.5, 2.5])
-DPI = 300
-adj = int(DPI/72)
-windowPx = np.array(DPI*windowInch, dtype=int)
-
-p = xcell.visualizers.PVScene(
-    figsize=windowInch, dpi=DPI, off_screen=True, line_width=1.5)
+linecolor = pv.Color(xc.colors.BASE)
+# windowInch = np.array([3.5,6])
+# DPI = 300
+# windowPx = DPI*windowInch
+p = xc.visualizers.PVScene()
 p.setup(rdisp, opacity=1.,
         # rdisp['Conductors'],
         simData='sigma',
@@ -175,7 +173,7 @@ print(fstem)
 # %% Show currents
 
 if preview and showCurrents:
-    p = xcell.visualizers.PVScene(time=tvec)
+    p = xc.visualizers.PVScene(time=tvec)
     p.camera.focal_point = np.zeros(3)
     p.camera.position = 2 * \
         np.linalg.norm(regions['Conductors'].bounds[::2]
@@ -201,7 +199,7 @@ if preview and showCurrents:
     p.setup(regions)
     p.add_mesh(pts,
                clim=150e-6*np.array([-1, 1]),
-               show_edges=True, cmap=xcell.colors.CM_BIPOLAR,
+               show_edges=True, cmap=xc.colors.CM_BIPOLAR,
                # log_scale=True,
                scalar_bar_args=VBAR, render_points_as_spheres=True,
                point_size=10)
@@ -253,7 +251,7 @@ else:
 coefs = 2**(-Coef*depthvec)
 
 sim.makeAdaptiveGrid(refPts=refs, maxdepth=depthvec,
-                     minl0Function=xcell.generalMetric,
+                     minl0Function=xc.generalMetric,
                      coefs=coefs, coarsen=False)
 sim.finalizeMesh(sigmaMesh=regions, defaultSigma=sigma_0)
 sim.setBoundaryNodes()
@@ -261,7 +259,7 @@ sim.setBoundaryNodes()
 # sim.startTiming('Assign sigma')
 # regions.assignSigma(sim.mesh, defaultSigma=sigma_0)
 # sim.logTime()
-vmesh = xcell.io.toVTK(sim.mesh)
+vmesh = xc.io.toVTK(sim.mesh)
 vmesh.point_data['voltage'] = 0
 
 vslice = vmesh.slice(normal='z')
@@ -270,7 +268,7 @@ vslice = vmesh.slice(normal='z')
 vmesh.save(os.path.join(fstem, 'sim0.vtk'))
 vslice.save(os.path.join(fstem, 'Slice.vtk'))
 
-p = xcell.visualizers.PVScene(time=tvec)
+p = xc.visualizers.PVScene(time=tvec)
 p.setup(regions.toPlane(), mesh=vslice,
         simData='sigma', show_edges=True)
 p.planeview(ROI)
@@ -304,7 +302,7 @@ for ii in timer:
         coefs = 2**(-Coef*depthvec)
 
         changed = sim.makeAdaptiveGrid(refPts=refs, maxdepth=depthvec,
-                                       minl0Function=xcell.generalMetric,
+                                       minl0Function=xc.generalMetric,
                                        coefs=coefs)
         if changed:
 
@@ -328,7 +326,7 @@ for ii in timer:
     # if adaptive and changed:
     sim.iteration += 1
     sim.name = 'sim%d' % sim.iteration
-    vmesh = xcell.io.toVTK(sim.mesh)
+    vmesh = xc.io.toVTK(sim.mesh)
     vmesh.save(os.path.join(fstem, '%s.vtk' %
                sim.name))
 
@@ -358,7 +356,7 @@ for ii in timer:
     if np.max(np.abs(v)) > 100:
         exit
     # vmesh.point_data['v'] = v
-    # p = xcell.visualizers.PVScene()
+    # p = xc.visualizers.PVScene()
     # p.setup(regions.toPlane(), vmesh.slice('z'), simData='v',
     #         show_edges=True)
     # p.planeview(ROI)
@@ -375,6 +373,9 @@ meshname = 'sim0'
 
 # plotTime =tvec
 plotTime = None
+
+# dataCat = 'voltage'
+dataCat = 'sigma'
 
 # reloading pickled data
 if not 'infos' in dir():
@@ -395,16 +396,22 @@ else:
 
         msh = pv.read((os.path.join(fstem, meshname+'.vtk')))
         if ii == 0:
-            msh.point_data['voltage'] = np.zeros(msh.n_points)
+            if dataCat=='sigma':
+                msh.cell_data[dataCat]=np.zeros(msh.n_cells)
+            else:
+                msh.point_data[dataCat] = np.zeros(msh.n_points)
             vmesh = msh.copy()
             mesh = msh.copy()
         else:
-            msh.point_data['voltage'] = v.copy()
+            if dataCat=='sigma':
+                regions.assignSigma(msh,defaultSigma = sigma_0)
+            else:
+                msh.point_data[dataCat] = v.copy()
         # print('%d\t%d' % (len(v), msh.n_points))
 
         slic = msh.slice(normal='z')
 
-        data.append(slic['voltage'])
+        data.append(slic[dataCat])
 
     # vmesh.point_data['voltage'] = 0
     mesh = vmesh.slice(normal='z')
@@ -431,11 +438,11 @@ if symlog:
     moviename += '-log'
     symmer = SymLogNorm(vspan[1]/100, vmax=vspan[1], vmin=vspan[0])
     clim = (0., 1.)
-    cma = xcell.colors.CM_BIPOLAR
+    cma = xc.colors.CM_BIPOLAR
     # opacity = np.ones(11)
     # opacity[11//2] = 0.
     # pargs['opacity'] = opacity
-    cbarfig = xcell.visualizers.makeSoloColorbar(None,
+    cbarfig = xc.visualizers.makeSoloColorbar(None,
                                                  cmap=cma, norm=symmer, unit='V')
 elif amplitude:
     clim = max(np.abs(vrange))*np.array([1e-3, 1.])
@@ -455,7 +462,7 @@ p.open_movie(fstem+'.mp4')
 
 
 # cma = mcmap['bwr']
-# cma = xcell.colors.CM_BIPOLAR
+# cma = xc.colors.CM_BIPOLAR
 # cma=mcmap['seismic']
 # cma = xcell.colors.scoopCmap(cmr.guppy_r)
 
@@ -463,7 +470,7 @@ p.open_movie(fstem+'.mp4')
 if viewIso:
     p.setup(regions)
 else:
-    p.setup(regions.toPlane(), mesh=mesh, simData='voltage', clim=clim,
+    p.setup(regions.toPlane(), mesh=mesh, simData=dataCat, clim=clim,
             show_edges=True, cmap=cma, scalar_bar_args=VBAR,
             show_scalar_bar=(not symlog),
             lighting=False,
@@ -508,11 +515,11 @@ for ii in viz:
         p.edgeMesh.copy_from(newmesh)
 
     if symlog:
-        mesh['voltage'] = symmer(data[ii])
+        mesh[dataCat] = symmer(data[ii])
     elif amplitude:
-        mesh['voltage'] = np.abs(data[ii])
+        mesh[dataCat] = np.abs(data[ii])
     else:
-        mesh['voltage'] = data[ii]
+        mesh[dataCat] = data[ii]
 
     p.setTime(t)
     p.write_frame()
