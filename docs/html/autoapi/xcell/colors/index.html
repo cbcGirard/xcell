@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>xcell.colors &mdash; xcell  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #990000" >
+
+          
+          
+          <a href="../../../index.html">
+            
+              <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Purpose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html#installing">Installing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html#citation">Citation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../auto_examples/index.html">Example applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../auto_examples/index.html#geometry">Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #990000" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">xcell</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.colors</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/autoapi/xcell/colors/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-xcell.colors">
+<span id="xcell-colors"></span><h1><a class="reference internal" href="#module-xcell.colors" title="xcell.colors"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.colors</span></code></a><a class="headerlink" href="#module-xcell.colors" title="Permalink to this heading"></a></h1>
+<p>Color schemes for xcell.</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading"></a></h2>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.colors.scoopCmap" title="xcell.colors.scoopCmap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scoopCmap</span></code></a>(baseCmap[, fraction])</p></td>
+<td><p>Fades colormap transparency as values approach 0.0.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.colors.makeStyleDict" title="xcell.colors.makeStyleDict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">makeStyleDict</span></code></a>(fgColor, bgColor)</p></td>
+<td><p>Generate dictionary of plotting preferences.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.colors.useDarkStyle" title="xcell.colors.useDarkStyle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">useDarkStyle</span></code></a>()</p></td>
+<td><p>Switch to dark-mode visualizations (suitable for screen).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.colors.useLightStyle" title="xcell.colors.useLightStyle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">useLightStyle</span></code></a>()</p></td>
+<td><p>Switch to light-mode visualizations (suitable for print).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.colors.setupPVtheme" title="xcell.colors.setupPVtheme"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setupPVtheme</span></code></a>(theme)</p></td>
+<td><p>Set PyVista to match current xcell theme.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.colors.recolorSVG" title="xcell.colors.recolorSVG"><code class="xref py py-obj docutils literal notranslate"><span class="pre">recolorSVG</span></code></a>(fname[, toLight])</p></td>
+<td><p>Post-process SVG to change color scheme.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Permalink to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.colors.MESH_ALPHA" title="xcell.colors.MESH_ALPHA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MESH_ALPHA</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.colors.FAINT" title="xcell.colors.FAINT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FAINT</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.colors.CM_BIPOLAR" title="xcell.colors.CM_BIPOLAR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CM_BIPOLAR</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.colors.DARK" title="xcell.colors.DARK"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DARK</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.colors.HILITE" title="xcell.colors.HILITE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HILITE</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.colors.OFFWHITE" title="xcell.colors.OFFWHITE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OFFWHITE</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.colors.NULL" title="xcell.colors.NULL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NULL</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.colors.WHITE" title="xcell.colors.WHITE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WHITE</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.colors.ACCENT_DARK" title="xcell.colors.ACCENT_DARK"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ACCENT_DARK</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.colors.ACCENT_LIGHT" title="xcell.colors.ACCENT_LIGHT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ACCENT_LIGHT</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.colors.BASE" title="xcell.colors.BASE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BASE</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.colors.BG" title="xcell.colors.BG"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BG</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.colors.plx" title="xcell.colors.plx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plx</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.colors.lint" title="xcell.colors.lint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lint</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.colors.CM_MONO" title="xcell.colors.CM_MONO"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CM_MONO</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.colors.scopeColors" title="xcell.colors.scopeColors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scopeColors</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.colors.scopeColorsLite" title="xcell.colors.scopeColorsLite"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scopeColorsLite</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.colors.styleScope" title="xcell.colors.styleScope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">styleScope</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.colors.styleScope2" title="xcell.colors.styleScope2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">styleScope2</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.MESH_ALPHA">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">MESH_ALPHA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.25</span></em><a class="headerlink" href="#xcell.colors.MESH_ALPHA" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.FAINT">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">FAINT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">()</span></em><a class="headerlink" href="#xcell.colors.FAINT" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.colors.scoopCmap">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">scoopCmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">baseCmap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.colors.scoopCmap" title="Permalink to this definition"></a></dt>
+<dd><p>Fades colormap transparency as values approach 0.0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>baseCmap</strong> (<em>colormap</em>) – Colormap to modify.</p></li>
+<li><p><strong>fraction</strong> (<em>float</em><em>, </em><em>optional</em>) – Fraction of colormap range to apply alpha fade. The default is 0.1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>newCmap</strong> – Modified colormap.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>colormap</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.CM_BIPOLAR">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">CM_BIPOLAR</span></span><a class="headerlink" href="#xcell.colors.CM_BIPOLAR" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.DARK">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">DARK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'#19232d'</span></em><a class="headerlink" href="#xcell.colors.DARK" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.HILITE">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">HILITE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'#afcfff'</span></em><a class="headerlink" href="#xcell.colors.HILITE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.OFFWHITE">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">OFFWHITE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'#dcd4c7'</span></em><a class="headerlink" href="#xcell.colors.OFFWHITE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.NULL">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">NULL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'#00000000'</span></em><a class="headerlink" href="#xcell.colors.NULL" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.WHITE">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">WHITE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'#FFFFFF00'</span></em><a class="headerlink" href="#xcell.colors.WHITE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.ACCENT_DARK">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">ACCENT_DARK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'#990000'</span></em><a class="headerlink" href="#xcell.colors.ACCENT_DARK" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.ACCENT_LIGHT">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">ACCENT_LIGHT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'#FFCC00'</span></em><a class="headerlink" href="#xcell.colors.ACCENT_LIGHT" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.BASE">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">BASE</span></span><a class="headerlink" href="#xcell.colors.BASE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.BG">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">BG</span></span><a class="headerlink" href="#xcell.colors.BG" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.plx">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">plx</span></span><a class="headerlink" href="#xcell.colors.plx" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.lint">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">lint</span></span><a class="headerlink" href="#xcell.colors.lint" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.CM_MONO">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">CM_MONO</span></span><a class="headerlink" href="#xcell.colors.CM_MONO" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.scopeColors">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">scopeColors</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['#ffff00',</span> <span class="pre">'#00ffff',</span> <span class="pre">'#ff00ff',</span> <span class="pre">'#00ff00',</span> <span class="pre">'#ff0000',</span> <span class="pre">'#0000ff',</span> <span class="pre">'#ff8000',</span> <span class="pre">'#8000ff',...</span></em><a class="headerlink" href="#xcell.colors.scopeColors" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.scopeColorsLite">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">scopeColorsLite</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['#ffcc00',</span> <span class="pre">'#17becf',</span> <span class="pre">'#e377c2',</span> <span class="pre">'#2ca02c',</span> <span class="pre">'#1c2a99',</span> <span class="pre">'#d62728',</span> <span class="pre">'#ff7f0e',</span> <span class="pre">'#9467bd',...</span></em><a class="headerlink" href="#xcell.colors.scopeColorsLite" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.styleScope">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">styleScope</span></span><a class="headerlink" href="#xcell.colors.styleScope" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.styleScope2">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">styleScope2</span></span><a class="headerlink" href="#xcell.colors.styleScope2" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.colors.makeStyleDict">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">makeStyleDict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fgColor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bgColor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.colors.makeStyleDict" title="Permalink to this definition"></a></dt>
+<dd><p>Generate dictionary of plotting preferences.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fgColor</strong> (<em>color</em>) – Color for gridlines, text, etc..</p></li>
+<li><p><strong>bgColor</strong> (<em>color</em>) – Color for image background.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>styleDict</strong> – Dict of matplotlib preferences (pass to mpl.style.use()).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.colors.useDarkStyle">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">useDarkStyle</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.colors.useDarkStyle" title="Permalink to this definition"></a></dt>
+<dd><p>Switch to dark-mode visualizations (suitable for screen).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.colors.useLightStyle">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">useLightStyle</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.colors.useLightStyle" title="Permalink to this definition"></a></dt>
+<dd><p>Switch to light-mode visualizations (suitable for print).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.colors.setupPVtheme">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">setupPVtheme</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theme</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.colors.setupPVtheme" title="Permalink to this definition"></a></dt>
+<dd><p>Set PyVista to match current xcell theme.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>theme</strong> (<em>PyVista theme</em>) – Built-in theme to use as a starting point</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>theme</strong> – Customized theme</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>PyVista theme</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.colors.recolorSVG">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">recolorSVG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">toLight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.colors.recolorSVG" title="Permalink to this definition"></a></dt>
+<dd><p>Post-process SVG to change color scheme.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname</strong> (<em>str</em>) – File name.</p></li>
+<li><p><strong>toLight</strong> (<em>bool</em><em>, </em><em>optional</em>) – Set conversion direction from dark to light. The default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, CBC Girard.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

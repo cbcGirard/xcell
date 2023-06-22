@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>&lt;no title&gt; &mdash; xcell  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Geometry" href="Geometry/index.html" />
+    <link rel="prev" title="Simulation overview" href="plot_algorithmOverview.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #990000" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Purpose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html#installing">Installing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html#citation">Citation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Example applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#geometry">Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #990000" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">xcell</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Example applications</a></li>
+      <li class="breadcrumb-item active">&lt;no title&gt;</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/auto_examples/Common.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-common-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<p class="sphx-glr-example-title" id="sphx-glr-auto-examples-common-py">Common resources for simulations.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xcell</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
+
+<span class="kn">from</span> <span class="nn">neuron</span> <span class="kn">import</span> <span class="n">h</span>
+<span class="kn">from</span> <span class="nn">neuron.units</span> <span class="kn">import</span> <span class="n">ms</span><span class="p">,</span> <span class="n">mV</span>
+<span class="kn">import</span> <span class="nn">neuron</span> <span class="k">as</span> <span class="nn">nrn</span>
+
+<span class="n">h</span><span class="o">.</span><span class="n">load_file</span><span class="p">(</span><span class="s1">&#39;stdrun.hoc&#39;</span><span class="p">)</span>
+<span class="n">h</span><span class="o">.</span><span class="n">CVode</span><span class="p">()</span><span class="o">.</span><span class="n">use_fast_imem</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">nrn</span><span class="o">.</span><span class="n">load_mechanisms</span><span class="p">(</span><span class="s1">&#39;estimsurvey/&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">makeSynthStudy</span><span class="p">(</span><span class="n">folderName</span><span class="p">,</span>
+                   <span class="n">rElec</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span>
+                   <span class="n">vSource</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                   <span class="n">xmax</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    folderName : TYPE</span>
+<span class="sd">        DESCRIPTION.</span>
+<span class="sd">    rElec : TYPE, optional</span>
+<span class="sd">        DESCRIPTION. The default is 1e-6.</span>
+<span class="sd">    vSource : TYPE, optional</span>
+<span class="sd">        DESCRIPTION. The default is False.</span>
+<span class="sd">    xmax : TYPE, optional</span>
+<span class="sd">        DESCRIPTION. The default is 1e-4.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    study : TYPE</span>
+<span class="sd">        DESCRIPTION.</span>
+<span class="sd">    setup : TYPE</span>
+<span class="sd">        DESCRIPTION.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">datadir</span> <span class="o">=</span> <span class="s1">&#39;/home/benoit/smb4k/ResearchData/Results&#39;</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">datadir</span><span class="p">,</span> <span class="n">folderName</span><span class="p">)</span>
+    <span class="n">bbox</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="n">xmax</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">xmax</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+
+    <span class="n">study</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">SimStudy</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">bbox</span><span class="p">)</span>
+
+    <span class="n">setup</span> <span class="o">=</span> <span class="n">study</span><span class="o">.</span><span class="n">newSimulation</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">vSource</span><span class="p">:</span>
+        <span class="n">setup</span><span class="o">.</span><span class="n">addVoltageSource</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span>
+                               <span class="n">coords</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span>
+                               <span class="n">radius</span><span class="o">=</span><span class="n">rElec</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">setup</span><span class="o">.</span><span class="n">addCurrentSource</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">rElec</span><span class="p">,</span>
+                               <span class="n">coords</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span>
+                               <span class="n">radius</span><span class="o">=</span><span class="n">rElec</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">study</span><span class="p">,</span> <span class="n">setup</span>
+
+
+<span class="k">def</span> <span class="nf">runAdaptation</span><span class="p">(</span><span class="n">setup</span><span class="p">,</span> <span class="n">maxdepth</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">meshdensity</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">metrics</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">src</span> <span class="ow">in</span> <span class="n">setup</span><span class="o">.</span><span class="n">currentSources</span><span class="p">:</span>
+            <span class="n">metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xcell</span><span class="o">.</span><span class="n">makeExplicitLinearMetric</span><span class="p">(</span><span class="n">maxdepth</span><span class="p">,</span> <span class="n">meshdensity</span><span class="p">,</span>
+                                                          <span class="n">origin</span><span class="o">=</span><span class="n">src</span><span class="o">.</span><span class="n">coords</span><span class="p">))</span>
+
+    <span class="n">setup</span><span class="o">.</span><span class="n">makeAdaptiveGrid</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">maxdepth</span><span class="p">)</span>
+    <span class="n">setup</span><span class="o">.</span><span class="n">finalizeMesh</span><span class="p">()</span>
+    <span class="n">setup</span><span class="o">.</span><span class="n">setBoundaryNodes</span><span class="p">()</span>
+    <span class="n">setup</span><span class="o">.</span><span class="n">iterativeSolve</span><span class="p">(</span><span class="n">tol</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">setParams</span><span class="p">(</span><span class="n">testCat</span><span class="p">,</span> <span class="n">testVal</span><span class="p">,</span> <span class="n">overrides</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;Mesh type&#39;</span><span class="p">:</span> <span class="s1">&#39;adaptive&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Element type&#39;</span><span class="p">:</span> <span class="s1">&#39;Admittance&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Vsrc?&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s1">&#39;BoundaryFunction&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">overrides</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">overrides</span><span class="p">)</span>
+
+    <span class="n">params</span><span class="p">[</span><span class="n">testCat</span><span class="p">]</span> <span class="o">=</span> <span class="n">testVal</span>
+
+    <span class="k">return</span> <span class="n">params</span>
+
+
+<span class="k">def</span> <span class="nf">pairedDepthSweep</span><span class="p">(</span><span class="n">study</span><span class="p">,</span> <span class="n">depthRange</span><span class="p">,</span> <span class="n">testCat</span><span class="p">,</span> <span class="n">testVals</span><span class="p">,</span> <span class="n">rElec</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">overrides</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">lastmesh</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;numel&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;nX&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+    <span class="n">meshnum</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">maxdepth</span> <span class="ow">in</span> <span class="n">depthRange</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">tstVal</span> <span class="ow">in</span> <span class="n">testVals</span><span class="p">:</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="n">setParams</span><span class="p">(</span><span class="n">testCat</span><span class="p">,</span> <span class="n">tstVal</span><span class="p">,</span> <span class="n">overrides</span><span class="p">)</span>
+
+            <span class="n">setup</span> <span class="o">=</span> <span class="n">study</span><span class="o">.</span><span class="n">newSimulation</span><span class="p">()</span>
+            <span class="n">setup</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elementType</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;Element type&#39;</span><span class="p">]</span>
+            <span class="n">setup</span><span class="o">.</span><span class="n">meshtype</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;Mesh type&#39;</span><span class="p">]</span>
+            <span class="n">setup</span><span class="o">.</span><span class="n">meshnum</span> <span class="o">=</span> <span class="n">meshnum</span>
+
+            <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;Vsrc?&#39;</span><span class="p">]:</span>
+                <span class="n">setup</span><span class="o">.</span><span class="n">addVoltageSource</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">rElec</span><span class="p">)</span>
+                <span class="n">srcMag</span> <span class="o">=</span> <span class="mf">1.</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">srcMag</span> <span class="o">=</span> <span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">sigma</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">rElec</span>
+                <span class="n">setup</span><span class="o">.</span><span class="n">addCurrentSource</span><span class="p">(</span><span class="n">srcMag</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">rElec</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;Mesh type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;uniform&#39;</span><span class="p">:</span>
+                <span class="n">newNx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">lastmesh</span><span class="p">[</span><span class="s1">&#39;numel&#39;</span><span class="p">]</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)))</span>
+                <span class="n">nX</span> <span class="o">=</span> <span class="n">newNx</span><span class="o">+</span><span class="n">newNx</span> <span class="o">%</span> <span class="mi">2</span>
+                <span class="n">setup</span><span class="o">.</span><span class="n">makeUniformGrid</span><span class="p">(</span><span class="n">newNx</span><span class="o">+</span><span class="n">newNx</span> <span class="o">%</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;uniform, </span><span class="si">%d</span><span class="s1"> per axis&#39;</span> <span class="o">%</span> <span class="n">nX</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;Mesh type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="sa">r</span><span class="s1">&#39;equal $l_0$&#39;</span><span class="p">:</span>
+                <span class="n">setup</span><span class="o">.</span><span class="n">makeUniformGrid</span><span class="p">(</span><span class="n">lastmesh</span><span class="p">[</span><span class="s1">&#39;nX&#39;</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">metricCoef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="n">maxdepth</span><span class="o">*</span><span class="mf">0.2</span><span class="p">),</span>
+                                      <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">setup</span><span class="o">.</span><span class="n">makeAdaptiveGrid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>                                        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="n">maxdepth</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">xcell</span><span class="o">.</span><span class="n">generalMetric</span><span class="p">,</span> <span class="n">coefs</span><span class="o">=</span><span class="n">metricCoef</span><span class="p">)</span>
+
+            <span class="n">setup</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elementType</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;Element type&#39;</span><span class="p">]</span>
+            <span class="n">setup</span><span class="o">.</span><span class="n">finalizeMesh</span><span class="p">()</span>
+
+            <span class="k">def</span> <span class="nf">boundaryFun</span><span class="p">(</span><span class="n">coord</span><span class="p">):</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">rElec</span><span class="o">/</span><span class="p">(</span><span class="n">r</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="mi">4</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;BoundaryFunction&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Analytic&#39;</span><span class="p">:</span>
+                <span class="n">setup</span><span class="o">.</span><span class="n">setBoundaryNodes</span><span class="p">(</span><span class="n">boundaryFun</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;BoundaryFunction&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Rubik0&#39;</span><span class="p">:</span>
+                <span class="n">setup</span><span class="o">.</span><span class="n">setBoundaryNodes</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span>
+                                       <span class="n">expand</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                       <span class="n">sigma</span><span class="o">=</span><span class="mf">1.</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">setup</span><span class="o">.</span><span class="n">setBoundaryNodes</span><span class="p">()</span>
+            <span class="c1"># setup.getEdgeCurrents()</span>
+
+            <span class="c1"># v=setup.solve()</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">setup</span><span class="o">.</span><span class="n">iterativeSolve</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mf">1e-9</span><span class="p">)</span>
+
+            <span class="n">setup</span><span class="o">.</span><span class="n">applyTransforms</span><span class="p">()</span>
+
+            <span class="n">setup</span><span class="o">.</span><span class="n">getMemUsage</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="n">errEst</span><span class="p">,</span> <span class="n">err</span><span class="p">,</span> <span class="n">ana</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">setup</span><span class="o">.</span><span class="n">calculateErrors</span><span class="p">()</span>
+            <span class="n">FVU</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">FVU</span><span class="p">(</span><span class="n">ana</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+
+            <span class="n">minel</span> <span class="o">=</span> <span class="n">setup</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">getL0Min</span><span class="p">()</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;error: </span><span class="si">%g</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">errEst</span><span class="p">)</span>
+
+            <span class="n">dataCats</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Error&#39;</span><span class="p">,</span> <span class="s1">&#39;FVU&#39;</span><span class="p">,</span> <span class="s1">&#39;l0min&#39;</span><span class="p">,</span> <span class="n">testCat</span><span class="p">]</span>
+            <span class="n">dataVals</span> <span class="o">=</span> <span class="p">[</span><span class="n">errEst</span><span class="p">,</span> <span class="n">FVU</span><span class="p">,</span> <span class="n">minel</span><span class="p">,</span> <span class="n">tstVal</span><span class="p">]</span>
+
+            <span class="n">data</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">getErrorEstimates</span><span class="p">(</span><span class="n">setup</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">dataCats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+                <span class="n">dataVals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
+            <span class="n">study</span><span class="o">.</span><span class="n">newLogEntry</span><span class="p">(</span><span class="n">dataCats</span><span class="p">,</span> <span class="n">dataVals</span><span class="p">)</span>
+            <span class="n">study</span><span class="o">.</span><span class="n">saveData</span><span class="p">(</span><span class="n">setup</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;Mesh type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;adaptive&#39;</span><span class="p">:</span>
+                <span class="n">lastmesh</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;numel&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">setup</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span><span class="p">),</span>
+                            <span class="s1">&#39;nX&#39;</span><span class="p">:</span> <span class="n">setup</span><span class="o">.</span><span class="n">ptPerAxis</span><span class="o">-</span><span class="mi">1</span><span class="p">}</span>
+
+
+<span class="k">class</span> <span class="nc">Cell</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gid</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gid</span> <span class="o">=</span> <span class="n">gid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_morphology</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="s1">&#39;soma&#39;</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">all</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">soma</span><span class="o">.</span><span class="n">wholetree</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">all</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">allsec</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_biophysics</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">h</span><span class="o">.</span><span class="n">define_shape</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rotate_z</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_position</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vrest</span> <span class="o">=</span> <span class="o">-</span><span class="mi">65</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ncs</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">[</span><span class="si">{}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gid</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_set_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">sec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sec</span><span class="o">.</span><span class="n">n3d</span><span class="p">()):</span>
+                <span class="n">sec</span><span class="o">.</span><span class="n">pt3dchange</span><span class="p">(</span><span class="n">i</span><span class="p">,</span>
+                               <span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">sec</span><span class="o">.</span><span class="n">x3d</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+                               <span class="n">y</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">sec</span><span class="o">.</span><span class="n">y3d</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+                               <span class="n">z</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span> <span class="o">+</span> <span class="n">sec</span><span class="o">.</span><span class="n">z3d</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+                               <span class="n">sec</span><span class="o">.</span><span class="n">diam3d</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span>
+
+    <span class="k">def</span> <span class="nf">_rotate_z</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Rotate the cell about the Z axis.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">sec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sec</span><span class="o">.</span><span class="n">n3d</span><span class="p">()):</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">sec</span><span class="o">.</span><span class="n">x3d</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">sec</span><span class="o">.</span><span class="n">y3d</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+                <span class="n">xprime</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">c</span> <span class="o">-</span> <span class="n">y</span> <span class="o">*</span> <span class="n">s</span>
+                <span class="n">yprime</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">s</span> <span class="o">+</span> <span class="n">y</span> <span class="o">*</span> <span class="n">c</span>
+                <span class="n">sec</span><span class="o">.</span><span class="n">pt3dchange</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">xprime</span><span class="p">,</span> <span class="n">yprime</span><span class="p">,</span> <span class="n">sec</span><span class="o">.</span><span class="n">z3d</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">sec</span><span class="o">.</span><span class="n">diam3d</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">rotateLocal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Rotate cell about its soma</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">soma</span><span class="o">.</span><span class="n">x3d</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">y0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">soma</span><span class="o">.</span><span class="n">y3d</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">sec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sec</span><span class="o">.</span><span class="n">n3d</span><span class="p">()):</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">sec</span><span class="o">.</span><span class="n">x3d</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">-</span> <span class="n">x0</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">sec</span><span class="o">.</span><span class="n">y3d</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">-</span> <span class="n">y0</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+                <span class="n">xprime</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">c</span> <span class="o">-</span> <span class="n">y</span> <span class="o">*</span> <span class="n">s</span> <span class="o">+</span> <span class="n">x0</span>
+                <span class="n">yprime</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">s</span> <span class="o">+</span> <span class="n">y</span> <span class="o">*</span> <span class="n">c</span> <span class="o">+</span> <span class="n">y0</span>
+                <span class="n">sec</span><span class="o">.</span><span class="n">pt3dchange</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">xprime</span><span class="p">,</span> <span class="n">yprime</span><span class="p">,</span> <span class="n">sec</span><span class="o">.</span><span class="n">z3d</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">sec</span><span class="o">.</span><span class="n">diam3d</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">forceZ0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Hack to fix neurons floating away from plane&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">sec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sec</span><span class="o">.</span><span class="n">n3d</span><span class="p">()):</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">sec</span><span class="o">.</span><span class="n">x3d</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">sec</span><span class="o">.</span><span class="n">y3d</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+                <span class="n">sec</span><span class="o">.</span><span class="n">pt3dchange</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sec</span><span class="o">.</span><span class="n">diam3d</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+
+
+<span class="k">class</span> <span class="nc">BallAndStick</span><span class="p">(</span><span class="n">Cell</span><span class="p">,</span> <span class="n">xcell</span><span class="o">.</span><span class="n">nrnutil</span><span class="o">.</span><span class="n">RecordedCell</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;BallAndStick&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gid</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">gid</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">soma</span><span class="o">.</span><span class="n">diam</span><span class="o">/</span><span class="mi">2</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="n">r</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="n">dy</span> <span class="o">=</span> <span class="n">r</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_position</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">-</span><span class="n">dx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">-</span><span class="n">dy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">attachMembraneRecordings</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">soma</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attachSpikeDetector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">soma</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_setup_morphology</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">soma</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">Section</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;soma&#39;</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dend</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">Section</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;dend&#39;</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dend</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">soma</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">soma</span><span class="o">.</span><span class="n">L</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">soma</span><span class="o">.</span><span class="n">diam</span> <span class="o">=</span> <span class="mf">12.6157</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dend</span><span class="o">.</span><span class="n">L</span> <span class="o">=</span> <span class="mi">200</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dend</span><span class="o">.</span><span class="n">diam</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">_setup_biophysics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">sec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all</span><span class="p">:</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">Ra</span> <span class="o">=</span> <span class="mi">100</span>    <span class="c1"># Axial resistance in Ohm * cm</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">cm</span> <span class="o">=</span> <span class="mi">1</span>      <span class="c1"># Membrane capacitance in micro Farads / cm^2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">soma</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;hh&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">seg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">soma</span><span class="p">:</span>
+            <span class="n">seg</span><span class="o">.</span><span class="n">hh</span><span class="o">.</span><span class="n">gnabar</span> <span class="o">=</span> <span class="mf">0.12</span>  <span class="c1"># Sodium conductance in S/cm2</span>
+            <span class="n">seg</span><span class="o">.</span><span class="n">hh</span><span class="o">.</span><span class="n">gkbar</span> <span class="o">=</span> <span class="mf">0.036</span>  <span class="c1"># Potassium conductance in S/cm2</span>
+            <span class="n">seg</span><span class="o">.</span><span class="n">hh</span><span class="o">.</span><span class="n">gl</span> <span class="o">=</span> <span class="mf">0.0003</span>    <span class="c1"># Leak conductance in S/cm2</span>
+            <span class="n">seg</span><span class="o">.</span><span class="n">hh</span><span class="o">.</span><span class="n">el</span> <span class="o">=</span> <span class="o">-</span><span class="mf">54.3</span>     <span class="c1"># Reversal potential in mV</span>
+        <span class="c1"># Insert passive current in the dendrite</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dend</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;pas&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">seg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dend</span><span class="p">:</span>
+            <span class="n">seg</span><span class="o">.</span><span class="n">pas</span><span class="o">.</span><span class="n">g</span> <span class="o">=</span> <span class="mf">0.001</span>  <span class="c1"># Passive conductance in S/cm2</span>
+            <span class="n">seg</span><span class="o">.</span><span class="n">pas</span><span class="o">.</span><span class="n">e</span> <span class="o">=</span> <span class="o">-</span><span class="mi">65</span>    <span class="c1"># Leak reversal potential mV</span>
+
+        <span class="c1"># NEW: the synapse</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">syn</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">ExpSyn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dend</span><span class="p">(</span><span class="mf">0.5</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">syn</span><span class="o">.</span><span class="n">tau</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">ms</span>
+
+
+<span class="k">class</span> <span class="nc">Axon10</span><span class="p">(</span><span class="n">Cell</span><span class="p">,</span> <span class="n">xcell</span><span class="o">.</span><span class="n">nrnutil</span><span class="o">.</span><span class="n">RecordedCell</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;axon10&#39;</span>
+
+    <span class="n">GAP</span> <span class="o">=</span> <span class="mf">2.5e-4</span>  <span class="c1"># width of node of Ranvier in cm</span>
+    <span class="n">DIAM</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># fiber diameter in um including myelin</span>
+    <span class="n">SDD</span> <span class="o">=</span> <span class="mf">0.7</span>  <span class="c1"># axon diameter is SDD*DIAM</span>
+    <span class="n">ELD</span> <span class="o">=</span> <span class="mi">100</span>  <span class="c1"># length of internode/fiber diameter</span>
+
+    <span class="n">RHOI</span> <span class="o">=</span> <span class="mi">100</span>  <span class="c1"># cytoplasmic resistivity in ohm cm</span>
+    <span class="n">CM</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># specific membrane capacitance in uf/cm2</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gid</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">segL</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nnodes</span> <span class="o">=</span> <span class="n">nnodes</span>
+
+        <span class="k">if</span> <span class="n">segL</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ELD</span> <span class="o">=</span> <span class="n">segL</span>
+
+        <span class="c1"># super().__init__(gid, x, y, z,0)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gid</span> <span class="o">=</span> <span class="n">gid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_morphology</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_biophysics</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">h</span><span class="o">.</span><span class="n">define_shape</span><span class="p">()</span>
+
+        <span class="n">origin</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">nrnutil</span><span class="o">.</span><span class="n">returnSegmentCoordinates</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">nnodes</span><span class="o">//</span><span class="mi">2</span><span class="p">],</span> <span class="n">inMicrons</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_position</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">origin</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                           <span class="n">y</span> <span class="o">-</span> <span class="n">origin</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                           <span class="n">z</span> <span class="o">-</span> <span class="n">origin</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">attachSpikeDetector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">nnodes</span><span class="o">//</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vrest</span> <span class="o">=</span> <span class="o">-</span><span class="mi">70</span>
+
+    <span class="k">def</span> <span class="nf">_setup_morphology</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">h</span><span class="o">.</span><span class="n">Section</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;node</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">n</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+                      <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nnodes</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">internodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">h</span><span class="o">.</span><span class="n">Section</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;internode</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">n</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+                           <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nnodes</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+
+        <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">internode</span><span class="p">,</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">internodes</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nnodes</span><span class="p">)):</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">diam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SDD</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">DIAM</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">L</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GAP</span><span class="o">*</span><span class="mf">1e4</span>
+
+            <span class="n">internode</span><span class="o">.</span><span class="n">diam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SDD</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">DIAM</span>
+            <span class="n">internode</span><span class="o">.</span><span class="n">L</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ELD</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">DIAM</span>
+
+            <span class="n">internode</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">ii</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">lastInternode</span><span class="p">)</span>
+
+            <span class="n">lastInternode</span> <span class="o">=</span> <span class="n">internode</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">internodes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">all</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">SectionList</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">allsec</span><span class="p">())</span>
+
+        <span class="c1"># for nn in self.nodes:</span>
+        <span class="c1">#     nn.diam = 7.</span>
+        <span class="c1">#     nn.L = 2.5</span>
+
+        <span class="c1"># for ii in self.internodes:</span>
+        <span class="c1">#     ii.diam = 7.</span>
+        <span class="c1">#     ii.L = 1000.</span>
+        <span class="c1">#     ii.nseg = 3</span>
+
+    <span class="k">def</span> <span class="nf">_setup_biophysics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">sec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all</span><span class="p">:</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">Ra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">RHOI</span>    <span class="c1"># Axial resistance in Ohm * cm</span>
+        <span class="k">for</span> <span class="n">sec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">cm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CM</span>      <span class="c1"># Membrane capacitance in micro Farads / cm^2</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;fh&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">seg</span> <span class="ow">in</span> <span class="n">sec</span><span class="p">:</span>
+                <span class="n">seg</span><span class="o">.</span><span class="n">pnabar_fh</span> <span class="o">=</span> <span class="mf">8e-3</span>
+                <span class="n">seg</span><span class="o">.</span><span class="n">pkbar_fh</span> <span class="o">=</span> <span class="mf">1.2e-3</span>
+                <span class="n">seg</span><span class="o">.</span><span class="n">ppbar_fh</span> <span class="o">=</span> <span class="mf">0.54e-3</span>
+                <span class="n">seg</span><span class="o">.</span><span class="n">gl_fh</span> <span class="o">=</span> <span class="mf">0.0303</span>
+                <span class="n">seg</span><span class="o">.</span><span class="n">nai</span> <span class="o">=</span> <span class="mf">13.74</span>
+                <span class="n">seg</span><span class="o">.</span><span class="n">nao</span> <span class="o">=</span> <span class="mf">114.5</span>
+                <span class="n">seg</span><span class="o">.</span><span class="n">ki</span> <span class="o">=</span> <span class="mi">120</span>
+                <span class="n">seg</span><span class="o">.</span><span class="n">ko</span> <span class="o">=</span> <span class="mf">2.</span>
+
+        <span class="k">for</span> <span class="n">sec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">internodes</span><span class="p">:</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">cm</span> <span class="o">=</span> <span class="mf">1e-6</span>
+
+        <span class="n">h</span><span class="o">.</span><span class="n">celsius</span> <span class="o">=</span> <span class="mf">20.</span>
+
+
+<span class="k">class</span> <span class="nc">MRG</span><span class="p">(</span><span class="n">Cell</span><span class="p">,</span> <span class="n">xcell</span><span class="o">.</span><span class="n">nrnutil</span><span class="o">.</span><span class="n">RecordedCell</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;MRG&#39;</span>
+    <span class="n">RHOA</span> <span class="o">=</span> <span class="mf">0.7e6</span>
+    <span class="n">CM</span> <span class="o">=</span> <span class="mf">0.1</span>
+    <span class="n">GM</span> <span class="o">=</span> <span class="mf">1e-3</span>
+
+    <span class="n">PARALENGTH1</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">NODELENGTH</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">SPACE_P1</span> <span class="o">=</span> <span class="mf">2e-3</span>
+    <span class="n">SPACE_P2</span> <span class="o">=</span> <span class="mf">4e-3</span>
+    <span class="n">SPACE_I</span> <span class="o">=</span> <span class="mf">4e-3</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gid</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">fiberD</span><span class="o">=</span><span class="mf">10.</span><span class="p">,</span>
+                 <span class="n">axonNodes</span><span class="o">=</span><span class="mi">21</span><span class="p">):</span>
+        <span class="n">nrn</span><span class="o">.</span><span class="n">load_mechanisms</span><span class="p">(</span><span class="s1">&#39;../../3810/&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fiberD</span> <span class="o">=</span> <span class="n">fiberD</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axonNodes</span> <span class="o">=</span> <span class="n">axonNodes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paraNodes1</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">axonNodes</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paraNodes2</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">axonNodes</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axonInter</span> <span class="o">=</span> <span class="mi">6</span><span class="o">*</span><span class="p">(</span><span class="n">axonNodes</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axontotal</span> <span class="o">=</span> <span class="mi">11</span><span class="o">*</span><span class="n">axonNodes</span><span class="o">-</span><span class="mi">10</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_deps</span><span class="p">(</span><span class="n">fiberD</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">gid</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vrest</span> <span class="o">=</span> <span class="o">-</span><span class="mi">80</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">attachSpikeDetector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">axonNodes</span><span class="o">//</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_deps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fiberD</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">fiberD</span> <span class="o">==</span> <span class="mf">5.7</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">g</span> <span class="o">=</span> <span class="mf">0.605</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">axonD</span> <span class="o">=</span> <span class="mf">3.4</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodeD</span> <span class="o">=</span> <span class="mf">1.9</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paraD1</span> <span class="o">=</span> <span class="mf">1.9</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paraD2</span> <span class="o">=</span> <span class="mf">3.4</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">deltax</span> <span class="o">=</span> <span class="mi">500</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paralength2</span> <span class="o">=</span> <span class="mi">35</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nl</span> <span class="o">=</span> <span class="mi">80</span>
+        <span class="k">if</span> <span class="n">fiberD</span> <span class="o">==</span> <span class="mf">7.3</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">g</span> <span class="o">=</span> <span class="mf">0.630</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">axonD</span> <span class="o">=</span> <span class="mf">4.6</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodeD</span> <span class="o">=</span> <span class="mf">2.4</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paraD1</span> <span class="o">=</span> <span class="mf">2.4</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paraD2</span> <span class="o">=</span> <span class="mf">4.6</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">deltax</span> <span class="o">=</span> <span class="mi">750</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paralength2</span> <span class="o">=</span> <span class="mi">38</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nl</span> <span class="o">=</span> <span class="mi">100</span>
+        <span class="k">if</span> <span class="n">fiberD</span> <span class="o">==</span> <span class="mf">8.7</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">g</span> <span class="o">=</span> <span class="mf">0.661</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">axonD</span> <span class="o">=</span> <span class="mf">5.8</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodeD</span> <span class="o">=</span> <span class="mf">2.8</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paraD1</span> <span class="o">=</span> <span class="mf">2.8</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paraD2</span> <span class="o">=</span> <span class="mf">5.8</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">deltax</span> <span class="o">=</span> <span class="mi">1000</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paralength2</span> <span class="o">=</span> <span class="mi">40</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nl</span> <span class="o">=</span> <span class="mi">110</span>
+        <span class="k">if</span> <span class="n">fiberD</span> <span class="o">==</span> <span class="mf">10.0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">g</span> <span class="o">=</span> <span class="mf">0.690</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">axonD</span> <span class="o">=</span> <span class="mf">6.9</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodeD</span> <span class="o">=</span> <span class="mf">3.3</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paraD1</span> <span class="o">=</span> <span class="mf">3.3</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paraD2</span> <span class="o">=</span> <span class="mf">6.9</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">deltax</span> <span class="o">=</span> <span class="mi">1150</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paralength2</span> <span class="o">=</span> <span class="mi">46</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nl</span> <span class="o">=</span> <span class="mi">120</span>
+        <span class="k">if</span> <span class="n">fiberD</span> <span class="o">==</span> <span class="mf">11.5</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">g</span> <span class="o">=</span> <span class="mf">0.700</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">axonD</span> <span class="o">=</span> <span class="mf">8.1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodeD</span> <span class="o">=</span> <span class="mf">3.7</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paraD1</span> <span class="o">=</span> <span class="mf">3.7</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paraD2</span> <span class="o">=</span> <span class="mf">8.1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">deltax</span> <span class="o">=</span> <span class="mi">1250</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paralength2</span> <span class="o">=</span> <span class="mi">50</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nl</span> <span class="o">=</span> <span class="mi">130</span>
+        <span class="k">if</span> <span class="n">fiberD</span> <span class="o">==</span> <span class="mf">12.8</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">g</span> <span class="o">=</span> <span class="mf">0.719</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">axonD</span> <span class="o">=</span> <span class="mf">9.2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodeD</span> <span class="o">=</span> <span class="mf">4.2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paraD1</span> <span class="o">=</span> <span class="mf">4.2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paraD2</span> <span class="o">=</span> <span class="mf">9.2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">deltax</span> <span class="o">=</span> <span class="mi">1350</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paralength2</span> <span class="o">=</span> <span class="mi">54</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nl</span> <span class="o">=</span> <span class="mi">135</span>
+        <span class="k">if</span> <span class="n">fiberD</span> <span class="o">==</span> <span class="mf">14.0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">g</span> <span class="o">=</span> <span class="mf">0.739</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">axonD</span> <span class="o">=</span> <span class="mf">10.4</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodeD</span> <span class="o">=</span> <span class="mf">4.7</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paraD1</span> <span class="o">=</span> <span class="mf">4.7</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paraD2</span> <span class="o">=</span> <span class="mf">10.4</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">deltax</span> <span class="o">=</span> <span class="mi">1400</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paralength2</span> <span class="o">=</span> <span class="mi">56</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nl</span> <span class="o">=</span> <span class="mi">140</span>
+        <span class="k">if</span> <span class="n">fiberD</span> <span class="o">==</span> <span class="mf">15.0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">g</span> <span class="o">=</span> <span class="mf">0.767</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">axonD</span> <span class="o">=</span> <span class="mf">11.5</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodeD</span> <span class="o">=</span> <span class="mf">5.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paraD1</span> <span class="o">=</span> <span class="mf">5.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paraD2</span> <span class="o">=</span> <span class="mf">11.5</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">deltax</span> <span class="o">=</span> <span class="mi">1450</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paralength2</span> <span class="o">=</span> <span class="mi">58</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nl</span> <span class="o">=</span> <span class="mi">145</span>
+        <span class="k">if</span> <span class="n">fiberD</span> <span class="o">==</span> <span class="mf">16.0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">g</span> <span class="o">=</span> <span class="mf">0.791</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">axonD</span> <span class="o">=</span> <span class="mf">12.7</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodeD</span> <span class="o">=</span> <span class="mf">5.5</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paraD1</span> <span class="o">=</span> <span class="mf">5.5</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paraD2</span> <span class="o">=</span> <span class="mf">12.7</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">deltax</span> <span class="o">=</span> <span class="mi">1500</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paralength2</span> <span class="o">=</span> <span class="mi">60</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nl</span> <span class="o">=</span> <span class="mi">150</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Rpn0</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">RHOA</span><span class="o">*</span><span class="mf">.01</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span>
+                                     <span class="p">((((</span><span class="bp">self</span><span class="o">.</span><span class="n">nodeD</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">SPACE_P1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nodeD</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Rpn1</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">RHOA</span><span class="o">*</span><span class="mf">.01</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span>
+                                     <span class="p">((((</span><span class="bp">self</span><span class="o">.</span><span class="n">paraD1</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">SPACE_P1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">paraD1</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Rpn2</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">RHOA</span><span class="o">*</span><span class="mf">.01</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span>
+                                     <span class="p">((((</span><span class="bp">self</span><span class="o">.</span><span class="n">paraD2</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">SPACE_P2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">paraD2</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Rpx</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">RHOA</span><span class="o">*</span><span class="mf">.01</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span>
+                                    <span class="p">((((</span><span class="bp">self</span><span class="o">.</span><span class="n">axonD</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">SPACE_I</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">axonD</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interlength</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">deltax</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">NODELENGTH</span> <span class="o">-</span>
+                            <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">PARALENGTH1</span><span class="p">)</span><span class="o">-</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">paralength2</span><span class="p">))</span><span class="o">/</span><span class="mi">6</span>
+
+    <span class="k">def</span> <span class="nf">_setup_morphology</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">h</span><span class="o">.</span><span class="n">Section</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;node</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">n</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+                      <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axonNodes</span><span class="p">)]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">MYSA</span> <span class="o">=</span> <span class="p">[</span><span class="n">h</span><span class="o">.</span><span class="n">Section</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;MYSA</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">n</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+                     <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paraNodes1</span><span class="p">)]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">FLUT</span> <span class="o">=</span> <span class="p">[</span><span class="n">h</span><span class="o">.</span><span class="n">Section</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;FLUT</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">n</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+                     <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paraNodes2</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">STIN</span> <span class="o">=</span> <span class="p">[</span><span class="n">h</span><span class="o">.</span><span class="n">Section</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;STIN</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">n</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+                     <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axonInter</span><span class="p">)]</span>
+
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axonNodes</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">chain</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span>
+                     <span class="bp">self</span><span class="o">.</span><span class="n">MYSA</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">ii</span><span class="p">],</span>
+                     <span class="bp">self</span><span class="o">.</span><span class="n">FLUT</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">ii</span><span class="p">]]</span>
+            <span class="n">chain</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">STIN</span><span class="p">[</span><span class="mi">6</span><span class="o">*</span><span class="n">ii</span><span class="o">+</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">)])</span>
+            <span class="n">chain</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">FLUT</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">ii</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span>
+                          <span class="bp">self</span><span class="o">.</span><span class="n">MYSA</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">ii</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span>
+                          <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">ii</span><span class="o">+</span><span class="mi">1</span><span class="p">]])</span>
+
+            <span class="k">for</span> <span class="n">jj</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">chain</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="n">chain</span><span class="p">[</span><span class="n">jj</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">chain</span><span class="p">[</span><span class="n">jj</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_setup_biophysics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">sec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;axnode&#39;</span><span class="p">)</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;extracellular&#39;</span><span class="p">)</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">nseg</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">diam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeD</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">L</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">NODELENGTH</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">Ra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">RHOA</span><span class="o">/</span><span class="mf">1e4</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">cm</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">xraxial</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Rpn0</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">xg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e10</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">xc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">sec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">MYSA</span><span class="p">:</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;pas&#39;</span><span class="p">)</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;extracellular&#39;</span><span class="p">)</span>
+            <span class="n">ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">paraD1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">fiberD</span>
+
+            <span class="n">sec</span><span class="o">.</span><span class="n">nseg</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">diam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fiberD</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">L</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">PARALENGTH1</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">Ra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">RHOA</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">ratio</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mf">1e4</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">cm</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">ratio</span>
+
+            <span class="n">sec</span><span class="o">.</span><span class="n">g_pas</span> <span class="o">=</span> <span class="mf">1e-3</span> <span class="o">*</span> <span class="n">ratio</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">e_pas</span> <span class="o">=</span> <span class="o">-</span><span class="mi">80</span>
+
+            <span class="n">sec</span><span class="o">.</span><span class="n">xraxial</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Rpn1</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">xg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GM</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">nl</span><span class="p">)</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">xc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CM</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">nl</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">sec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">FLUT</span><span class="p">:</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;pas&#39;</span><span class="p">)</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;extracellular&#39;</span><span class="p">)</span>
+            <span class="n">ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">paraD2</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">fiberD</span>
+
+            <span class="n">sec</span><span class="o">.</span><span class="n">nseg</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">diam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fiberD</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">L</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">paralength2</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">Ra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">RHOA</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">ratio</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mf">1e4</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">cm</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">ratio</span>
+
+            <span class="n">sec</span><span class="o">.</span><span class="n">g_pas</span> <span class="o">=</span> <span class="mf">1e-3</span> <span class="o">*</span> <span class="n">ratio</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">e_pas</span> <span class="o">=</span> <span class="o">-</span><span class="mi">80</span>
+
+            <span class="n">sec</span><span class="o">.</span><span class="n">xraxial</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Rpn2</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">xg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GM</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">nl</span><span class="p">)</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">xc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CM</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">nl</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">sec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">STIN</span><span class="p">:</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;pas&#39;</span><span class="p">)</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="s1">&#39;extracellular&#39;</span><span class="p">)</span>
+            <span class="n">ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axonD</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">fiberD</span>
+
+            <span class="n">sec</span><span class="o">.</span><span class="n">nseg</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">diam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fiberD</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">L</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interlength</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">Ra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">RHOA</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">ratio</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mf">1e4</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">cm</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">ratio</span>
+
+            <span class="n">sec</span><span class="o">.</span><span class="n">g_pas</span> <span class="o">=</span> <span class="mf">1e-3</span> <span class="o">*</span> <span class="n">ratio</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">e_pas</span> <span class="o">=</span> <span class="o">-</span><span class="mi">80</span>
+
+            <span class="n">sec</span><span class="o">.</span><span class="n">xraxial</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Rpx</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">xg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GM</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">nl</span><span class="p">)</span>
+            <span class="n">sec</span><span class="o">.</span><span class="n">xc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CM</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">nl</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">Ring</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A network of *N* ball-and-stick cells where cell n makes an</span>
+<span class="sd">    excitatory synapse onto cell n + 1 and the last, Nth cell in the</span>
+<span class="sd">    network projects to the first cell.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">stim_w</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">stim_t</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">stim_delay</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">syn_w</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">syn_delay</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">dendSegs</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param N: Number of cells.</span>
+<span class="sd">        :param stim_w: Weight of the stimulus</span>
+<span class="sd">        :param stim_t: time of the stimulus (in ms)</span>
+<span class="sd">        :param stim_delay: delay of the stimulus (in ms)</span>
+<span class="sd">        :param syn_w: Synaptic weight</span>
+<span class="sd">        :param syn_delay: Delay of the synapse</span>
+<span class="sd">        :param r: radius of the network</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_syn_w</span> <span class="o">=</span> <span class="n">syn_w</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_syn_delay</span> <span class="o">=</span> <span class="n">syn_delay</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_cells</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_connect_cells</span><span class="p">()</span>
+        <span class="c1"># add stimulus</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_netstim</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">NetStim</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_netstim</span><span class="o">.</span><span class="n">number</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_netstim</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="n">stim_t</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nc</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">NetCon</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_netstim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">syn</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nc</span><span class="o">.</span><span class="n">delay</span> <span class="o">=</span> <span class="n">stim_delay</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nc</span><span class="o">.</span><span class="n">weight</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">stim_w</span>
+
+        <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cells</span><span class="p">:</span>
+            <span class="n">cell</span><span class="o">.</span><span class="n">dend</span><span class="o">.</span><span class="n">nseg</span> <span class="o">=</span> <span class="n">dendSegs</span>
+            <span class="n">h</span><span class="o">.</span><span class="n">define_shape</span><span class="p">()</span>
+            <span class="n">cell</span><span class="o">.</span><span class="n">forceZ0</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_create_cells</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cells</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="n">theta</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">h</span><span class="o">.</span><span class="n">PI</span> <span class="o">/</span> <span class="n">N</span>
+            <span class="n">newCell</span> <span class="o">=</span> <span class="n">BallAndStick</span><span class="p">(</span>
+                <span class="n">i</span><span class="p">,</span> <span class="n">h</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">,</span> <span class="n">h</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span>
+            <span class="n">newCell</span><span class="o">.</span><span class="n">rotateLocal</span><span class="p">(</span><span class="o">-</span><span class="n">h</span><span class="o">.</span><span class="n">PI</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cells</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newCell</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_connect_cells</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cells</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cells</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cells</span><span class="p">[</span><span class="mi">0</span><span class="p">]]):</span>
+            <span class="n">nc</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">NetCon</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">soma</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">_ref_v</span><span class="p">,</span> <span class="n">target</span><span class="o">.</span><span class="n">syn</span><span class="p">,</span> <span class="n">sec</span><span class="o">=</span><span class="n">source</span><span class="o">.</span><span class="n">soma</span><span class="p">)</span>
+            <span class="n">nc</span><span class="o">.</span><span class="n">weight</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_syn_w</span>
+            <span class="n">nc</span><span class="o">.</span><span class="n">delay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_syn_delay</span>
+            <span class="n">source</span><span class="o">.</span><span class="n">_ncs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nc</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.000 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-common-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/060d22b191488ef6480bdaf0e28bf950/Common.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">Common.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/9591d97b5811fbcca0a4d6c0e5b222c1/Common.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">Common.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plot_algorithmOverview.html" class="btn btn-neutral float-left" title="Simulation overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Geometry/index.html" class="btn btn-neutral float-right" title="Geometry" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, CBC Girard.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

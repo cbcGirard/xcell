@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>xcell.meshes &mdash; xcell  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #990000" >
+
+          
+          
+          <a href="../../../index.html">
+            
+              <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Purpose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html#installing">Installing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html#citation">Citation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../auto_examples/index.html">Example applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../auto_examples/index.html#geometry">Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #990000" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">xcell</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.meshes</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/autoapi/xcell/meshes/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-xcell.meshes">
+<span id="xcell-meshes"></span><h1><a class="reference internal" href="#module-xcell.meshes" title="xcell.meshes"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.meshes</span></code></a><a class="headerlink" href="#module-xcell.meshes" title="Permalink to this heading"></a></h1>
+<p>Mesh topology</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading"></a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.meshes.Mesh" title="xcell.meshes.Mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mesh</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.meshes.Octree" title="xcell.meshes.Octree"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Octree</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.meshes.Octant" title="xcell.meshes.Octant"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Octant</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="xcell.meshes.Mesh">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.meshes.</span></span><span class="sig-name descname"><span class="pre">Mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bbox</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elementType</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Admittance'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Mesh" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Mesh.__getstate__">
+<span class="sig-name descname"><span class="pre">__getstate__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Mesh.__getstate__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Mesh.__setstate__">
+<span class="sig-name descname"><span class="pre">__setstate__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Mesh.__setstate__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Mesh.getContainingElement">
+<span class="sig-name descname"><span class="pre">getContainingElement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Mesh.getContainingElement" title="Permalink to this definition"></a></dt>
+<dd><p>Get element containing specified point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>coords</strong> (<em>float</em><em>[</em><em>:</em><em>]</em>) – Cartesian coordinates of point.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – Error if no element contains the point.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>elem</strong> – Containing element.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>TYPE</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Mesh.finalize">
+<span class="sig-name descname"><span class="pre">finalize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Mesh.finalize" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Mesh.addElement">
+<span class="sig-name descname"><span class="pre">addElement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">origin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">span</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Mesh.addElement" title="Permalink to this definition"></a></dt>
+<dd><p>Insert element into the mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>origin</strong> (<em>float</em><em>[</em><em>:</em><em>]</em>) – Cartesian coords of element’s origin.</p></li>
+<li><p><strong>extents</strong> (<em>float</em><em>[</em><em>:</em><em>]</em>) – Length of edges in x,y,z.</p></li>
+<li><p><strong>sigma</strong> (<em>float</em>) – Conductivity of element.</p></li>
+<li><p><strong>nodeIndices</strong> (<em>int64</em><em>[</em><em>:</em><em>]</em>) – Numbering of element nodes according to global mesh.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Mesh.getConductances">
+<span class="sig-name descname"><span class="pre">getConductances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Mesh.getConductances" title="Permalink to this definition"></a></dt>
+<dd><p>Get the discrete conductances from every element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>elements</strong> (list of <cite>~xcell.mesh.Octant</cite>, optional) – DESCRIPTION. The default is None, which uses all in mesh.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>edgeIndices</strong> (<em>int64[:,:]</em>) – List of node pairs spanned by each conductance.</p></li>
+<li><p><strong>conductances</strong> (<em>float</em>) – Conductance in siemens.</p></li>
+<li><p><strong>transforms</strong> (<em>list of ints</em>) – Substitutions for graph-dual meshes.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Mesh.getL0Min">
+<span class="sig-name descname"><span class="pre">getL0Min</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Mesh.getL0Min" title="Permalink to this definition"></a></dt>
+<dd><p>Get the smallest edge length in mesh</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>l0Min</strong> – smallest edge length.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Mesh.getBoundaryNodes">
+<span class="sig-name descname"><span class="pre">getBoundaryNodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Mesh.getBoundaryNodes" title="Permalink to this definition"></a></dt>
+<dd><p>Get the indices of nodes on the domain boundary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>globalIndices</strong> – Indices of current mesh nodes at periphery.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int[:]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Mesh.getIntersectingelements">
+<span class="sig-name descname"><span class="pre">getIntersectingelements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinate</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Mesh.getIntersectingelements" title="Permalink to this definition"></a></dt>
+<dd><p>Find elements intersected by a cartesian plane.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>int</em>) – Normal of intersecting plane (0-&gt;x, 1-&gt;y,2-&gt;z).</p></li>
+<li><p><strong>coordinate</strong> (<em>float</em>) – Coordinate of plane alonx normal axis.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>elements</strong> – Elements intersected by the plane.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of <cite>~xcell.meshes.Octant</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="xcell.meshes.Octree">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.meshes.</span></span><span class="sig-name descname"><span class="pre">Octree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">boundingBox</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxDepth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elementType</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Admittance'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octree" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#xcell.meshes.Mesh" title="xcell.meshes.Mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mesh</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octree.getContainingElement">
+<span class="sig-name descname"><span class="pre">getContainingElement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octree.getContainingElement" title="Permalink to this definition"></a></dt>
+<dd><p>Get element containing specified point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>coords</strong> (<em>float</em><em>[</em><em>:</em><em>]</em>) – Cartesian coordinates of point.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – Error if no element contains the point.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>elem</strong> – Containing element.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>TYPE</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octree.getIntersectingelements">
+<span class="sig-name descname"><span class="pre">getIntersectingelements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinate</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octree.getIntersectingelements" title="Permalink to this definition"></a></dt>
+<dd><p>Find elements intersected by a cartesian plane.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>int</em>) – Normal of intersecting plane (0-&gt;x, 1-&gt;y,2-&gt;z).</p></li>
+<li><p><strong>coordinate</strong> (<em>float</em>) – Coordinate of plane alonx normal axis.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>elements</strong> – Elements intersected by the plane.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of <cite>~xcell.meshes.Octant</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octree.refineByMetric">
+<span class="sig-name descname"><span class="pre">refineByMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">minl0Function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refPts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxl0Function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coarsen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octree.refineByMetric" title="Permalink to this definition"></a></dt>
+<dd><p>Recursively splits elements until l0Function evaluated at the center
+of each element is greater than that element’s l0’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>minl0Function</strong> (<em>function</em>) – Function returning a scalar for each input cartesian coordinate.</p></li>
+<li><p><strong>refPts</strong> (<em>float</em><em>[</em><em>:</em><em>,</em><em>3</em><em>]</em>) – Cartesian coordinates where distance is evaluated from.</p></li>
+<li><p><strong>maxl0Function</strong> (<em>function</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Function giving maximum l0 for coarsening.
+The default is None, which uses minl0Function.</p></li>
+<li><p><strong>coefs</strong> (<em>float</em><em>[</em><em>:</em><em>]</em><em>, </em><em>optional</em>) – Factor multiplied each candidate l0. The default is None.</p></li>
+<li><p><strong>coarsen</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to prune elements larger than target l0. The default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>changed</strong> – Adaptation resulted in new topology</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octree.finalize">
+<span class="sig-name descname"><span class="pre">finalize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octree.finalize" title="Permalink to this definition"></a></dt>
+<dd><p>Convert terminal octants to mesh elements, mapping sparse to dense numbering.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octree.printStructure">
+<span class="sig-name descname"><span class="pre">printStructure</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octree.printStructure" title="Permalink to this definition"></a></dt>
+<dd><p>Debug tool to print structure of tree</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octree.octantByList">
+<span class="sig-name descname"><span class="pre">octantByList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indexList</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">octant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octree.octantByList" title="Permalink to this definition"></a></dt>
+<dd><p>Select an octant by recursing through a list of indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>indexList</strong> (<em>int64</em><em>[</em><em>]</em>) – Octant identifier, where i=indexList[n] specifies child i of octant n</p></li>
+<li><p><strong>octant</strong> (<a class="reference internal" href="#xcell.meshes.Octant" title="xcell.meshes.Octant"><em>Octant</em></a><em>, </em><em>optional</em>) – Used internally to recurse. The default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The octant object specified.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#xcell.meshes.Octant" title="xcell.meshes.Octant">Octant</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octree.countelements">
+<span class="sig-name descname"><span class="pre">countelements</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octree.countelements" title="Permalink to this definition"></a></dt>
+<dd><p>Get number of terminal elements in tree.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of leaf elements.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octree.getCoordsRecursively">
+<span class="sig-name descname"><span class="pre">getCoordsRecursively</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octree.getCoordsRecursively" title="Permalink to this definition"></a></dt>
+<dd><p>Determine coordinates of mesh nodes.</p>
+<p>Recurses through <cite>Octant.getCoordsRecursively</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>coords</strong> – Cartesian coordinates of each mesh node.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>2d float array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octree.getBoundaryNodes">
+<span class="sig-name descname"><span class="pre">getBoundaryNodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octree.getBoundaryNodes" title="Permalink to this definition"></a></dt>
+<dd><p>Get the indices of nodes on the domain boundary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>globalIndices</strong> – Indices of current mesh nodes at periphery.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int[:]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octree.getElementAdjacencies">
+<span class="sig-name descname"><span class="pre">getElementAdjacencies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octree.getElementAdjacencies" title="Permalink to this definition"></a></dt>
+<dd><p>Get the neighboring elements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>adjacencies</strong> – Adjacent elements in order of (+x,-x, +y,-y, +z,-z).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of elements</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="xcell.meshes.Octant">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.meshes.</span></span><span class="sig-name descname"><span class="pre">Octant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">origin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">span</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">np.ones(3)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oXYZ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">np.zeros(3,</span> <span class="pre">dtype=np.int32)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.__recreateTree">
+<span class="sig-name descname"><span class="pre">__recreateTree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.__recreateTree" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.countelements">
+<span class="sig-name descname"><span class="pre">countelements</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.countelements" title="Permalink to this definition"></a></dt>
+<dd><p>Return the number of leaf elements contained within octant.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of leaf elements within.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.split">
+<span class="sig-name descname"><span class="pre">split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">division</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">np.array([0.5,</span> <span class="pre">0.5,</span> <span class="pre">0.5])</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.split" title="Permalink to this definition"></a></dt>
+<dd><p>Split element into its child octants.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>division</strong> (<em>float</em><em>[</em><em>3</em><em>]</em><em>, </em><em>optional</em>) – Fraction of division in x,y,z directions. The default is np.array([0.5, 0.5, 0.5]).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.getCoordsRecursively">
+<span class="sig-name descname"><span class="pre">getCoordsRecursively</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">asDual</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.getCoordsRecursively" title="Permalink to this definition"></a></dt>
+<dd><p>Get the coordinates of the mesh within the element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>asDual</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to return the mesh-dual nodes instead of vertices. The default is False.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>indices</strong> – Indices of node according to universal numbering.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.refineByMetric">
+<span class="sig-name descname"><span class="pre">refineByMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">l0Function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refPts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxDepth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.refineByMetric" title="Permalink to this definition"></a></dt>
+<dd><p>Recursively splits elements until l0Function evaluated at the center
+of each element is greater than that element’s l0’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>minl0Function</strong> (<em>function</em>) – Function returning a scalar for each input cartesian coordinate.</p></li>
+<li><p><strong>refPts</strong> (<em>float</em><em>[</em><em>:</em><em>,</em><em>3</em><em>]</em>) – Cartesian coordinates where distance is evaluated from.</p></li>
+<li><p><strong>maxDepth</strong> (<em>int</em>) – Maximum depth of splitting permitted</p></li>
+<li><p><strong>coefs</strong> (<em>float</em><em>[</em><em>:</em><em>]</em><em>, </em><em>optional</em>) – Factor multiplied each candidate l0. The default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>changed</strong> – Adaptation resulted in new topology</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.coarsenByMetric">
+<span class="sig-name descname"><span class="pre">coarsenByMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refPts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxdepth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.coarsenByMetric" title="Permalink to this definition"></a></dt>
+<dd><p>Delete children if element and all children are smaller than target.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metric</strong> (<em>function</em>) – Function returning a scalar for each input cartesian coordinate.</p></li>
+<li><p><strong>refPts</strong> (<em>float</em><em>[</em><em>:</em><em>,</em><em>3</em><em>]</em>) – Cartesian coordinates where distance is evaluated from.</p></li>
+<li><p><strong>maxdepth</strong> (<em>int</em>) – Maximum depth of splitting.</p></li>
+<li><p><strong>coefs</strong> (<em>float</em><em>[</em><em>:</em><em>]</em>) – Factor multiplied each candidate l0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>changed</strong> (<em>bool</em>) – Whether mesh topology was altered.</p></li>
+<li><p><strong>undersized</strong> (<em>bool</em>) – Whether element is smaller than all targets.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.printStructure">
+<span class="sig-name descname"><span class="pre">printStructure</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.printStructure" title="Permalink to this definition"></a></dt>
+<dd><p>Print out octree structure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.isTerminal">
+<span class="sig-name descname"><span class="pre">isTerminal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.isTerminal" title="Permalink to this definition"></a></dt>
+<dd><p>Determine if element is terminal (has no children)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>terminal</strong> – True if element has no children.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.intersectsPlane">
+<span class="sig-name descname"><span class="pre">intersectsPlane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coord</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.intersectsPlane" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.getTerminalOctants">
+<span class="sig-name descname"><span class="pre">getTerminalOctants</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.getTerminalOctants" title="Permalink to this definition"></a></dt>
+<dd><p>Get all childless octants.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Childless octants (the actual elements of the mesh)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of Octants</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.calcIndices">
+<span class="sig-name descname"><span class="pre">calcIndices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.calcIndices" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the universal indices of the element’s nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.getContainingElement">
+<span class="sig-name descname"><span class="pre">getContainingElement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.getContainingElement" title="Permalink to this definition"></a></dt>
+<dd><p>Find the element that contains the specified point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>coords</strong> (<em>float</em><em>[</em><em>3</em><em>]</em>) – Cartesian coordinates of test point.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Element containing point.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#xcell.meshes.Octant" title="xcell.meshes.Octant">xcell.meshes.Octant</a> or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.getIntersectingElement">
+<span class="sig-name descname"><span class="pre">getIntersectingElement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coord</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.getIntersectingElement" title="Permalink to this definition"></a></dt>
+<dd><p>Find elements intersected by a cartesian plane.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>int</em>) – Normal of intersecting plane (0-&gt;x, 1-&gt;y,2-&gt;z).</p></li>
+<li><p><strong>coord</strong> (<em>float</em>) – Coordinate of plane alonx normal axis.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>elements</strong> – Elements intersected by the plane.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of <cite>~xcell.meshes.Octant</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.interpolateWithin">
+<span class="sig-name descname"><span class="pre">interpolateWithin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.interpolateWithin" title="Permalink to this definition"></a></dt>
+<dd><p>Interpolate values within the element from specified vertices/face nodes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coordinates</strong> (<em>float</em><em>[</em><em>:</em><em>,</em><em>3</em><em>]</em>) – Cartesian coordinates to interpolate at (in global coordinate system).</p></li>
+<li><p><strong>values</strong> (<em>float</em><em>[</em><em>8</em><em>] or </em><em>float</em><em>[</em><em>7</em><em>]</em>) – Array of values at vertices (n=8) or faces (n=7).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>interp</strong> – Interpolated values at the specified points.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float[:]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.getUniversalVals">
+<span class="sig-name descname"><span class="pre">getUniversalVals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">knownValues</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.getUniversalVals" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.getPlanarValues">
+<span class="sig-name descname"><span class="pre">getPlanarValues</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">globalValues</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coord</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.getPlanarValues" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, CBC Girard.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

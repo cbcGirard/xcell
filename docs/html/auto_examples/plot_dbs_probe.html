@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DBS Electrode &mdash; xcell  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Depth sweep" href="plot_comparisons.html" />
+    <link rel="prev" title="Single timestep" href="plot_singleStep.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #990000" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Purpose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html#installing">Installing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html#citation">Citation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Example applications</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="plot_MeshAdaptation.html">Adaptation parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_singleStep.html">Single timestep</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">DBS Electrode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_comparisons.html">Depth sweep</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_singularityEffect.html">Singularity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_algorithmOverview.html">Simulation overview</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#geometry">Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #990000" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">xcell</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Example applications</a></li>
+      <li class="breadcrumb-item active">DBS Electrode</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/auto_examples/plot_dbs_probe.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-plot-dbs-probe-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="dbs-electrode">
+<span id="sphx-glr-auto-examples-plot-dbs-probe-py"></span><h1>DBS Electrode<a class="headerlink" href="#dbs-electrode" title="Permalink to this heading"></a></h1>
+<p>Programmatically generate micro-macro electrode array</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xcell</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial.transform</span> <span class="kn">import</span> <span class="n">Rotation</span>
+<span class="kn">import</span> <span class="nn">pyvista</span> <span class="k">as</span> <span class="nn">pv</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+
+<span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">to_rgba_array</span>
+
+<span class="n">composite</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">MultiBlock</span><span class="p">()</span>
+<span class="n">regions</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">Regions</span><span class="p">()</span>
+
+<span class="c1"># bodies, misc, oriens, and hilus</span>
+<span class="n">sigmas</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">6.429</span><span class="p">,</span>
+                     <span class="mf">3.215</span><span class="p">,</span>
+                     <span class="mf">2.879</span><span class="p">,</span>
+                     <span class="mf">2.605</span><span class="p">])</span>
+
+<span class="c1"># latest from https://github.com/Head-Conductivity/Human-Head-Conductivity</span>
+<span class="n">sigma_0</span> <span class="o">=</span> <span class="mf">0.3841</span>
+
+
+<span class="n">xdom</span> <span class="o">=</span> <span class="mf">5e-2</span>
+
+<span class="n">dbody</span> <span class="o">=</span> <span class="mf">1.3e-3</span>
+<span class="n">dmicro</span> <span class="o">=</span> <span class="mf">17e-6</span>
+<span class="c1"># dmicro = 5e-4</span>
+<span class="n">wmacro</span> <span class="o">=</span> <span class="mf">2e-3</span>
+
+<span class="n">pitchMacro</span> <span class="o">=</span> <span class="mf">5e-3</span>
+
+<span class="n">nmacro</span> <span class="o">=</span> <span class="mi">6</span>  <span class="c1"># 4-6</span>
+<span class="n">nmicro</span> <span class="o">=</span> <span class="mi">24</span>  <span class="c1"># 10-24</span>
+
+<span class="n">microRows</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">microCols</span> <span class="o">=</span> <span class="mi">3</span>
+
+<span class="n">orientation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span>
+
+<span class="n">tipPt</span> <span class="o">=</span> <span class="mf">1e-3</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">5.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="n">bodyL</span> <span class="o">=</span> <span class="mf">0.05</span>
+
+<span class="n">tpulse</span> <span class="o">=</span> <span class="mf">1e-3</span>  <span class="c1"># per phase</span>
+<span class="n">ipulse</span> <span class="o">=</span> <span class="mf">150e-6</span>
+<span class="n">vpulse</span> <span class="o">=</span> <span class="mf">1.</span>
+
+
+<span class="n">hippo</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;./Geometry/slice77600_ext10000.vtk&#39;</span><span class="p">)</span>
+<span class="n">brainXform</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">hippo</span><span class="o">.</span><span class="n">center</span><span class="p">)</span>
+<span class="n">hippo</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">brainXform</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;bodies&#39;</span><span class="p">,</span> <span class="s1">&#39;misc&#39;</span><span class="p">,</span> <span class="s1">&#39;oriens&#39;</span><span class="p">,</span> <span class="s1">&#39;hilus&#39;</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">sig</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">sigmas</span><span class="p">):</span>
+    <span class="n">region</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;Geometry/&#39;</span><span class="o">+</span><span class="n">f</span><span class="o">+</span><span class="s1">&#39;.stl&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">brainXform</span><span class="p">)</span>
+    <span class="n">region</span><span class="o">.</span><span class="n">cell_data</span><span class="p">[</span><span class="s1">&#39;sigma&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sig</span>
+    <span class="n">regions</span><span class="o">.</span><span class="n">addMesh</span><span class="p">(</span><span class="n">region</span><span class="p">,</span> <span class="s1">&#39;Conductors&#39;</span><span class="p">)</span>
+    <span class="n">composite</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">region</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
+
+<span class="c1"># xdom = max(np.array(hippo.bounds[1::2])-np.array(hippo.bounds[::2]))</span>
+<span class="n">xdom</span> <span class="o">=</span> <span class="n">pitchMacro</span><span class="o">*</span><span class="p">(</span><span class="n">nmacro</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+
+<span class="n">bbox</span> <span class="o">=</span> <span class="n">xdom</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)))</span>
+
+<span class="c1"># set smallest element to microelectrode radius or smaller</span>
+<span class="n">maxdepth</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">xdom</span> <span class="o">/</span> <span class="n">dmicro</span><span class="p">))</span> <span class="o">+</span> <span class="mi">2</span>
+
+<span class="n">sim</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="n">bbox</span><span class="p">)</span>
+
+
+<span class="n">body</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">Cylinder</span><span class="p">(</span>
+    <span class="n">tipPt</span><span class="o">+</span><span class="n">bodyL</span><span class="o">*</span><span class="n">orientation</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">dbody</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">bodyL</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">orientation</span><span class="p">)</span>
+
+<span class="c1"># bugfix to force detection of points inside cylindrical body</span>
+<span class="n">bodyMesh</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">toPV</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+<span class="n">regions</span><span class="o">.</span><span class="n">addMesh</span><span class="p">(</span><span class="n">bodyMesh</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="s1">&#39;Insulators&#39;</span><span class="p">)</span>
+
+<span class="c1"># bodyMesh = pv.Cylinder(center=body.center,</span>
+<span class="c1"># direction=body.axis,</span>
+<span class="c1"># radius=body.radius,</span>
+<span class="c1"># height=body.length)</span>
+
+<span class="n">macroElectrodes</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">microElectrodes</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">elecMeshes</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="n">refPts</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">refSizes</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="c1"># Generate macroelectrodes (bands)</span>
+<span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmacro</span><span class="p">):</span>
+    <span class="n">pt</span> <span class="o">=</span> <span class="n">tipPt</span><span class="o">+</span><span class="p">(</span><span class="n">ii</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">pitchMacro</span><span class="o">*</span><span class="n">orientation</span>
+
+    <span class="n">geo</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">Cylinder</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">dbody</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">wmacro</span><span class="p">,</span> <span class="n">orientation</span><span class="p">)</span>
+
+    <span class="n">sim</span><span class="o">.</span><span class="n">addCurrentSource</span><span class="p">(</span><span class="n">xcell</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+                         <span class="n">coords</span><span class="o">=</span><span class="n">pt</span><span class="p">,</span>
+                         <span class="n">geometry</span><span class="o">=</span><span class="n">geo</span><span class="p">)</span>
+
+    <span class="n">macroElectrodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geo</span><span class="p">)</span>
+
+    <span class="n">refPts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geo</span><span class="o">.</span><span class="n">center</span><span class="p">)</span>
+
+    <span class="n">regions</span><span class="o">.</span><span class="n">addMesh</span><span class="p">(</span><span class="n">xcell</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">toPV</span><span class="p">(</span><span class="n">geo</span><span class="p">),</span> <span class="n">category</span><span class="o">=</span><span class="s1">&#39;Electrodes&#39;</span><span class="p">)</span>
+
+
+<span class="c1"># Generate microelectrodes</span>
+<span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">microRows</span><span class="p">):</span>
+    <span class="n">rowpt</span> <span class="o">=</span> <span class="n">tipPt</span><span class="o">+</span><span class="p">(</span><span class="n">ii</span><span class="o">+</span><span class="mf">.5</span><span class="p">)</span><span class="o">*</span><span class="n">pitchMacro</span><span class="o">*</span><span class="n">orientation</span>
+
+    <span class="k">for</span> <span class="n">jj</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">microCols</span><span class="p">):</span>
+        <span class="n">rot</span> <span class="o">=</span> <span class="n">Rotation</span><span class="o">.</span><span class="n">from_rotvec</span><span class="p">(</span><span class="n">orientation</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">jj</span><span class="o">/</span><span class="n">microCols</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+
+        <span class="n">microOrientation</span> <span class="o">=</span> <span class="n">rot</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dbody</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]))</span>
+
+        <span class="n">geo</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">Disk</span><span class="p">(</span>
+            <span class="n">center</span><span class="o">=</span><span class="n">rowpt</span><span class="o">+</span><span class="n">microOrientation</span><span class="p">,</span>
+            <span class="n">radius</span><span class="o">=</span><span class="n">dmicro</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">microOrientation</span><span class="p">,</span>
+            <span class="n">tol</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+        <span class="n">sim</span><span class="o">.</span><span class="n">addCurrentSource</span><span class="p">(</span><span class="n">xcell</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">coords</span><span class="o">=</span><span class="n">geo</span><span class="o">.</span><span class="n">center</span><span class="p">,</span>
+                             <span class="n">geometry</span><span class="o">=</span><span class="n">geo</span><span class="p">)</span>
+
+        <span class="n">microElectrodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geo</span><span class="p">)</span>
+
+        <span class="n">refPts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geo</span><span class="o">.</span><span class="n">center</span><span class="p">)</span>
+        <span class="n">regions</span><span class="o">.</span><span class="n">addMesh</span><span class="p">(</span><span class="n">xcell</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">toPV</span><span class="p">(</span><span class="n">geo</span><span class="p">),</span> <span class="n">category</span><span class="o">=</span><span class="s1">&#39;Electrodes&#39;</span><span class="p">)</span>
+
+<span class="n">p</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">visualizers</span><span class="o">.</span><span class="n">PVScene</span><span class="p">()</span>
+<span class="n">p</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">regions</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">p</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_plot_dbs_probe_001.png" srcset="../_images/sphx_glr_plot_dbs_probe_001.png" alt="plot dbs probe" class = "sphx-glr-single-img"/><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sim</span><span class="o">.</span><span class="n">quickAdaptiveGrid</span><span class="p">(</span><span class="n">maxdepth</span><span class="p">)</span>
+
+<span class="n">vmesh</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">toVTK</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">mesh</span><span class="p">)</span>
+<span class="n">vmesh</span><span class="o">.</span><span class="n">cell_data</span><span class="p">[</span><span class="s1">&#39;sigma&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigma_0</span>
+
+<span class="n">regions</span><span class="o">.</span><span class="n">assignSigma</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">mesh</span><span class="p">,</span> <span class="n">defaultSigma</span><span class="o">=</span><span class="n">sigma_0</span><span class="p">)</span>
+
+<span class="n">sim</span><span class="o">.</span><span class="n">currentSources</span><span class="p">[</span><span class="n">nmacro</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="mf">150e-6</span>
+
+
+<span class="n">sim</span><span class="o">.</span><span class="n">setBoundaryNodes</span><span class="p">()</span>
+<span class="n">v</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">iterativeSolve</span><span class="p">()</span>
+<span class="n">vmesh</span><span class="o">.</span><span class="n">point_data</span><span class="p">[</span><span class="s1">&#39;voltage&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+<span class="n">vmesh</span><span class="o">.</span><span class="n">set_active_scalars</span><span class="p">(</span><span class="s1">&#39;voltage&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;FieldAssociation.POINT: 0&gt;, pyvista_ndarray([0., 0., 0., ..., 0., 0., 0.]))
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">p</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">visualizers</span><span class="o">.</span><span class="n">PVScene</span><span class="p">()</span>
+<span class="n">p</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">regions</span><span class="p">)</span>  <span class="c1"># , mesh=vmesh, simData=&#39;voltage&#39;)</span>
+<span class="c1"># p.camera.tight(padding=0.1)</span>
+<span class="n">p</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">vmesh</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">normal</span><span class="o">=</span><span class="s1">&#39;z&#39;</span><span class="p">),</span> <span class="n">show_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+           <span class="n">cmap</span><span class="o">=</span><span class="n">xcell</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">CM_BIPOLAR</span><span class="p">)</span>
+<span class="n">cambox</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">hippo</span><span class="o">.</span><span class="n">bounds</span><span class="p">)</span>
+<span class="n">cambox</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span> <span class="o">=</span> <span class="mf">0.</span>
+<span class="c1"># p.reset_camera(bounds=cambox)</span>
+<span class="n">p</span><span class="o">.</span><span class="n">view_xy</span><span class="p">()</span>
+<span class="n">p</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># sphinx_gallery_thumbnail_number = 3</span>
+
+<span class="c1"># Save outputs</span>
+<span class="n">regions</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">&#39;Geometry/composite.vtm&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_plot_dbs_probe_002.png" srcset="../_images/sphx_glr_plot_dbs_probe_002.png" alt="plot dbs probe" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  41.202 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-dbs-probe-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/10e61232e3403684b4390fac84be5f77/plot_dbs_probe.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_dbs_probe.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/2b24ba6c9db330ef4c8a9cf5ef0f42ab/plot_dbs_probe.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_dbs_probe.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plot_singleStep.html" class="btn btn-neutral float-left" title="Single timestep" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_comparisons.html" class="btn btn-neutral float-right" title="Depth sweep" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, CBC Girard.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
