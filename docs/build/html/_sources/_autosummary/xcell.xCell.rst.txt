@@ -1,0 +1,42 @@
+xcell.xCell
+===========
+
+.. automodule:: xcell.xCell
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      generalMetric
+      getStandardMeshParams
+      makeBoundedLinearMetric
+      makeExplicitLinearMetric
+      makeScaledMetrics
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      CurrentSource
+      SimStudy
+      Simulation
+      VoltageSource
+   
+   
+
+   
+   
+   
+
+
+

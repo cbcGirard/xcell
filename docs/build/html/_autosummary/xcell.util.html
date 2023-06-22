@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>xcell.util &mdash; xcell  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #990000" >
+            <a href="../index.html">
+            <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Purpose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #990000" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">xcell</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>xcell.util</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/xcell.util.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-xcell.util">
+<span id="xcell-util"></span><h1>xcell.util<a class="headerlink" href="#module-xcell.util" title="Permalink to this heading"></a></h1>
+<p>Created on Sun Dec 19 13:40:44 2021
+Utilities
+&#64;author: benoit</p>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.anyMatch" title="xcell.util.anyMatch"><code class="xref py py-obj docutils literal notranslate"><span class="pre">anyMatch</span></code></a>(searchArray, searchVals)</p></td>
+<td><p>Rapid search if any matches occur (returns immediately at first match).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.condenseIndices" title="xcell.util.condenseIndices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">condenseIndices</span></code></a>(globalMask)</p></td>
+<td><p>Get array for mapping local to global numbering.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.coord2InterpVals" title="xcell.util.coord2InterpVals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">coord2InterpVals</span></code></a>(coord)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.coords2MaskedArrays" title="xcell.util.coords2MaskedArrays"><code class="xref py py-obj docutils literal notranslate"><span class="pre">coords2MaskedArrays</span></code></a>(intCoords, edges, ...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.deduplicateEdges" title="xcell.util.deduplicateEdges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">deduplicateEdges</span></code></a>(edges, conductances)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.edgeCurrentLoop" title="xcell.util.edgeCurrentLoop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edgeCurrentLoop</span></code></a>(gList, edgeMat, dof2Global, ...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.edgeNodesOfType" title="xcell.util.edgeNodesOfType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edgeNodesOfType</span></code></a>(edges, nodeSelect)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.edgeRoles" title="xcell.util.edgeRoles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edgeRoles</span></code></a>(edges, nodeRoleTable)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.eliminateRows" title="xcell.util.eliminateRows"><code class="xref py py-obj docutils literal notranslate"><span class="pre">eliminateRows</span></code></a>(matrix)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.evalulateInterpolant" title="xcell.util.evalulateInterpolant"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evalulateInterpolant</span></code></a>(interp, location)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.fromBitArray" title="xcell.util.fromBitArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fromBitArray</span></code></a>(arr)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.getBilinCoefs" title="xcell.util.getBilinCoefs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getBilinCoefs</span></code></a>(vals)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.getCurrentVector" title="xcell.util.getCurrentVector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getCurrentVector</span></code></a>(interpolant, location)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.getElementInterpolant" title="xcell.util.getElementInterpolant"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getElementInterpolant</span></code></a>(nodeVals)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.getIndexDict" title="xcell.util.getIndexDict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getIndexDict</span></code></a>(sparseIndices)</p></td>
+<td><p>Get a dict of subsetIndex: globalIndex.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.getPyDict" title="xcell.util.getPyDict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getPyDict</span></code></a>(sparseIndices)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.getUnmasked" title="xcell.util.getUnmasked"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getUnmasked</span></code></a>(maskArray)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.getquads" title="xcell.util.getquads"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getquads</span></code></a>(x, y, xInt, yInt, values)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.htile" title="xcell.util.htile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">htile</span></code></a>(array, ncopy)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.index2pos" title="xcell.util.index2pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">index2pos</span></code></a>(ndx, dX)</p></td>
+<td><p>Convert scalar index to [x,y,z] indices.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.indexToCoords" title="xcell.util.indexToCoords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">indexToCoords</span></code></a>(indices, origin, span)</p></td>
+<td><p><dl class="field-list simple">
+<dt class="field-odd">param indices</dt>
+<dd class="field-odd"><p>DESCRIPTION.</p>
+</dd>
+</dl>
+</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.indicesWithinOctant" title="xcell.util.indicesWithinOctant"><code class="xref py py-obj docutils literal notranslate"><span class="pre">indicesWithinOctant</span></code></a>(elList, relativePos)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.intdot" title="xcell.util.intdot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">intdot</span></code></a>(a, b)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.interpolateBilin" title="xcell.util.interpolateBilin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">interpolateBilin</span></code></a>(nodeVals, location)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.logceil" title="xcell.util.logceil"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logceil</span></code></a>(val)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.logfloor" title="xcell.util.logfloor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logfloor</span></code></a>(val)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.loground" title="xcell.util.loground"><code class="xref py py-obj docutils literal notranslate"><span class="pre">loground</span></code></a>(axis[, which])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.makeGridPoints" title="xcell.util.makeGridPoints"><code class="xref py py-obj docutils literal notranslate"><span class="pre">makeGridPoints</span></code></a>(nx, xmax[, xmin, ymax, ymin, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.maxUnder" title="xcell.util.maxUnder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">maxUnder</span></code></a>(target, vals)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.minOver" title="xcell.util.minOver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">minOver</span></code></a>(target, vals)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.octListReverseXYZ" title="xcell.util.octListReverseXYZ"><code class="xref py py-obj docutils literal notranslate"><span class="pre">octListReverseXYZ</span></code></a>(octantList)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.octantListToXYZ" title="xcell.util.octantListToXYZ"><code class="xref py py-obj docutils literal notranslate"><span class="pre">octantListToXYZ</span></code></a>(octList)</p></td>
+<td><p><dl class="field-list simple">
+<dt class="field-odd">param octList</dt>
+<dd class="field-odd"><p>DESCRIPTION.</p>
+</dd>
+</dl>
+</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.octantNeighborIndexLists" title="xcell.util.octantNeighborIndexLists"><code class="xref py py-obj docutils literal notranslate"><span class="pre">octantNeighborIndexLists</span></code></a>(ownIndexList)</p></td>
+<td><p><dl class="field-list simple">
+<dt class="field-odd">param ownIndexList</dt>
+<dd class="field-odd"><p>DESCRIPTION.</p>
+</dd>
+</dl>
+</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.octreeLoop_GetBoundaryNodesLoop" title="xcell.util.octreeLoop_GetBoundaryNodesLoop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">octreeLoop_GetBoundaryNodesLoop</span></code></a>(nX, indexMap)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.oneDigit" title="xcell.util.oneDigit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">oneDigit</span></code></a>(x)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.pointCurrentV" title="xcell.util.pointCurrentV"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pointCurrentV</span></code></a>(tstCoords, iSrc[, sigma, srcLoc])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.pos2index" title="xcell.util.pos2index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pos2index</span></code></a>(pos, dX)</p></td>
+<td><p>Convert [x,y,z] indices to a scalar index</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.quadsToMaskedArrays" title="xcell.util.quadsToMaskedArrays"><code class="xref py py-obj docutils literal notranslate"><span class="pre">quadsToMaskedArrays</span></code></a>(quadInds, quadVals)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.reduceFunctions" title="xcell.util.reduceFunctions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reduceFunctions</span></code></a>(l0Function, refPts, elBBox)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.reindex" title="xcell.util.reindex"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reindex</span></code></a>(sparseVal, denseList)</p></td>
+<td><p>Get position of sparseVal in denseList, returning as soon as found.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.renumberIndices" title="xcell.util.renumberIndices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">renumberIndices</span></code></a>(sparseIndices, denseList)</p></td>
+<td><p>Renumber indices according to a subset.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.toBilinearVars" title="xcell.util.toBilinearVars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toBilinearVars</span></code></a>(coord)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.toBitArray" title="xcell.util.toBitArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toBitArray</span></code></a>(val[, nBits])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.uIndexToXYZ" title="xcell.util.uIndexToXYZ"><code class="xref py py-obj docutils literal notranslate"><span class="pre">uIndexToXYZ</span></code></a>(index)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.unravelArraySet" title="xcell.util.unravelArraySet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unravelArraySet</span></code></a>(maskedArrays)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.xyzWithinOctant" title="xcell.util.xyzWithinOctant"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xyzWithinOctant</span></code></a>(elList, relativePos)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/xcell/util/index.html#xcell.util.Logger" title="xcell.util.Logger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Logger</span></code></a>(stepName[, printout])</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, CBC Girard.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

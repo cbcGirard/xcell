@@ -1,0 +1,407 @@
+:py:mod:`xcell.util`
+====================
+
+.. py:module:: xcell.util
+
+.. autoapi-nested-parse::
+
+   Low-level helpers.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   xcell.util.IndexMap
+   xcell.util.Logger
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   xcell.util.pointCurrentV
+   xcell.util.diskCurrentV
+   xcell.util.oneDigit
+   xcell.util.logfloor
+   xcell.util.logceil
+   xcell.util.loground
+   xcell.util.makeGridPoints
+   xcell.util.eliminateRows
+   xcell.util.htile
+   xcell.util.__eliminateRowsLoop
+   xcell.util.deduplicateEdges
+   xcell.util.condenseIndices
+   xcell.util.getIndexDict
+   xcell.util.getPyDict
+   xcell.util.renumberIndices
+   xcell.util.reindex
+   xcell.util.getUnmasked
+   xcell.util.toBilinearVars
+   xcell.util.interpolateBilin
+   xcell.util.getBilinCoefs
+   xcell.util.minOver
+   xcell.util.maxUnder
+   xcell.util.getElementInterpolant
+   xcell.util.evalulateInterpolant
+   xcell.util.coord2InterpVals
+   xcell.util.getCurrentVector
+   xcell.util.toBitArray
+   xcell.util.fromBitArray
+   xcell.util.anyMatch
+   xcell.util.index2pos
+   xcell.util.pos2index
+   xcell.util.reduceFunctions
+   xcell.util.intdot
+   xcell.util.indicesWithinOctant
+   xcell.util.xyzWithinOctant
+   xcell.util.indexToCoords
+   xcell.util.octantListToXYZ
+   xcell.util.uIndexToXYZ
+   xcell.util.octantNeighborIndexLists
+   xcell.util.octListReverseXYZ
+   xcell.util.__xyzToOList
+   xcell.util.unravelArraySet
+   xcell.util.fastcount
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   xcell.util.MAXDEPTH
+   xcell.util.MAXPT
+   xcell.util.OCT_INDEX_BITS
+
+
+.. py:data:: MAXDEPTH
+
+   
+
+.. py:data:: MAXPT
+
+   
+
+.. py:function:: pointCurrentV(tstCoords, iSrc, sigma=1.0, srcLoc=np.zeros(3, dtype=np.float64))
+
+   Calculate field from point current source.
+
+   :param tstCoords: Points at which to evaluate field.
+   :type tstCoords: TYPE
+   :param iSrc: Source current in amperes.
+   :type iSrc: float
+   :param sigma: Local conductivity in S/m. The default is 1..
+   :type sigma: float, optional
+   :param srcLoc: Center of source. The default is np.zeros(3, dtype=np.float64).
+   :type srcLoc: TYPE, optional
+
+   :returns: **v** -- Potential at specified points.
+   :rtype: float[:]
+
+
+.. py:function:: diskCurrentV(tstCoords, iSrc, sigma=1.0, srcLoc=np.zeros(3, dtype=np.float64))
+
+   Calculate field from a disk current source.
+
+   :param tstCoords: Points at which to evaluate field.
+   :type tstCoords: TYPE
+   :param iSrc: Source current in amperes.
+   :type iSrc: float
+   :param sigma: Local conductivity in S/m. The default is 1..
+   :type sigma: float, optional
+   :param srcLoc: Center of source. The default is np.zeros(3, dtype=np.float64).
+   :type srcLoc: TYPE, optional
+
+   :returns: **v** -- Potential at specified points.
+   :rtype: float[:]
+
+
+.. py:function:: oneDigit(x)
+
+   Round to one significant digit.
+
+   :param x: number to round.
+   :type x: float
+
+   :returns: Rounded number.
+   :rtype: float
+
+
+.. py:function:: logfloor(val)
+
+
+.. py:function:: logceil(val)
+
+
+.. py:function:: loground(axis, which='both')
+
+
+.. py:function:: makeGridPoints(nx, xmax, xmin=None, ymax=None, ymin=None, centers=False)
+
+
+.. py:class:: IndexMap(sparseIndices)
+
+   .. py:method:: __findMatch(value, lower, upper)
+
+
+   .. py:method:: toDense(sparseIndex)
+
+
+
+.. py:function:: eliminateRows(matrix)
+
+
+.. py:function:: htile(array, ncopy)
+
+
+.. py:function:: __eliminateRowsLoop(rowIdx, colIdx, count)
+
+
+.. py:function:: deduplicateEdges(edges, conductances)
+
+   Combine conductances in parallel
+
+   :param edges: Global indices of the edge endpoints.
+   :type edges: int[:,2]
+   :param conductances: Discrete conductance between the nodes.
+   :type conductances: float[:]
+
+   :returns: * **newEdges** (*int[:,2]*) -- Minimal set of conductances' endpoints.
+             * **newConds** (*float[:]*) -- Minimal set of conductances.
+
+
+.. py:function:: condenseIndices(globalMask)
+
+   Get array for mapping local to global numbering.
+
+   :param globalMask: Global elements included in subset.
+   :type globalMask: bool array
+
+   :returns: **whereSubset** -- DESCRIPTION.
+   :rtype: int array
+
+
+.. py:function:: getIndexDict(sparseIndices)
+
+   Get a dict of subsetIndex: globalIndex.
+
+   .. deprecated:: 1.6.0
+       Lower mem usage, but horribly slow.
+       Use `condenseIndices` instead
+
+   :param globalMask: Global elements included in subset.
+   :type globalMask: bool array
+
+   :returns: **indexDict** -- Dictionary of subset:global indices.
+   :rtype: dict
+
+
+.. py:function:: getPyDict(sparseIndices)
+
+   Get dictionary mapping a sparse index number to its position in the list of indices.
+
+   :param sparseIndices: DESCRIPTION.
+   :type sparseIndices: int[]
+
+   :returns: **dic** -- Dictionary for A[ii]=n such that dic[n]=ii.
+   :rtype: dict
+
+
+.. py:function:: renumberIndices(sparseIndices, denseList)
+
+   Renumber indices according to a subset.
+
+   :param edges: Node indices by global numbering.
+   :type edges: int array (1- or 2-d)
+   :param globalMask: Boolean mask of which global elements are in subset.
+   :type globalMask: bool array
+
+   :returns: **subNumberedEdges** -- Edges contained in subset, according to subset ordering.
+   :rtype: int array
+
+
+.. py:function:: reindex(sparseVal, denseList)
+
+   Get position of sparseVal in denseList, returning as soon as found.
+
+   :param sparseVal: Value to find index of match.
+   :type sparseVal: int64
+   :param denseList: List of nonconsecutive indices.
+   :type denseList: int64[:]
+
+   :raises ValueError: Error if sparseVal not found.
+
+   :returns: index where sparseVal occurs in denseList.
+   :rtype: int64
+
+
+.. py:function:: getUnmasked(maskArray)
+
+
+.. py:function:: toBilinearVars(coord)
+
+
+.. py:function:: interpolateBilin(nodeVals, location)
+
+
+.. py:function:: getBilinCoefs(vals)
+
+
+.. py:function:: minOver(target, vals)
+
+
+.. py:function:: maxUnder(target, vals)
+
+
+.. py:function:: getElementInterpolant(nodeVals)
+
+
+.. py:function:: evalulateInterpolant(interp, location)
+
+
+.. py:function:: coord2InterpVals(coord)
+
+
+.. py:function:: getCurrentVector(interpolant, location)
+
+
+.. py:function:: toBitArray(val)
+
+
+.. py:data:: OCT_INDEX_BITS
+
+   
+
+.. py:function:: fromBitArray(arr)
+
+
+.. py:function:: anyMatch(searchArray, searchVals)
+
+   Rapid search if any matches occur (returns immediately at first match).
+
+   :param searchArray: Array to seach.
+   :type searchArray: array
+   :param searchVals: Values to search array for.
+   :type searchVals: array
+
+   :returns: DESCRIPTION.
+   :rtype: bool
+
+
+.. py:function:: index2pos(ndx, dX)
+
+   Convert scalar index to [x,y,z] indices.
+
+   :param ndx: Index to convert.
+   :type ndx: uint64
+   :param dX: Number of points per axis.
+   :type dX: uint64
+
+   :returns: **int64[** -- DESCRIPTION.
+   :rtype: ]
+
+
+.. py:function:: pos2index(pos, dX)
+
+   Convert [x,y,z] indices to a scalar index
+
+   :param pos: [x,y,z] indices.
+   :type pos: int64[:]
+   :param dX: Number of points per axis.
+   :type dX: int64
+
+   :returns: **newNdx** -- Scalar index equivalent to [x,y,z] triple.
+   :rtype: int64
+
+
+.. py:function:: reduceFunctions(l0Function, refPts, elBBox, coefs=None, returnUnder=True)
+
+
+.. py:function:: intdot(a, b)
+
+
+.. py:function:: indicesWithinOctant(elList, relativePos)
+
+
+.. py:function:: xyzWithinOctant(elList, relativePos)
+
+
+.. py:function:: indexToCoords(indices, origin, span)
+
+   :param indices: DESCRIPTION.
+   :type indices: TYPE
+   :param origin: DESCRIPTION.
+   :type origin: TYPE
+   :param span: DESCRIPTION.
+   :type span: TYPE
+   :param maxDepth: DESCRIPTION.
+   :type maxDepth: TYPE
+
+   :returns: **coords** -- DESCRIPTION.
+   :rtype: TYPE
+
+
+.. py:function:: octantListToXYZ(octList)
+
+   Get xyz indices at octant origin.
+
+   :param octList: DESCRIPTION.
+   :type octList: TYPE
+
+   :returns: **XYZ** -- DESCRIPTION.
+   :rtype: TYPE
+
+
+.. py:function:: uIndexToXYZ(index)
+
+
+.. py:function:: octantNeighborIndexLists(ownIndexList)
+
+   :param ownIndexList: DESCRIPTION.
+   :type ownIndexList: TYPE
+
+   :returns: **neighborLists** -- DESCRIPTION.
+   :rtype: TYPE
+
+
+.. py:function:: octListReverseXYZ(octantList)
+
+
+.. py:function:: __xyzToOList(xyz, depth)
+
+
+.. py:class:: Logger(stepName, printout=False)
+
+   Monitor timing, memory use, and step progress.
+
+   .. py:method:: logCompletion()
+
+      Log completion of step and prints duration if configured to.
+
+      :rtype: None.
+
+
+
+.. py:function:: unravelArraySet(maskedArrays)
+
+
+.. py:function:: fastcount(boolArray)
+
+   Faster equivalent to summing boolean array
+
+   :param array: Logical array.
+   :type array: bool[:]
+
+   :returns: number of true elements.
+   :rtype: int
+
+

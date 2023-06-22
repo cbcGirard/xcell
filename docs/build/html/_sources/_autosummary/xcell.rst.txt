@@ -1,0 +1,42 @@
+﻿xcell
+=====
+
+.. automodule:: xcell
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   xcell.AAnimation
+   xcell.colors
+   xcell.elements
+   xcell.fem
+   xcell.geometry
+   xcell.io
+   xcell.meshes
+   xcell.misc
+   xcell.nrnutil
+   xcell.util
+   xcell.visualizers
+   xcell.xCell
+

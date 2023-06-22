@@ -1,0 +1,39 @@
+xcell.geometry
+==============
+
+.. automodule:: xcell.geometry
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      avgPoints
+      calcTriNormals
+      fixTriNormals
+      isInBBox
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Cylinder
+      Disk
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Single timestep &mdash; xcell  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="DBS Electrode" href="plot_dbs_probe.html" />
+    <link rel="prev" title="Adaptation parameters" href="plot_MeshAdaptation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #990000" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Purpose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html#installing">Installing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html#citation">Citation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Example applications</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="plot_MeshAdaptation.html">Adaptation parameters</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Single timestep</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sliceviewer">SliceViewer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sliceset">SliceSet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#errorgraph">ErrorGraph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#logerror">LogError</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="plot_dbs_probe.html">DBS Electrode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_comparisons.html">Depth sweep</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_singularityEffect.html">Singularity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_algorithmOverview.html">Simulation overview</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#geometry">Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #990000" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">xcell</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Example applications</a></li>
+      <li class="breadcrumb-item active">Single timestep</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/auto_examples/plot_singleStep.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-plot-singlestep-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="single-timestep">
+<span id="sphx-glr-auto-examples-plot-singlestep-py"></span><h1>Single timestep<a class="headerlink" href="#single-timestep" title="Permalink to this heading"></a></h1>
+<p>Illustrates setting up a simulation and solving at a single time step</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">xcell</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+</pre></div>
+</div>
+<p>Simulation preferences</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Misc parameters</span>
+<span class="n">xcell</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">useLightStyle</span><span class="p">()</span>
+<span class="n">studyPath</span> <span class="o">=</span> <span class="s1">&#39;/dev/null&#39;</span>
+
+<span class="c1"># options = uniform, adaptive</span>
+<span class="n">meshtype</span> <span class="o">=</span> <span class="s1">&#39;adaptive&#39;</span>
+
+<span class="n">maxdepth</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># Maximum successive splits allowed for octree mesh</span>
+<span class="n">nX</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># Number of elements along an axis for a uniform mesh</span>
+
+<span class="c1"># options: Admittance, Face, FEM</span>
+<span class="n">elementType</span> <span class="o">=</span> <span class="s1">&#39;Admittance&#39;</span>
+<span class="n">dual</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">regularize</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="c1"># options: analytical, ground</span>
+<span class="n">boundaryType</span> <span class="o">=</span> <span class="s1">&#39;ground&#39;</span>
+
+<span class="n">fixedVoltageSource</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># otherwise, simulate current injection</span>
+</pre></div>
+</div>
+<p>Setup simulation</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xmax</span> <span class="o">=</span> <span class="mf">1e-4</span>  <span class="c1"># domain boundary</span>
+<span class="n">rElec</span> <span class="o">=</span> <span class="mf">1e-6</span>  <span class="c1"># center source radius</span>
+
+<span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">bbox</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="n">xmax</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">xmax</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="n">study</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">SimStudy</span><span class="p">(</span><span class="n">studyPath</span><span class="p">,</span> <span class="n">bbox</span><span class="p">)</span>
+
+<span class="n">setup</span> <span class="o">=</span> <span class="n">study</span><span class="o">.</span><span class="n">newSimulation</span><span class="p">()</span>
+<span class="n">setup</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elementType</span> <span class="o">=</span> <span class="n">elementType</span>
+<span class="n">setup</span><span class="o">.</span><span class="n">meshtype</span> <span class="o">=</span> <span class="n">meshtype</span>
+
+<span class="k">if</span> <span class="n">fixedVoltageSource</span><span class="p">:</span>
+    <span class="n">setup</span><span class="o">.</span><span class="n">addVoltageSource</span><span class="p">(</span><span class="n">xcell</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">rElec</span><span class="p">)</span>
+    <span class="n">srcMag</span> <span class="o">=</span> <span class="mf">1.</span>
+    <span class="n">srcType</span> <span class="o">=</span> <span class="s1">&#39;Voltage&#39;</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">srcMag</span> <span class="o">=</span> <span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">sigma</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">rElec</span>
+    <span class="n">setup</span><span class="o">.</span><span class="n">addCurrentSource</span><span class="p">(</span><span class="n">xcell</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="n">srcMag</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">rElec</span><span class="p">)</span>
+    <span class="n">srcType</span> <span class="o">=</span> <span class="s1">&#39;Current&#39;</span>
+
+<span class="k">if</span> <span class="n">meshtype</span> <span class="o">==</span> <span class="s1">&#39;uniform&#39;</span><span class="p">:</span>
+    <span class="n">setup</span><span class="o">.</span><span class="n">makeUniformGrid</span><span class="p">(</span><span class="n">nX</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;uniform, </span><span class="si">%d</span><span class="s1"> per axis&#39;</span> <span class="o">%</span> <span class="n">nX</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">setup</span><span class="o">.</span><span class="n">makeAdaptiveGrid</span><span class="p">(</span><span class="n">refPts</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
+                           <span class="n">maxdepth</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">maxdepth</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                           <span class="n">minl0Function</span><span class="o">=</span><span class="n">xcell</span><span class="o">.</span><span class="n">generalMetric</span><span class="p">,</span>
+                           <span class="c1"># coefs=np.array(2**(-0.2*maxdepth), ndmin=1))</span>
+                           <span class="n">coefs</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">ndmin</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+
+<span class="k">if</span> <span class="n">boundaryType</span> <span class="o">==</span> <span class="s1">&#39;analytical&#39;</span><span class="p">:</span>
+    <span class="n">boundaryFun</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">boundaryFun</span><span class="p">(</span><span class="n">coord</span><span class="p">):</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rElec</span><span class="o">/</span><span class="p">(</span><span class="n">r</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="mi">4</span><span class="p">)</span>
+
+
+<span class="n">setup</span><span class="o">.</span><span class="n">finalizeMesh</span><span class="p">()</span>
+
+<span class="n">setup</span><span class="o">.</span><span class="n">setBoundaryNodes</span><span class="p">(</span><span class="n">boundaryFun</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">v</span> <span class="o">=</span> <span class="n">setup</span><span class="o">.</span><span class="n">iterativeSolve</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mf">1e-9</span><span class="p">)</span>
+<span class="n">setup</span><span class="o">.</span><span class="n">applyTransforms</span><span class="p">()</span>
+
+
+<span class="n">setup</span><span class="o">.</span><span class="n">getMemUsage</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">setup</span><span class="o">.</span><span class="n">printTotalTime</span><span class="p">()</span>
+
+<span class="n">setup</span><span class="o">.</span><span class="n">startTiming</span><span class="p">(</span><span class="s1">&#39;Estimate error&#39;</span><span class="p">)</span>
+<span class="c1"># srcMag,srcType,showPlots=showGraphs)</span>
+<span class="n">errEst</span><span class="p">,</span> <span class="n">arErr</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">setup</span><span class="o">.</span><span class="n">calculateErrors</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;error: </span><span class="si">%g</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">errEst</span><span class="p">)</span>
+<span class="n">setup</span><span class="o">.</span><span class="n">logTime</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>898.777 Mb used
+        Total time: 12.6203s [CPU], 5.42217s [Wall]
+error: 0.217408
+</pre></div>
+</div>
+<section id="sliceviewer">
+<h2>SliceViewer<a class="headerlink" href="#sliceviewer" title="Permalink to this heading"></a></h2>
+<p>Interactive slice viewer (use arrow keys to change location within ipython session)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sv</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">visualizers</span><span class="o">.</span><span class="n">SliceViewer</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sim</span><span class="o">=</span><span class="n">setup</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_plot_singleStep_001.png" srcset="../_images/sphx_glr_plot_singleStep_001.png" alt="z=0" class = "sphx-glr-single-img"/><p>2d image</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bnd</span> <span class="o">=</span> <span class="n">setup</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">bbox</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">]]</span>
+
+<span class="n">arr</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">setup</span><span class="o">.</span><span class="n">getValuesInPlane</span><span class="p">()</span>
+<span class="n">cMap</span><span class="p">,</span> <span class="n">cNorm</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">visualizers</span><span class="o">.</span><span class="n">getCmap</span><span class="p">(</span><span class="n">setup</span><span class="o">.</span><span class="n">nodeVoltages</span><span class="p">,</span> <span class="n">forceBipolar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">xcell</span><span class="o">.</span><span class="n">visualizers</span><span class="o">.</span><span class="n">patchworkImage</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span><span class="o">.</span><span class="n">gca</span><span class="p">(),</span>
+                                 <span class="n">arr</span><span class="p">,</span> <span class="n">cMap</span><span class="p">,</span> <span class="n">cNorm</span><span class="p">,</span>
+                                 <span class="n">extent</span><span class="o">=</span><span class="n">bnd</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_plot_singleStep_002.png" srcset="../_images/sphx_glr_plot_singleStep_002.png" alt="plot singleStep" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[&lt;matplotlib.image.AxesImage object at 0x7f9ff04ea130&gt;, &lt;matplotlib.image.AxesImage object at 0x7f9ff04ea730&gt;, &lt;matplotlib.image.AxesImage object at 0x7f9ff04eac70&gt;, &lt;matplotlib.image.AxesImage object at 0x7f9ff04ea490&gt;, &lt;matplotlib.image.AxesImage object at 0x7f9ff04ead30&gt;, &lt;matplotlib.image.AxesImage object at 0x7f9ff04ee070&gt;, &lt;matplotlib.image.AxesImage object at 0x7f9ff04eea30&gt;]
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">()</span>
+<span class="n">xcell</span><span class="o">.</span><span class="n">visualizers</span><span class="o">.</span><span class="n">formatXYAxis</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">bnd</span><span class="p">)</span>
+<span class="n">arr</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">visualizers</span><span class="o">.</span><span class="n">resamplePlane</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">setup</span><span class="p">)</span>
+
+<span class="n">cMap</span><span class="p">,</span> <span class="n">cNorm</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">visualizers</span><span class="o">.</span><span class="n">getCmap</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">forceBipolar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">xcell</span><span class="o">.</span><span class="n">visualizers</span><span class="o">.</span><span class="n">patchworkImage</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span>
+                                 <span class="p">[</span><span class="n">arr</span><span class="p">],</span> <span class="n">cMap</span><span class="p">,</span> <span class="n">cNorm</span><span class="p">,</span>
+                                 <span class="n">extent</span><span class="o">=</span><span class="n">bnd</span><span class="p">)</span>
+
+<span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">edgePoints</span> <span class="o">=</span> <span class="n">setup</span><span class="o">.</span><span class="n">getElementsInPlane</span><span class="p">()</span>
+<span class="n">xcell</span><span class="o">.</span><span class="n">visualizers</span><span class="o">.</span><span class="n">showEdges2d</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">edgePoints</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_plot_singleStep_003.png" srcset="../_images/sphx_glr_plot_singleStep_003.png" alt="plot singleStep" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.collections.LineCollection object at 0x7f9ff05603d0&gt;
+</pre></div>
+</div>
+<p>TOPOLOGY/connectivity</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ax</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">visualizers</span><span class="o">.</span><span class="n">showMesh</span><span class="p">(</span><span class="n">setup</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_zticks</span><span class="p">([])</span>
+<span class="n">ghost</span> <span class="o">=</span> <span class="p">(</span><span class="mf">.0</span><span class="p">,</span> <span class="mf">.0</span><span class="p">,</span> <span class="mf">.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_pane_color</span><span class="p">(</span><span class="n">ghost</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_pane_color</span><span class="p">(</span><span class="n">ghost</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">zaxis</span><span class="o">.</span><span class="n">set_pane_color</span><span class="p">(</span><span class="n">ghost</span><span class="p">)</span>
+
+
+<span class="n">xcell</span><span class="o">.</span><span class="n">visualizers</span><span class="o">.</span><span class="n">showEdges</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span>
+                            <span class="n">setup</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">nodeCoords</span><span class="p">,</span>
+                            <span class="n">setup</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span>
+                            <span class="n">setup</span><span class="o">.</span><span class="n">conductances</span><span class="p">)</span>
+
+<span class="n">bnodes</span> <span class="o">=</span> <span class="n">setup</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">getBoundaryNodes</span><span class="p">()</span>
+<span class="n">xcell</span><span class="o">.</span><span class="n">visualizers</span><span class="o">.</span><span class="n">showNodes3d</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span>
+                              <span class="n">setup</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">nodeCoords</span><span class="p">[</span><span class="n">bnodes</span><span class="p">],</span>
+                              <span class="n">nodeVals</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">bnodes</span><span class="p">),</span>
+                              <span class="n">colors</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_plot_singleStep_004.png" srcset="../_images/sphx_glr_plot_singleStep_004.png" alt="plot singleStep" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;mpl_toolkits.mplot3d.art3d.Path3DCollection object at 0x7f9ff0499ee0&gt;
+</pre></div>
+</div>
+</section>
+<section id="sliceset">
+<h2>SliceSet<a class="headerlink" href="#sliceset" title="Permalink to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># sphinx_gallery_thumbnail_number = 5</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">visualizers</span><span class="o">.</span><span class="n">SliceSet</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(),</span> <span class="n">study</span><span class="p">)</span>
+<span class="n">img</span><span class="o">.</span><span class="n">addSimulationData</span><span class="p">(</span><span class="n">setup</span><span class="p">,</span> <span class="n">append</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">img</span><span class="o">.</span><span class="n">getArtists</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_plot_singleStep_005.png" srcset="../_images/sphx_glr_plot_singleStep_005.png" alt="Simulated potential [V], Absolute error [V]" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[&lt;matplotlib.image.AxesImage object at 0x7f9f9f3fd910&gt;, &lt;matplotlib.image.AxesImage object at 0x7f9f9f3fdc10&gt;, &lt;matplotlib.image.AxesImage object at 0x7f9f9f3fdeb0&gt;, &lt;matplotlib.image.AxesImage object at 0x7f9f7f38e1f0&gt;, &lt;matplotlib.collections.LineCollection object at 0x7f9f7f38e250&gt;, &lt;matplotlib.collections.LineCollection object at 0x7f9fb5da8fa0&gt;, &lt;matplotlib.collections.LineCollection object at 0x7f9fb5dba4f0&gt;, &lt;matplotlib.collections.LineCollection object at 0x7f9fb5a18460&gt;, &lt;matplotlib.collections.LineCollection object at 0x7f9fb5a23910&gt;, &lt;matplotlib.collections.LineCollection object at 0x7f9fb5681880&gt;, &lt;matplotlib.collections.LineCollection object at 0x7f9fb568bd30&gt;, &lt;matplotlib.collections.LineCollection object at 0x7f9fb536aca0&gt;]
+</pre></div>
+</div>
+</section>
+<section id="errorgraph">
+<h2>ErrorGraph<a class="headerlink" href="#errorgraph" title="Permalink to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ptr</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">visualizers</span><span class="o">.</span><span class="n">ErrorGraph</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(),</span> <span class="n">study</span><span class="p">)</span>
+<span class="n">ptr</span><span class="o">.</span><span class="n">prefs</span><span class="p">[</span><span class="s1">&#39;universalPts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">pdata</span> <span class="o">=</span> <span class="n">ptr</span><span class="o">.</span><span class="n">addSimulationData</span><span class="p">(</span><span class="n">setup</span><span class="p">)</span>
+<span class="n">ptr</span><span class="o">.</span><span class="n">getArtists</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">pdata</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_plot_singleStep_006.png" srcset="../_images/sphx_glr_plot_singleStep_006.png" alt="plot singleStep" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[&lt;matplotlib.collections.PathCollection object at 0x7f9fb51d8550&gt;, &lt;matplotlib.lines.Line2D object at 0x7f9fb51e6340&gt;, &lt;matplotlib.collections.PathCollection object at 0x7f9fb51e6fd0&gt;, &lt;matplotlib.collections.PolyCollection object at 0x7f9fb51e6f40&gt;]
+</pre></div>
+</div>
+</section>
+<section id="logerror">
+<h2>LogError<a class="headerlink" href="#logerror" title="Permalink to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">P</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">visualizers</span><span class="o">.</span><span class="n">LogError</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">study</span><span class="p">)</span>
+<span class="n">P</span><span class="o">.</span><span class="n">addSimulationData</span><span class="p">(</span><span class="n">setup</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="n">P</span><span class="o">.</span><span class="n">getArtists</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_plot_singleStep_007.png" srcset="../_images/sphx_glr_plot_singleStep_007.png" alt="plot singleStep" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[&lt;matplotlib.lines.Line2D object at 0x7f9fb5070310&gt;, &lt;matplotlib.lines.Line2D object at 0x7f9fb5070490&gt;, Text(0.5, 0.95, &#39;FVU=0.016, int1=0.22, 587 points in source&#39;)]
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  37.492 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-singlestep-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/b99bab67b84061fdd0575bbce55568e9/plot_singleStep.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_singleStep.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/daa894d25e156e2e5bf10ba6fa909f03/plot_singleStep.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_singleStep.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plot_MeshAdaptation.html" class="btn btn-neutral float-left" title="Adaptation parameters" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_dbs_probe.html" class="btn btn-neutral float-right" title="DBS Electrode" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, CBC Girard.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

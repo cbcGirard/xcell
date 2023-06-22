@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>xcell.fem &mdash; xcell  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #990000" >
+
+          
+          
+          <a href="../../../index.html">
+            
+              <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Purpose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html#installing">Installing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html#citation">Citation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../auto_examples/index.html">Example applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../auto_examples/index.html#geometry">Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #990000" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">xcell</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.fem</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/autoapi/xcell/fem/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-xcell.fem">
+<span id="xcell-fem"></span><h1><a class="reference internal" href="#module-xcell.fem" title="xcell.fem"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.fem</span></code></a><a class="headerlink" href="#module-xcell.fem" title="Permalink to this heading"></a></h1>
+<p>Created on Tue Jan 11 10:37:11 2022</p>
+<p>&#64;author: benoit</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading"></a></h2>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.fem.getHexConductances" title="xcell.fem.getHexConductances"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getHexConductances</span></code></a>(span, sigma)</p></td>
+<td><p>Calculate the conductances of a trilinear FEM hexahedron.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.fem.getHexIndices" title="xcell.fem.getHexIndices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getHexIndices</span></code></a>()</p></td>
+<td><p>Generate indices of conductance nodes for trilinear FEM hexahedron.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.fem.getFaceConductances" title="xcell.fem.getFaceConductances"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getFaceConductances</span></code></a>(span, sigma)</p></td>
+<td><p>Calculate the conductances of a mesh-dual (face-oriented) hexahedron.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.fem._getFaceIndices" title="xcell.fem._getFaceIndices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_getFaceIndices</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.fem.getTetConductance" title="xcell.fem.getTetConductance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getTetConductance</span></code></a>(pts)</p></td>
+<td><p>Calculate conductances between nodes of tetrahedron.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.fem.getTetIndices" title="xcell.fem.getTetIndices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getTetIndices</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.fem.getAdmittanceConductances" title="xcell.fem.getAdmittanceConductances"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getAdmittanceConductances</span></code></a>(span, sigma)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.fem.getAdmittanceIndices" title="xcell.fem.getAdmittanceIndices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getAdmittanceIndices</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.fem.interpolateFromFace" title="xcell.fem.interpolateFromFace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">interpolateFromFace</span></code></a>(faceValues, localCoords)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.fem.interpolateFromVerts" title="xcell.fem.interpolateFromVerts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">interpolateFromVerts</span></code></a>(vertexValues, localCoords)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.fem.integrateFromVerts" title="xcell.fem.integrateFromVerts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">integrateFromVerts</span></code></a>(vertexValues, span)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.fem.toLocalCoords" title="xcell.fem.toLocalCoords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">toLocalCoords</span></code></a>(globalCoords, center, span)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.fem.__toTrilinCoefOrder" title="xcell.fem.__toTrilinCoefOrder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__toTrilinCoefOrder</span></code></a>(coords)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.fem.__toFaceCoefOrder" title="xcell.fem.__toFaceCoefOrder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__toFaceCoefOrder</span></code></a>(coords)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Permalink to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.fem.ADMITTANCE_EDGES" title="xcell.fem.ADMITTANCE_EDGES"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ADMITTANCE_EDGES</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.fem.TET_EDGES" title="xcell.fem.TET_EDGES"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TET_EDGES</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.fem.FACE_EDGES" title="xcell.fem.FACE_EDGES"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FACE_EDGES</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.fem.HEX_VERTEX_COORDS" title="xcell.fem.HEX_VERTEX_COORDS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HEX_VERTEX_COORDS</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.fem.HEX_FACE_COORDS" title="xcell.fem.HEX_FACE_COORDS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HEX_FACE_COORDS</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.fem.HEX_POINT_INDICES" title="xcell.fem.HEX_POINT_INDICES"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HEX_POINT_INDICES</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.fem.TRIL_INVERSE_MATRIX" title="xcell.fem.TRIL_INVERSE_MATRIX"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TRIL_INVERSE_MATRIX</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.fem.TRIP_INVERSE_MATRIX" title="xcell.fem.TRIP_INVERSE_MATRIX"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TRIP_INVERSE_MATRIX</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.fem.getHexConductances">
+<span class="sig-prename descclassname"><span class="pre">xcell.fem.</span></span><span class="sig-name descname"><span class="pre">getHexConductances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">span</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.fem.getHexConductances" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the conductances of a trilinear FEM hexahedron.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>span</strong> (<em>float</em><em>[</em><em>3</em><em>]</em>) – Size of element along each axis</p></li>
+<li><p><strong>sigma</strong> (<em>float</em><em>[</em><em>3</em><em>] or </em><em>float</em>) – Conductivity of element</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float[28]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.fem.getHexIndices">
+<span class="sig-prename descclassname"><span class="pre">xcell.fem.</span></span><span class="sig-name descname"><span class="pre">getHexIndices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.fem.getHexIndices" title="Permalink to this definition"></a></dt>
+<dd><p>Generate indices of conductance nodes for trilinear FEM hexahedron.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Edges within the hex</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int64[28,2]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.fem.getFaceConductances">
+<span class="sig-prename descclassname"><span class="pre">xcell.fem.</span></span><span class="sig-name descname"><span class="pre">getFaceConductances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">span</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.fem.getFaceConductances" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the conductances of a mesh-dual (face-oriented) hexahedron.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>span</strong> (<em>float</em><em>[</em><em>3</em><em>]</em>) – Size of element along each axis</p></li>
+<li><p><strong>sigma</strong> (<em>float</em><em>[</em><em>3</em><em>] or </em><em>float</em>) – Conductivity of element</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Conductances, in order -x, +x, -y, +y, …</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float[6]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.fem._getFaceIndices">
+<span class="sig-prename descclassname"><span class="pre">xcell.fem.</span></span><span class="sig-name descname"><span class="pre">_getFaceIndices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.fem._getFaceIndices" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.fem.getTetConductance">
+<span class="sig-prename descclassname"><span class="pre">xcell.fem.</span></span><span class="sig-name descname"><span class="pre">getTetConductance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pts</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.fem.getTetConductance" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate conductances between nodes of tetrahedron.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pts</strong> (<em>float</em><em>[</em><em>4</em><em>,</em><em>3</em><em>]</em>) – Cartesian coordinates of tet vertices</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Conductances between vertices</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float[4]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.fem.getTetIndices">
+<span class="sig-prename descclassname"><span class="pre">xcell.fem.</span></span><span class="sig-name descname"><span class="pre">getTetIndices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.fem.getTetIndices" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.fem.getAdmittanceConductances">
+<span class="sig-prename descclassname"><span class="pre">xcell.fem.</span></span><span class="sig-name descname"><span class="pre">getAdmittanceConductances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">span</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.fem.getAdmittanceConductances" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.fem.getAdmittanceIndices">
+<span class="sig-prename descclassname"><span class="pre">xcell.fem.</span></span><span class="sig-name descname"><span class="pre">getAdmittanceIndices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.fem.getAdmittanceIndices" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.fem.ADMITTANCE_EDGES">
+<span class="sig-prename descclassname"><span class="pre">xcell.fem.</span></span><span class="sig-name descname"><span class="pre">ADMITTANCE_EDGES</span></span><a class="headerlink" href="#xcell.fem.ADMITTANCE_EDGES" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.fem.TET_EDGES">
+<span class="sig-prename descclassname"><span class="pre">xcell.fem.</span></span><span class="sig-name descname"><span class="pre">TET_EDGES</span></span><a class="headerlink" href="#xcell.fem.TET_EDGES" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.fem.FACE_EDGES">
+<span class="sig-prename descclassname"><span class="pre">xcell.fem.</span></span><span class="sig-name descname"><span class="pre">FACE_EDGES</span></span><a class="headerlink" href="#xcell.fem.FACE_EDGES" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.fem.interpolateFromFace">
+<span class="sig-prename descclassname"><span class="pre">xcell.fem.</span></span><span class="sig-name descname"><span class="pre">interpolateFromFace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">faceValues</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">localCoords</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.fem.interpolateFromFace" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.fem.interpolateFromVerts">
+<span class="sig-prename descclassname"><span class="pre">xcell.fem.</span></span><span class="sig-name descname"><span class="pre">interpolateFromVerts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertexValues</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">localCoords</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.fem.interpolateFromVerts" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.fem.integrateFromVerts">
+<span class="sig-prename descclassname"><span class="pre">xcell.fem.</span></span><span class="sig-name descname"><span class="pre">integrateFromVerts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertexValues</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">span</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.fem.integrateFromVerts" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.fem.toLocalCoords">
+<span class="sig-prename descclassname"><span class="pre">xcell.fem.</span></span><span class="sig-name descname"><span class="pre">toLocalCoords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">globalCoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">span</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.fem.toLocalCoords" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.fem.__toTrilinCoefOrder">
+<span class="sig-prename descclassname"><span class="pre">xcell.fem.</span></span><span class="sig-name descname"><span class="pre">__toTrilinCoefOrder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.fem.__toTrilinCoefOrder" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.fem.__toFaceCoefOrder">
+<span class="sig-prename descclassname"><span class="pre">xcell.fem.</span></span><span class="sig-name descname"><span class="pre">__toFaceCoefOrder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.fem.__toFaceCoefOrder" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.fem.HEX_VERTEX_COORDS">
+<span class="sig-prename descclassname"><span class="pre">xcell.fem.</span></span><span class="sig-name descname"><span class="pre">HEX_VERTEX_COORDS</span></span><a class="headerlink" href="#xcell.fem.HEX_VERTEX_COORDS" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.fem.HEX_FACE_COORDS">
+<span class="sig-prename descclassname"><span class="pre">xcell.fem.</span></span><span class="sig-name descname"><span class="pre">HEX_FACE_COORDS</span></span><a class="headerlink" href="#xcell.fem.HEX_FACE_COORDS" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.fem.HEX_POINT_INDICES">
+<span class="sig-prename descclassname"><span class="pre">xcell.fem.</span></span><span class="sig-name descname"><span class="pre">HEX_POINT_INDICES</span></span><a class="headerlink" href="#xcell.fem.HEX_POINT_INDICES" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.fem.TRIL_INVERSE_MATRIX">
+<span class="sig-prename descclassname"><span class="pre">xcell.fem.</span></span><span class="sig-name descname"><span class="pre">TRIL_INVERSE_MATRIX</span></span><a class="headerlink" href="#xcell.fem.TRIL_INVERSE_MATRIX" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.fem.TRIP_INVERSE_MATRIX">
+<span class="sig-prename descclassname"><span class="pre">xcell.fem.</span></span><span class="sig-name descname"><span class="pre">TRIP_INVERSE_MATRIX</span></span><a class="headerlink" href="#xcell.fem.TRIP_INVERSE_MATRIX" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, CBC Girard.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,659 @@
+:py:mod:`xcell`
+===============
+
+.. py:module:: xcell
+
+.. autoapi-nested-parse::
+
+   Main xcell package
+   ==================================
+
+   description needed?
+
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   AAnimation/index.rst
+   colors/index.rst
+   elements/index.rst
+   fem/index.rst
+   geometry/index.rst
+   io/index.rst
+   meshes/index.rst
+   misc/index.rst
+   nrnutil/index.rst
+   signals/index.rst
+   util/index.rst
+   visualizers/index.rst
+   xCell/index.rst
+
+
+Package Contents
+----------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   xcell.Signal
+   xcell.CurrentSource
+   xcell.VoltageSource
+   xcell.Simulation
+   xcell.SimStudy
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   xcell.makeBoundedLinearMetric
+   xcell.makeExplicitLinearMetric
+   xcell._analytic
+   xcell.makeScaledMetrics
+   xcell.generalMetric
+   xcell.getStandardMeshParams
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   xcell.ADMITTANCE_EDGES
+
+
+.. py:data:: ADMITTANCE_EDGES
+
+   
+
+.. py:class:: Signal(value)
+
+   .. py:method:: getValueAtTime(t)
+
+
+   .. py:method:: reset()
+
+
+
+.. py:class:: CurrentSource(value, coords, radius=0)
+
+
+.. py:class:: VoltageSource(value, coords, radius=0)
+
+
+.. py:class:: Simulation(name, bbox, printSteps=False)
+
+   .. py:method:: quickAdaptiveGrid(maxdepth, coefficent=0.2)
+
+      Make a generic octree mesh where resolution increases near current sources.
+
+      :param maxdepth: Maximum subdivision depth.
+      :type maxdepth: int
+
+      :rtype: None.
+
+
+   .. py:method:: makeAdaptiveGrid(refPts, maxdepth, minl0Function, maxl0Function=None, coefs=None, coarsen=True)
+
+      Construct octree mesh.
+
+      :param refPts: DESCRIPTION.
+      :type refPts: float[:,3]
+      :param maxdepth: Maximum recursion depth.
+      :type maxdepth: int
+      :param minl0Function: Function to calculate l0. cf :meth:`xcell.generalMetric`.
+      :type minl0Function: function
+      :param maxl0Function: DESCRIPTION. minl0Function used if None.
+      :type maxl0Function: function, optional
+      :param coefs: Coefficents passed to l0 function. The default is None.
+      :type coefs: float[:], optional
+      :param coarsen: Whether to prune following splits. The default is True.
+      :type coarsen: bool, optional
+
+      :returns: **changed** -- Whether adaptation results in a different mesh topology
+      :rtype: bool
+
+
+   .. py:method:: makeUniformGrid(nX, sigma=np.array([1.0, 1.0, 1.0]))
+
+      Fast utility to construct a uniformly spaced mesh of the domain.
+
+      :param nX: Number of elements along each axis (yielding nX**3 total elements).
+      :type nX: int
+      :param sigma: Global conductivity. The default is np.array([1.,1.,1.]).
+      :type sigma: TYPE, optional
+
+      :rtype: None.
+
+
+   .. py:method:: startTiming(stepName)
+
+      General call to start timing an execution step.
+
+      :param stepName: Label for the step
+      :type stepName: string
+
+      :rtype: None.
+
+
+   .. py:method:: logTime(logger=None)
+
+      Signals completion of step.
+
+      :param logger: DESCRIPTION. The default is None.
+      :type logger: TYPE, optional
+
+      :rtype: None.
+
+
+   .. py:method:: getMemUsage(printVal=False)
+
+      Get memory usage of simulation.
+
+      :returns: **mem** -- Platform-dependent, often kb used.
+      :rtype: int
+
+
+   .. py:method:: getPower()
+
+
+   .. py:method:: printTotalTime()
+
+
+   .. py:method:: getEdgeCurrents()
+
+      Get currents through each edge of the mesh.
+
+      :returns: * **currents** (*float[:]*) -- Current through edge in amperes; .
+                * **edges** (*int[:,:]*) -- Pairs of node (global) node indices corresponding to
+                  [start, end] of each current vector.
+
+
+   .. py:method:: intifyCoords(coords=None)
+
+      Expresses coordinates as triplet of positive integers.
+
+      Prevents rounding
+      errors when determining if two points correspond to the same
+      mesh node
+
+      :param coords: Coordinates to rescale as integers, or mesh nodes if None.
+      :type coords: float[:,:]
+
+      :returns: **int[** -- Mesh nodes as integers.
+      :rtype: ,:]
+
+
+   .. py:method:: makeTableHeader()
+
+
+   .. py:method:: logAsTableEntry(csvFile, extraCols=None, extraVals=None)
+
+      Log key metrics of simulation as an additional line of a .csv file.
+
+      Custom categories (column headers) and their values can be added to the line
+
+      :param csvFile: File where data is written to.
+      :type csvFile: file path
+      :param extraCols: Additional categories (column headers). The default is None.
+      :type extraCols: string[:], optional
+      :param extraVals: Values corresponding to the additional categories. The default is None.
+      :type extraVals: numeric[:], optional
+
+      :rtype: None.
+
+
+   .. py:method:: finalizeMesh(regularize=False, sigmaMesh=None, defaultSigma=1.0)
+
+      Prepare mesh for simulation.
+
+      Locks connectivity, sets global node numbering, gets list of
+      edges and corresponding conductances from all elements.
+
+      :rtype: None.
+
+
+   .. py:method:: applyTransforms()
+
+      Calculate implicitly defined node voltages from explicit ones.
+
+      :rtype: None.
+
+
+   .. py:method:: addCurrentSource(value, coords, radius=0, geometry=None)
+
+
+   .. py:method:: addVoltageSource(value, coords=None, radius=0)
+
+
+   .. py:method:: insertSourcesInMesh(snaplength=0)
+
+
+   .. py:method:: __nodesInSource(source)
+
+
+   .. py:method:: setBoundaryNodes(boundaryFun=None, expand=None, sigma=None)
+
+      Set potential of nodes at simulation boundary.
+
+      Can pass user-defined function to calculate node potential from its
+      Cartesian coordinates; otherwise, boundary is assumed to be grounded.
+
+      :param boundaryFun: User-defined potential as function of coords. The default is None.
+      :type boundaryFun: function, optional
+
+      :rtype: None.
+
+
+   .. py:method:: solve()
+
+      Directly solve for nodal voltages.
+
+      Computational time grows significantly with simulation size;
+      try iterativeSolve() for faster convergence
+
+      :returns: **voltages** -- Simulated nodal voltages.
+      :rtype: float[:]
+
+      .. seealso::
+
+         :obj:`iterativeSolve`
+             conjugate gradient solver
+
+
+   .. py:method:: getDoFs()
+
+      Get the voltage of every degree of freedom.
+
+      :returns: **vDoF** -- Voltages of all degrees of freedom [floating nodes + current sources].
+      :rtype: float[:]
+
+
+   .. py:method:: iterativeSolve(vGuess=None, tol=1e-12)
+
+      Solve nodal voltages using conjgate gradient method.
+
+      Likely to achieve similar accuracy to direct solution at much greater
+      speed for element counts above a few thousand
+
+      :param vGuess: Initial guess for nodal voltages. Default None.
+      :type vGuess: float[:]
+      :param tol: Maximum allowed norm of the residual. The default is 1e-9.
+      :type tol: float, optional
+
+      :returns: **voltages** -- Simulated nodal voltages.
+      :rtype: float[:]
+
+
+   .. py:method:: __selByDoF(dofNdx)
+
+
+   .. py:method:: analyticalEstimate(rvec=None)
+
+      Analytical estimate of potential field.
+
+      Calculates estimated potential from sum of piecewise functions
+
+            Vsrc,         r<=rSrc
+      v(r)={
+            isrc/(4Pi*r)
+
+      If rvec is none, calculates at every node of mesh
+
+      :param rvec: Distances from source to evaluate at. The default is None.
+      :type rvec: float[:], optional
+
+      :returns: * **vAna, list of float[** (*]*) -- List (per source) of estimated potentials
+                * *intAna, list of float* -- Integral of analytical curve across specified range.
+
+
+   .. py:method:: estimateVolumeError(basic=False)
+
+      :param basic: DESCRIPTION. The default is False.
+      :type basic: TYPE, optional
+
+      :returns: * **elVints** (*TYPE*) -- DESCRIPTION.
+                * **elAnaInts** (*TYPE*) -- DESCRIPTION.
+                * **elErrInts** (*TYPE*) -- DESCRIPTION.
+                * **analyticInt** (*TYPE*) -- DESCRIPTION.
+
+
+   .. py:method:: calculateErrors(uInds=None)
+
+      Estimate error in solution.
+
+      Estimates error between simulated solution assuming point/spherical
+      sources in uniform conductivity.
+
+      For the error metric to be applicable across a range of domain
+      sizes and mesh densities, it must
+
+      The normalized error metric approximates the area between the
+      analytical solution i/(4*pi*sigma*r) and a linear interpolation
+      between the simulated nodal voltages, evaluated across the simulation domain
+
+      :param rvec: Alternative points at which to evaluate the analytical solution. The default is None.
+      :type rvec: float[:], optional
+
+      :returns: * **errSummary** (*float*) -- Normalized, overall error metric.
+                * **err** (*float[:]*) -- Absolute error estimate at each node (following global node ordering)
+                * **vAna** (*float[:]*) -- Estimated potential at each node (following global ordering)
+                * **sorter** (*int[:]*) -- Indices to sort globally-ordered array based on the corresponding node's distance from center
+                  e.g. erSorted=err[sorter]
+                * **r** (*float[:]*) -- distance of each point from source
+
+
+   .. py:method:: __toDoF(globalIndex)
+
+
+   .. py:method:: getNodeTypes()
+
+      Get an integer per node indicating its role.
+
+      Type indices:
+          0: Unknown voltage
+          1: Fixed voltage
+          2: Fixed current, unknown voltage
+
+      :rtype: None.
+
+
+   .. py:method:: getEdgeMat(dedup=True)
+
+      Return conductance matrix across all nodes in mesh.
+
+      :param dedup: Sum parallel conductances. The default is True.
+      :type dedup: bool, optional
+
+      :returns: **gAll** -- Conductance matrix, N x N for a mesh of N nodes.
+      :rtype: COO sparse matrix
+
+
+   .. py:method:: getNodeConnectivity(deduplicate=False)
+
+      Calculate how many conductances terminate in each node.
+
+      A fully-connected hex node will have 24 edges prior to merging parallel
+      conductances; less than this indicates the node is hanging (nonconforming).
+
+      :raises ValueError: DESCRIPTION.
+
+      :returns: **nConn** -- Number of edges that terminate in each node.
+      :rtype: int[:]
+
+
+   .. py:method:: regularizeMesh()
+
+      Deprecated. Attempt to remove nonconforming nodes
+
+      :rtype: None.
+
+
+   .. py:method:: __dedupEdges()
+
+
+   .. py:method:: __isMatchingEdge(edges, toMatch)
+
+
+   .. py:method:: getSystem()
+
+      Construct system of equations GV=b.
+
+      Rows represent each node without a voltage or current
+      constraint, followed by an additional row per current
+      source.
+
+      :returns: * **G** (*COO sparse matrix*) -- Conductances between degrees of freedom.
+                * **b** (*float[:]*) -- Right-hand side of system, representing injected current
+                  and contributions of fixed-voltage nodes.
+
+
+   .. py:method:: getCoords(orderType='mesh', maskArray=None)
+
+
+   .. py:method:: getEdges(orderType='mesh', maskArray=None)
+
+
+   .. py:method:: getMeshGeometry()
+
+
+   .. py:method:: interpolateAt(coords, elements=None, data=None)
+
+      Interpolate values at specified coordinates.
+
+      :param coords: Coordinates to interpolate ate.
+      :type coords: float[:,:]
+      :param elements: Elements to search for the proper interpolation. The default is None, which checks all elements.
+      :type elements: element list, optional
+      :param data: Nodal values used for interpolation. The default is None, which uses node voltages.
+      :type data: float[:], optional
+
+      :returns: **vals** -- Interpolated values at the specfied points
+      :rtype: float[:]
+
+
+   .. py:method:: getOrdering(orderType)
+
+      Get integer tag for each node according to the designated numbering scheme.
+
+      :param orderType: Whether to order by corresponding degree of freedom 'dof'
+                        or electrical .
+      :type orderType: string
+
+      :returns: **int[** -- Tag for each node.
+      :rtype: ]
+
+
+   .. py:method:: getElementsInPlane(axis=2, point=0.0)
+
+      Get all elements that intersect a plane orthogonal to the axes.
+
+      .. deprecated
+          Use PyVista slicing routines instead for greater robustness.
+
+      :param axis: DESCRIPTION. The default is 2.
+      :type axis: TYPE, optional
+      :param point: DESCRIPTION. The default is 0..
+      :type point: TYPE, optional
+
+      :returns: * **elements** (*elements*) -- DESCRIPTION.
+                * **coords** (*float[:,2]*)
+                * **edgePts** (*float[:,2,2]*)
+
+
+   .. py:method:: _getUniformPlane(axis, point, data)
+
+
+   .. py:method:: getValuesInPlane(axis=2, point=0.0, data=None)
+
+      Extract values in a plane.
+
+      .. deprecated
+          Use PyVista slicing routines instead for greater robustness.
+
+      :param axis: DESCRIPTION. The default is 2.
+      :type axis: TYPE, optional
+      :param point: DESCRIPTION. The default is 0..
+      :type point: TYPE, optional
+      :param data: DESCRIPTION. The default is None.
+      :type data: TYPE, optional
+
+      :rtype: None.
+
+
+   .. py:method:: getUniversalPoints(elements=None)
+
+
+   .. py:method:: getCurrentsInPlane(axis=2, point=0.0)
+
+      :param axis: DESCRIPTION. The default is 2.
+      :type axis: TYPE, optional
+      :param point: DESCRIPTION. The default is 0..
+      :type point: TYPE, optional
+
+      :returns: * **currents** (*TYPE*) -- DESCRIPTION.
+                * **currentPts** (*TYPE*) -- DESCRIPTION.
+                * **mesh** (*TYPE*) -- DESCRIPTION.
+
+
+
+.. py:class:: SimStudy(studyPath, boundingBox)
+
+   .. py:method:: newSimulation(simName=None, keepMesh=False)
+
+
+   .. py:method:: saveMesh(simulation=None)
+
+
+   .. py:method:: reloadMesh(meshnum)
+
+
+   .. py:method:: newLogEntry(extraCols=None, extraVals=None)
+
+      Log current simulation stats to csv file.
+
+      :param extraCols: Additional column labels. The default is None.
+      :type extraCols: string[:], optional
+      :param extraVals: Additional column data. The default is None.
+      :type extraVals: [:], optional
+
+      :rtype: None.
+
+
+   .. py:method:: makeStandardPlots(savePlots=True, keepOpen=False)
+
+
+   .. py:method:: saveData(simulation, baseName=None, addedTags='')
+
+
+   .. py:method:: loadData(simName)
+
+
+   .. py:method:: save(obj, fname, ext='.p')
+
+
+   .. py:method:: load(fname, ext='.p')
+
+
+   .. py:method:: getfile(name, extension='.p')
+
+
+   .. py:method:: savePlot(fig, fileName, ext=None)
+
+
+   .. py:method:: __makepath(fileName, ext)
+
+
+   .. py:method:: saveAnimation(animator, filename, **kwargs)
+
+      Save matplotlib-based animation.
+
+      :param animator: DESCRIPTION.
+      :type animator: TYPE
+      :param filename: DESCRIPTION.
+      :type filename: TYPE
+      :param \*\*kwargs: DESCRIPTION.
+      :type \*\*kwargs: TYPE
+
+      :rtype: None.
+
+
+   .. py:method:: savePVimage(plotter, filename, **kwargs)
+
+      Save PyVista plot to image.
+
+      :param plotter: Active plotter.
+      :type plotter: PyVista Plotter
+      :param filename: File name, with or without extension.
+                       Saves as .png if not specified.
+      :type filename: str
+      :param \*\* kwargs: Options for plotter.show()
+
+      :rtype: None.
+
+
+   .. py:method:: makePVmovie(plotter, filename, **kwargs)
+
+      Open movie file for PyVista animation.
+
+      :param plotter: Active plotter.
+      :type plotter: PyVista Plotter
+      :param filename: File name, with or without extension.
+                       Saves as .mp4 if not specified.
+      :type filename: str
+      :param \*\* kwargs: Options for plotter.open_movie()
+
+      :rtype: None.
+
+
+   .. py:method:: loadLogfile()
+
+      Returns Pandas dataframe of logged runs
+
+      :returns: * **df** (*TYPE*) -- DESCRIPTION.
+                * **cats** (*TYPE*) -- DESCRIPTION.
+
+
+   .. py:method:: plotTimes(xCat='Number of elements', sortCat=None)
+
+
+   .. py:method:: plotAccuracyCost()
+
+
+   .. py:method:: getSavedSims(filterCategories=None, filterVals=None, sortCategory=None)
+
+      :param filterCategories: DESCRIPTION. The default is None.
+      :type filterCategories: TYPE, optional
+      :param filterVals: DESCRIPTION. The default is None.
+      :type filterVals: TYPE, optional
+      :param sortCategory: DESCRIPTION. The default is None.
+      :type sortCategory: TYPE, optional
+
+      :returns: * **fnames** (*TYPE*) -- DESCRIPTION.
+                * **categories** (*TYPE*) -- DESCRIPTION.
+
+
+   .. py:method:: animatePlot(plotfun, aniName=None, filterCategories=None, filterVals=None, sortCategory=None)
+
+
+
+.. py:function:: makeBoundedLinearMetric(l0min, l0max, domainX, origin=np.zeros(3))
+
+
+.. py:function:: makeExplicitLinearMetric(maxdepth, meshdensity, origin=np.zeros(3))
+
+
+.. py:function:: _analytic(rad, V, I, r)
+
+
+.. py:function:: makeScaledMetrics(maxdepth, density=0.2)
+
+
+.. py:function:: generalMetric(elementBBox, refCoords, refCoefs)
+
+
+.. py:function:: getStandardMeshParams(sources, meshDepth, density=0.2)
+
+   #
+
+   :param sources: DESCRIPTION.
+   :type sources: TYPE
+   :param meshDepth: DESCRIPTION.
+   :type meshDepth: TYPE
+   :param density: DESCRIPTION. The default is 0.2.
+   :type density: TYPE, optional
+
+   :returns: * **srcCoords** (*TYPE*) -- DESCRIPTION.
+             * **maxDepths** (*TYPE*) -- DESCRIPTION.
+             * **coefs** (*TYPE*) -- DESCRIPTION.
+
+

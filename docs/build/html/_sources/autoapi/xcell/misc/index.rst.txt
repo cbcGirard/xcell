@@ -1,0 +1,143 @@
+:py:mod:`xcell.misc`
+====================
+
+.. py:module:: xcell.misc
+
+.. autoapi-nested-parse::
+
+   Convenience functions.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   xcell.misc.iSourcePower
+   xcell.misc.vSourceIntegral
+   xcell.misc.iSourceIntegral
+   xcell.misc.estimatePower
+   xcell.misc.getErrorEstimates
+   xcell.misc.getSquares
+   xcell.misc.transposeDicts
+   xcell.misc.FVU
+
+
+
+.. py:function:: iSourcePower(isrc, radius, sigma)
+
+   Get an analytic estimate of the power dissipated by a spherical current source.
+
+   :param isrc: Amplitude of source in amps.
+   :type isrc: float
+   :param radius: Radius of source in meters.
+   :type radius: float
+   :param sigma: Conductivity of surroundings in S/m.
+   :type sigma: float or float[:]
+
+   :returns: **power** -- Estimated power dissipation in watts.
+   :rtype: float
+
+
+.. py:function:: vSourceIntegral(vsrc, radius, rmax)
+
+   Calculate exact integral of V for a spherical voltage source
+   from the center to a distance of rmax.
+
+   :param vsrc: Amplitude of source in volts.
+   :type vsrc: float
+   :param radius: Radius of source in meters.
+   :type radius: float
+   :param rmax: Furthest distance of domain.
+   :type rmax: float
+
+   :returns: Integral of V from center to rmax.
+   :rtype: float
+
+
+.. py:function:: iSourceIntegral(isrc, radius, rmax, sigma)
+
+   Calculate exact integral of V for a spherical current source
+   from the center to a distance of rmax.
+
+   :param vsrc: Amplitude of source in volts.
+   :type vsrc: float
+   :param radius: Radius of source in meters.
+   :type radius: float
+   :param rmax: Furthest distance of domain.
+   :type rmax: float
+   :param sigma: Conductivity of region in S/m
+   :type sigma: float or float[:]
+
+   :returns: Integral of V from center to rmax.
+   :rtype: float
+
+
+.. py:function:: estimatePower(voltages, edges, conductances)
+
+   Estimate power dissipated in the equivalent netowrk of the mesh.
+
+   :param voltages: Voltage at each node.
+   :type voltages: float[:]
+   :param edges: i-th lists indices of the endpoints for the i-th conductance.
+   :type edges: int[:,2]
+   :param conductances: Value of conductances in S.
+   :type conductances: float[:]
+
+   :returns: Total power dissipated in watts.
+   :rtype: float
+
+
+.. py:function:: getErrorEstimates(simulation)
+
+   Get error-related metrics for a simulation of point/sphere sources.
+
+   :param simulation: Simulation object.
+   :type simulation: `~xcell.Simulation`
+
+   :returns: **data** -- Error-related quantitites.
+   :rtype: dict
+
+
+.. py:function:: getSquares(err, vAna)
+
+   Get sums-of-squares for statistical operations
+
+   :param err: Difference between simulated and analytic voltage at each node.
+   :type err: float[:]
+   :param vAna: Analytic voltage at each node.
+   :type vAna: float[:]
+
+   :returns: * **SSE** (*float*) -- Sum of squared errors.
+             * **SSTot** (*float*) -- Total sum of squares.
+
+
+.. py:function:: transposeDicts(dictList)
+
+   Convert list of dicts (from timesteps) to dict of lists (for plotting).
+
+   :param dictList: List of data from each timestep.
+   :type dictList: [{}]
+
+   :returns: **arrayDict** -- Dict of variables, as lists of values at each timestep.
+   :rtype: {[]}
+
+
+.. py:function:: FVU(analyticVals, err)
+
+   Calculate fraction of variance unexplained (FVU)
+
+   :param analyticVals: Analytic voltage at each node.
+   :type analyticVals: float[:]
+   :param err: Difference between simulated and analytic voltage at each node.
+   :type err: float[:]
+
+   :returns: **FVU** -- Fraction of variance unexplained.
+   :rtype: float
+
+

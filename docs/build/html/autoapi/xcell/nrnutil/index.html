@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>xcell.nrnutil &mdash; xcell  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #990000" >
+
+          
+          
+          <a href="../../../index.html">
+            
+              <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Purpose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html#installing">Installing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html#citation">Citation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../auto_examples/index.html">Example applications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../auto_examples/index.html#geometry">Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #990000" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">xcell</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.nrnutil</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/autoapi/xcell/nrnutil/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-xcell.nrnutil">
+<span id="xcell-nrnutil"></span><h1><a class="reference internal" href="#module-xcell.nrnutil" title="xcell.nrnutil"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.nrnutil</span></code></a><a class="headerlink" href="#module-xcell.nrnutil" title="Permalink to this heading"></a></h1>
+<p>Utilities for interfacing with NEURON.</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading"></a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.nrnutil.LineDataUnits" title="xcell.nrnutil.LineDataUnits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LineDataUnits</span></code></a></p></td>
+<td><p>Yoinked from <a class="reference external" href="https://stackoverflow.com/a/42972469">https://stackoverflow.com/a/42972469</a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.nrnutil.ThresholdSim" title="xcell.nrnutil.ThresholdSim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ThresholdSim</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.nrnutil.ThresholdStudy" title="xcell.nrnutil.ThresholdStudy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ThresholdStudy</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.nrnutil.RecordedCell" title="xcell.nrnutil.RecordedCell"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RecordedCell</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.nrnutil.setVext" title="xcell.nrnutil.setVext"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setVext</span></code></a>(vext, vstim, tstim)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.nrnutil.returnSegmentCoordinates" title="xcell.nrnutil.returnSegmentCoordinates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">returnSegmentCoordinates</span></code></a>(section[, inMicrons])</p></td>
+<td><p>Get geometry info at segment centers.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.nrnutil.getNeuronGeometry" title="xcell.nrnutil.getNeuronGeometry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getNeuronGeometry</span></code></a>()</p></td>
+<td><p>Get geometric info of all compartments.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.nrnutil.getMembraneCurrents" title="xcell.nrnutil.getMembraneCurrents"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getMembraneCurrents</span></code></a>()</p></td>
+<td><p>Record total membrane current of every compartment.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.nrnutil.showCellGeo" title="xcell.nrnutil.showCellGeo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">showCellGeo</span></code></a>(axis[, polys, showNodes])</p></td>
+<td><p>Add cell geometry to designated plot.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.nrnutil.getCellImage" title="xcell.nrnutil.getCellImage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getCellImage</span></code></a>()</p></td>
+<td><p>Get plottable representation of cell geometry.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.nrnutil.makeBiphasicPulse" title="xcell.nrnutil.makeBiphasicPulse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">makeBiphasicPulse</span></code></a>(amplitude, tstart, pulsedur[, trise])</p></td>
+<td><p>Create pair of Vectors for biphasic (positive first) stimulus.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.nrnutil.makeMonophasicPulse" title="xcell.nrnutil.makeMonophasicPulse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">makeMonophasicPulse</span></code></a>(amplitude, tstart, pulsedur[, trise])</p></td>
+<td><p>Create pair of Vectors for monophasic stimulus.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.nrnutil.makeInterface" title="xcell.nrnutil.makeInterface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">makeInterface</span></code></a>()</p></td>
+<td><p>Add extracellular mechanism to join NEURON and xcell.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.nrnutil.setVext">
+<span class="sig-prename descclassname"><span class="pre">xcell.nrnutil.</span></span><span class="sig-name descname"><span class="pre">setVext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vext</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vstim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tstim</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.nrnutil.setVext" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.nrnutil.returnSegmentCoordinates">
+<span class="sig-prename descclassname"><span class="pre">xcell.nrnutil.</span></span><span class="sig-name descname"><span class="pre">returnSegmentCoordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inMicrons</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.nrnutil.returnSegmentCoordinates" title="Permalink to this definition"></a></dt>
+<dd><p>Get geometry info at segment centers.</p>
+<p>Adapted from <a class="reference external" href="https://www.neuron.yale.edu/phpBB/viewtopic.php?p=19176#p19176">https://www.neuron.yale.edu/phpBB/viewtopic.php?p=19176#p19176</a></p>
+<p>Modified to give segment radius as well</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>section</strong> (<em>NEURON section</em>) – The section to return info about.</p></li>
+<li><p><strong>inMicrons</strong> (<em>bool</em><em>, </em><em>default False</em>) – Whether to return values in microns (NEURON default)
+or in meters (xcell default)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>xCoord</strong> (<em>float</em>) – x coordinate.</p></li>
+<li><p><strong>yCoord</strong> (<em>float</em>) – y coordinate.</p></li>
+<li><p><strong>zCoord</strong> (<em>float</em>) – z coordinate.</p></li>
+<li><p><strong>rads</strong> (<em>float</em>) – radius of segment</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.nrnutil.getNeuronGeometry">
+<span class="sig-prename descclassname"><span class="pre">xcell.nrnutil.</span></span><span class="sig-name descname"><span class="pre">getNeuronGeometry</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.nrnutil.getNeuronGeometry" title="Permalink to this definition"></a></dt>
+<dd><p>Get geometric info of all compartments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>coords</strong> (<em>float[:,3]</em>) – Cartesian coordinates of compartment centers.</p></li>
+<li><p><strong>rads</strong> (<em>float[:]</em>) – Radius of each compatment.</p></li>
+<li><p><strong>isSphere</strong> (<em>bool[:]</em>) – Whether compartment is assumed to represent a sphere.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.nrnutil.getMembraneCurrents">
+<span class="sig-prename descclassname"><span class="pre">xcell.nrnutil.</span></span><span class="sig-name descname"><span class="pre">getMembraneCurrents</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.nrnutil.getMembraneCurrents" title="Permalink to this definition"></a></dt>
+<dd><p>Record total membrane current of every compartment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ivecs</strong> – List of vectors of membrane current.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of Vector</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="xcell.nrnutil.LineDataUnits">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.nrnutil.</span></span><span class="sig-name descname"><span class="pre">LineDataUnits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.nrnutil.LineDataUnits" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.lines.Line2D</span></code></p>
+<p>Yoinked from <a class="reference external" href="https://stackoverflow.com/a/42972469">https://stackoverflow.com/a/42972469</a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="xcell.nrnutil.LineDataUnits._linewidth">
+<span class="sig-name descname"><span class="pre">_linewidth</span></span><a class="headerlink" href="#xcell.nrnutil.LineDataUnits._linewidth" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.nrnutil.LineDataUnits._get_lw">
+<span class="sig-name descname"><span class="pre">_get_lw</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.nrnutil.LineDataUnits._get_lw" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.nrnutil.LineDataUnits._set_lw">
+<span class="sig-name descname"><span class="pre">_set_lw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.nrnutil.LineDataUnits._set_lw" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.nrnutil.showCellGeo">
+<span class="sig-prename descclassname"><span class="pre">xcell.nrnutil.</span></span><span class="sig-name descname"><span class="pre">showCellGeo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showNodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.nrnutil.showCellGeo" title="Permalink to this definition"></a></dt>
+<dd><p>Add cell geometry to designated plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>matplotlib axis</em>) – Axis to plot on.</p></li>
+<li><p><strong>polys</strong> (<em>List</em><em> of </em><em>M x 2 arrays</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is None, which queries NEURON for all compartments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>polys</strong> – DESCRIPTION.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TYPE</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.nrnutil.getCellImage">
+<span class="sig-prename descclassname"><span class="pre">xcell.nrnutil.</span></span><span class="sig-name descname"><span class="pre">getCellImage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.nrnutil.getCellImage" title="Permalink to this definition"></a></dt>
+<dd><p>Get plottable representation of cell geometry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>polys</strong> – List of vertices for creating a PolyCollection.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of M x 2 arrays</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.nrnutil.makeBiphasicPulse">
+<span class="sig-prename descclassname"><span class="pre">xcell.nrnutil.</span></span><span class="sig-name descname"><span class="pre">makeBiphasicPulse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amplitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tstart</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pulsedur</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.nrnutil.makeBiphasicPulse" title="Permalink to this definition"></a></dt>
+<dd><p>Create pair of Vectors for biphasic (positive first) stimulus.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>amplitude</strong> (<em>float</em>) – Amplitude of pulse in amperes.</p></li>
+<li><p><strong>tstart</strong> (<em>float</em>) – Delay before stimulus begins in ms.</p></li>
+<li><p><strong>pulsedur</strong> (<em>float</em>) – Duration of float in ms.</p></li>
+<li><p><strong>trise</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. Set to pulsedur/1000 if None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>stimTvec</strong> (<em>Vector</em>) – Times at which stimulus is specified.</p></li>
+<li><p><strong>stimVvec</strong> (<em>Vector</em>) – Amplitudes stimulus takes on.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.nrnutil.makeMonophasicPulse">
+<span class="sig-prename descclassname"><span class="pre">xcell.nrnutil.</span></span><span class="sig-name descname"><span class="pre">makeMonophasicPulse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amplitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tstart</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pulsedur</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.nrnutil.makeMonophasicPulse" title="Permalink to this definition"></a></dt>
+<dd><p>Create pair of Vectors for monophasic stimulus.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>amplitude</strong> (<em>float</em>) – Amplitude of pulse in amperes.</p></li>
+<li><p><strong>tstart</strong> (<em>float</em>) – Delay before stimulus begins in ms.</p></li>
+<li><p><strong>pulsedur</strong> (<em>float</em>) – Duration of float in ms.</p></li>
+<li><p><strong>trise</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. Set to pulsedur/1000 if None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>stimTvec</strong> (<em>Vector</em>) – Times at which stimulus is specified.</p></li>
+<li><p><strong>stimVvec</strong> (<em>Vector</em>) – Amplitudes stimulus takes on.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.nrnutil.makeInterface">
+<span class="sig-prename descclassname"><span class="pre">xcell.nrnutil.</span></span><span class="sig-name descname"><span class="pre">makeInterface</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.nrnutil.makeInterface" title="Permalink to this definition"></a></dt>
+<dd><p>Add extracellular mechanism to join NEURON and xcell.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>float[</strong> – Coordinates of compartment centers in meters.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>,3]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="xcell.nrnutil.ThresholdSim">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.nrnutil.</span></span><span class="sig-name descname"><span class="pre">ThresholdSim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xdom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">srcAmps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">srcGeometry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.nrnutil.ThresholdSim" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../xCell/index.html#xcell.xCell.Simulation" title="xcell.xCell.Simulation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xcell.xCell.Simulation</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.nrnutil.ThresholdSim.meshAndSolve">
+<span class="sig-name descname"><span class="pre">meshAndSolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">depth</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.nrnutil.ThresholdSim.meshAndSolve" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.nrnutil.ThresholdSim.getAnalyticVals">
+<span class="sig-name descname"><span class="pre">getAnalyticVals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.nrnutil.ThresholdSim.getAnalyticVals" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="xcell.nrnutil.ThresholdStudy">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.nrnutil.</span></span><span class="sig-name descname"><span class="pre">ThresholdStudy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pulsedur</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">biphasic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">viz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.nrnutil.ThresholdStudy" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="xcell.nrnutil.ThresholdStudy._buildNeuron">
+<span class="sig-name descname"><span class="pre">_buildNeuron</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.nrnutil.ThresholdStudy._buildNeuron" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.nrnutil.ThresholdStudy.getThreshold">
+<span class="sig-name descname"><span class="pre">getThreshold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.nrnutil.ThresholdStudy.getThreshold" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.nrnutil.ThresholdStudy._runTrial">
+<span class="sig-name descname"><span class="pre">_runTrial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amplitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analytic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.nrnutil.ThresholdStudy._runTrial" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.nrnutil.ThresholdStudy._setVext">
+<span class="sig-name descname"><span class="pre">_setVext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analytic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.nrnutil.ThresholdStudy._setVext" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="xcell.nrnutil.RecordedCell">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.nrnutil.</span></span><span class="sig-name descname"><span class="pre">RecordedCell</span></span><a class="headerlink" href="#xcell.nrnutil.RecordedCell" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="xcell.nrnutil.RecordedCell.attachSpikeDetector">
+<span class="sig-name descname"><span class="pre">attachSpikeDetector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.nrnutil.RecordedCell.attachSpikeDetector" title="Permalink to this definition"></a></dt>
+<dd><p>Attach spike detector to section.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>section</strong> (<em>NEURON section</em>) – Section to check for spikes.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.nrnutil.RecordedCell.attachMembraneRecordings">
+<span class="sig-name descname"><span class="pre">attachMembraneRecordings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sections</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.nrnutil.RecordedCell.attachMembraneRecordings" title="Permalink to this definition"></a></dt>
+<dd><p>Attach recorders for membrane voltage &amp; current.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sections</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – NEURON sections to record, or all sections if None (default)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, CBC Girard.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

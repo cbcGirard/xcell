@@ -1,0 +1,81 @@
+:py:mod:`xcell.geometry`
+========================
+
+.. py:module:: xcell.geometry
+
+.. autoapi-nested-parse::
+
+   Geometric primitives.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   xcell.geometry.Sphere
+   xcell.geometry.Disk
+   xcell.geometry.Cylinder
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   xcell.geometry.isInBBox
+   xcell.geometry.avgPoints
+   xcell.geometry.calcTriNormals
+   xcell.geometry.fixTriNormals
+   xcell.geometry.toPV
+
+
+
+.. py:class:: Sphere(center, radius)
+
+   .. py:method:: isInside(coords)
+
+
+
+.. py:class:: Disk(center, radius, axis, tol=0.01)
+
+   .. py:method:: isInside(coords)
+
+
+
+.. py:class:: Cylinder(center, radius, length, axis)
+
+   .. py:method:: isInside(coords)
+
+
+
+.. py:function:: isInBBox(bbox, point)
+
+
+.. py:function:: avgPoints(pts)
+
+
+.. py:function:: calcTriNormals(pts, surf)
+
+
+.. py:function:: fixTriNormals(pts, surf)
+
+
+.. py:function:: toPV(geometry, **kwargs)
+
+   Hackishly convert xcell geometry to PyVista representation.
+
+   :param geometry: Geometry to convert.
+   :type geometry: xcell Disk, Sphere, or Cylinder
+   :param \*\*kwargs: Parameters for PyVista mesh generation.
+   :type \*\*kwargs: PyVista arguments
+
+   :returns: **mesh** -- Geometry as a PyVista mesh for visualization.
+   :rtype: PyVista PolyData
+
+

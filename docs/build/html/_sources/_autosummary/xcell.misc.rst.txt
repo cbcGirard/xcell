@@ -1,0 +1,36 @@
+xcell.misc
+==========
+
+.. automodule:: xcell.misc
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      FVU
+      estimatePower
+      getErrorEstimates
+      getSquares
+      iSourceIntegral
+      iSourcePower
+      transposeDicts
+      vSourceIntegral
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

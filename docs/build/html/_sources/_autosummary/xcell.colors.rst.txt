@@ -1,0 +1,33 @@
+xcell.colors
+============
+
+.. automodule:: xcell.colors
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      makeStyleDict
+      recolorSVG
+      scoopCmap
+      useDarkStyle
+      useLightStyle
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

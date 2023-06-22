@@ -1,0 +1,92 @@
+:py:mod:`xcell.elements`
+========================
+
+.. py:module:: xcell.elements
+
+.. autoapi-nested-parse::
+
+   Created on Tue Jan  4 14:39:59 2022
+   Element type routines
+   @author: benoit
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   xcell.elements.Element
+   xcell.elements.FEMHex
+   xcell.elements.AdmittanceHex
+
+
+
+
+.. py:class:: Element(origin, span, sigma)
+
+   Base class for cuboid elements
+
+   .. py:method:: getCoordsRecursively()
+
+      Calculates the global coordinates of the element's vertices.
+
+      :returns: **coords** -- Cartesian coordinates of element vertices
+      :rtype: float[:,3]
+
+
+   .. py:method:: getConductanceVals()
+
+
+   .. py:method:: getConductanceIndices()
+
+
+   .. py:method:: getCharLength()
+
+
+   .. py:method:: setGlobalIndices(indices)
+
+
+
+.. py:class:: FEMHex(origin, span, sigma)
+
+   .. py:method:: getCoordsRecursively()
+
+
+   .. py:method:: getCharLength()
+
+
+   .. py:method:: setGlobalIndices(indices)
+
+
+   .. py:method:: getConductanceVals()
+
+
+   .. py:method:: getConductanceIndices()
+
+
+
+.. py:class:: AdmittanceHex(origin, span, sigma)
+
+   .. py:method:: getCoordsRecursively()
+
+
+   .. py:method:: getMidpoint()
+
+
+   .. py:method:: getCharLength()
+
+
+   .. py:method:: setGlobalIndices(indices)
+
+
+   .. py:method:: getConductanceVals()
+
+
+   .. py:method:: getConductanceIndices()
+
+
+

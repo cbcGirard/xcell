@@ -1,0 +1,160 @@
+:py:mod:`xcell.fem`
+===================
+
+.. py:module:: xcell.fem
+
+.. autoapi-nested-parse::
+
+   Created on Tue Jan 11 10:37:11 2022
+
+   @author: benoit
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   xcell.fem.getHexConductances
+   xcell.fem.getHexIndices
+   xcell.fem.getFaceConductances
+   xcell.fem._getFaceIndices
+   xcell.fem.getTetConductance
+   xcell.fem.getTetIndices
+   xcell.fem.getAdmittanceConductances
+   xcell.fem.getAdmittanceIndices
+   xcell.fem.interpolateFromFace
+   xcell.fem.interpolateFromVerts
+   xcell.fem.integrateFromVerts
+   xcell.fem.toLocalCoords
+   xcell.fem.__toTrilinCoefOrder
+   xcell.fem.__toFaceCoefOrder
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   xcell.fem.ADMITTANCE_EDGES
+   xcell.fem.TET_EDGES
+   xcell.fem.FACE_EDGES
+   xcell.fem.HEX_VERTEX_COORDS
+   xcell.fem.HEX_FACE_COORDS
+   xcell.fem.HEX_POINT_INDICES
+   xcell.fem.TRIL_INVERSE_MATRIX
+   xcell.fem.TRIP_INVERSE_MATRIX
+
+
+.. py:function:: getHexConductances(span, sigma)
+
+   Calculate the conductances of a trilinear FEM hexahedron.
+
+   :param span: Size of element along each axis
+   :type span: float[3]
+   :param sigma: Conductivity of element
+   :type sigma: float[3] or float
+
+   :rtype: float[28]
+
+
+.. py:function:: getHexIndices()
+
+   Generate indices of conductance nodes for trilinear FEM hexahedron.
+
+   :returns: Edges within the hex
+   :rtype: int64[28,2]
+
+
+.. py:function:: getFaceConductances(span, sigma)
+
+   Calculate the conductances of a mesh-dual (face-oriented) hexahedron.
+
+   :param span: Size of element along each axis
+   :type span: float[3]
+   :param sigma: Conductivity of element
+   :type sigma: float[3] or float
+
+   :returns: Conductances, in order -x, +x, -y, +y, ...
+   :rtype: float[6]
+
+
+.. py:function:: _getFaceIndices()
+
+
+.. py:function:: getTetConductance(pts)
+
+   Calculate conductances between nodes of tetrahedron.
+
+   :param pts: Cartesian coordinates of tet vertices
+   :type pts: float[4,3]
+
+   :returns: Conductances between vertices
+   :rtype: float[4]
+
+
+.. py:function:: getTetIndices()
+
+
+.. py:function:: getAdmittanceConductances(span, sigma)
+
+
+.. py:function:: getAdmittanceIndices()
+
+
+.. py:data:: ADMITTANCE_EDGES
+
+   
+
+.. py:data:: TET_EDGES
+
+   
+
+.. py:data:: FACE_EDGES
+
+   
+
+.. py:function:: interpolateFromFace(faceValues, localCoords)
+
+
+.. py:function:: interpolateFromVerts(vertexValues, localCoords)
+
+
+.. py:function:: integrateFromVerts(vertexValues, span)
+
+
+.. py:function:: toLocalCoords(globalCoords, center, span)
+
+
+.. py:function:: __toTrilinCoefOrder(coords)
+
+
+.. py:function:: __toFaceCoefOrder(coords)
+
+
+.. py:data:: HEX_VERTEX_COORDS
+
+   
+
+.. py:data:: HEX_FACE_COORDS
+
+   
+
+.. py:data:: HEX_POINT_INDICES
+
+   
+
+.. py:data:: TRIL_INVERSE_MATRIX
+
+   
+
+.. py:data:: TRIP_INVERSE_MATRIX
+
+   
+

@@ -1,0 +1,80 @@
+xcell.util
+==========
+
+.. automodule:: xcell.util
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      anyMatch
+      condenseIndices
+      coord2InterpVals
+      coords2MaskedArrays
+      deduplicateEdges
+      edgeCurrentLoop
+      edgeNodesOfType
+      edgeRoles
+      eliminateRows
+      evalulateInterpolant
+      fromBitArray
+      getBilinCoefs
+      getCurrentVector
+      getElementInterpolant
+      getIndexDict
+      getPyDict
+      getUnmasked
+      getquads
+      htile
+      index2pos
+      indexToCoords
+      indicesWithinOctant
+      intdot
+      interpolateBilin
+      logceil
+      logfloor
+      loground
+      makeGridPoints
+      maxUnder
+      minOver
+      octListReverseXYZ
+      octantListToXYZ
+      octantNeighborIndexLists
+      octreeLoop_GetBoundaryNodesLoop
+      oneDigit
+      pointCurrentV
+      pos2index
+      quadsToMaskedArrays
+      reduceFunctions
+      reindex
+      renumberIndices
+      toBilinearVars
+      toBitArray
+      uIndexToXYZ
+      unravelArraySet
+      xyzWithinOctant
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Logger
+   
+   
+
+   
+   
+   
+
+
+

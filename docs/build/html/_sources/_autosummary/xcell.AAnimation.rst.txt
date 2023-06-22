@@ -1,0 +1,30 @@
+xcell.AAnimation
+================
+
+.. automodule:: xcell.AAnimation
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      AAnimation
+      FWriter
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,368 @@
+:py:mod:`xcell.meshes`
+======================
+
+.. py:module:: xcell.meshes
+
+.. autoapi-nested-parse::
+
+   Mesh topology
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   xcell.meshes.Mesh
+   xcell.meshes.Octree
+   xcell.meshes.Octant
+
+
+
+
+.. py:class:: Mesh(bbox, elementType='Admittance')
+
+   .. py:method:: __getstate__()
+
+
+   .. py:method:: __setstate__(state)
+
+
+   .. py:method:: getContainingElement(coords)
+
+      Get element containing specified point.
+
+      :param coords: Cartesian coordinates of point.
+      :type coords: float[:]
+
+      :raises ValueError: Error if no element contains the point.
+
+      :returns: **elem** -- Containing element.
+      :rtype: TYPE
+
+
+   .. py:method:: finalize()
+
+
+   .. py:method:: addElement(origin, span, sigma, index)
+
+      Insert element into the mesh.
+
+      :param origin: Cartesian coords of element's origin.
+      :type origin: float[:]
+      :param extents: Length of edges in x,y,z.
+      :type extents: float[:]
+      :param sigma: Conductivity of element.
+      :type sigma: float
+      :param nodeIndices: Numbering of element nodes according to global mesh.
+      :type nodeIndices: int64[:]
+
+      :rtype: None.
+
+
+   .. py:method:: getConductances(elements=None)
+
+      Get the discrete conductances from every element.
+
+
+      :param elements: DESCRIPTION. The default is None, which uses all in mesh.
+      :type elements: list of `~xcell.mesh.Octant`, optional
+
+      :returns: * **edgeIndices** (*int64[:,:]*) -- List of node pairs spanned by each conductance.
+                * **conductances** (*float*) -- Conductance in siemens.
+                * **transforms** (*list of ints*) -- Substitutions for graph-dual meshes.
+
+
+   .. py:method:: getL0Min()
+
+      Get the smallest edge length in mesh
+
+      :returns: **l0Min** -- smallest edge length.
+      :rtype: float
+
+
+   .. py:method:: getBoundaryNodes()
+
+      Get the indices of nodes on the domain boundary.
+
+      :returns: **globalIndices** -- Indices of current mesh nodes at periphery.
+      :rtype: int[:]
+
+
+   .. py:method:: getIntersectingelements(axis, coordinate)
+
+      Find elements intersected by a cartesian plane.
+
+      :param axis: Normal of intersecting plane (0->x, 1->y,2->z).
+      :type axis: int
+      :param coordinate: Coordinate of plane alonx normal axis.
+      :type coordinate: float
+
+      :returns: **elements** -- Elements intersected by the plane.
+      :rtype: list of `~xcell.meshes.Octant`
+
+
+
+.. py:class:: Octree(boundingBox, maxDepth=10, elementType='Admittance')
+
+   Bases: :py:obj:`Mesh`
+
+   .. py:method:: getContainingElement(coords)
+
+      Get element containing specified point.
+
+      :param coords: Cartesian coordinates of point.
+      :type coords: float[:]
+
+      :raises ValueError: Error if no element contains the point.
+
+      :returns: **elem** -- Containing element.
+      :rtype: TYPE
+
+
+   .. py:method:: getIntersectingelements(axis, coordinate)
+
+      Find elements intersected by a cartesian plane.
+
+      :param axis: Normal of intersecting plane (0->x, 1->y,2->z).
+      :type axis: int
+      :param coordinate: Coordinate of plane alonx normal axis.
+      :type coordinate: float
+
+      :returns: **elements** -- Elements intersected by the plane.
+      :rtype: list of `~xcell.meshes.Octant`
+
+
+   .. py:method:: refineByMetric(minl0Function, refPts, maxl0Function=None, coefs=None, coarsen=True)
+
+      Recursively splits elements until l0Function evaluated at the center
+      of each element is greater than that element's l0'
+
+      :param minl0Function: Function returning a scalar for each input cartesian coordinate.
+      :type minl0Function: function
+      :param refPts: Cartesian coordinates where distance is evaluated from.
+      :type refPts: float[:,3]
+      :param maxl0Function: Function giving maximum l0 for coarsening.
+                            The default is None, which uses minl0Function.
+      :type maxl0Function: function or None, optional
+      :param coefs: Factor multiplied each candidate l0. The default is None.
+      :type coefs: float[:], optional
+      :param coarsen: Whether to prune elements larger than target l0. The default is True.
+      :type coarsen: bool, optional
+
+      :returns: **changed** -- Adaptation resulted in new topology
+      :rtype: bool
+
+
+   .. py:method:: finalize()
+
+      Convert terminal octants to mesh elements, mapping sparse to dense numbering.
+
+      :rtype: None.
+
+
+   .. py:method:: printStructure()
+
+      Debug tool to print structure of tree
+
+      :rtype: None.
+
+
+   .. py:method:: octantByList(indexList, octant=None)
+
+      Select an octant by recursing through a list of indices.
+
+      :param indexList: Octant identifier, where i=indexList[n] specifies child i of octant n
+      :type indexList: int64[]
+      :param octant: Used internally to recurse. The default is None.
+      :type octant: Octant, optional
+
+      :returns: The octant object specified.
+      :rtype: Octant
+
+
+   .. py:method:: countelements()
+
+      Get number of terminal elements in tree.
+
+      :returns: Number of leaf elements.
+      :rtype: int
+
+
+   .. py:method:: getCoordsRecursively()
+
+      Determine coordinates of mesh nodes.
+
+      Recurses through `Octant.getCoordsRecursively`
+
+      :returns: **coords** -- Cartesian coordinates of each mesh node.
+      :rtype: 2d float array
+
+
+   .. py:method:: getBoundaryNodes()
+
+      Get the indices of nodes on the domain boundary.
+
+      :returns: **globalIndices** -- Indices of current mesh nodes at periphery.
+      :rtype: int[:]
+
+
+   .. py:method:: getElementAdjacencies()
+
+      Get the neighboring elements.
+
+      :returns: **adjacencies** -- Adjacent elements in order of (+x,-x, +y,-y, +z,-z).
+      :rtype: list of elements
+
+
+
+.. py:class:: Octant(origin, span, depth=0, sigma=np.ones(3), index=[], oXYZ=np.zeros(3, dtype=np.int32))
+
+   .. py:method:: __recreateTree(elements)
+
+
+   .. py:method:: countelements()
+
+      Return the number of leaf elements contained within octant.
+
+      :returns: Number of leaf elements within.
+      :rtype: int
+
+
+   .. py:method:: split(division=np.array([0.5, 0.5, 0.5]))
+
+      Split element into its child octants.
+
+      :param division: Fraction of division in x,y,z directions. The default is np.array([0.5, 0.5, 0.5]).
+      :type division: float[3], optional
+
+      :rtype: None.
+
+
+   .. py:method:: getCoordsRecursively(asDual=False)
+
+      Get the coordinates of the mesh within the element.
+
+      :param asDual: Whether to return the mesh-dual nodes instead of vertices. The default is False.
+      :type asDual: bool, optional
+
+      :returns: **indices** -- Indices of node according to universal numbering.
+      :rtype: list of int
+
+
+   .. py:method:: refineByMetric(l0Function, refPts, maxDepth, coefs)
+
+      Recursively splits elements until l0Function evaluated at the center
+      of each element is greater than that element's l0'
+
+      :param minl0Function: Function returning a scalar for each input cartesian coordinate.
+      :type minl0Function: function
+      :param refPts: Cartesian coordinates where distance is evaluated from.
+      :type refPts: float[:,3]
+      :param maxDepth: Maximum depth of splitting permitted
+      :type maxDepth: int
+      :param coefs: Factor multiplied each candidate l0. The default is None.
+      :type coefs: float[:], optional
+
+      :returns: **changed** -- Adaptation resulted in new topology
+      :rtype: bool
+
+
+   .. py:method:: coarsenByMetric(metric, refPts, maxdepth, coefs)
+
+      Delete children if element and all children are smaller than target.
+
+      :param metric: Function returning a scalar for each input cartesian coordinate.
+      :type metric: function
+      :param refPts: Cartesian coordinates where distance is evaluated from.
+      :type refPts: float[:,3]
+      :param maxdepth: Maximum depth of splitting.
+      :type maxdepth: int
+      :param coefs: Factor multiplied each candidate l0.
+      :type coefs: float[:]
+
+      :returns: * **changed** (*bool*) -- Whether mesh topology was altered.
+                * **undersized** (*bool*) -- Whether element is smaller than all targets.
+
+
+   .. py:method:: printStructure()
+
+      Print out octree structure.
+
+      :rtype: None.
+
+
+   .. py:method:: isTerminal()
+
+      Determine if element is terminal (has no children)
+
+      :returns: **terminal** -- True if element has no children.
+      :rtype: bool
+
+
+   .. py:method:: intersectsPlane(axis, coord)
+
+
+   .. py:method:: getTerminalOctants()
+
+      Get all childless octants.
+
+      :returns: Childless octants (the actual elements of the mesh)
+      :rtype: list of Octants
+
+
+   .. py:method:: calcIndices()
+
+      Calculate the universal indices of the element's nodes.
+
+      :rtype: None.
+
+
+   .. py:method:: getContainingElement(coords)
+
+      Find the element that contains the specified point.
+
+      :param coords: Cartesian coordinates of test point.
+      :type coords: float[3]
+
+      :returns: Element containing point.
+      :rtype: xcell.meshes.Octant or None
+
+
+   .. py:method:: getIntersectingElement(axis, coord)
+
+      Find elements intersected by a cartesian plane.
+
+      :param axis: Normal of intersecting plane (0->x, 1->y,2->z).
+      :type axis: int
+      :param coord: Coordinate of plane alonx normal axis.
+      :type coord: float
+
+      :returns: **elements** -- Elements intersected by the plane.
+      :rtype: list of `~xcell.meshes.Octant`
+
+
+   .. py:method:: interpolateWithin(coordinates, values)
+
+      Interpolate values within the element from specified vertices/face nodes
+
+      :param coordinates: Cartesian coordinates to interpolate at (in global coordinate system).
+      :type coordinates: float[:,3]
+      :param values: Array of values at vertices (n=8) or faces (n=7).
+      :type values: float[8] or float[7]
+
+      :returns: **interp** -- Interpolated values at the specified points.
+      :rtype: float[:]
+
+
+   .. py:method:: getUniversalVals(knownValues)
+
+
+   .. py:method:: getPlanarValues(globalValues, axis=2, coord=0.0)
+
+
+

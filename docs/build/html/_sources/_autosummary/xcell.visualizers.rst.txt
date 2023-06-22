@@ -1,0 +1,75 @@
+xcell.visualizers
+=================
+
+.. automodule:: xcell.visualizers
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      addInset
+      animatedTitle
+      discreteColors
+      discreteLegend
+      engineerTicks
+      equalizeScale
+      errorCompositePlot
+      formatXYAxis
+      getCmap
+      getPlanarEdgePoints
+      groupedScatter
+      hideBorders
+      importAndPlotTimes
+      importRunset
+      new3dPlot
+      outsideLegend
+      patchworkImage
+      plotBoundEffect
+      plotStudyPerformance
+      resamplePlane
+      showCurrentVecs
+      showEdges
+      showEdges2d
+      showMesh
+      showNodes3d
+      showRawSlice
+      showSourceBoundary
+      stackedTimePlot
+      toEdgePoints
+      undrawAxis
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      CurrentPlot
+      DataPrefs
+      DisplayPrefs
+      ErrorGraph
+      FigureAnimator
+      LogError
+      ScaleRange
+      SingleSlice
+      SliceSet
+      SliceViewer
+      SortaLogNorm
+      TimingBar
+   
+   
+
+   
+   
+   
+
+
+

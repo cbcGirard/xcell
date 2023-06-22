@@ -1,0 +1,40 @@
+xcell.fem
+=========
+
+.. automodule:: xcell.fem
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      getAdmittanceConductances
+      getAdmittanceIndices
+      getFaceConductances
+      getFaceIndices
+      getHexConductances
+      getHexIndices
+      getTetConductance
+      getTetIndices
+      integrateFromVerts
+      interpolateFromFace
+      interpolateFromVerts
+      toLocalCoords
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
