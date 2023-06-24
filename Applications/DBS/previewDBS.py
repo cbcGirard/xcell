@@ -5,7 +5,7 @@ Created on Sun Apr  9 16:42:08 2023
 
 @author: benoit
 """
-#%%
+# %%
 import xcell as xc
 import pyvista as pv
 import pickle
@@ -46,7 +46,7 @@ Depth = 16
 adaptive = True
 symlog = True
 amplitude = False
-liteMode = True
+# liteMode = True
 preview = False
 
 if liteMode:
@@ -128,16 +128,18 @@ rdisp['Conductors'] = rc.clip('z')
 simbb = bbox[xc.io.PV_BOUND_ORDER]
 
 linecolor = pv.Color(xc.colors.BASE)
-# windowInch = np.array([3.5,6])
-# DPI = 300
-# windowPx = DPI*windowInch
-p = xc.visualizers.PVScene()
+
+windowInch = np.array([7.2, 5.4])
+DPI = 200
+windowPx = np.array(DPI*windowInch, dtype=int)
+
+p = xc.visualizers.PVScene(figsize=windowInch, dpi=DPI)
 p.setup(rdisp, opacity=1.,
         # rdisp['Conductors'],
         simData='sigma',
         scalar_bar_args={'title': r'$\sigma[S/m]$',
-                         'title_font_size': 9*adj,
-                         'label_font_size': 9*adj,
+                         'title_font_size': 9,
+                         'label_font_size': 9,
                          'fmt': '%.2f'}
         )
 p.add_ruler(pointa=(ROI[0], 1.2*ROI[2], 0.),
@@ -371,11 +373,13 @@ study.save(infos, fstem+'info')
 moviename = 'voltage'
 meshname = 'sim0'
 
-# plotTime =tvec
-plotTime = None
+plotTime = tvec
+# plotTime = None
 
 # dataCat = 'voltage'
 dataCat = 'sigma'
+moviename = 'sigma'
+symlog = False
 
 # reloading pickled data
 if not 'infos' in dir():
@@ -396,15 +400,15 @@ else:
 
         msh = pv.read((os.path.join(fstem, meshname+'.vtk')))
         if ii == 0:
-            if dataCat=='sigma':
-                msh.cell_data[dataCat]=np.zeros(msh.n_cells)
+            if dataCat == 'sigma':
+                msh.cell_data[dataCat] = np.zeros(msh.n_cells)
             else:
                 msh.point_data[dataCat] = np.zeros(msh.n_points)
             vmesh = msh.copy()
             mesh = msh.copy()
         else:
-            if dataCat=='sigma':
-                regions.assignSigma(msh,defaultSigma = sigma_0)
+            if dataCat == 'sigma':
+                regions.assignSigma(msh, defaultSigma=sigma_0)
             else:
                 msh.point_data[dataCat] = v.copy()
         # print('%d\t%d' % (len(v), msh.n_points))
@@ -434,31 +438,37 @@ VBAR = {
     'title_font_size': 20,
     'label_font_size': 20,
 }
-if symlog:
-    moviename += '-log'
-    symmer = SymLogNorm(vspan[1]/100, vmax=vspan[1], vmin=vspan[0])
-    clim = (0., 1.)
-    cma = xc.colors.CM_BIPOLAR
-    # opacity = np.ones(11)
-    # opacity[11//2] = 0.
-    # pargs['opacity'] = opacity
-    cbarfig = xc.visualizers.makeSoloColorbar(None,
-                                                 cmap=cma, norm=symmer, unit='V')
-elif amplitude:
-    clim = max(np.abs(vrange))*np.array([1e-3, 1.])
-    cma = 'magma_r'
-    pargs['log_scale'] = True
-    VBAR['title'] = 'Amplitude [v]'
+
+if dataCat == 'sigma':
+    cma = xc.colors.CM_MONO
+    clim = np.array([0., 0.5])
+
 else:
-    clim = vrange
-    cma = 'seismic'
+    if symlog:
+        moviename += '-log'
+        symmer = SymLogNorm(vspan[1]/100, vmax=vspan[1], vmin=vspan[0])
+        clim = (0., 1.)
+        cma = xc.colors.CM_BIPOLAR
+        # opacity = np.ones(11)
+        # opacity[11//2] = 0.
+        # pargs['opacity'] = opacity
+        cbarfig = xc.visualizers.makeSoloColorbar(None,
+                                                  cmap=cma, norm=symmer, unit='V')
+    elif amplitude:
+        clim = max(np.abs(vrange))*np.array([1e-3, 1.])
+        cma = 'magma_r'
+        pargs['log_scale'] = True
+        VBAR['title'] = 'Amplitude [v]'
+    else:
+        clim = vrange
+        cma = 'seismic'
 
 
-p = xcell.visualizers.PVScene(time=plotTime, figsize=[
-                              3.25, 2.5], dpi=300, off_screen=True)
+p = xc.visualizers.PVScene(
+    time=plotTime, figsize=windowInch, dpi=DPI, off_screen=True)
 
-p.open_movie(fstem+'.mp4')
-# study.makePVmovie(p, filename=moviename)
+# p.open_movie(fstem+'.mp4')
+study.makePVmovie(p, filename=moviename)
 
 
 # cma = mcmap['bwr']
@@ -490,9 +500,8 @@ if not viewIso:
 # if not preview:
 # p.show(auto_close=False)
 
-# %%
-# viz = tqdm.trange(len(tvec), desc='Animating')
-viz = [0, 14, 43, 59, 79, 102, ]
+viz = tqdm.trange(len(tvec)-1, desc='Animating')
+# viz = [0, 14, 43, 59, 79, 102, ]
 for ii in viz:
     t = tvec[ii]
     if ii+1 == len(tvec):
@@ -521,19 +530,19 @@ for ii in viz:
     else:
         mesh[dataCat] = data[ii]
 
-    p.setTime(t)
-    p.write_frame()
-    p.screenshot('f%03d.png' % ii)
+    # p.setTime(t)
+    # p.write_frame()
+    # p.screenshot('f%03d.png' % ii)
 
-    # while t < tnext:
-    #     p.setTime(t)
-    #     # p.write_frame()
-    #     # if liteMode:
-    #     study.savePVimage(p,
-    #                       os.path.join(moviename,
-    #                                    moviename+'frame%03d.png' % ii))
-    #     t += 0.005
-    #     break
+    while t < tnext:
+        p.setTime(t)
+        p.write_frame()
+        # if liteMode:
+        study.savePVimage(p,
+                          os.path.join(moviename,
+                                       moviename+'frame%03d.png' % ii))
+        t += 0.005
+        break
 
 if liteMode:
     study.savePlot(cbarfig,

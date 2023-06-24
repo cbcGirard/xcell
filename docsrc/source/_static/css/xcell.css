@@ -1,0 +1,30 @@
+/** css/yourtheme.css **/
+
+/* This line is theme specific - it includes the base theme CSS */
+@import 'theme.css';       /* for the Read the Docs theme */
+
+body {
+    /* ... */
+    
+    
+
+    .wy-nav-content-wrap{
+        background: #080000;
+    }
+    .wy-nav-content{
+        background: #19232d;
+        color: #dcd4c7;
+    }
+
+    .highlight{
+        color:#000000;
+        background: #FFFFFF;
+    }
+
+
+
+}
+
+h1{
+    color:#afcfff;
+}

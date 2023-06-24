@@ -77,12 +77,12 @@ celltype = args.celltype
 # # #overrides
 # # domX = rElec*2**7
 # # tpulse=0.1
-# stepViz = True
-celltype = 'MRG'
-args.folder = 'tthreshold-%s' % celltype
+stepViz = True
+# celltype = 'MRG'
+args.folder = 'Dark-threshold-%s' % celltype
 combineRuns = True
-args.liteMode = True
-# elecY = 10
+# args.liteMode = True
+elecY = 150
 # # analytic = True
 
 
