@@ -162,16 +162,21 @@ for form, title in zip(formulations, titles):
 
 newGraph.study.studyPath = os.getcwd()
 ax.set_ylabel('')
-newGraph.animateStudy('Composite')  # ,artists = artists)
+newGraph.animateStudy('Composite2')  # ,artists = artists)
 
 
 # %%
+c = np.array(plt.colormaps['tab10'].colors[:4])
+c[2] = mpl.colors.to_rgb('#990000')
 with plt.rc_context({'figure.figsize': [4, 4],
                      'figure.dpi': 250,
                      'font.size': 10,
+                     'axes.prop_cycle': plt.cycler('color', c)
                      }):
     # g=newGraph.copy()
     g = Composite(plt.figure(), study)
+    g.study.studyPath = os.getcwd()
+
     g.dataSets = newGraph.dataSets
     g.prefs.update({'keepLegend': True})
     g.animateStudy('Composite')

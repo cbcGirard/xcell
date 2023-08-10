@@ -54,7 +54,7 @@ if liteMode:
 else:
     xc.colors.useDarkStyle()
 
-fontsize = 10
+fontsize = 24
 pv.global_theme.font.size = fontsize
 pv.global_theme.font.label_size = fontsize
 pv.global_theme.font.title_size = fontsize
@@ -133,7 +133,7 @@ windowInch = np.array([7.2, 5.4])
 DPI = 200
 windowPx = np.array(DPI*windowInch, dtype=int)
 
-p = xc.visualizers.PVScene(figsize=windowInch, dpi=DPI)
+p = xc.visualizers.PVScene(figsize=windowInch, dpi=DPI, off_screen=args.remote)
 p.setup(rdisp, opacity=1.,
         # rdisp['Conductors'],
         simData='sigma',
@@ -162,7 +162,6 @@ p.planeview(1.1*np.array(ROI))
 microcenters = np.array([m.center for m in regions['Electrodes'][:nmicro]])
 p.add_mesh(pv.wrap(microcenters), color='gold',
            render_points_as_spheres=True, point_size=10.)
-study.savePVimage(p, 'setup2.svg', raster=False)
 study.savePVimage(p, 'setup2.png', window_size=windowPx)
 
 if preview:
@@ -376,10 +375,10 @@ meshname = 'sim0'
 plotTime = tvec
 # plotTime = None
 
-# dataCat = 'voltage'
-dataCat = 'sigma'
-moviename = 'sigma'
-symlog = False
+dataCat = 'voltage'
+# dataCat = 'sigma'
+# moviename = 'sigma'
+# symlog = False
 
 # reloading pickled data
 if not 'infos' in dir():
@@ -474,7 +473,7 @@ study.makePVmovie(p, filename=moviename)
 # cma = mcmap['bwr']
 # cma = xc.colors.CM_BIPOLAR
 # cma=mcmap['seismic']
-# cma = xcell.colors.scoopCmap(cmr.guppy_r)
+cma = xc.colors.scoopCmap(cmr.guppy_r)
 
 
 if viewIso:

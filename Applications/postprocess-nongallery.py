@@ -27,7 +27,8 @@ datadir = '/home/benoit/smb4k/ResearchData/Results/studyTst/'
 # filterCategories=['Source']
 # filterVals=['current','voltage']
 
-studyPath = datadir+'uniVsAdapt'
+# studyPath = datadir+'uniVsAdapt'
+studyPath = '/home/benoit/smb4k/ResearchData/Results/Quals/PoC'
 filterCategories = ["Mesh type"]
 filterVals = ["adaptive", "uniform"]
 # filterVals=['adaptive']
@@ -72,8 +73,8 @@ study = xcell.SimStudy(studyPath, bbox)
 # aniImg2=study.animatePlot(xcell.centerSlice,'img_uniform',['Mesh type'],['uniform'])
 
 
-staticPlots = True
-# staticPlots = False
+# staticPlots = True
+staticPlots = False
 
 plotters = [
     xcell.visualizers.ErrorGraph,
@@ -156,4 +157,4 @@ for ii, p in enumerate(plotters):
     for plot, name in zip(plots, names):
         plot.dataScales = ranges
 
-        plot.animateStudy(fname=name)
+        plot.animateStudy(fname=name+'redux')

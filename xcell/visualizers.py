@@ -1946,7 +1946,7 @@ class ErrorGraph(FigureAnimator):
         simLine = axV.plot(
             # self.simR[ii], self.sims[ii],
             data['simR'], data['simV'],
-            c='C1', marker='.', label='Simulated')
+            c='C0', marker='.', label='Simulated')
 
         if setnum == 0 and self.prefs['showLegend']:
             axV.legend(loc='upper right')

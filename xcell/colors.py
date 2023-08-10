@@ -91,9 +91,9 @@ CM_MONO = mpl.colors.LinearSegmentedColormap.from_list('mono',
                                                        np.hstack((plx, lint)))
 
 
-scopeColors = ['#ffff00', '#00ffff', '#ff00ff', '#00ff00',
+scopeColors = ['#ffff00', '#00ffff', '#990000', '#00ff00',
                '#ff0000', '#0000ff', '#ff8000', '#8000ff', '#ff0080', '#0080ff']
-scopeColorsLite = ['#ffcc00', '#17becf', '#e377c2', '#2ca02c',
+scopeColorsLite = ['#ffcc00', '#17becf', '#990000', '#2ca02c',
                    '#1c2a99', '#d62728', '#ff7f0e', '#9467bd', '#990000', '#7f7f7f']
 
 styleScope = {
