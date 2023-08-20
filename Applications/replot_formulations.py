@@ -7,7 +7,7 @@ figure 7b in JNE paper
 """
 
 import xcell as xc
-import Common as com
+import Common_nongallery as com
 import pickle
 import os
 import matplotlib.pyplot as plt
@@ -22,8 +22,8 @@ figdims = [3.25, 3]
 npx = int(figdims[0]*DPI)
 
 study, _ = com.makeSynthStudy(folder)
-folder = study.studyPath
-xc.colors.useLightStyle()
+folder = study.study_path
+xc.colors.use_light_style()
 
 
 formulations = ['Admittance', 'FEM', 'Face']
@@ -46,7 +46,7 @@ def compress(x, y, nPx, xmin, xmax):
 
         isin = np.logical_and(x >= p0, x <= pxVec[ii])
 
-        if np.nonzero(isin)[0].shape[0]:
+        if xc.util.fastcount(isin):
             minval = np.min(y[isin])
             midval = np.mean(y[isin])
             maxval = np.max(y[isin])
@@ -61,7 +61,7 @@ for form, title in zip(formulations, titles):
     graph = pickle.load(
         open(os.path.join(folder, 'ErrorGraph_'+form+'.adata'), 'rb'))
 
-    dat = graph.dataSets[nthGen]
+    dat = graph.datasets[nthGen]
 
     rs.append(dat['simR'])
     vs.append(dat['simV'])
@@ -77,15 +77,15 @@ for form, title in zip(formulations, titles):
             'r'+title: dat['simR']}
     dat.update(dnew)
 
-# dat=newGraph.dataSets[nthGen]
+# dat=newGraph.datasets[nthGen]
 # rs=[k for k in dat.keys() if k[0]=='r']
 # vs=[k for k in dat.keys() if k[0]=='v']
 # ls=[k[1:] for k in vs]
 
 
-# sim=study.loadData('sim11')
-# l0 = graph.dataSets[11]['elemL']
-# elR = graph.dataSets[11]['elemR']
+# sim=study.load_simulation('sim11')
+# l0 = graph.datasets[11]['elemL']
+# elR = graph.datasets[11]['elemR']
 
 
 # %%
@@ -114,8 +114,8 @@ with plt.rc_context({
 
     axes[1].scatter(elR, l0, c=xc.colors.BASE, marker='.')
 
-    # xc.visualizers.engineerTicks(axes[0], 'm', 'V')
-    xc.visualizers.engineerTicks(axes[1], 'm', None)
+    # xc.visualizers.engineering_ticks(axes[0], 'm', 'V')
+    xc.visualizers.engineering_ticks(axes[1], 'm', None)
 
     for r, v, l in zip(rs, vs, titles):
 
@@ -132,4 +132,4 @@ with plt.rc_context({
     f.align_ylabels()
 
 
-# study.savePlot(f, 'FormulationErrorsDetail')
+# study.save_plot(f, 'FormulationErrorsDetail')

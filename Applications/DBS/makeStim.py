@@ -46,7 +46,7 @@ def getSignals(nMicro, step=None):
             if t >= (simDuration - 2e-2):
                 continue
             else:
-                chan.addPulse(t, pulseDur=stimPhase, pulseAmp=stimI)
+                chan.add_pulse(t, pulse_duration=stimPhase, pulse_amplitude=stimI)
 
         channels.append(chan)
 

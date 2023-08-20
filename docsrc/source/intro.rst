@@ -8,16 +8,9 @@ At present, the software is at an early alpha stage; some modifications may be n
 Installing
 ============
 
-To minimize the chance of compatibility issues, it's best to use the `Anaconda distribution. <https://docs.anaconda.com/free/anaconda/install/>`_
+To minimize the chance of compatibility issues (and take advantage of much faster installers), it's best to use the `Mambaforge  distribution <https://github.com/conda-forge/miniforge#mambaforge>`_ instead of a standard Anaconda distribution, though that should be possible as well. MacOS and Windows installations are not yet fully tested, but no further steps beyond this guide should be needed for Linux.
 
-In the directory where you download xcell, create an Anaconda environment by executing ::
-
-    conda env create -f xcell.yml
-
-For even faster installation, instead add Mamba to the base Anaconda environment with ::
-
-	conda install -c conda-forge mamba
-and create the environment with ::
+In the directory where you download xcell, create an environment by executing ::
 
 	conda env create -n xcell
 	mamba env update -n xcell --file xcell.yml

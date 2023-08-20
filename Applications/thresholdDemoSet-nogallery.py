@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Generate the full set of data for one neuron's threshold study
+Generate the full set of data for one neuron's thresholdold study
 """
 
 import os
@@ -15,7 +15,7 @@ x = 10000
 # celltype = 'ball'
 # x = 1000
 
-folder = '"tthreshold-%s"' % celltype
+folder = '"tthresholdold-%s"' % celltype
 
 ymax = 150
 

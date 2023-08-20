@@ -11,16 +11,16 @@ import sys
 
 sys.path.append('..')
 
-from Applications import Common
+from Applications import Common_nongallery
 import os
 
 here=os.path.dirname(os.path.realpath(__file__))
 
-study,setup=Common.makeSynthStudy(here)
+study,setup=Common_nongallery.makeSynthStudy(here)
 
-maxdepth=16
+max_depth=16
 
-Common.runAdaptation(setup,maxdepth=maxdepth)
+Common_nongallery.runAdaptation(setup,max_depth=max_depth)
 
 viz=xc.visualizers.SliceSet(None, study,
                                 prefs={
@@ -28,8 +28,8 @@ viz=xc.visualizers.SliceSet(None, study,
                                     'showInsets':False,
                                     'relativeError':False,
                                     'logScale':True,
-                                    'showNodes':True,
+                                    'show_nodes':True,
                                     'fullInterp':True})
 
-viz.addSimulationData(setup,append=True)
-viz.getArtists(0)
+viz.add_simulation_data(setup,append=True)
+viz.get_artists(0)

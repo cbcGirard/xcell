@@ -2,28 +2,24 @@
 # -*- coding: utf-8 -*-
 """
 LFP estimation with dynamic remeshing
-=============================
+===========================================
 
 Plot LFP from toy neurons
 
 """
 
+import xcell as xc
 from neuron import h  # , gui
 from neuron.units import ms, mV
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from matplotlib.animation import ArtistAnimation
-import xcell
 from tqdm import trange
 
-import Common
+import Common_nongallery
 import time
-import pickle
-import os
 
 from xcell import nrnutil as nUtil
-from matplotlib.lines import Line2D
 
 resultFolder = '/tmp'
 
@@ -33,36 +29,22 @@ h.CVode().use_fast_imem(1)
 
 mpl.style.use('fast')
 
-
 nRing = 5
 nSegs = 5
 
 dmax = 8
 dmin = 4
 
-# vids = False
-# post = False
 nskip = 4
 
-# Overrides for e.g. debugging in Spyder
-#args.vids=True
-# args.synth=False
-# args.folder='Quals/polyCell'
-#args.folder='Quals/monoCell'
-#args.strat='depth'
-#args.nSegs = 101
-# args.folder='tst'
-#args.nskip=1
-#args.nRing=0
+# %%
 
-#%%
-
-ring = Common.Ring(N=nRing, stim_delay=0, dendSegs=nSegs, r=175)
+ring = Common_nongallery.Ring(N=nRing, stim_delay=0, dendSegs=nSegs, r=175)
 tstop = 40
 tPerFrame = 5
-barRatio=[9,1]
+barRatio = [9, 1]
 
-ivecs, isSphere, coords, rads = nUtil.getNeuronGeometry()
+ivecs, is_sphere, coords, rads = nUtil.get_neuron_geometry()
 
 
 t = h.Vector().record(h._ref_t)
@@ -88,8 +70,8 @@ xmax = 2*np.max(np.concatenate(
     (np.max(coord, axis=0), np.min(coord, axis=0))
 ))
 
-#round up
-xmax=xcell.util.oneDigit(xmax)
+# round up
+xmax = xc.util.round_to_digit(xmax)
 if xmax <= 0 or np.isnan(xmax):
     xmax = 1e-4
 
@@ -97,20 +79,21 @@ if xmax <= 0 or np.isnan(xmax):
 lastNumEl = 0
 lastI = 0
 
-study, setup = Common.makeSynthStudy(resultFolder, xmax=xmax)
-setup.currentSources = []
-studyPath = study.studyPath
+study, setup = Common_nongallery.makeSynthStudy(resultFolder, xmax=xmax)
+setup.current_sources = []
+study_path = study.study_path
 
 dspan = dmax-dmin
 
 
-tdata=None
+tdata = None
 
-img = xcell.visualizers.SingleSlice(None, study,
+img = xc.visualizers.SingleSlice(None, study,
                                     tv, tdata=tdata)
 
 for r, c, v in zip(rads, coords, I[0]):
-    setup.addCurrentSource(v, c, r)
+    geo = xc.geometry.Sphere(center=c, radius = r)
+    setup.add_current_source(v, geometry = geo)
 
 tmax = tv.shape[0]
 errdicts = []
@@ -122,75 +105,72 @@ for ii in trange(0, tmax):
     tval = tv[ii]
     vScale = np.abs(analyticVmax[ii])/vPeak
 
-    setup.currentTime = tval
+    setup.current_time = tval
 
     changed = False
 
-
-    for jj in range(len(setup.currentSources)):
+    for jj in range(len(setup.current_sources)):
         ival = ivals[jj]
-        setup.currentSources[jj].value = ival
+        setup.current_sources[jj].value = ival
 
     # Depth strategy
     scale = dmin+dspan*vScale
     dint = np.rint(scale)
-    maxdepth = np.floor(scale).astype(int)
+    max_depth = np.floor(scale).astype(int)
 
     density = 0.2  # +0.2*dfrac
 
     metricCoef = 2**(-density*scale)
 
+    netScale = 2**(-max_depth*density)
 
-    netScale = 2**(-maxdepth*density)
-
-    changed = setup.makeAdaptiveGrid(
-        coord, maxdepth, xcell.generalMetric, coefs=metricCoef)
+    changed = setup.make_adaptive_grid(
+        coord, max_depth, xc.general_metric, coefs=metricCoef)
 
     if changed or ii == 0:
         setup.meshnum += 1
-        setup.finalizeMesh()
+        setup.finalize_mesh()
 
-        numEl = len(setup.mesh.elements)
+        n_elements = len(setup.mesh.elements)
 
-        setup.setBoundaryNodes()
+        setup.set_boundary_nodes()
 
-        v = setup.iterativeSolve()
-        lastNumEl = numEl
+        v = setup.solve()
+        lastNumEl = n_elements
         setup.iteration += 1
 
-        study.saveData(setup)  # ,baseName=str(setup.iteration))
-        print('%d source nodes' % sum(setup.nodeRoleTable == 2))
+        study.save_simulation(setup)  # ,baseName=str(setup.iteration))
+        print('%d source nodes' % sum(setup.node_role_table == 2))
     else:
         # TODO: why is reset needed?
-        setup.nodeRoleTable[setup.nodeRoleTable == 2] = 0
+        setup.node_role_table[setup.node_role_table == 2] = 0
 
-        v = setup.iterativeSolve()
+        v = setup.solve()
 
     dt = time.monotonic()-t0
 
     lastI = ival
 
-    study.newLogEntry(['Timestep', 'Meshnum'], [
-                      setup.currentTime, setup.meshnum])
+    study.log_current_simulation(['Timestep', 'Meshnum'], [
+                      setup.current_time, setup.meshnum])
 
-    setup.stepLogs = []
+    setup.step_logs = []
 
-    errdict = xcell.misc.getErrorEstimates(setup)
+    errdict = xc.misc.get_error_estimates(setup)
     errdict['densities'] = density
-    errdict['depths'] = maxdepth
+    errdict['depths'] = max_depth
     errdict['numels'] = lastNumEl
     errdict['dt'] = dt
     errdict['vMax'] = max(v)
     errdict['vMin'] = min(v)
     errdicts.append(errdict)
 
+    img.add_simulation_data(setup, append=True)
 
-    img.addSimulationData(setup, append=True)
-
-lists = xcell.misc.transposeDicts(errdicts)
+lists = xc.misc.transpose_dicts(errdicts)
 
 
-xcell.colors.useDarkStyle()
-nUtil.showCellGeo(img.axes[0])
+xc.colors.use_dark_style()
+nUtil.show_cell_geo(img.axes[0])
 
-ani=img.animateStudy('', fps=30)
+ani = img.animate_study('', fps=30)

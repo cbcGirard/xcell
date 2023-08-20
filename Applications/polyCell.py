@@ -7,23 +7,23 @@ LFP estimation
 Plot LFP from toy neurons
 
 """
+import xcell as xc
+from xcell import nrnutil as nUtil
 
 from neuron import h  # , gui
 from neuron.units import ms, mV
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from matplotlib.animation import ArtistAnimation
-import xcell
+
+
 from tqdm import trange
 
-import Common
+import Common_nongallery
 import time
 import pickle
 import os
 
-from xcell import nrnutil as nUtil
-from matplotlib.lines import Line2D
 
 import argparse
 
@@ -77,29 +77,29 @@ args.vids = True
 args.folder = 'Final/polyCell'
 # args.folder='Quals/monoCell'
 args.strat = 'depth'
-#args.nSegs = 101
+# args.nSegs = 101
 # args.folder='tst'
 # args.nskip=1
 # args.nRing=0
-xcell.colors.useLightStyle()
+xc.colors.use_light_style()
 
 # %%
 if args.strat == 'depthExt':
     dmax += 4
 
 if args.nRing == 0:
-    ring = Common.Ring(N=1, stim_delay=0, dendSegs=1, r=0)
+    ring = Common_nongallery.Ring(N=1, stim_delay=0, dendSegs=1, r=0)
     tstop = 12
     tPerFrame = 2
     barRatio = [4, 1]
 else:
-    ring = Common.Ring(N=args.nRing, stim_delay=0, dendSegs=args.nSegs, r=175)
+    ring = Common_nongallery.Ring(N=args.nRing, stim_delay=0, dendSegs=args.nSegs, r=175)
     tstop = 40
     tPerFrame = 5
     barRatio = [9, 1]
 
-coords, rads, isSphere = nUtil.getNeuronGeometry()
-ivecs = nUtil.getMembraneCurrents()
+coords, rads, is_sphere = nUtil.get_neuron_geometry()
+ivecs = nUtil.get_membrane_currents()
 
 if args.nRing == 0:
     ivecs.pop()
@@ -126,9 +126,9 @@ else:
     tv = np.array(t)*1e-3
     I = 1e-9*np.array(ivecs).transpose()
 
-whichPts = list(range(0, tv.shape[0], args.nskip))
-whichPts.append(tv.shape[0]-1)
-whichInds = np.array(whichPts)
+which_pts = list(range(0, tv.shape[0], args.nskip))
+which_pts.append(tv.shape[0]-1)
+whichInds = np.array(which_pts)
 
 I = I[whichInds]
 tv = tv[whichInds]
@@ -147,7 +147,7 @@ xmax = 2*np.max(np.concatenate(
 ))
 
 # round up
-xmax = xcell.util.oneDigit(xmax)
+xmax = xc.util.round_to_digit(xmax)
 if xmax <= 0 or np.isnan(xmax):
     xmax = 1e-4
 
@@ -157,9 +157,9 @@ lastNumEl = 0
 
 resultFolder = os.path.join(args.folder, args.strat)
 
-study, setup = Common.makeSynthStudy(resultFolder, xmax=xmax)
-setup.currentSources = []
-studyPath = study.studyPath
+study, setup = Common_nongallery.makeSynthStudy(resultFolder, xmax=xmax)
+setup.current_sources = []
+study_path = study.study_path
 
 dspan = dmax-dmin
 
@@ -176,10 +176,10 @@ else:
     tdata = None
 
 if args.vids:
-    img = xcell.visualizers.SingleSlice(None, study,
+    img = xc.visualizers.SingleSlice(None, study,
                                         tv, tdata=tdata)
 
-    err = xcell.visualizers.SingleSlice(None, study,
+    err = xc.visualizers.SingleSlice(None, study,
                                         tv, tdata=tdata)
     err.dataSrc = 'absErr'
     # err.dataSrc='vAna'
@@ -190,30 +190,31 @@ if args.vids:
     # animators = [img]
     # aniNames = ['volt-']
 
-    # animators=[xcell.visualizers.ErrorGraph(None, study)]
-    # animators.append(xcell.visualizers.LogError(None,study))
+    # animators=[xc.visualizers.ErrorGraph(None, study)]
+    # animators.append(xc.visualizers.LogError(None,study))
 
 iEffective = []
 for r, c, v in zip(rads, coords, I.transpose()):
-    signal = xcell.signals.PiecewiseSignal()
+    signal = xc.signals.PiecewiseSignal()
     signal.times = tv
     signal.values = v
-    setup.addCurrentSource(signal, c, r)
+    geo = xc.geometry.Sphere(c,r)
+    setup.add_current_source(signal, geo)
 
 tmax = tv.shape[0]
 errdicts = []
 
-polygons = nUtil.getCellImage()
+polygons = nUtil.get_cell_image()
 
 simDict = {'tv': tv,
            'I': I,
            'rads': rads,
            'coords': coords,
-           'isSphere': isSphere,
+           'is_sphere': is_sphere,
            'polygons': polygons,
            }
 pickle.dump(simDict, open(os.path.join(
-    os.path.dirname(studyPath), 'commonData.xstudy'), 'wb'))
+    os.path.dirname(study_path), 'commonData.xstudy'), 'wb'))
 
 
 # %%
@@ -226,15 +227,15 @@ for ii in stepper:
     tval = tv[ii]
     vScale = np.abs(analyticVmax[ii])/vPeak
 
-    setup.currentTime = tval
+    setup.current_time = tval
 
     changed = False
     # metrics=[]
 
-    # for jj in range(len(setup.currentSources)):
+    # for jj in range(len(setup.current_sources)):
     #     ival = ivals[jj]
-    #     setup.currentSources[jj].value = ival
-    setup.currentTime = tval
+    #     setup.current_sources[jj].value = ival
+    setup.current_time = tval
 
     if args.strat == 'k':
         # k-param strategy
@@ -246,8 +247,8 @@ for ii in stepper:
         scale = dmin+dspan*vScale
         # dint, dfrac = divmod(np.min(scale), 1)
         dint = np.rint(scale)
-        maxdepth = np.floor(scale).astype(int)
-        # print('depth:%d'%maxdepth)
+        max_depth = np.floor(scale).astype(int)
+        # print('depth:%d'%max_depth)
 
         # density=0.25
         if args.strat == 'd2':
@@ -262,68 +263,68 @@ for ii in stepper:
         # Static mesh
         density = 0.2
         if args.strat == 'fixedMax':
-            maxdepth = dmax*np.ones_like(vScale)
+            max_depth = dmax*np.ones_like(vScale)
             dmin = dmax
         elif args.strat == 'fixedMin':
-            maxdepth = dmin*np.ones_like(vScale)
+            max_depth = dmin*np.ones_like(vScale)
             dmax = dmin
         else:
-            maxdepth = 5
-        metricCoef = 2**(-maxdepth*density)
+            max_depth = 5
+        metricCoef = 2**(-max_depth*density)
 
-    netScale = 2**(-maxdepth*density)
+    netScale = 2**(-max_depth*density)
 
-    changed = setup.makeAdaptiveGrid(
-        coord, maxdepth, xcell.generalMetric, coefs=metricCoef)
+    changed = setup.make_adaptive_grid(
+        coord, max_depth, xc.general_metric, coefs=metricCoef)
 
     if changed or ii == 0:
         setup.meshnum += 1
-        setup.finalizeMesh()
+        setup.finalize_mesh()
 
-        numEl = len(setup.mesh.elements)
+        n_elements = len(setup.mesh.elements)
 
-        setup.setBoundaryNodes()
+        setup.set_boundary_nodes()
 
-        v = setup.iterativeSolve()
-        lastNumEl = numEl
+        v = setup.solve()
+        lastNumEl = n_elements
         setup.iteration += 1
 
-        study.saveData(setup)  # ,baseName=str(setup.iteration))
+        study.save_simulation(setup)  # ,baseName=str(setup.iteration))
         stepper.set_postfix_str('%d source nodes' %
-                                sum(setup.nodeRoleTable == 2))
+                                sum(setup.node_role_table == 2))
     else:
-        # vdof = setup.getDoFs()
-        # v=setup.iterativeSolve(vGuess=vdof)
+        # vdof = setup.get_voltage_at_dof()
+        # v=setup.solve(vGuess=vdof)
         # TODO: vguess slows things down?
 
-        setup.nodeRoleTable[setup.nodeRoleTable == 2] = 0
+        setup.node_role_table[setup.node_role_table == 2] = 0
 
-        v = setup.iterativeSolve()
+        v = setup.solve()
 
     dt = time.monotonic()-t0
 
-    study.newLogEntry(['Timestep', 'Meshnum'], [
-                      setup.currentTime, setup.meshnum])
+    study.log_current_simulation(['Timestep', 'Meshnum'], [
+                      setup.current_time, setup.meshnum])
 
-    setup.stepLogs = []
+    setup.step_logs = []
 
-    errdict = xcell.misc.getErrorEstimates(setup)
+    errdict = xc.misc.get_error_estimates(setup)
     errdict['densities'] = density
-    errdict['depths'] = maxdepth
+    errdict['depths'] = max_depth
     errdict['numels'] = lastNumEl
     errdict['dt'] = dt
     errdict['vMax'] = max(v)
     errdict['vMin'] = min(v)
     errdicts.append(errdict)
 
-    iEffective.append(setup.nodeISources)
+    iEffective.append(setup._node_current_sources)
 
     if args.vids:
-        [an.addSimulationData(setup, append=True) for an in animators]
-        # err.addSimulationData(setup,append=True)
-        # img.addSimulationData(setup, append=True)
+        [an.add_simulation_data(setup, append=True) for an in animators]
+        # err.add_simulation_data(setup,append=True)
+        # img.add_simulation_data(setup, append=True)
 
-lists = xcell.misc.transposeDicts(errdicts)
+lists = xc.misc.transpose_dicts(errdicts)
 
 if args.strat[:5] == 'fixed':
     if args.strat[5:] == 'Min':
@@ -337,11 +338,11 @@ else:
 
 lists['depths'] = depthStr
 
-# pickle.dump(lists, open(studyPath+'/'+args.strat+'.pcr', 'wb'))
+# pickle.dump(lists, open(study_path+'/'+args.strat+'.pcr', 'wb'))
 study.save(lists, args.strat)
 if args.vids:
     for ani, aniName in zip(animators, aniNames):
-        study.saveAnimation(ani, aniName)
+        study.save_animation(ani, aniName)
 
 # %%
 
@@ -349,23 +350,23 @@ if args.vids:
 
     # for lite in ['','-lite']:
     #     if lite=='':
-    #         xcell.colors.useLightStyle()
+    #         xc.colors.use_light_style()
     #     else:
-    #         xcell.colors.useDarkStyle()
-    #         anis=[an.animateStudy(l+args.strat,fps=30) for an,l in zip(animators, aniNames)]
+    #         xc.colors.use_dark_style()
+    #         anis=[an.animate_study(l+args.strat,fps=30) for an,l in zip(animators, aniNames)]
 
     for an, l in zip(animators, aniNames):
-        xcell.colors.useDarkStyle()
-        nUtil.showCellGeo(an.axes[0])
+        xc.colors.use_dark_style()
+        nUtil.show_cell_geo(an.axes[0])
 
-        if len(an.dataSets) == 0:
+        if len(an.datasets) == 0:
             # reload data
             an = study.load(l, ext='.adata')
 
         fname = l+args.strat
-        # an.animateStudy(fname, fps=30)
+        # an.animate_study(fname, fps=30)
 
-        xcell.colors.useLightStyle()
+        xc.colors.use_light_style()
 
         alite = an.copy({'colorbar': False,
                          'barRatio': barRatio,
@@ -377,23 +378,23 @@ if args.vids:
         alite.axes[0].set_xticks([])
         alite.axes[0].set_yticks([])
 
-        nUtil.showCellGeo(alite.axes[0])
+        nUtil.show_cell_geo(alite.axes[0])
 
         # get closest frames to 5ms intervals
-        frameNs = np.linspace(0, len(alite.dataSets)-1,
+        frameNs = np.linspace(0, len(alite.datasets)-1,
                               1+int(tstop/tPerFrame), dtype=int)
-        artists = [alite.getArtists(ii) for ii in frameNs]
-        alite.animateStudy(fname+'-lite', fps=30, artists=artists,
-                           vectorFrames=np.arange(len(frameNs)), unitStr='V')
+        artists = [alite.get_artists(ii) for ii in frameNs]
+        alite.animate_study(fname+'-lite', fps=30, artists=artists,
+                           vector_frames=np.arange(len(frameNs)), unitStr='V')
         alite.solobar(fname+'-lite')
 
-        # artists=[alite.getArtists(ii) for ii in frameNs]
-        # alite.animateStudy(fname+'-lite', fps=30, vectorFrames=frameNs, unitStr='V')
+        # artists=[alite.get_artists(ii) for ii in frameNs]
+        # alite.animate_study(fname+'-lite', fps=30, vector_frames=frameNs, unitStr='V')
 
 # %%
 if args.post:
-    folderstem = os.path.dirname(studyPath)
-    nuStudy, _ = Common.makeSynthStudy(folderstem)
+    folderstem = os.path.dirname(study_path)
+    nuStudy, _ = Common_nongallery.makeSynthStudy(folderstem)
 
     def getdata(strat):
         fname = os.path.join(folderstem, strat, strat+'.pcr')
@@ -417,9 +418,9 @@ if args.post:
 
         for lite in ['', '-lite']:
             if lite == '':
-                xcell.colors.useDarkStyle()
+                xc.colors.use_dark_style()
             else:
-                xcell.colors.useLightStyle()
+                xc.colors.use_light_style()
 
             f, ax = plt.subplots(3, gridspec_kw={'height_ratios': [5, 5, 2]},
                                  figsize=[3.25, 3.5])
@@ -437,7 +438,7 @@ if args.post:
             ax[2].set_xlabel('Simulated time')
             ax[2].set_xlim(0, tstop*1e-3)
 
-            xcell.visualizers.engineerTicks(ax[2], xunit='s')
+            xc.visualizers.engineering_ticks(ax[2], xunit='s')
             [a.set_xticks([]) for a in ax[:-1]]
             f.align_ylabels()
 
@@ -483,10 +484,10 @@ if args.post:
                 dtick = a.get_yticks()[1]
                 a.set_yticks(np.arange(ntick)*dtick)
 
-            study.savePlot(f2, os.path.join(
+            study.save_plot(f2, os.path.join(
                 folderstem, 'ring%dsummary%s' % (args.nRing, lite)))
 
-            study.savePlot(f, os.path.join(
+            study.save_plot(f, os.path.join(
                 folderstem, 'ring%dcomparison%s' % (args.nRing, lite)))
 
 

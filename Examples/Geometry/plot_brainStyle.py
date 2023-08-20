@@ -27,34 +27,34 @@ bbox = np.hstack((np.min(pts, axis=0),
 xmax = np.max(np.abs(bbox))*1.5
 
 mindepth = 2
-maxdepth = 10
+max_depth = 6
 
 setup = xcell.Simulation('brain', xmax*np.sign(bbox), True)
 
 # interpolate by bounds
-idealDepth = mindepth+(maxdepth-mindepth)*(pts[:, 2]-bbox[2])/(bbox[5]-bbox[2])
-metfun = xcell.generalMetric
+idealDepth = mindepth+(max_depth-mindepth)*(pts[:, 2]-bbox[2])/(bbox[5]-bbox[2])
+metfun = xcell.general_metric
 
-setup.makeAdaptiveGrid(refPts=pts, maxdepth=idealDepth.astype(
-    int), minl0Function=metfun, coefs=0.2*np.ones_like(idealDepth),
+setup.make_adaptive_grid(ref_pts=pts, max_depth=idealDepth.astype(
+    int), min_l0_function=metfun, coefs=0.2*np.ones_like(idealDepth),
     coarsen=False)
 
-setup.finalizeMesh()
+setup.finalize_mesh()
 
 # %%
-adj = setup.mesh.getElementAdjacencies()
+adj = setup.mesh.get_element_adjacencies()
 # reg = xcell.io.Regions()
 # stl.cell_data['sigma'] = 1.
 # reg['Conductors'].append(stl)
 
-# reg.assignSigma(setup.mesh, defaultSigma=0)
+# reg.assign_sigma(setup.mesh, default_sigma=0)
 
 # %% alt sigma calc
 
-xmesh = xcell.io.toVTK(setup.mesh)
+xmesh = xcell.io.to_vtk(setup.mesh)
 
 
-xmesh.save('xmesh%d%d.vtk' % (mindepth, maxdepth))
+xmesh.save('xmesh%d%d.vtk' % (mindepth, max_depth))
 inside = xmesh.cell_centers().select_enclosed_points(stl, tolerance=1e-9)
 
 
@@ -87,7 +87,7 @@ for ii in tqdm.trange(len(setup.mesh.elements), desc='Checking faces'):
                     else:
                         inds = el.vertices[quadorders[jj]]
 
-                    globalind = [setup.mesh.inverseIdxMap[idx] for idx in inds]
+                    globalind = [setup.mesh.inverse_index_map[idx] for idx in inds]
                     okfaces.append(globalind)
 
 
@@ -98,7 +98,7 @@ revNodes = {}
 for ii, n in enumerate(usedNodes):
     revNodes[n] = ii
 
-newpts = setup.mesh.nodeCoords[usedNodes]
+newpts = setup.mesh.node_coords[usedNodes]
 
 newFaces = np.array([revNodes[n]
                     for n in fc.ravel()]).reshape((fc.shape[0], 4))
@@ -119,7 +119,7 @@ qg.set_active_scalars('Area')
 # -------------------------------
 #
 
-fstem = 'xcell%d-%d' % (mindepth, maxdepth)
+fstem = 'xcell%d-%d' % (mindepth, max_depth)
 
 result = inside.threshold(
     value=0.5, scalars='SelectedPoints').extract_largest()
@@ -130,31 +130,36 @@ result.save(fstem+'.vtk')
 pv.save_meshio('quads.obj', qmesh)
 
 
+# %%
+# Generate animation
+# ------------------------------
+#
+
+# to generate from premeshed file
 # result = pv.read('xcell2-9.vtk')
 
-# thm = pv.themes.DarkTheme()
-# thm.background = pv.Color(xcell.colors.DARK, opacity=0)
-# offwhite = pv.Color(xcell.colors.OFFWHITE, opacity=1.)
+thm = pv.themes.DarkTheme()
+thm.background = pv.Color(xcell.colors.DARK, opacity=0)
+offwhite = pv.Color(xcell.colors.OFFWHITE, opacity=1.)
 
 
-# pv.set_plot_theme(thm)
+pv.set_plot_theme(thm)
 
-# p = pv.Plotter(off_screen=True)
-# p.add_mesh(stl, color='blue', opacity=0.75)
+p = pv.Plotter(off_screen=True)
+p.add_mesh(stl, color='blue', opacity=0.75)
 
-# viewup = [0.2, -1., 0.]
+viewup = [0.2, -1., 0.]
 
-# p.add_mesh(result, show_edges=False, color=offwhite)
+p.add_mesh(result, show_edges=False, color=offwhite)
 
-# p.enable_eye_dome_lighting()
+p.enable_eye_dome_lighting()
 
-# p.show(auto_close=False)
+p.show(auto_close=False)
 
-# # path = p.generate_orbital_path(factor=1.5, n_points=144, viewup=viewup, shift=-0.2)
-# path = p.generate_orbital_path(
-#     factor=1.5, n_points=32, viewup=viewup, shift=-0.2)
+path = p.generate_orbital_path(
+    factor=1.5, n_points=32, viewup=viewup, shift=-0.2)
 
-# p.open_movie("orbit.mp4")
+p.open_movie("orbit.mp4")
 
-# p.orbit_on_path(path, write_frames=True, viewup=viewup,
-#                 step=0.1, progress_bar=True)
+p.orbit_on_path(path, write_frames=True, viewup=viewup,
+                step=0.1, progress_bar=True)

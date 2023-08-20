@@ -42,6 +42,7 @@ extensions = [
 #   'sphinx.ext.autosummary',
 #   'sphinx_codeautolink',
   'sphinx_gallery.gen_gallery',
+  'sphinx.ext.intersphinx',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -104,3 +105,10 @@ sphinx_gallery_conf = {
 autoapi_type = 'python'
 autoapi_modules = {'xcell':None}
 autoapi_dirs = ['../../xcell', ]
+
+# external API doc links
+intersphinx_mapping = {
+    'pyvista': ('https://docs.pyvista.org/version/stable/', None),
+    'matplotlib': ('https://matplotlib.org/stable/index.html', None),
+}
+

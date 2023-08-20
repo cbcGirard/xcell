@@ -12,7 +12,7 @@ import xcell as xc
 import pickle
 import matplotlib.pyplot as plt
 import numpy as np
-import Common as com
+import Common_nongallery as com
 import os
 import matplotlib as mpl
 
@@ -34,22 +34,22 @@ class Composite(xc.visualizers.FigureAnimator):
 
         return ax
 
-    def setupFigure(self, resetBounds=False):
+    def setup_figure(self, resetBounds=False):
 
         ax = self.showAnalytic()
         self.axes.append(ax)
 
-        xc.visualizers.engineerTicks(ax, 'm', 'V')
+        xc.visualizers.engineering_ticks(ax, 'm', 'V')
 
         ax.set_ylim(bottom=1e-3, top=1e1)
         ax.set_ylabel('Voltage')
         ax.set_xlabel('Distance')
 
-    def getArtists(self, setnumber, data=None):
+    def get_artists(self, setnumberber, data=None):
         ax = self.axes[0]
 
         if data is None:
-            data = self.dataSets[setnumber]
+            data = self.datasets[setnumberber]
 
         titles = ['Admittance', 'Trilinear FEM', 'Mesh dual']
 
@@ -64,7 +64,7 @@ class Composite(xc.visualizers.FigureAnimator):
                                      label=title,
                                      alpha=0.75))
 
-        if setnumber == 0:
+        if setnumberber == 0:
             if 'keepLegend' in self.prefs:
                 ax.legend(loc='upper right')
             else:
@@ -74,7 +74,7 @@ class Composite(xc.visualizers.FigureAnimator):
 
 
 class ErrorComp(xc.visualizers.FigureAnimator):
-    def setupFigure(self, resetBounds=False):
+    def setup_figure(self, resetBounds=False):
         self.fig, self.axes = plt.subplots(2, 1, sharey=True, sharex=True)
         self.axes[0].set_title('Admittance')
         self.axes[1].set_title('Mesh dual')
@@ -84,11 +84,11 @@ class ErrorComp(xc.visualizers.FigureAnimator):
 
         self.axes[1].set_xlabel('Distance [m]')
 
-    def getArtists(self, setnumber, data=None):
+    def get_artists(self, setnumberber, data=None):
         ax = self.axes[0]
 
         if data is None:
-            data = self.dataSets[setnumber]
+            data = self.datasets[setnumberber]
 
         titles = ['Admittance', 'Mesh dual']
 
@@ -127,8 +127,8 @@ titles = ['Admittance', 'Trilinear FEM', 'Mesh dual']
 # titles = ['Octree', 'Uniform']
 
 study, _ = com.makeSynthStudy(folder)
-folder = study.studyPath
-xc.colors.useDarkStyle()
+folder = study.study_path
+xc.colors.use_dark_style()
 
 
 # %%
@@ -147,22 +147,22 @@ for form, title in zip(formulations, titles):
     graph = pickle.load(
         open(os.path.join(folder, 'ErrorGraph_'+form+'.adata'), 'rb'))
 
-    for ii, dat in enumerate(graph.dataSets):
+    for ii, dat in enumerate(graph.datasets):
         dnew = {'v'+title: dat['simV'],
                 'r'+title: dat['simR']}
-        if ii >= len(newGraph.dataSets):
-            newGraph.dataSets.append(dnew)
+        if ii >= len(newGraph.datasets):
+            newGraph.datasets.append(dnew)
         else:
-            newGraph.dataSets[ii].update(dnew)
+            newGraph.datasets[ii].update(dnew)
 
-    # graphdata=xc.misc.transposeDicts(graph.dataSets)
+    # graphdata=xc.misc.transpose_dicts(graph.datasets)
 
     # finalData['v'+title]=graphdata['simV']
     # finalData['r'+title]=graphdata['simR']
 
-newGraph.study.studyPath = os.getcwd()
+newGraph.study.study_path = os.getcwd()
 ax.set_ylabel('')
-newGraph.animateStudy('Composite2')  # ,artists = artists)
+newGraph.animate_study('Composite2')  # ,artists = artists)
 
 
 # %%
@@ -175,11 +175,11 @@ with plt.rc_context({'figure.figsize': [4, 4],
                      }):
     # g=newGraph.copy()
     g = Composite(plt.figure(), study)
-    g.study.studyPath = os.getcwd()
+    g.study.study_path = os.getcwd()
 
-    g.dataSets = newGraph.dataSets
+    g.datasets = newGraph.datasets
     g.prefs.update({'keepLegend': True})
-    g.animateStudy('Composite')
+    g.animate_study('Composite')
 
 
 # %% paired error graphs
@@ -190,27 +190,27 @@ with plt.rc_context({'figure.figsize': [4, 6],
                      }):
     # g=newGraph.copy()
     g = ErrorComp(None, study)
-    g.dataSets = newGraph.dataSets
-    g.axes[0].set_xlim(right=max(g.dataSets[0]['rAdmittance']))
-    g.animateStudy('ErrorAreas')
+    g.datasets = newGraph.datasets
+    g.axes[0].set_xlim(right=max(g.datasets[0]['rAdmittance']))
+    g.animate_study('ErrorAreas')
 
 
 # %%
-xc.colors.useLightStyle()
+xc.colors.use_light_style()
 frames = [2, 6, 10]
 
 f, axes = plt.subplots(3, 1, figsize=[6.5, 8], sharex=True)
-liteGraph = newGraph.copy(newFigure=f)
+liteGraph = newGraph.copy(new_figure=f)
 
 
 for ax, frame in zip(axes, frames):
     liteGraph.axes = [ax]
     liteGraph.showAnalytic(ax)
 
-    # liteGraph.getArtists(frame)
+    # liteGraph.get_artists(frame)
     for t in titles:
-        ax.loglog(liteGraph.dataSets[frame]['r'+t],
-                  liteGraph.dataSets[frame]['v'+t],
+        ax.loglog(liteGraph.datasets[frame]['r'+t],
+                  liteGraph.datasets[frame]['v'+t],
                   label=t)
 
     ax.set_ylabel('Potential [V]')
@@ -223,14 +223,14 @@ for ax, frame in zip(axes, frames):
         ax.set_xlabel('Distance [m]')
 
 
-study.savePlot(f, 'frames-lite')
+study.save_plot(f, 'frames-lite')
 
 
 # %% Summary graphs
-xc.colors.useLightStyle()
+xc.colors.use_light_style()
 
-logfile = study.studyPath+'/log.csv'
-df, cats = study.loadLogfile()
+logfile = study.study_path+'/log.csv'
+df, cats = study.load_logfile()
 
 # xaxes=['Number of elements','Total time [Wall]']
 # xaxes = ['Number of elements']
@@ -275,8 +275,8 @@ with mpl.rc_context({
     # f, axes = plt.subplots(2, 1, sharey=True)
     f, axes = plt.subplots()
 
-    xc.visualizers.groupedScatter(
-        logfile, xcat='Number of elements', ycat='Error', groupcat=group, ax=axes)
+    xc.visualizers.grouped_scatter(
+        logfile, x_category='Number of elements', y_category='Error', group_category=group, ax=axes)
     # ax.set_ylim(bottom=logfloor(ax.get_ylim()[0]))
 
     # loground(axes)
@@ -287,15 +287,15 @@ with mpl.rc_context({
     axes.legend(labels=titles)
     # axes.set_xlabel(l0string)
 
-# study.savePlot(f, 'Error_composite')
-study.savePlot(f, 'Error_composite-fullpage')
+# study.save_plot(f, 'Error_composite')
+study.save_plot(f, 'Error_composite-fullpage')
 
-# study.savePlot(f2, 'PerformanceSummary')
+# study.save_plot(f2, 'PerformanceSummary')
 
 
 # %% Computation time vs element size
 
-# xaxes=['Number of elements','l0min']
+# xaxes=['Number of elements','min_l0']
 xaxes = ['Number of elements', 'Error']
 
 
@@ -320,8 +320,8 @@ with mpl.rc_context({
 
     for ax, mtype, title in zip(axes, ['Admittance', 'FEM', 'Face'], titles):
         ax.set_title(title, fontsize=10)
-        xc.visualizers.importAndPlotTimes(
-            fname=logfile, timeType='Wall', ax=ax, xCat='Number of elements', onlyCat='Element type', onlyVal=mtype, hatch=hatches)
+        xc.visualizers.import_and_plot_times(
+            fname=logfile, time_type='Wall', ax=ax, x_category='Number of elements', only_category='Element type', only_value=mtype, hatch=hatches)
 
 [a.set_ylabel('') for a in axes[1:]]
 axes[0].set_xlim(left=0)
@@ -329,7 +329,7 @@ axes[0].set_xlim(left=0)
 
 
 xc.visualizers.outsideLegend(
-    axes[1], flipOrder=False, where='bottom', fontsize=8, ncol=2)
+    axes[1], reverse_order=False, where='bottom', fontsize=8, ncol=2)
 
 f.subplots_adjust(bottom=0.525, wspace=0.2)
 newLeg = [
@@ -343,4 +343,4 @@ newLeg = [
     'Solve system']
 [t.set_text(l) for t, l in zip(axes[1].legend_.get_texts(), newLeg)]
 
-study.savePlot(f, 'discretPerformanceStack')
+study.save_plot(f, 'discretPerformanceStack')

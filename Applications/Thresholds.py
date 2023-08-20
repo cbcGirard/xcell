@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Preliminary results for effect of mesh parameters on activation thresholds
+Preliminary results for effect of mesh parameters on activation thresholdolds
 """
 
 import xcell as xc
 import numpy as np
-import Common as com
+import Common_nongallery as com
 from neuron import h  # , gui
 import neuron.units as nUnit
 from xcell.signals import Signal
@@ -79,7 +79,7 @@ celltype = args.celltype
 # # tpulse=0.1
 stepViz = True
 # celltype = 'MRG'
-args.folder = 'Dark-threshold-%s' % celltype
+args.folder = 'Dark-thresholdold-%s' % celltype
 combineRuns = True
 # args.liteMode = True
 elecY = 150
@@ -125,12 +125,12 @@ class ThisSim(xc.nrnutil.ThresholdSim):
             amps.append(Signal(-1.))
 
             if viz is not None:
-                xc.visualizers.showSourceBoundary(viz.axes, rElec,
-                                                  srcCenter=elecB[:-1])
+                xc.visualizers.show_source_boundary(viz.axes, rElec,
+                                                  source_center=elecB[:-1])
 
         if viz is not None:
-            xc.visualizers.showSourceBoundary(viz.axes, rElec,
-                                              srcCenter=elecA[:-1])
+            xc.visualizers.show_source_boundary(viz.axes, rElec,
+                                              source_center=elecA[:-1])
 
         wire1 = xc.geometry.Disk(elecA,
                                  rElec,
@@ -140,26 +140,26 @@ class ThisSim(xc.nrnutil.ThresholdSim):
         amps.append(Signal(1.))
 
         super().__init__(name, xdom,
-                         srcAmps=amps,
-                         srcGeometry=geoms,
+                         source_amps=amps,
+                         source_geometry=geoms,
                          sigma=sigma)
 
-    def getAnalyticVals(self, coords):
-        anaVals = np.zeros(coords.shape[0])
-        for src in self.currentSources:
-            # anaVals += xc.util.diskCurrentV(coords,
-            # anaVals += xc.util.pointCurrentV(coords,
-            #                                  iSrc=src.value.getValueAtTime(0.),
+    def get_analytic_vals(self, coords):
+        analytic_values = np.zeros(coords.shape[0])
+        for src in self.current_sources:
+            # analytic_values += xc.util.disk_current_source_voltage(coords,
+            # analytic_values += xc.util.point_current_source_voltage(coords,
+            #                                  i_source=src.value.get_value_at_time(0.),
             #                                  sigma=self.sigma,
-            #                                  srcLoc=src.coords)
-            dists = src.geometry.getSignedDistance(coords)
-            k = src.value.getValueAtTime(0.)/(
+            #                                  source_location=src.coords)
+            dists = src.geometry.get_signed_distance(coords)
+            k = src.value.get_value_at_time(0.)/(
                 4*np.pi*self.sigma)
             vals = k/dists
             vals[dists < src.geometry.radius] = k/src.geometry.radius
-            anaVals += vals
+            analytic_values += vals
 
-        return anaVals
+        return analytic_values
 
 
 class ThisStudy(xc.nrnutil.ThresholdStudy):
@@ -170,7 +170,7 @@ class ThisStudy(xc.nrnutil.ThresholdStudy):
                          biphasic=biphasic,
                          viz=viz)
 
-    def _buildNeuron(self):
+    def _build_neuron(self):
         # h.load_file('stdrun.hoc')
 
         # cell = com.BallAndStick(1, -50., 0., 0., 0.)
@@ -191,13 +191,13 @@ class ThisStudy(xc.nrnutil.ThresholdStudy):
         else:
             cell = com.BallAndStick(1, -100, -self.yval, 0, 0)
 
-        self.segCoords = xc.nrnutil.makeInterface()
+        self.segment_coordinates = xc.nrnutil.make_interface()
 
         # optional visualization
         if self.viz is not None:
-            # viz.addSimulationData(setup,append=True)
-            self.cellImg = xc.nrnutil.showCellGeo(
-                self.viz.axes[0], showNodes=False)
+            # viz.add_simulation_data(setup,append=True)
+            self.cell_image = xc.nrnutil.show_cell_geo(
+                self.viz.axes[0], show_nodes=False)
 
         return cell
 
@@ -211,7 +211,7 @@ if analytic:
 if args.liteMode:
     xc.colors.useLightStyle()
 else:
-    xc.colors.useDarkStyle()
+    xc.colors.use_dark_style()
 
 
 study, _ = com.makeSynthStudy(os.path.join(
@@ -225,7 +225,7 @@ if stepViz:
                                       'showInsets': False,
                                       'relativeError': False,
                                       'logScale': True,
-                                      'showNodes': True,
+                                      'show_nodes': True,
                                       'fullInterp': True})
     resetBounds(viz.axes[0], xview)  # , yElec=elecY*1e-6)
 else:
@@ -240,23 +240,23 @@ if __name__ == '__main__':
 
     if analytic:
 
-        threshSet = []
+        thresholdSet = []
 
         sim = ThisSim('analytic', domX, elecY=elecY,
                       dualElectrode=pairStim,
                       sigma=Sigma, viz=viz)
         tst = ThisStudy(sim)
-        thresh = tst.getThreshold(None, analytic=analytic)
-        threshSet.append(thresh)
+        threshold = tst.get_threshold(None, analytic=analytic)
+        thresholdSet.append(threshold)
 
-        # print(thresh)
+        # print(threshold)
 
         _, ax = plt.subplots()
-        ax.plot(y, threshSet)
-        xc.visualizers.engineerTicks(ax, 'm', 'A')
+        ax.plot(y, thresholdSet)
+        xc.visualizers.engineering_ticks(ax, 'm', 'A')
 
     else:
-        threshSet = []
+        thresholdSet = []
         nElec = []
         nTot = []
         l0ratio = []
@@ -266,7 +266,7 @@ if __name__ == '__main__':
                       dualElectrode=pairStim, viz=viz,
                       sigma=Sigma)
         tmp = ThisStudy(sim, pulsedur=tpulse, yval=elecY, viz=viz)
-        threshAna, _, _ = tmp.getThreshold(0, analytic=True)
+        thresholdAna, _, _ = tmp.get_threshold(0, analytic=True)
         del tmp
 
         # depthvec = trange(3, 14, desc='Simulating')
@@ -293,8 +293,8 @@ if __name__ == '__main__':
                           viz=viz, sigma=Sigma)
             tst = ThisStudy(sim, viz=viz, yval=elecY)
 
-            t, nT, nE = tst.getThreshold(
-                d, pmin=0, pmax=threshAna*1e2, strict=True)
+            t, nT, nE = tst.get_threshold(
+                d, pmin=0, pmax=thresholdAna*1e2, strict=True)
             if np.isnan(t):
                 continue
 
@@ -302,36 +302,36 @@ if __name__ == '__main__':
             l0ratio.append(minl0/rElec)
 
             data = {}
-            data['threshold'] = t
-            data['nElec'] = nE/len(sim.currentSources)
+            data['thresholdold'] = t
+            data['nElec'] = nE/len(sim.current_sources)
             data['nTot'] = nT
             data['l0ratio'] = minl0/rElec
-            data['xcoords'] = tst.segCoords[:, 0].squeeze()
-            data['segV'] = tst.vExt
-            data['l0min'] = minl0
-            data['threshAna'] = threshAna
+            data['xcoords'] = tst.segment_coordinates[:, 0].squeeze()
+            data['segV'] = tst.v_external
+            data['min_l0'] = minl0
+            data['thresholdAna'] = thresholdAna
 
             dataset.append(data)
 
-            xstepper.set_postfix_str('threshold: %.1g' % t)
+            xstepper.set_postfix_str('thresholdold: %.1g' % t)
 
             del tst
 
-            threshSet.append(t)
-            nElec.append(nE/len(sim.currentSources))
+            thresholdSet.append(t)
+            nElec.append(nE/len(sim.current_sources))
             nTot.append(nT)
 
             if nE > 5e3:
                 break
 
-        dataVecs = xc.misc.transposeDicts(dataset)
+        dataVecs = xc.misc.transpose_dicts(dataset)
 
         f, ax = plt.subplots()
-        # simline, = ax.semilogx(nElec, threshSet,
-        # simline, = ax.semilogx(l0ratio, threshSet,
+        # simline, = ax.semilogx(nElec, thresholdSet,
+        # simline, = ax.semilogx(l0ratio, thresholdSet,
         #                        marker='o', label='Simulated')
         simline, = ax.semilogx(dataVecs['l0ratio'],
-                               dataVecs['threshold'],
+                               dataVecs['thresholdold'],
                                marker='o', label='Simulated')
         # ax.set_xlabel('Source nodes')
         ax.set_xlabel(r'$\ell_0/r_{elec}$')
@@ -340,21 +340,21 @@ if __name__ == '__main__':
         ax.set_ylabel('Threshold')
         ax.yaxis.set_major_formatter(xc.visualizers.eform('A'))
 
-        ax.hlines(threshAna,
+        ax.hlines(thresholdAna,
                   # 1, np.nanmax(nElec),
                   l0ratio[0], l0ratio[-1],
                   label='Analytic value', linestyles=':',
                   colors=simline.get_color())
         ax.legend()
 
-        ax.set_title(r'Activation threshold for %.1f ms %sphasic pulse %d $\mu m$ away' % (
+        ax.set_title(r'Activation thresholdold for %.1f ms %sphasic pulse %d $\mu m$ away' % (
             tpulse, stimStr, elecY))
 
         # voltage field
         f2, axes2 = plt.subplots(nrows=2, sharex=True, layout='constrained')
         # [a.set_yscale('log') for a in axes2]
         axes2[0].set_ylabel('Extracellular V @ 1A')
-        axes2[1].set_ylabel('Extracellular V @ threshold')
+        axes2[1].set_ylabel('Extracellular V @ thresholdold')
         axes2[1].xaxis.set_major_formatter(xc.visualizers.eform('m'))
 
         nsims = len(dataset)
@@ -366,7 +366,7 @@ if __name__ == '__main__':
         for ii in range(nsims):
             dat = dataset[ii]
 
-            yvals = [dat['segV'], dat['threshold']*dat['segV']]
+            yvals = [dat['segV'], dat['thresholdold']*dat['segV']]
             for a, y in zip(axes2, yvals):
                 a.plot(dat['xcoords'],
                        y,
@@ -376,8 +376,8 @@ if __name__ == '__main__':
 
         # cnorm = plt.Normalize(#vmin=0,
         cnorm = LogNorm(
-            vmin=dataVecs['l0min'][-1],
-            vmax=dataVecs['l0min'][0])
+            vmin=dataVecs['min_l0'][-1],
+            vmax=dataVecs['min_l0'][0])
         cb = f2.colorbar(plt.cm.ScalarMappable(cmap=cmap,
                                                norm=cnorm),
                          ax=axes2,
@@ -388,22 +388,22 @@ if __name__ == '__main__':
 
         if save:
             # dset = {'nElec': nElec, 'nTot': nTot,
-            # 'thresh': threshSet, 'threshAna': threshAna}
-            fstub = study.studyPath+'/'
+            # 'threshold': thresholdSet, 'thresholdAna': thresholdAna}
+            fstub = study.study_path+'/'
             # pickle.dump(dset,
             pickle.dump(dataVecs,
                         open(fstub+'res.dat', 'wb'))
             aniName = fstub+'steps'
 
-            study.savePlot(f, 'thresh')
+            study.save_plot(f, 'threshold')
 
-            study.savePlot(f2, 'vext')
+            study.save_plot(f2, 'vext')
 
         else:
             aniName = None
 
         if stepViz:
-            ani = viz.animateStudy(aniName)
+            ani = viz.animate_study(aniName)
 
 # %%
     if combineRuns:
@@ -415,7 +415,7 @@ if __name__ == '__main__':
             'figure.figsize': [6.4, 3.6]
         }):
             # import os
-            bpath, _ = os.path.split(study.studyPath)
+            bpath, _ = os.path.split(study.study_path)
             subs = os.listdir(bpath)
             folders = [f for f in subs
                        if os.path.isdir(os.path.join(bpath, f))]
@@ -446,13 +446,13 @@ if __name__ == '__main__':
                     d['l0ratio'],
                     # simline, = ax.loglog(
                     # d['nElec'],
-                    d['threshold'],
+                    d['thresholdold'],
                     marker='o', linestyle='-',
                     # label=r'$%s \mu m$, simulated' % y)
                     label=r'$%s \mu m$' % y)
 
                 s2, = a2.loglog(d['l0ratio'],
-                                np.array(d['threshold'])/d['threshAna'][0],
+                                np.array(d['thresholdold'])/d['thresholdAna'][0],
                                 marker='o', linestyle='-',
                                 label=r'$%s \mu m$' % y)
 
@@ -460,7 +460,7 @@ if __name__ == '__main__':
             xc.visualizers.outsideLegend(a2)
 
             ax.set_title(
-                r'Activation threshold for %.1f ms biphasic pulse' % tpulse)
+                r'Activation thresholdold for %.1f ms biphasic pulse' % tpulse)
             a2.set_title('Threshold ratios ')
             t0, t1 = a2.get_ylim()
             a2.set_ylim(10**np.floor(np.log10(t0)),
@@ -476,6 +476,6 @@ if __name__ == '__main__':
 
             ax.set_ylim(ymin, ymax)
 
-            study.studyPath = bpath
-            study.savePlot(f, 'composite')
-            study.savePlot(f2, 'analyticComp')
+            study.study_path = bpath
+            study.save_plot(f, 'composite')
+            study.save_plot(f2, 'analyticComp')

@@ -22,10 +22,10 @@ def showBound(obj):
 
 
 
-    isin=obj.isInside(pts)
+    isin=obj.is_inside(pts)
 
     ax=viz.new3dPlot()
-    viz.showNodes3d(ax, pts, isin.astype(int), cMap=cmap,cNorm=mpl.colors.Normalize())
+    viz.show_3d_nodes(ax, pts, isin.astype(int), colormap=cmap,color_norm=mpl.colors.Normalize())
 
 
 
@@ -49,16 +49,16 @@ disk=geo.Disk(origin,radius,axis,0.1)
 
 
 # Show cylinder
-ptCat=cyl.isInside(pts).astype(int)
-ptCat+=disk.isInside(pts)
+ptCat=cyl.is_inside(pts).astype(int)
+ptCat+=disk.is_inside(pts)
 
 
 cmap=mpl.colors.ListedColormap([viz.NULL,viz.BASE+'10','C0'])
 
 ax=viz.new3dPlot()
 
-viz.showNodes3d(ax, pts, ptCat,
-                cMap=cmap, cNorm=mpl.colors.Normalize())
+viz.show_3d_nodes(ax, pts, ptCat,
+                colormap=cmap, color_norm=mpl.colors.Normalize())
 
 ax.grid(False)
 [ax.spines[k].set_visible(False) for k in ax.spines]

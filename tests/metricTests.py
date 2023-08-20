@@ -11,7 +11,7 @@ import xCell
 import matplotlib.pyplot as plt
 
 
-maxdepth=8
+max_depth=8
 xmax=1e-4
 bbox=xmax*np.concatenate(((-np.ones(3),np.ones(3))))
 
@@ -21,9 +21,9 @@ sim=xCell.Simulation('',bbox)
 elnums=[]
 kvals=np.linspace(0,1)
 for k in kvals:
-    metric=xCell.makeExplicitLinearMetric(maxdepth, k)
-    sim.makeAdaptiveGrid(metric, maxdepth)
-    numel=len(sim.mesh.tree.getTerminalOctants())
+    metric=xCell.makeExplicitLinearMetric(max_depth, k)
+    sim.make_adaptive_grid(metric, max_depth)
+    numel=len(sim.mesh.tree.get_terminal_octants())
     
     elnums.append(numel)
     

@@ -8,7 +8,7 @@ Compare performance as mesh resolution increases. Generates ch3-4 data.
 """
 
 import xcell
-import Common
+import Common_nongallery
 import matplotlib.pyplot as plt
 import argparse
 import numpy as np
@@ -60,7 +60,7 @@ if args.comparison == 'bigPOC':
 
 if args.comparison == 'fixedDisc':
     foldername = 'Quals/fixedDisc'
-    xtraParams = {'BoundaryFunction': 'Analytic'}
+    xtraParams = {'boundary_functionction': 'Analytic'}
 
 
 # if args.comparison=='voltage':
@@ -85,11 +85,11 @@ plotPrefs = [
 ]
 
 
-study, _ = Common.makeSynthStudy(foldername, xmax=xmax)
+study, _ = Common_nongallery.makeSynthStudy(foldername, xmax=xmax)
 # %%
 
 if generate and not args.plot_only:
-    Common.pairedDepthSweep(study,
+    Common_nongallery.pairedDepthSweep(study,
                             depthRange=depths,
                             testCat=tstCat,
                             testVals=tstVals,
@@ -99,31 +99,32 @@ if generate and not args.plot_only:
 
 costcat = 'Error'
 # costcat='FVU'
-# xcat='l0min'
+# x_category='l0min'
 
 xvalues = ['Number of elements', 'l0min', 'Total time [Wall]']
 xtags = ['numel', 'l0', 'totTime']
 if staticPlots:
-    for xcat, xtag in zip(xvalues, xtags):
+    for x_category, xtag in zip(xvalues, xtags):
 
-        xcell.visualizers.groupedScatter(study.studyPath+'/log.csv',
-                                         xcat=xcat,
-                                         ycat=costcat,
-                                         groupcat=tstCat)
+        xcell.visualizers.grouped_scatter(study.study_path+'/log.csv',
+                                         x_category=x_category,
+                                         y_category=costcat,
+                                         group_category=tstCat)
         fname = tstCat+"_"+costcat+'-vs-'+xtag
         fname.replace(' ', '_')
         nufig = plt.gcf()
-        study.savePlot(nufig, fname)
+        study.save_plot(nufig, fname)
         for fv in tstVals:
 
-            fstack, fratio = xcell.visualizers.plotStudyPerformance(study,
-                                                                    onlyCat=tstCat,
-                                                                    onlyVal=fv)
+            fstack, fratio = xcell.visualizers.plot_study_performance(study,
+                                                                      plot_ratios = True,
+                                                                    only_category=tstCat,
+                                                                    only_value=fv)
             fstem = '_'+tstCat+str(fv)
 
-            study.savePlot(fstack, 'Performance'+fstem)
+            study.save_plot(fstack, 'Performance'+fstem)
 
-            study.savePlot(fratio, 'Ratio'+fstem)
+            study.save_plot(fratio, 'Ratio'+fstem)
 
 
 # %%
@@ -144,17 +145,17 @@ for ii, p in enumerate(plotters):
             if plotr.prefs['onlyDoF']:
                 fname += '-detail'
 
-        plotr.getStudyData(filterCategories=[tstCat],
-                           filterVals=[fv])
+        plotr.get_study_data(filter_categories=[tstCat],
+                           filter_values=[fv])
 
         plots.append(plotr)
         names.append(fname)
 
         if ranges is not None:
-            plotr.unifyScales(ranges)
-        ranges = plotr.dataScales
+            plotr.unify_scales(ranges)
+        ranges = plotr.data_scales
 
     for plot, name in zip(plots, names):
-        plot.dataScales = ranges
+        plot.data_scales = ranges
 
-        plot.animateStudy(fname=name, fps=1.0)
+        plot.animate_study(fname=name, fps=1.0)

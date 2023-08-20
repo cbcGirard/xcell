@@ -4,23 +4,34 @@
 
 import numpy as np
 import numba as nb
-from numba import int64, float64
+from numba import float64
 import pyvista as pv
-from .visualizers import PVScene
 
-from vtk import VTK_POLYGON
 
 
 @nb.experimental.jitclass([
     ('center', float64[::1]),
     ('radius', float64)
-])
+]) # type: ignore
 class Sphere:
     def __init__(self, center, radius):
         self.center = center
         self.radius = radius
 
-    def isInside(self, coords):
+    def is_inside(self, coords):
+        """
+        Determine which points are inside the region.
+
+        Parameters
+        ----------
+        coords : float[:,3]
+            Cartesian coordinates of points to test.
+
+        Returns
+        -------
+        bool[:]
+            Boolean array of points inside region.
+        """        
         N = coords.shape[0]
         isIn = np.empty(N, dtype=np.bool_)
         for ii in nb.prange(N):
@@ -29,22 +40,22 @@ class Sphere:
 
         return isIn
 
-    def getSignedDistance(self, coords):
+    def get_signed_distance(self, coords):
         N = coords.shape[0]
-        dist = np.empty(N, dtype=np.float)
+        dist = np.empty(N, dtype=np.float64)
         for ii in nb.prange(N):
             c = coords[ii]
-            isIn[ii] = np.linalg.norm(c-self.center) - self.radius
+            dist[ii] = np.linalg.norm(c-self.center) - self.radius
 
         return dist
 
 
-@nb.experimental.jitclass([
+@nb.experimental.jitclass(spec=[
     ('center', float64[::1]),
     ('radius', float64),
     ('axis', float64[::1]),
     ('tol', float64)
-])
+]) # type: ignore
 class Disk:
     def __init__(self, center, radius, axis, tol=1e-2):
         self.center = center
@@ -52,7 +63,20 @@ class Disk:
         self.axis = axis/np.linalg.norm(axis)
         self.tol = tol
 
-    def isInside(self, coords):
+    def is_inside(self, coords):
+        """
+        Determine which points are inside the region.
+
+        Parameters
+        ----------
+        coords : float[:,3]
+            Cartesian coordinates of points to test.
+
+        Returns
+        -------
+        bool[:]
+            Boolean array of points inside region.
+        """        
         N = coords.shape[0]
         isIn = np.empty(N, dtype=np.bool_)
 
@@ -68,9 +92,9 @@ class Disk:
         return isIn
 
 # todo: check math
-    def getSignedDistance(self, coords):
+    def get_signed_distance(self, coords):
         N = coords.shape[0]
-        signedDist = np.empty(N, dtype=np.float)
+        signedDist = np.empty(N, dtype=np.float64)
 
         delta = coords-self.center
         deviation = np.dot(delta, self.axis)
@@ -99,7 +123,7 @@ class Disk:
     ('radius', float64),
     ('length', float64),
     ('axis', float64[::1])
-])
+]) # type: ignore
 class Cylinder:
     def __init__(self, center, radius, length, axis):
         self.center = center
@@ -107,7 +131,20 @@ class Cylinder:
         self.length = length
         self.axis = axis/np.linalg.norm(axis)
 
-    def isInside(self, coords):
+    def is_inside(self, coords):
+        """
+        Determine which points are inside the region.
+
+        Parameters
+        ----------
+        coords : float[:,3]
+            Cartesian coordinates of points to test.
+
+        Returns
+        -------
+        bool[:]
+            Boolean array of points inside region.
+        """        
         N = coords.shape[0]
         isIn = np.empty(N, dtype=np.bool_)
 
@@ -125,7 +162,22 @@ class Cylinder:
 
 
 @nb.njit()
-def isInBBox(bbox, point):
+def is_in_bbox(bbox, point):
+    """
+    Determine whether point is within bounding box.
+
+    Parameters
+    ----------
+    bbox : float[:]
+        Bounding box in order (-x, -y, -z, x, y, z)
+    point : float[3]
+        Cartesian coordinate of point to check
+
+    Returns
+    -------
+    bool
+        Whether point is contained in bounding box
+    """    
     gt = np.greater_equal(point, bbox[:3])
     lt = np.less_equal(point, bbox[3:])
 
@@ -133,7 +185,20 @@ def isInBBox(bbox, point):
 
 
 @nb.njit()
-def avgPoints(pts):
+def _avg_points(pts):
+    """
+    Get point at average of x,y,z from each supplied point.
+
+    Parameters
+    ----------
+    pts : float[:,3]
+        Cartesian coordinates
+
+    Returns
+    -------
+    float[:,3]
+        Center of points.
+    """    
     center = np.zeros(3)
 
     for ii in nb.prange(pts.shape[0]):
@@ -145,7 +210,7 @@ def avgPoints(pts):
 
 
 @nb.njit()
-def calcTriNormals(pts, surf):
+def _calc_tri_normals(pts, surf):
     ntris = surf.shape[0]
     norms = np.empty((ntris, 3))
 
@@ -161,17 +226,32 @@ def calcTriNormals(pts, surf):
 
 
 # @nb.njit()
-def fixTriNormals(pts, surf):
-    norms = calcTriNormals(pts, surf)
+def fix_tri_normals(pts, surf):
+    """
+    Experimental: try to orient all surface triangles outward.
+
+    Parameters
+    ----------
+    pts : float[:,3]
+        List of all vertices in surface mesh.
+    surf : int[:,3]
+        Indices of triangles' vertices
+
+    Returns
+    -------
+    int[:,3]
+        Indices of triangles' vertices, flipped as needed to orient outward.
+    """    
+    norms = _calc_tri_normals(pts, surf)
 
     uniqueInds = np.unique(surf.ravel())
-    ctr = avgPoints(pts[uniqueInds])
+    ctr = _avg_points(pts[uniqueInds])
 
     fixedSurf = np.empty_like(surf)
     ntri = surf.shape[0]
 
     for ii in nb.prange(ntri):
-        triCtr = avgPoints(pts[surf[ii], :])
+        triCtr = _avg_points(pts[surf[ii], :])
         ok = np.dot(norms[ii, :], triCtr-ctr) > 0
 
         if ok:
@@ -182,7 +262,7 @@ def fixTriNormals(pts, surf):
     return fixedSurf
 
 
-def toPV(geometry, **kwargs):
+def to_pyvista(geometry, **kwargs):
     """
     Hackishly convert xcell geometry to PyVista representation.
 
@@ -199,8 +279,7 @@ def toPV(geometry, **kwargs):
         Geometry as a PyVista mesh for visualization.
 
     """
-    t = str(type(geometry))
-    tstring = t.split('.')[-1].split('\'')[0]
+    tstring = _get_geometry_shape(geometry)
     if tstring == 'Cylinder':
         rawmesh = pv.Cylinder(
             radius=geometry.radius,
@@ -242,3 +321,9 @@ def toPV(geometry, **kwargs):
                        **kwargs)
 
     return mesh
+
+def _get_geometry_shape(geometry):
+    t = str(type(geometry))
+    tstring = t.split('.')[-1].split('\'')[0]
+    
+    return tstring

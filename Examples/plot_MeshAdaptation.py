@@ -8,17 +8,18 @@ Illustrates how adaptation parameters affect the generated mesh
 
 """
 
-import Common
+import Common_nongallery
 import numpy as np
-import xcell
+import xcell as xc
 import matplotlib.pyplot as plt
 
-# swept='density'
-# swept = 'depth'
 dmin = 2
 dmax = 6
 
-study, setup = Common.makeSynthStudy('adaptationDemos')
+#keep animations in list so they show up in Sphix gallery
+animations=[]
+
+study, setup = Common_nongallery.makeSynthStudy('adaptationDemos')
 plotprefs={'colorbar':False,
            'barRatio':[7,1],
            'labelAxes':False}
@@ -49,34 +50,26 @@ for swept in ['density','depth']:
             'figure.dpi':144
             }):
 
-        img = xcell.visualizers.SingleSlice(None, study, timevec=tvec, tdata=tdata, prefs=plotprefs)
-        # aa=img.axes[0]
-        # aa.set_xticks([])
-        # aa.set_yticks([])
+        img = xc.visualizers.SingleSlice(None, study, timevec=tvec, tdata=tdata, prefs=plotprefs)
         img.axes[2].set_xticks([])
-
-        # data={
-        #       'mesh':[],
-        #       'depth':[],
-        #       'density':[]}
 
         lastdepth = -1
         for val in vrange:
 
             if swept == 'density':
                 density = val
-                maxdepth = dmax
+                max_depth = dmax
             elif swept == 'depth':
-                maxdepth = val
+                max_depth = val
                 density = .2
 
-            metric = xcell.generalMetric
+            metric = xc.general_metric
 
-            setup.makeAdaptiveGrid(np.zeros((1, 3)),  maxdepth=np.array(maxdepth,ndmin=1), minl0Function=metric,  coefs=np.ones(1)*2**(-maxdepth*density))
-            setup.finalizeMesh()
+            setup.make_adaptive_grid(np.zeros((1, 3)),  max_depth=np.array(max_depth,ndmin=1), min_l0_function=metric,  coefs=np.ones(1)*2**(-max_depth*density))
+            setup.finalize_mesh()
 
-            img.addSimulationData(setup, append=True)
+            img.add_simulation_data(setup, append=True)
 
 
-        ani = img.animateStudy(fname=swept, fps=5.)
+        animations.append(img.animate_study(fname=swept, fps=5.))
 # sphinx_gallery_thumbnail_number = 2

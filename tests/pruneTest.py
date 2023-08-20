@@ -14,18 +14,18 @@ xmax=1e-4
 bbox=xmax*np.concatenate((-np.ones(3),np.ones(3)))
 
 setup=xCell.Simulation('', bbox)
-maxdepth=5
+max_depth=5
 
-metric=xCell.makeExplicitLinearMetric(maxdepth, 1)
+metric=xCell.makeExplicitLinearMetric(max_depth, 1)
 
-setup.makeAdaptiveGrid(metric, maxdepth)
+setup.make_adaptive_grid(metric, max_depth)
 
-setup.finalizeMesh()
+setup.finalize_mesh()
 
 
 
-metric=xCell.makeExplicitLinearMetric(maxdepth, .2)
+metric=xCell.makeExplicitLinearMetric(max_depth, .2)
 
-setup.makeAdaptiveGrid(metric, maxdepth)
+setup.make_adaptive_grid(metric, max_depth)
 
-setup.finalizeMesh()
+setup.finalize_mesh()

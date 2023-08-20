@@ -7,7 +7,7 @@ DBS Electrode
 Programmatically generate micro-macro electrode array
 """
 # %%
-import xcell
+import xcell as xc
 import numpy as np
 from scipy.spatial.transform import Rotation
 import pyvista as pv
@@ -16,7 +16,7 @@ import pickle
 from matplotlib.colors import to_rgba_array
 
 composite = pv.MultiBlock()
-regions = xcell.io.Regions()
+regions = xc.io.Regions()
 
 # bodies, misc, oriens, and hilus
 sigmas = 1/np.array([6.429,
@@ -72,16 +72,18 @@ xdom = pitchMacro*(nmacro+1)
 bbox = xdom * np.concatenate((-np.ones(3), np.ones(3)))
 
 # set smallest element to microelectrode radius or smaller
-maxdepth = int(np.log2(xdom / dmicro)) + 2
+max_depth = int(np.log2(xdom / dmicro)) + 2
 
-sim = xcell.Simulation('test', bbox=bbox)
+sim = xc.Simulation('test', bbox=bbox)
 
 
-body = xcell.geometry.Cylinder(
-    tipPt+bodyL*orientation/2, radius=dbody/2, length=bodyL, axis=orientation)
+body = xc.geometry.Cylinder(tipPt+bodyL*orientation/2, 
+                            radius=dbody/2, 
+                            length=bodyL, 
+                            axis=orientation)
 
 # bugfix to force detection of points inside cylindrical body
-bodyMesh = xcell.geometry.toPV(body)
+bodyMesh = xc.geometry.to_pyvista(body)
 regions.addMesh(bodyMesh, category='Insulators')
 
 # bodyMesh = pv.Cylinder(center=body.center,
@@ -93,24 +95,23 @@ macroElectrodes = []
 microElectrodes = []
 elecMeshes = []
 
-refPts = []
+ref_pts = []
 refSizes = []
 
 # Generate macroelectrodes (bands)
 for ii in range(nmacro):
     pt = tipPt+(ii+1)*pitchMacro*orientation
 
-    geo = xcell.geometry.Cylinder(pt, dbody/2, wmacro, orientation)
+    geo = xc.geometry.Cylinder(pt, dbody/2, wmacro, orientation)
 
-    sim.addCurrentSource(xcell.signals.Signal(0),
-                         coords=pt,
+    sim.add_current_source(xc.signals.Signal(0),
                          geometry=geo)
 
     macroElectrodes.append(geo)
 
-    refPts.append(geo.center)
+    ref_pts.append(geo.center)
 
-    regions.addMesh(xcell.geometry.toPV(geo), category='Electrodes')
+    regions.addMesh(xc.geometry.to_pyvista(geo), category='Electrodes')
 
 
 # Generate microelectrodes
@@ -122,48 +123,47 @@ for ii in range(microRows):
 
         microOrientation = rot.apply(0.5*dbody*np.array([0., 0., 1.]))
 
-        geo = xcell.geometry.Disk(
+        geo = xc.geometry.Disk(
             center=rowpt+microOrientation,
             radius=dmicro/2, axis=microOrientation,
             tol=0.5)
 
-        sim.addCurrentSource(xcell.signals.Signal(0), coords=geo.center,
-                             geometry=geo)
+        sim.add_current_source(xc.signals.Signal(0), geometry=geo)
 
         microElectrodes.append(geo)
 
-        refPts.append(geo.center)
-        regions.addMesh(xcell.geometry.toPV(geo), category='Electrodes')
+        ref_pts.append(geo.center)
+        regions.addMesh(xc.geometry.to_pyvista(geo), category='Electrodes')
 
-p = xcell.visualizers.PVScene()
+p = xc.visualizers.PVScene()
 p.setup(regions, opacity=0.5)
 p.show()
 
 
 # %% Map back to elements and simulate pulse
-sim.quickAdaptiveGrid(maxdepth)
+sim.quick_adaptive_grid(max_depth)
 
-vmesh = xcell.io.toVTK(sim.mesh)
+vmesh = xc.io.to_vtk(sim.mesh)
 vmesh.cell_data['sigma'] = sigma_0
 
-regions.assignSigma(sim.mesh, defaultSigma=sigma_0)
+regions.assign_sigma(sim.mesh, default_sigma=sigma_0)
 
-sim.currentSources[nmacro+1].value.value = 150e-6
+sim.current_sources[nmacro+1].value.value = 150e-6
 
 
-sim.setBoundaryNodes()
-v = sim.iterativeSolve()
+sim.set_boundary_nodes()
+v = sim.solve()
 vmesh.point_data['voltage'] = v
 
 vmesh.set_active_scalars('voltage')
 
 # %% Plot and save
 
-p = xcell.visualizers.PVScene()
+p = xc.visualizers.PVScene()
 p.setup(regions)  # , mesh=vmesh, simData='voltage')
 # p.camera.tight(padding=0.1)
 p.add_mesh(vmesh.slice(normal='z'), show_edges=True,
-           cmap=xcell.colors.CM_BIPOLAR)
+           cmap=xc.colors.CM_BIPOLAR)
 cambox = np.array(hippo.bounds)
 cambox[4:] = 0.
 # p.reset_camera(bounds=cambox)

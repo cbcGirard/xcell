@@ -50,9 +50,9 @@ amplitude = False
 preview = False
 
 if liteMode:
-    xc.colors.useLightStyle()
+    xc.colors.use_light_style()
 else:
-    xc.colors.useDarkStyle()
+    xc.colors.use_dark_style()
 
 fontsize = 24
 pv.global_theme.font.size = fontsize
@@ -102,9 +102,9 @@ fstem = 'full-d%dx%d' % (Depth, int(Coef*10))
 if adaptive:
     fstem = 'adaptive-'+fstem
 
-study = xc.SimStudy(os.path.join(os.getcwd(), fstem), bbox)
+study = xc.Study(os.path.join(os.getcwd(), fstem), bbox)
 
-sim = study.newSimulation()
+sim = study.new_simulation()
 
 body, microElectrodes, macroElectrodes = electrode.makeDBSElectrode()
 
@@ -125,7 +125,7 @@ rc = rdisp['Conductors']
 
 rdisp['Insulators'][0] = rdisp.toPlane()['Insulators'][0]
 rdisp['Conductors'] = rc.clip('z')
-simbb = bbox[xc.io.PV_BOUND_ORDER]
+simbb = bbox[xc.io.TO_PV_BBOX_ORDER]
 
 linecolor = pv.Color(xc.colors.BASE)
 
@@ -162,7 +162,7 @@ p.planeview(1.1*np.array(ROI))
 microcenters = np.array([m.center for m in regions['Electrodes'][:nmicro]])
 p.add_mesh(pv.wrap(microcenters), color='gold',
            render_points_as_spheres=True, point_size=10.)
-study.savePVimage(p, 'setup2.png', window_size=windowPx)
+study.save_pv_image(p, 'setup2.png', window_size=windowPx)
 
 if preview:
     p.show()
@@ -194,7 +194,7 @@ if preview and showCurrents:
     }
 
     pts = pv.wrap(
-        np.array([src.geometry.center for src in sim.currentSources]))
+        np.array([src.geometry.center for src in sim.current_sources]))
     pts.point_data['voltage'] = 0
 
     p.setup(regions)
@@ -213,8 +213,8 @@ if preview and showCurrents:
         else:
             tnext = tvec[ii+1]
 
-        sim.currentTime = t
-        currentV = [src.value.getCurrentValue(t) for src in sim.currentSources]
+        sim.current_time = t
+        currentV = [src.value.getCurrentValue(t) for src in sim.current_sources]
         pts['voltage'] = currentV
 
         # for msh, sig in zip(regions['Electrodes'], channels):
@@ -230,12 +230,12 @@ if preview and showCurrents:
 
     p.close()
 
-for src in sim.currentSources:
+for src in sim.current_sources:
     src.value.reset()
 
 
 # %% Simulate
-refs = np.array([src.geometry.center for src in sim.currentSources[:nmicro]])
+refs = np.array([src.geometry.center for src in sim.current_sources[:nmicro]])
 
 # refs = np.concatenate([r.points for r in regions['Conductors']])
 # coefs = np.ones(refs.shape[0])
@@ -251,16 +251,16 @@ else:
 
 coefs = 2**(-Coef*depthvec)
 
-sim.makeAdaptiveGrid(refPts=refs, maxdepth=depthvec,
-                     minl0Function=xc.generalMetric,
+sim.make_adaptive_grid(ref_pts=refs, max_depth=depthvec,
+                     min_l0_function=xc.general_metric,
                      coefs=coefs, coarsen=False)
-sim.finalizeMesh(sigmaMesh=regions, defaultSigma=sigma_0)
-sim.setBoundaryNodes()
+sim.finalize_mesh(sigma_mesh=regions, default_sigma=sigma_0)
+sim.set_boundary_nodes()
 
-# sim.startTiming('Assign sigma')
-# regions.assignSigma(sim.mesh, defaultSigma=sigma_0)
-# sim.logTime()
-vmesh = xc.io.toVTK(sim.mesh)
+# sim.start_timing('Assign sigma')
+# regions.assign_sigma(sim.mesh, default_sigma=sigma_0)
+# sim.log_time()
+vmesh = xc.io.to_vtk(sim.mesh)
 vmesh.point_data['voltage'] = 0
 
 vslice = vmesh.slice(normal='z')
@@ -273,7 +273,7 @@ p = xc.visualizers.PVScene(time=tvec)
 p.setup(regions.toPlane(), mesh=vslice,
         simData='sigma', show_edges=True)
 p.planeview(ROI)
-study.savePVimage(p, 'meshed', title='Meshed geometry')
+study.save_pv_image(p, 'meshed', title='Meshed geometry')
 
 if preview:
     p.show()
@@ -289,12 +289,12 @@ infos = []
 for ii in timer:
     t = tvec[ii]
     # t = tvec[4]
-    sim.currentTime = t
+    sim.current_time = t
 
     if adaptive and ii != 0:
         depths = []
-        for src in sim.currentSources[:nmicro]:
-            if src.value.getValueAtTime(t) == 0:
+        for src in sim.current_sources[:nmicro]:
+            if src.value.get_value_at_time(t) == 0:
                 depths.append(depthmin)
             else:
                 depths.append(Depth)
@@ -302,20 +302,20 @@ for ii in timer:
 
         coefs = 2**(-Coef*depthvec)
 
-        changed = sim.makeAdaptiveGrid(refPts=refs, maxdepth=depthvec,
-                                       minl0Function=xc.generalMetric,
+        changed = sim.make_adaptive_grid(ref_pts=refs, max_depth=depthvec,
+                                       min_l0_function=xc.general_metric,
                                        coefs=coefs)
         if changed:
 
-            sim.finalizeMesh(sigmaMesh=regions, defaultSigma=sigma_0)
-            sim.setBoundaryNodes()
+            sim.finalize_mesh(sigma_mesh=regions, default_sigma=sigma_0)
+            sim.set_boundary_nodes()
 
         # else:
-        #     # sim.nodeRoleTable[sim.nodeRoleTable == 2] == 0
-        #     sim.finalizeMesh()
-        #     sim.setBoundaryNodes()
+        #     # sim.node_role_table[sim.node_role_table == 2] == 0
+        #     sim.finalize_mesh()
+        #     sim.set_boundary_nodes()
 
-    v = sim.iterativeSolve()
+    v = sim.solve()
 
     # MUST use v.copy; otherwise, results in list of the last timestep's result at every time!
     volts.append(v.copy())
@@ -327,16 +327,16 @@ for ii in timer:
     # if adaptive and changed:
     sim.iteration += 1
     sim.name = 'sim%d' % sim.iteration
-    vmesh = xc.io.toVTK(sim.mesh)
+    vmesh = xc.io.to_vtk(sim.mesh)
     vmesh.save(os.path.join(fstem, '%s.vtk' %
                sim.name))
 
-    study.newLogEntry()
+    study.log_current_simulation()
 
     stepinfo = {'meshName': sim.name}
     twall = 0
     tcpu = 0
-    for l in sim.stepLogs:
+    for l in sim.step_logs:
         stepinfo[l.name+' [Wall]'] = l.durationWall
         stepinfo[l.name+' [CPU]'] = l.durationCPU
         stepinfo[l.name+' [memory]'] = l.memory
@@ -349,7 +349,7 @@ for ii in timer:
 
     infos.append(stepinfo)
 
-    sim.stepLogs = []
+    sim.step_logs = []
     timer.set_postfix_str('Vrange=[%.2g, %.2g]' % (min(v), max(v)))
 
     # print(sim.RHS[sim.RHS != 0])
@@ -375,8 +375,8 @@ meshname = 'sim0'
 plotTime = tvec
 # plotTime = None
 
-dataCat = 'voltage'
-# dataCat = 'sigma'
+data_category = 'voltage'
+# data_category = 'sigma'
 # moviename = 'sigma'
 # symlog = False
 
@@ -399,22 +399,22 @@ else:
 
         msh = pv.read((os.path.join(fstem, meshname+'.vtk')))
         if ii == 0:
-            if dataCat == 'sigma':
-                msh.cell_data[dataCat] = np.zeros(msh.n_cells)
+            if data_category == 'sigma':
+                msh.cell_data[data_category] = np.zeros(msh.n_cells)
             else:
-                msh.point_data[dataCat] = np.zeros(msh.n_points)
+                msh.point_data[data_category] = np.zeros(msh.n_points)
             vmesh = msh.copy()
             mesh = msh.copy()
         else:
-            if dataCat == 'sigma':
-                regions.assignSigma(msh, defaultSigma=sigma_0)
+            if data_category == 'sigma':
+                regions.assign_sigma(msh, default_sigma=sigma_0)
             else:
-                msh.point_data[dataCat] = v.copy()
+                msh.point_data[data_category] = v.copy()
         # print('%d\t%d' % (len(v), msh.n_points))
 
         slic = msh.slice(normal='z')
 
-        data.append(slic[dataCat])
+        data.append(slic[data_category])
 
     # vmesh.point_data['voltage'] = 0
     mesh = vmesh.slice(normal='z')
@@ -438,7 +438,7 @@ VBAR = {
     'label_font_size': 20,
 }
 
-if dataCat == 'sigma':
+if data_category == 'sigma':
     cma = xc.colors.CM_MONO
     clim = np.array([0., 0.5])
 
@@ -467,19 +467,19 @@ p = xc.visualizers.PVScene(
     time=plotTime, figsize=windowInch, dpi=DPI, off_screen=True)
 
 # p.open_movie(fstem+'.mp4')
-study.makePVmovie(p, filename=moviename)
+study.make_pv_movie(p, filename=moviename)
 
 
 # cma = mcmap['bwr']
 # cma = xc.colors.CM_BIPOLAR
 # cma=mcmap['seismic']
-cma = xc.colors.scoopCmap(cmr.guppy_r)
+cma = xc.colors.scoop_cmap(cmr.guppy_r)
 
 
 if viewIso:
     p.setup(regions)
 else:
-    p.setup(regions.toPlane(), mesh=mesh, simData=dataCat, clim=clim,
+    p.setup(regions.toPlane(), mesh=mesh, simData=data_category, clim=clim,
             show_edges=True, cmap=cma, scalar_bar_args=VBAR,
             show_scalar_bar=(not symlog),
             lighting=False,
@@ -523,11 +523,11 @@ for ii in viz:
         p.edgeMesh.copy_from(newmesh)
 
     if symlog:
-        mesh[dataCat] = symmer(data[ii])
+        mesh[data_category] = symmer(data[ii])
     elif amplitude:
-        mesh[dataCat] = np.abs(data[ii])
+        mesh[data_category] = np.abs(data[ii])
     else:
-        mesh[dataCat] = data[ii]
+        mesh[data_category] = data[ii]
 
     # p.setTime(t)
     # p.write_frame()
@@ -537,14 +537,14 @@ for ii in viz:
         p.setTime(t)
         p.write_frame()
         # if liteMode:
-        study.savePVimage(p,
+        study.save_pv_image(p,
                           os.path.join(moviename,
                                        moviename+'frame%03d.png' % ii))
         t += 0.005
         break
 
 if liteMode:
-    study.savePlot(cbarfig,
+    study.save_plot(cbarfig,
                    os.path.join(moviename, moviename+'colorbar'))
 
 p.close()

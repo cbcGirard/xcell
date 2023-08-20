@@ -9,7 +9,7 @@ Better plotting of the stacked error plots for print
 """
 
 import xcell as xc
-import Common as com
+import Common_nongallery as com
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
@@ -33,7 +33,7 @@ compress = False
 analytic = vizA.analytic
 analyticR = vizA.analyticR
 
-xc.colors.useLightStyle()
+xc.colors.use_light_style()
 
 with plt.rc_context({
         'font.size': 9,
@@ -56,12 +56,12 @@ with plt.rc_context({
     #         lastRow=nrow==2
 
     #         v.fig=sub
-    #         v.setupFigure(labelX=lastRow, labelY=v==vizU)
+    #         v.setup_figure(labelX=lastRow, labelY=v==vizU)
     #         v.prefs['showLegend']=(v==vizA and nrow==0)
     #         v.analytic=analytic
     #         v.analyticR=analyticR
 
-    #         v.getArtists(frames[nrow])
+    #         v.get_artists(frames[nrow])
 
     ratios = [5, 5, 3, 0]
     hratio = ratios*3
@@ -101,7 +101,7 @@ with plt.rc_context({
                 subs[nrow, ncol].set_title(tstr)
 
             v.axes = subs[4*nrow:4*nrow+3, ncol]
-            v.setupFigure(labelX=lastRow,
+            v.setup_figure(labelX=lastRow,
                           labelY=v == vizU,
                           # labelY=False,
                           newAxes=False)
@@ -110,7 +110,7 @@ with plt.rc_context({
             v.analytic = analytic
             v.analyticR = analyticR
 
-            data = v.dataSets[frames[nrow]]
+            data = v.datasets[frames[nrow]]
 
             if compress:
                 data['simV'] = np.interp(pxVec, data['simR'], data['simV'])
@@ -130,11 +130,11 @@ with plt.rc_context({
                         data['errR'] >= p0, data['errR'] <= pxVec[ii])
                     hasEl = np.logical_and(data['elemR'] >= p0,
                                            data['elemR'] <= pxVec[ii])
-                    if np.nonzero(isin)[0].shape[0]:
+                    if xc.util.fastcount(isin):
                         whr = np.argmax(np.abs(data['errors'][isin]))
                         maxerr.append(data['errors'][isin][whr])
                         pxList.append(pxVec[ii])
-                    if np.nonzero(hasEl)[0].shape[0]:
+                    if xc.util.fastcount(hasEl):
                         l0.append(np.mean(data['elemL'][hasEl]))
                         l0r.append(np.mean(data['elemR'][hasEl]))
 
@@ -143,7 +143,7 @@ with plt.rc_context({
                 data['elemL'] = np.array(l0)
                 data['elemR'] = np.array(l0r)
 
-            v.getArtists(frames[nrow])
+            v.get_artists(frames[nrow])
 
             l0span.update(data['elemL'])
 
@@ -164,13 +164,13 @@ with plt.rc_context({
 
 
 # %% Error vs. numel and time
-xc.colors.useLightStyle()
+xc.colors.use_light_style()
 
-logfile = study.studyPath+'/log.csv'
-df, cats = study.loadLogfile()
+logfile = study.study_path+'/log.csv'
+df, cats = study.load_logfile()
 
 # xaxes=['Number of elements','Total time [Wall]']
-xaxes = ['Number of elements', 'l0min']
+xaxes = ['Number of elements', 'min_l0']
 group = 'Mesh type'
 
 # group='Element type'
@@ -200,13 +200,13 @@ with mpl.rc_context({'lines.markersize': 5,  'lines.linewidth': 2}):
     f, axes = plt.subplots(2, 1, sharey=True, figsize=[6.5, 8])
     f2, a2 = plt.subplots(1, 1, figsize=[6.5, 3])
 
-    for ax, xcat in zip(axes, xaxes):
-        xc.visualizers.groupedScatter(
-            logfile, xcat, ycat='Error', groupcat=group, ax=ax)
+    for ax, x_category in zip(axes, xaxes):
+        xc.visualizers.grouped_scatter(
+            logfile, x_category, y_category='Error', group_category=group, ax=ax)
         # ax.set_ylim(bottom=logfloor(ax.get_ylim()[0]))
 
-    xc.visualizers.groupedScatter(
-        logfile, ycat='Total time [Wall]', xcat='l0min', groupcat=group, ax=a2, df=df[2:])
+    xc.visualizers.grouped_scatter(
+        logfile, y_category='Total time [Wall]', x_category='min_l0', group_category=group, ax=a2, df=df[2:])
 
 [loground(a) for a in axes]
 
@@ -220,12 +220,12 @@ a2.set_xlabel(l0string)
 
 a2.invert_xaxis()
 
-study.savePlot(f, 'Error_composite')
-study.savePlot(f2, 'PerformanceSummary')
+study.save_plot(f, 'Error_composite')
+study.save_plot(f2, 'PerformanceSummary')
 
 # %% Computation time vs element size
 # xaxes=['Number of elements','Error']
-xaxes = ['Number of elements', 'l0min']
+xaxes = ['Number of elements', 'min_l0']
 
 
 isoct = df['Mesh type'] == 'adaptive'
@@ -240,21 +240,21 @@ with mpl.rc_context({'figure.figsize': [6.5, 3]}):
     # f, axes = plt.subplots(2, 1,sharex=True)#, gridspec_kw={'height_ratios':[2,4]})
     # axes[1,0].invert_xaxis()
 
-    # for arow,xcat in zip(axes,xaxes):
+    # for arow,x_category in zip(axes,xaxes):
 
     #     arow[1].sharex(arow[0])
     #     arow[1].sharey(arow[0])
     #     for ax, mtype, title in zip(arow, ['uniform', 'adaptive'], ['Uniform', 'Octree']):
     for ax, mtype, title in zip(axes, ['adaptive', 'uniform'], titles):
-        # if xcat==xaxes[1]:
-        #     xc.visualizers.groupedScatter(fname=logfile, xcat=xcat, ycat='Total time [Wall]', groupcat='Mesh type', ax=ax)
+        # if x_category==xaxes[1]:
+        #     xc.visualizers.grouped_scatter(fname=logfile, x_category=x_category, y_category='Total time [Wall]', group_category='Mesh type', ax=ax)
         #     ax.set_yscale('log')
         #     ax.set_xscale('log')
         #     # pass
         # else:
         ax.set_title(title)
-        xc.visualizers.importAndPlotTimes(
-            fname=logfile, timeType='Wall', ax=ax, xCat='Number of elements', onlyCat='Mesh type', onlyVal=mtype)
+        xc.visualizers.import_and_plot_times(
+            fname=logfile, time_type='Wall', ax=ax, x_category='Number of elements', only_category='Mesh type', only_value=mtype)
 
 axes[1].set_ylabel('')
 f.align_labels()
@@ -265,11 +265,11 @@ axes[0].set_xlim(left=0)
 # xc.visualizers.outsideLegend(where='bottom',ncol=3)
 # plt.tight_layout()
 
-study.savePlot(f, 'PerformanceStack')
+study.save_plot(f, 'PerformanceStack')
 
 # %% Computation time vs element size plus parallelism
 # xaxes=['Number of elements','Error']
-xaxes = ['Number of elements', 'l0min']
+xaxes = ['Number of elements', 'min_l0']
 
 
 isoct = df['Mesh type'] == 'adaptive'
@@ -283,22 +283,22 @@ with mpl.rc_context({'figure.figsize': [6.5, 5]}):
     f, axes = plt.subplots(2, 2, sharex=True)
     # axes[1,0].invert_xaxis()
 
-    for arow, xcat in zip(axes, xaxes):
+    for arow, x_category in zip(axes, xaxes):
 
         arow[1].sharey(arow[0])
         for ax, mtype, title in zip(arow, ['uniform', 'adaptive'], titles):
 
-            if xcat == xaxes[1]:
-                xc.visualizers.importAndPlotTimes(
-                    fname=logfile, timeType='Ratio', ax=ax, xCat='Number of elements', onlyCat='Mesh type', onlyVal=mtype)
+            if x_category == xaxes[1]:
+                xc.visualizers.import_and_plot_times(
+                    fname=logfile, time_type='Ratio', ax=ax, x_category='Number of elements', only_category='Mesh type', only_value=mtype)
 
                 ax.set_yscale('linear')
                 # ax.set_xscale('log')
                 # pass
             else:
                 ax.set_title(title)
-                xc.visualizers.importAndPlotTimes(
-                    fname=logfile, timeType='Wall', ax=ax, xCat='Number of elements', onlyCat='Mesh type', onlyVal=mtype)
+                xc.visualizers.import_and_plot_times(
+                    fname=logfile, time_type='Wall', ax=ax, x_category='Number of elements', only_category='Mesh type', only_value=mtype)
                 ax.set_xlabel('')
 
             # if mtype='adaptive':
@@ -316,13 +316,13 @@ axes[0, 0].set_xlim(left=0)
 
 with plt.rc_context({'figure.figsize': [7, 6.5],
                      'figure.dpi': 144}):
-    # v2=v.copy(overridePrefs={'logScale':True})
+    # v2=v.copy(override_prefs={'logScale':True})
     study, _ = com.makeSynthStudy('Quals/bigPOC')
     v = xc.visualizers.SliceSet(None, study)
-    v.getStudyData()
-    v.animateStudy('ImageTst')
+    v.get_study_data()
+    v.animate_study('ImageTst')
 
     # v2.prefs['logScale']=True
-    # v2.dataScales['vbounds'].knee=1e-3
-    # v2.dataScales['errbounds'].knee=0.1
-    # v2.animateStudy('Image')
+    # v2.data_scales['vbounds'].knee=1e-3
+    # v2.data_scales['errbounds'].knee=0.1
+    # v2.animate_study('Image')

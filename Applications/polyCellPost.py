@@ -9,16 +9,16 @@ Postprocessing of dynamic adaptation tests
 """
 
 import xcell
-import Common
+import Common_nongallery
 import pickle
 import os
 import matplotlib.pyplot as plt
 import numpy as np
 import xcell.nrnutil as nUtil
 
-studyPath = 'Quals/polyCell'
+study_path = 'Quals/polyCell'
 nRing = 5
-ring = Common.Ring(N=nRing, stim_delay=0, dendSegs=101, r=175)
+ring = Common_nongallery.Ring(N=nRing, stim_delay=0, dendSegs=101, r=175)
 tstop = 40
 tPerFrame = 5
 barRatio = [9, 1]
@@ -32,14 +32,14 @@ else:
 skipExt = False
 
 
-# studyPath = 'Quals/monoCell'
+# study_path = 'Quals/monoCell'
 # nRing = 0
 # tstop = 12
 # tPerFrame = 2
 # barRatio = [4, 1]
 
-study, _ = Common.makeSynthStudy(studyPath)
-folderstem = study.studyPath
+study, _ = Common_nongallery.makeSynthStudy(study_path)
+folderstem = study.study_path
 
 
 dmin = 4
@@ -51,7 +51,7 @@ tv = comDict['tv']
 I = comDict['I']
 rads = comDict['rads']
 coords = comDict['coords']
-isSphere = comDict['isSphere']
+is_sphere = comDict['is_sphere']
 polygons = comDict['polygons']
 # %%
 
@@ -80,9 +80,9 @@ if skipExt:
 
 for lite in ['lite']:  # ,'-lite']:
     if lite == '':
-        xcell.colors.useDarkStyle()
+        xcell.colors.use_dark_style()
     else:
-        xcell.colors.useLightStyle()
+        xcell.colors.use_light_style()
 
     f, ax = plt.subplots(3, gridspec_kw={'height_ratios': [
                          5, 5, 2]}, layout='constrained')
@@ -98,7 +98,7 @@ for lite in ['lite']:  # ,'-lite']:
     ax[2].set_ylabel('Activity')
     ax[2].set_xlabel('Simulated time')
 
-    xcell.visualizers.engineerTicks(ax[2], xunit='s')
+    xcell.visualizers.engineering_ticks(ax[2], xunit='s')
     for a in ax[:-1]:
         a.set_xticks([])
         a.grid(True, axis='both')
@@ -145,10 +145,10 @@ for lite in ['lite']:  # ,'-lite']:
             a.set_yticks(np.arange(ntick)*dtick)
             a.grid(axis='x')
 
-        study.savePlot(f2, os.path.join(
+        study.save_plot(f2, os.path.join(
             folderstem, 'ring%dsummary%s' % (nRing, lite)+widthtag))
 
-        study.savePlot(f, os.path.join(
+        study.save_plot(f, os.path.join(
             folderstem, 'ring%dcomparison%s' % (nRing, lite)+widthtag))
 
 
@@ -176,7 +176,7 @@ an = pickle.load(
 # fname = 'volt-depth'
 fname = 'tmp'
 
-xcell.colors.useLightStyle()
+xcell.colors.use_light_style()
 
 # alite = an.copy({'colorbar': False,
 #                  'barRatio': barRatio})
@@ -197,26 +197,26 @@ ax.set_xlim(-vizlim, vizlim)
 # alite.tbar.axes[0].set_xlim(right=tstop/1000)
 
 
-_ = nUtil.showCellGeo(alite.axes[0])
+_ = nUtil.show_cell_geo(alite.axes[0])
 
 # get closest frames to 5ms intervals
-frameNs = [int(f*len(alite.dataSets)/tstop)
+frameNs = [int(f*len(alite.datasets)/tstop)
            for f in np.arange(0, tstop, tPerFrame)]
-frameNs.append(len(alite.dataSets)-1)
-# artists = [alite.getArtists(ii) for ii in frameNs]
-# alite.animateStudy(fname+'-lite', fps=30, artists=artists,
-#                     vectorFrames=np.arange(len(frameNs)), unitStr='V')
+frameNs.append(len(alite.datasets)-1)
+# artists = [alite.get_artists(ii) for ii in frameNs]
+# alite.animate_study(fname+'-lite', fps=30, artists=artists,
+#                     vector_frames=np.arange(len(frameNs)), unitStr='V')
 
 for ii in range(len(frameNs)):
-    alite.resetFigure()
+    alite.reset_figure()
     # figw = 2.
     # alite.fig.set_figwidth(figw)
     # alite.fig.set_figheight(1.*figw)
     # ax.set_xticks([])
     # ax.set_yticks([])
     # alite.tbar.axes[0].set_xlim(right=tstop/1000)
-    alite.getArtists(frameNs[ii])
-    nUtil.showCellGeo(ax)
+    alite.get_artists(frameNs[ii])
+    nUtil.show_cell_geo(ax)
 
     tag = ax.text(0.1, 0.9, '%d ms' % (5*ii), transform=ax.transAxes,
                   bbox=dict(facecolor='white', alpha=0.8, edgecolor='gray', boxstyle='round'))
@@ -227,7 +227,7 @@ for ii in range(len(frameNs)):
 
 # %% voltage for screen
 
-# xcell.colors.CM_BIPOLAR=xcell.colors.scoopCmap(cm.guppy_r,0.5)
+# xcell.colors.CM_BIPOLAR=xcell.colors.scoop_cmap(cm.guppy_r,0.5)
 
 viz = pickle.load(open(folderstem+'/depth/volt-depth.adata', 'rb'))
 
@@ -241,14 +241,14 @@ with plt.rc_context({
     barRatio = [4, 1]
     vd = viz.copy(
         {'colorbar': False, 'barRatio': barRatio, 'labelAxes': False})
-    # vd.dataScales['spaceV'].knee=1e-8
-    # vd.dataScales['spaceV'].min=-1e-5
+    # vd.data_scales['spaceV'].knee=1e-8
+    # vd.data_scales['spaceV'].min=-1e-5
     ax = vd.axes[0]
     ax.set_xticks([])
     ax.set_yticks([])
     ax.set_aspect('equal')
-    nUtil.showCellGeo(ax)
+    nUtil.show_cell_geo(ax)
 
-    vd.getArtists(0)
+    vd.get_artists(0)
 
-    vd.animateStudy('Showcase')
+    vd.animate_study('Showcase')

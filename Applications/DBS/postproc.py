@@ -6,7 +6,7 @@ Created on Sat May  6 13:20:51 2023
 @author: benoit
 """
 
-import xcell
+import xcell as xc
 import pickle
 import pyvista as pv
 import numpy as np
@@ -17,9 +17,10 @@ from makeStim import getSignals
 import argparse
 import cmasher
 from electrode import makeDBSElectrode
-from xcell.geometry import toPV
+from xcell.geometry import to_pyvista
 import matplotlib as mpl
-xcell.colors.useLightStyle()
+
+xc.colors.use_light_style()
 
 cli = argparse.ArgumentParser()
 cli.add_argument('-D', '--maxDepth', type=int,
@@ -45,10 +46,10 @@ meshname = 'sim0'
 
 body, microE, macroE = makeDBSElectrode()
 rsave = pv.read('../../Examples/Geometry/composite.vtm')
-regions = xcell.io.Regions()
+regions = xc.io.Regions()
 regions['Conductors'] = rsave['Conductors']
-regions['Insulators'].append(toPV(body))
-regions['Electrodes'].extend([toPV(E) for E in macroE])
+regions['Insulators'].append(to_pyvista(body))
+regions['Electrodes'].extend([to_pyvista(E) for E in macroE])
 
 # for later clipping to XY coords of hippocampus
 ROI = regions['Conductors'].bounds[:4]
@@ -59,11 +60,11 @@ bbox = 2*np.max(np.abs(ROI))*np.concatenate((-np.ones(3), np.ones(3)))
 channels = getSignals(24, 50e-3)
 tvec = np.unique(np.concatenate([c.times for c in channels]))
 
-voltrange = xcell.visualizers.ScaleRange()
+voltrange = xc.visualizers.ScaleRange()
 
 datas = []
 for fs in [fstemFix, fstemAdapt]:
-    study = xcell.SimStudy(os.path.join(os.getcwd(), fs), bbox)
+    study = xc.Study(os.path.join(os.getcwd(), fs), bbox)
     info = study.load(fs+'info')
     volts = study.load(fs+'Volts')
     data = []
@@ -92,8 +93,8 @@ for fs in [fstemFix, fstemAdapt]:
 # calc difference
 dataFix, dataAdapt = datas
 
-fixDict = xcell.misc.transposeDicts(dataFix)
-adaptDict = xcell.misc.transposeDicts(dataAdapt)
+fixDict = xc.misc.transpose_dicts(dataFix)
+adaptDict = xc.misc.transpose_dicts(dataAdapt)
 
 # f, ax = plt.subplots()
 # ax.plot(fixDict['Total time [Wall]'], label='Static')
@@ -101,15 +102,15 @@ adaptDict = xcell.misc.transposeDicts(dataAdapt)
 # ax.set_xlabel('Timestep')
 # ax.set_ylabel('Computational time [s]')
 # ax.legend()
-# study.savePlot(f, 'timesteps')
+# study.save_plot(f, 'timesteps')
 
 
 diffs = []
 
-absdifrange = xcell.visualizers.ScaleRange()
-relDiffRange = xcell.visualizers.ScaleRange()
-amprange = xcell.visualizers.ScaleRange()
-vrange = xcell.visualizers.ScaleRange()
+absdifrange = xc.visualizers.ScaleRange()
+relDiffRange = xc.visualizers.ScaleRange()
+amprange = xc.visualizers.ScaleRange()
+vrange = xc.visualizers.ScaleRange()
 intDiffs = []
 dels = []
 # for dF, dA in zip(dataFix, dataAdapt):
@@ -188,29 +189,29 @@ with mpl.rc_context({
     axes[2].set_yticks([])
     axes[2].set_xlim(0., 2.)
 
-    xcell.visualizers.engineerTicks(axes[2], xunit='s')
+    xc.visualizers.engineering_ticks(axes[2], xunit='s')
 
     f.align_ylabels()
     # [a.set_xticks([]) for a in axes[:-1]]
 
-    # study.savePlot(f, 'timeSteps')
+    # study.save_plot(f, 'timeSteps')
 
     f2, ax2 = plt.subplots(figsize=[3.25, 2.5])
     ax2.bar([0, 1], [sum(fixDict['Total time [Wall]']),
                      sum(adaptDict['Total time [Wall]'])],
             tick_label=['Static', 'Dynamic'])
     ax2.set_ylabel('Wall time [s]')
-    # study.savePlot(f2, 'Time Comparison')
+    # study.save_plot(f2, 'Time Comparison')
 
 
 stdErr = np.std(dels)
 
 # %%
 
-p = xcell.visualizers.PVScene(time=tvec)
+p = xc.visualizers.PVScene(time=tvec)
 
 # p.open_movie(fstem+'.mp4')
-study.makePVmovie(p, filename=moviename)
+study.make_pv_movie(p, filename=moviename)
 
 VBAR = {
     'vertical': True,
@@ -222,7 +223,7 @@ VBAR = {
 
 }
 # cma = mcmap['bwr']
-# cma = xcell.colors.CM_BIPOLAR
+# cma = xc.colors.CM_BIPOLAR
 # cma=mcmap['seismic']
 
 mesh = diffs[0].copy()
@@ -296,7 +297,7 @@ for ii in viz:
     while t < tnext:
         p.setTime(t)
         p.write_frame()
-        study.savePVimage(p,
+        study.save_pv_image(p,
                           os.path.join(moviename, moviename+'frame%03d' % ii))
         t += 0.005
         break

@@ -10,7 +10,7 @@ Based on simulation protocol of Reilly 2016, using the Carnavale biophysics
 
 import xcell as xc
 import numpy as np
-import Common as com
+import Common_nongallery as com
 from neuron import h  # , gui
 import neuron.units as nUnit
 
@@ -72,7 +72,7 @@ if stepViz:
                                       'showInsets': False,
                                       'relativeError': False,
                                       'logScale': True,
-                                      'showNodes': True,
+                                      'show_nodes': True,
                                       'fullInterp': True})
 else:
     viz = None
@@ -112,59 +112,57 @@ class ThresholdSim(xc.Simulation):
             wire2 = xc.geometry.Disk(elecB,
                                      rElec,
                                      np.array([0, 0, 1]))
-            self.addCurrentSource(value=-1.,
-                                  coords=elecB,
+            self.add_current_source(value=-1.,
                                   geometry=wire2)
 
             if viz is not None:
-                xc.visualizers.showSourceBoundary(viz.axes, rElec,
-                                                  srcCenter=elecB[:-1])
+                xc.visualizers.show_source_boundary(viz.axes, rElec,
+                                                  source_center=elecB[:-1])
 
         if viz is not None:
-            xc.visualizers.showSourceBoundary(viz.axes, rElec,
-                                              srcCenter=elecA[:-1])
+            xc.visualizers.show_source_boundary(viz.axes, rElec,
+                                              source_center=elecA[:-1])
 
         wire1 = xc.geometry.Disk(elecA,
                                  rElec,
                                  np.array([0, 0, 1], dtype=float))
 
-        self.addCurrentSource(value=1.,
-                              coords=elecA,
+        self.add_current_source(value=1.,
                               geometry=wire1)
 
-    def meshAndSolve(self, depth):
+    def mesh_and_solve(self, depth):
         metrics = []
-        for src in self.currentSources:
-            metrics.append(xc.makeExplicitLinearMetric(maxdepth=depth,
+        for src in self.current_sources:
+            metrics.append(xc.makeExplicitLinearMetric(max_depth=depth,
                                                        meshdensity=0.2,
                                                        origin=src.geometry.center))
 
-        self.makeAdaptiveGrid(metrics, depth)
+        self.make_adaptive_grid(metrics, depth)
 
-        self.finalizeMesh()
-        self.setBoundaryNodes()
-        v = self.iterativeSolve(tol=1e-9)
+        self.finalize_mesh()
+        self.set_boundary_nodes()
+        v = self.solve(tol=1e-9)
 
-    def getAnalyticVals(self, coords):
-        anaVals = np.zeros(coords.shape[0])
-        for src in self.currentSources:
-            anaVals += xc.util.pointCurrentV(coords, iSrc=src.value,
+    def get_analytic_vals(self, coords):
+        analytic_values = np.zeros(coords.shape[0])
+        for src in self.current_sources:
+            analytic_values += xc.util.point_current_source_voltage(coords, i_source=src.value,
                                              sigma=self.sigma,
-                                             srcLoc=src.coords)
+                                             source_location=src.coords)
 
-        return anaVals
+        return analytic_values
 
 
 class ThresholdStudy:
     def __init__(self, simulation, pulsedur=1., biphasic=True, viz=None):
-        self.segCoords = None
-        self.vExt = None
+        self.segment_coordinates = None
+        self.v_external = None
         self.sim = simulation
         self.viz = viz
-        self.isBiphasic = biphasic
+        self.is_biphasic = biphasic
         self.pulsedur = pulsedur
 
-    def _buildNeuron(self):
+    def _build_neuron(self):
         h.load_file('estimsurvey/axon10.hoc')
 
         # cell = com.BallAndStick(1, -50., 0., 0., 0.)
@@ -183,12 +181,12 @@ class ThresholdStudy:
                 cellcoords.append([sec.x3d(ii), sec.y3d(ii), sec.z3d(ii)])
                 inds.append([[nsec, ii]])
 
-        self.segCoords = np.array(cellcoords)/nUnit.m
+        self.segment_coordinates = np.array(cellcoords)/nUnit.m
 
         # optional visualization
         if self.viz is not None:
-            # viz.addSimulationData(setup,append=True)
-            xc.nrnutil.showCellGeo(self.viz.axes[0])
+            # viz.add_simulation_data(setup,append=True)
+            xc.nrnutil.show_cell_geo(self.viz.axes[0])
 
         resultVec=h.Vector().record(h.node[0](0.5)._ref_v)
         return resultVec
@@ -196,67 +194,67 @@ class ThresholdStudy:
 
     def getAnalyticThreshold(self, pmin=1e-6, pmax=1e-2):
 
-        assert self._runTrial(pmax, analytic=True)
-        assert not self._runTrial(pmin, analytic=True)
+        assert self._run_trial(pmax, analytic=True)
+        assert not self._run_trial(pmin, analytic=True)
 
         while (pmax-pmin) > 1e-6:
             md = 0.5*(pmin+pmax)
             # print(md)
-            spike = self._runTrial(md, analytic=True)
+            spike = self._run_trial(md, analytic=True)
 
             if spike:
                 pmax = md
             else:
                 pmin = md
 
-        thresh = md
-        return thresh
+        threshold = md
+        return threshold
 
-    def getThreshold(self, depth, pmin=1e-6, pmax=1e-2):
-        self.sim.meshAndSolve(depth)
+    def get_threshold(self, depth, pmin=1e-6, pmax=1e-2):
+        self.sim.mesh_and_solve(depth)
         if self.viz is not None:
-            self.viz.addSimulationData(self.sim, append=True)
-        numEl = len(self.sim.mesh.elements)
-        numSrc = sum(self.sim.nodeRoleTable == 2)
+            self.viz.add_simulation_data(self.sim, append=True)
+        n_elements = len(self.sim.mesh.elements)
+        n_sources = sum(self.sim.node_role_table == 2)
 
-        if numSrc == 0:
-            numEl = np.nan
-            thresh = np.nan
-            numSrc = np.nan
+        if n_sources == 0:
+            n_elements = np.nan
+            threshold = np.nan
+            n_sources = np.nan
         else:
-            assert self._runTrial(pmax)
-            assert not self._runTrial(pmin)
+            assert self._run_trial(pmax)
+            assert not self._run_trial(pmin)
 
             while (pmax-pmin) > 1e-6:
                 md = 0.5*(pmin+pmax)
                 # print(md)
-                spike = self._runTrial(md)
+                spike = self._run_trial(md)
 
                 if spike:
                     pmax = md
                 else:
                     pmin = md
 
-            thresh = md
+            threshold = md
             # in amps
 
-        return thresh, numEl, numSrc
+        return threshold, n_elements, n_sources
 
-    def _runTrial(self, amplitude, analytic=False):
-        nodeVec=self._buildNeuron()
+    def _run_trial(self, amplitude, analytic=False):
+        nodeVec=self._build_neuron()
 
-        if self.isBiphasic:
-            tstim, vstim = xc.nrnutil.makeBiphasicPulse(
+        if self.is_biphasic:
+            tstim, vstim = xc.nrnutil.make_biphasic_pulse(
                 amplitude, 2., self.pulsedur)
         else:
-            tstim, vstim = xc.nrnutil.makeMonophasicPulse(
+            tstim, vstim = xc.nrnutil.make_monophasic_pulse(
                 amplitude, 2., self.pulsedur)
 
         self.tstim = tstim
         self.vstim = vstim
         tstop = 10*max(tstim.as_numpy())
 
-        vvecs, vmems = self._setVext(analytic=analytic)
+        vvecs, vmems = self._set_v_ext(analytic=analytic)
 
         tvec = h.Vector().record(h._ref_t)
 
@@ -285,19 +283,19 @@ class ThresholdStudy:
 
         return spiked
 
-    def _setVext(self, analytic=False):
+    def _set_v_ext(self, analytic=False):
 
         setup = self.sim
-        if self.vExt is None:
+        if self.v_external is None:
             if analytic:
-                vext = self.sim.getAnalyticVals(self.segCoords)
+                vext = self.sim.get_analytic_vals(self.segment_coordinates)
             else:
-                vext = setup.interpolateAt(self.segCoords)
-            self.vExt = vext
+                vext = setup.interpolate_at_points(self.segment_coordinates)
+            self.v_external = vext
         else:
-            vext = self.vExt
+            vext = self.v_external
 
-        # tstim,vstim =xc.nrnutil.makeBiphasicPulse(k, tstart, tpulse)
+        # tstim,vstim =xc.nrnutil.make_biphasic_pulse(k, tstart, tpulse)
 
         vvecs = []
         vmems = []
@@ -322,41 +320,41 @@ h.nrn_load_dll('estimsurvey/x86_64/libnrnmech.so')
 if analytic:
 
     y = np.linspace(0, 200)
-    threshSet = []
+    thresholdSet = []
 
     for d in y:
         sim = ThresholdSim('analytic', domX, elecY=elecY,
                            dualElectrode=pairStim,
                            sigma=Sigma)
         tst = ThresholdStudy(sim)
-        thresh = tst.getAnalyticThreshold()
-        threshSet.append(thresh)
+        threshold = tst.getAnalyticThreshold()
+        thresholdSet.append(threshold)
 
         del tst
-        # print(thresh)
+        # print(threshold)
 
     _, ax = plt.subplots()
-    ax.plot(y, threshSet)
-    xc.visualizers.engineerTicks(ax, 'm', 'A')
+    ax.plot(y, thresholdSet)
+    xc.visualizers.engineering_ticks(ax, 'm', 'A')
 
 
 else:
-    threshSet = []
+    thresholdSet = []
     nElec = []
     nTot = []
 
     sim = ThresholdSim('', domX, elecY=elecY, dualElectrode=pairStim, viz=viz)
     tmp = ThresholdStudy(sim, pulsedur=tpulse)
-    threshAna = tmp.getAnalyticThreshold()
+    thresholdAna = tmp.getAnalyticThreshold()
 
     for d in range(3, 14):
         tst = ThresholdStudy(sim, viz=viz)
 
-        t, nT, nE = tst.getThreshold(d)
+        t, nT, nE = tst.get_threshold(d)
         del tst
 
-        threshSet.append(t)
-        nElec.append(nE/len(sim.currentSources))
+        thresholdSet.append(t)
+        nElec.append(nE/len(sim.current_sources))
         nTot.append(nT)
 
         if nE > 1000:
@@ -369,39 +367,39 @@ else:
         stimStr = 'mono'
 
     f, ax = plt.subplots()
-    simline, = ax.semilogx(nElec, threshSet, marker='o', label='Simulated')
+    simline, = ax.semilogx(nElec, thresholdSet, marker='o', label='Simulated')
     ax.set_xlabel('Source nodes')
 
     ax.set_ylabel('Threshold')
     ax.yaxis.set_major_formatter(xc.visualizers.eform('A'))
 
-    ax.hlines(threshAna, 1, np.nanmax(nElec), label='Analytic value', linestyles=':',
+    ax.hlines(thresholdAna, 1, np.nanmax(nElec), label='Analytic value', linestyles=':',
               colors=simline.get_color())
     ax.legend()
 
-    ax.set_title(r'Activation threshold for %.1f ms %sphasic pulse %d $\mu m$ away' % (
+    ax.set_title(r'Activation thresholdold for %.1f ms %sphasic pulse %d $\mu m$ away' % (
         tpulse, stimStr, elecY))
 
     if save:
         dset = {'nElec': nElec, 'nTot': nTot,
-                'thresh': threshSet, 'threshAna': threshAna}
-        fstub = study.studyPath+'/'
+                'threshold': thresholdSet, 'thresholdAna': thresholdAna}
+        fstub = study.study_path+'/'
         pickle.dump(dset, open(fstub+'res.dat', 'wb'))
         aniName = fstub+'steps'
 
-        study.savePlot(f, 'thresh')
+        study.save_plot(f, 'threshold')
 
     else:
         aniName = None
 
     if stepViz:
-        ani = viz.animateStudy(aniName)
+        ani = viz.animate_study(aniName)
 
 
 combineRuns = True
 if combineRuns:
     import os
-    bpath, _ = os.path.split(study.studyPath)
+    bpath, _ = os.path.split(study.study_path)
     folders = os.listdir(bpath)
     Ys = [q.split('y')[1] for q in folders]
     dx = [pickle.load(open(os.path.join(bpath, fl, 'res.dat'), 'rb'))
@@ -417,15 +415,15 @@ if combineRuns:
     ax.yaxis.set_major_formatter(xc.visualizers.eform('A'))
 
     for d, y in zip(np.array(dx)[order], np.array(Ys)[order]):
-        simline, = ax.semilogx(d['nElec'], d['thresh'], marker='o', label=y)
-        ax.hlines(d['threshAna'],
+        simline, = ax.semilogx(d['nElec'], d['threshold'], marker='o', label=y)
+        ax.hlines(d['thresholdAna'],
                   np.nanmin(d['nElec']),
                   np.nanmax(d['nElec']),
                   linestyles=':',
                   colors=simline.get_color())
 
     ax.legend()
-    ax.set_title(r'Activation threshold for %.1f ms %sphasic pulse' %
+    ax.set_title(r'Activation thresholdold for %.1f ms %sphasic pulse' %
                  (tpulse, stimStr))
 
-    study.savePlot(f, 'composite')
+    study.save_plot(f, 'composite')

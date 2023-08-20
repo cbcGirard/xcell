@@ -10,13 +10,13 @@ from pandas import read_csv
 import numpy as np
 import matplotlib.pyplot as plt
 
-from xcell import SimStudy
-from xcell.visualizers import SliceSet, pairedBar
+from xcell import Study
+from xcell.visualizers import SliceSet, paired_bars
 import xcell.nrnutil as nutil
 
 from neuron import units as nUnits
 from neuron import h
-from xcell.util import pointCurrentV
+from xcell.util import point_current_source_voltage
 from xcell.geometry import Sphere
 from Common import Axon10, MRG
 
@@ -49,29 +49,29 @@ def coordscatter(ax, coords, **kwargs):
 
 
 class HalfPlane(nutil.ThresholdSim):
-    def getAnalyticVals(self, coords):
-        anaVals = np.zeros(coords.shape[0])
-        for src in self.currentSources:
-            anaVals += 2*pointCurrentV(coords,
-                                       iSrc=src.value,
+    def get_analytic_vals(self, coords):
+        analytic_values = np.zeros(coords.shape[0])
+        for src in self.current_sources:
+            analytic_values += 2*point_current_source_voltage(coords,
+                                       i_source=src.value,
                                        sigma=self.sigma,
-                                       srcLoc=src.coords)
+                                       source_location=src.coords)
 
-        return anaVals
+        return analytic_values
 
 
 class ThisStudy(nutil.ThresholdStudy):
-    def _buildNeuron(self):
+    def _build_neuron(self):
         nnodes = 101
         cell = MRG(0, -(nnodes//2)*1000, 0, 0, 0, axonNodes=nnodes)
         # cell = Axon10(1, -(nnodes//2)*1000, 0, 0, nnodes)
 
-        self.segCoords = nutil.makeInterface()
+        self.segment_coordinates = nutil.make_interface()
 
         # optional visualization
         if self.viz is not None:
-            # viz.addSimulationData(setup,append=True)
-            self.cellImg = nutil.showCellGeo(self.viz.axes[0])
+            # viz.add_simulation_data(setup,append=True)
+            self.cell_image = nutil.show_cell_geo(self.viz.axes[0])
 
         return cell
 
@@ -97,24 +97,24 @@ class Hcell(nutil.RecordedCell):
 
         self.vrest = -70
 
-        self.attachSpikeDetector(self.nodes[self.nnodes//2])
-        self.attachMembraneRecordings()
+        self.attach_spike_detector(self.nodes[self.nnodes//2])
+        self.attach_membrane_recordings()
 
 
 class HocStudy(nutil.ThresholdStudy):
-    def _buildNeuron(self):
+    def _build_neuron(self):
         cell = Hcell()
 
-        self.segCoords = nutil.makeInterface()
+        self.segment_coordinates = nutil.make_interface()
 
         return cell
 
-    def getThreshold(self, depth, pmin=0, pmax=1e6, analytic=False):
-        thresh, numEl, numSrc = super().getThreshold(depth=depth, pmin=pmin,
+    def get_threshold(self, depth, pmin=0, pmax=1e6, analytic=False):
+        threshold, n_elements, n_sources = super().get_threshold(depth=depth, pmin=pmin,
                                                      pmax=pmax, analytic=analytic)
         # h.quit()
 
-        return thresh, numEl, numSrc
+        return threshold, n_elements, n_sources
 
 
 def run(iterator):
@@ -126,11 +126,11 @@ def run(iterator):
 
     sim = HalfPlane('test',
                     xdom=xmax,
-                    srcAmps=[1., -1.],
-                    srcGeometry=geom,
+                    source_amps=[1., -1.],
+                    source_geometry=geom,
                     sigma=sigma)
 
-    # study.currentSim = sim
+    # study.current_simulation = sim
 
     tpulse = rw['PulseWidth']*nUnits.s
 
@@ -147,19 +147,19 @@ def run(iterator):
     else:
         h.dt = .025
 
-    thresh, _, _ = stu.getThreshold(0, analytic=True)
+    threshold, _, _ = stu.get_threshold(0, analytic=True)
 
-    gridv = thresh*sim.getAnalyticVals(gridcoords)
+    gridv = threshold*sim.get_analytic_vals(gridcoords)
     planeval = [gridv.reshape((ngrid, ngrid))]
 
-    outsideV = stu.vExt*thresh
-    segCoords = stu.segCoords
+    outsideV = stu.v_external*threshold
+    segment_coordinates = stu.segment_coordinates
 
-    return outsideV, planeval, gridv, thresh, segCoords
+    return outsideV, planeval, gridv, threshold, segment_coordinates
 
 
-study = SimStudy('/tmp', bbox)
-study.newSimulation()
+study = Study('/tmp', bbox)
+study.new_simulation()
 # viz = SingleSlice(None, study, )#,
 viz = SliceSet(None, study,
                prefs={
@@ -167,11 +167,11 @@ viz = SliceSet(None, study,
                    'showInsets': False,
                    'relativeError': False,
                    'logScale': True,
-                   'showNodes': False,
+                   'show_nodes': False,
                    'fullInterp': True})
 
 myThresh = []
-extraArtists = []
+extra_artists = []
 
 with multiprocessing.Pool(processes=len(data)) as pool:
     res = pool.map(run, data.iterrows())
@@ -181,39 +181,39 @@ with multiprocessing.Pool(processes=len(data)) as pool:
 # for ii, rw in data.iterrows():
 # for itr in data.iterrows():
 for dat in res:
-    outsideV, planeval, gridv, thresh, segCoords = dat
+    outsideV, planeval, gridv, threshold, segment_coordinates = dat
 
-    # outsideV, planeval, gridv, thresh, segCoords = run(itr)
+    # outsideV, planeval, gridv, threshold, segment_coordinates = run(itr)
 
-    viz.dataSets.append({'pvals': outsideV,
-                         'pcoords': segCoords[:, :-1],
+    viz.datasets.append({'pvals': outsideV,
+                         'pcoords': segment_coordinates[:, :-1],
                          'vArrays': planeval,
                          'meshPoints': [],
                          'sourcePoints': [],
                          })
 
-    # viz.dataScales['vbounds'].update(planeval[0].ravel())
-    viz.dataScales['vbounds'].update(gridv.ravel())
+    # viz.data_scales['vbounds'].update(planeval[0].ravel())
+    viz.data_scales['vbounds'].update(gridv.ravel())
 
-    # viz.getArtists(0)
+    # viz.get_artists(0)
 
     # # f2,a2=plt.subplots()
     a2 = viz.axes[0]
 
     extraArt = []
 
-    # for src, color in zip(sim.currentSources, [(0, 0.5, 1, 1), (1, 0.5, 0, 1)]):
+    # for src, color in zip(sim.current_sources, [(0, 0.5, 1, 1), (1, 0.5, 0, 1)]):
     #     extraArt.append(coordscatter(a2, np.array(
     #         src.coords, ndmin=2), color=color, marker='*', s=50.))
 
-    myThresh.append(thresh*1e3)
-    extraArtists.append(extraArt)
+    myThresh.append(threshold*1e3)
+    extra_artists.append(extraArt)
     # print('%.3g\t%.3g' % (myThresh[-1], rw[cellLabel]))
 
 
-ani = viz.animateStudy(extraArtists=extraArtists)
+ani = viz.animate_study(extra_artists=extra_artists)
 
 
 plt.figure()
-pairedBar(data[cellLabel], myThresh, ['Literature', 'Mine'])
+paired_bars(data[cellLabel], myThresh, ['Literature', 'Mine'])
 plt.gca().set_yscale('log')

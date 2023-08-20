@@ -7,20 +7,20 @@ import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d as p3d
 import matplotlib as mpl
 from matplotlib.ticker import EngFormatter as eform
-from matplotlib.animation import ArtistAnimation, FFMpegWriter
+# from matplotlib.animation import ArtistAnimation, FFMpegWriter
 import numpy as np
-import numba as nb
+# import numba as nb
 # from scipy.interpolate import interp2d
 from scipy.sparse import tril
 import os
-
+from matplotlib.cm import ScalarMappable as ScalarMap
 # import cmasher as cmr
 
 # import matplotlib.tri as tri
 from mpl_toolkits.axes_grid1 import AxesGrid
 from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes, mark_inset
 
-import pickle
+# import pickle
 import pandas
 
 from . import util
@@ -30,22 +30,40 @@ from .AAnimation import AAnimation, FWriter
 
 MAX_LOG_SPAN = 2
 
-# colors.useDarkStyle()
+def engineering_ticks(axis, xunit=None, yunit=None):
+    """
+    Set axis to use engineering (SI) notation.
 
-
-def engineerTicks(axis, xunit=None, yunit=None):
+    Parameters
+    ----------
+    axis : :py:class:`matplotlib.axes.Axes`
+        Axes to format
+    xunit : str, optional
+        Displayed unit for x axis, by default None
+    yunit : str, optional
+        Displayed unit for y axis, by default None
+    """    
     if xunit is not None:
         axis.xaxis.set_major_formatter(eform(xunit, places=0))
     if yunit is not None:
         axis.yaxis.set_major_formatter(eform(yunit, places=0))
 
-# def relabelLegend(axis, labels):
-#     h,l = axis.get_legend_handles_labels()
-#     axis.legend
-
-
+# TODO: document better
 class TimingBar:
-    def __init__(self, figure, axis, data=None):
+    def __init__(self, figure, axis=None, data=None):
+        """
+        Create timing bar in figures
+
+        Parameters
+        ----------
+        figure : :py:class:`matplotlib.figure.Figure`
+            Figure containing timing bar
+        axis : :py:class:`matplotlib.axes.Axes`
+            Axes to place timing bar in. Adds subplot if None (default).
+        data : array-like or dict, optional
+            Array of y-values, or dict with additional fields., by default 
+            None
+        """        
         self.maxtime = np.inf
         self.fig = figure
         self.axes = []
@@ -65,9 +83,6 @@ class TimingBar:
 
             if 'style' in data:
                 if data['style'] != 'sweep':
-                    # ymin=min(data['y'])
-                    # ymax=max(data['y'])
-                    # ax.set_ylim(ymin,ymax)
                     if data['style'] == 'dot':
                         alpha = 0.5
                     else:
@@ -87,9 +102,24 @@ class TimingBar:
         else:
             ax.yaxis.set_visible(False)
 
-    def getArt(self, time, step=None):
+    def get_artists(self, time, step=None):
+        """
+        Get artists for timing bar at given time
+
+        Parameters
+        ----------
+        time : float
+            Time in seconds to generate bar
+        step : int, optional
+            Index of timestep stored in .data, by default None
+            (use value of time)
+
+        Returns
+        -------
+        list of artists
+            List of artists
+        """        
         ax = self.axes[0]
-        ymin, ymax = ax.get_ylim()
         art = []
 
         if step is not None and self.data is not None:
@@ -110,244 +140,213 @@ class TimingBar:
                                       s=2.))
 
         else:
-            # art.append(ax.vlines(time, .8*ymin, .8*ymax,
-            #                      colors='C0',
-            #                      linewidths=1.5))
             art.append(ax.barh(0, time, color='C0')[0])
 
         return art
 
+# TODO: remove unused
+# class DataPrefs:
+#     def __init__(self, name,
+#                  dataSource=None,
+#                  scaleStyle=None,
+#                  cmap=None,
+#                  norm=None,
+#                  colors=None):
+#         self.name = name
+#         self.dataSource = dataSource
+#         self.scaleStyle = scaleStyle
+#         self.cmap = cmap
+#         self.norm = norm
+#         self.colors = colors
+#         self.range = ScaleRange()
+#         self.scaleViz = None
+#         self.dataViz = None
+#
+#     def updateRange(self, newVals):
+#         self.range.update(newVals)
+#
+#     def applyPrefs(self, axis, data):
+#         self.updateRange(data)
+#         plotargs = {}
+#
+#         if self.scaleStyle == 'legend':
+#             if self.colors is None:
+#                 self.colors = discrete_legend(axis, data)
+#             plotargs['colors'] = self.colors
+#
+#         if self.scaleStyle == 'colorbar':
+#             if self.cmap is None:
+#                 cmap, cnorm = get_cmap(data)
+#             else:
+#                 cmap = self.cmap
+#                 cnorm = self.norm
+#             plotargs['cmap'] = cmap
+#             plotargs['norm'] = cnorm
+#
+#         return plotargs
 
-class DataPrefs:
-    def __init__(self, name,
-                 dataSource=None,
-                 scaleStyle=None,
-                 cmap=None,
-                 norm=None,
-                 colors=None):
-        self.name = name
-        self.dataSource = dataSource
-        self.scaleStyle = scaleStyle
-        self.cmap = cmap
-        self.norm = norm
-        self.colors = colors
-        self.range = ScaleRange()
-        self.scaleViz = None
-        self.dataViz = None
-
-    def updateRange(self, newVals):
-        self.range.update(newVals)
-
-    def applyPrefs(self, axis, data):
-        self.updateRange(data)
-        plotargs = {}
-
-        if self.scaleStyle == 'legend':
-            if self.colors is None:
-                self.colors = discreteLegend(axis, data)
-            plotargs['colors'] = self.colors
-
-        if self.scaleStyle == 'colorbar':
-            if self.cmap is None:
-                cmap, cnorm = getCmap(data)
-            else:
-                cmap = self.cmap
-                cnorm = self.norm
-            plotargs['cmap'] = cmap
-            plotargs['norm'] = cnorm
-
-            # plt.colorbar(mpl.cm.ScalarMappable(**plotargs),
-            #              ax=axis)
-
-        return plotargs
-
-
-class DisplayPrefs:
-    def __init__(self, nodePrefs=None,
-                 edgePrefs=None,
-                 imgPrefs=None):
-        if nodePrefs is None:
-            nodePrefs = DataPrefs('nodePrefs')
-        if edgePrefs is None:
-            edgePrefs = DataPrefs('edgePrefs')
-        if imgPrefs is None:
-            imgPrefs = DataPrefs('imgPrefs')
-
-        self.nodePrefs = nodePrefs
-        self.edgePrefs = edgePrefs
-        self.imgPrefs = imgPrefs
-
-
-class SliceViewer:
-    def __init__(self, axis, sim, displayPrefs=None, topoType='mesh'):
-        if axis is None:
-            self.fig = plt.figure()
-            self.axes = [self.fig.add_subplot()]
-        else:
-            self.axes = [axis]
-            self.fig = axis.figure
-
-        self.fig.canvas.mpl_connect('key_press_event', self.onKey)
-        self.sim = sim
-        self.nLevels = 0
-
-        formatXYAxis(self.axes[0], bounds=None)
-        self.topoType = topoType
-
-        self.setPlane()
-
-        if displayPrefs is None:
-            displayPrefs = DisplayPrefs()
-
-        self.prefs = displayPrefs
-        self.edgeData = None
-        self.nodeData = None
-        self.edgeArtist = None
-        self.nodeArtist = None
-        self.edgeScaleViz = None
-        self.nodeScaleViz = None
-        # self.edgeColors=[]
-        # self.nodeColors=[]
-
-    def changeData(self, newSim):
-        self.sim = newSim
-
-        self.setPlane(self.normAxis, self.planeZ)
-
-    def setPlane(self, normalAxis=2, normCoord=0, showAll=False):
-
-        coords = self.sim.getCoords(self.topoType)
-        ic = self.sim.intifyCoords(coords)
-        self.intCoord = ic
-
-        pointCart = np.zeros(3)
-        pointCart[normalAxis] = normCoord
-
-        levelIndex = self.sim.intifyCoords(pointCart)[normalAxis]
-        self.lvlIndex = levelIndex
-        # self.nLevels=np.unique(ic[:,normalAxis]).shape[0]
-        self.nLevels = max(ic[:, normalAxis])
-
-        self.normAxis = normalAxis
-        self.__setmask(showAll)
-
-    def movePlane(self, stepAmount):
-        self.lvlIndex += stepAmount
-        self.__setmask()
-
-    def __setmask(self, showAll=False):
-        axNames = ['x', 'y', 'z']
-        axlist = np.arange(3)
-
-        coords = self.sim.getCoords(self.topoType)
-        otherAxes = axlist != self.normAxis
-
-        if showAll:
-            inPlane = np.ones(self.intCoord.shape[0], dtype=np.bool_)
-        else:
-            inPlane = self.intCoord[:, self.normAxis] == self.lvlIndex
-        zval = coords[inPlane, self.normAxis][0]
-        self.planeZ = zval
-        self.nInPlane = inPlane
-
-        self.xyCoords = coords[:, otherAxes]
-        self.zCoords = coords[:, ~otherAxes].squeeze()
-        self.pCoords = self.xyCoords[inPlane]
-
-        # graph formatting
-        xyNames = [axNames[i]+" [m]" for i in axlist[otherAxes]]
-        titleStr = axNames[self.normAxis]+"=%.2g" % zval
-        self.axes[0].set_xlabel(xyNames[0])
-        self.axes[0].set_ylabel(xyNames[1])
-        self.axes[0].set_title(titleStr)
-
-        bndInds = [d+3*ii for d in axlist[otherAxes] for ii in range(2)]
-        bnds = self.sim.mesh.bbox[bndInds]
-        self.axes[0].set_xlim(bnds[0], bnds[1])
-        self.axes[0].set_ylim(bnds[2], bnds[3])
-
-    def showEdges(self, connAngle=None, colors=None, **kwargs):
-        # edge=self.sim.getEdges(self.topoType)
-        # edgeMask=self.nInPlane[edge]
-        # edgeInPlane=np.all(edgeMask,axis=1)
-
-        # planeEdges=edge[edgeInPlane]
-
-        # edgePts=toEdgePoints(self.xyCoords, planeEdges)
-
-        _, _, edgePts = self.sim.getElementsInPlane(self.normAxis, self.planeZ)
-
-        # if colors is not None:
-        #     colors=colors[edgeInPlane]
-
-        art = showEdges2d(self.axes[0],
-                          edgePts,
-                          colors,
-                          **kwargs)
-
-        # if connAngle is not None:
-        #     edgeAdjacent=np.logical_xor(edgeMask[:,0],
-        #                                 edgeMask[:,1])
-        #     dz=np.array(self.zCoords-self.planeZ,
-        #                 ndmin=2).transpose()
-
-        #     skew=np.matmul(dz,
-        #                    np.array([np.cos(connAngle),np.sin(connAngle)],
-        #                             ndmin=2))
-        #     skewPoints=toEdgePoints(self.xyCoords+skew,
-        #                             self.sim.getEdges()[edgeAdjacent])
-        #     showEdges2d(self.axes[0], skewPoints, colors, **kwargs)
-
-        return art
-
-    def showNodes(self, nodeVals, colors=None, **kwargs):
-
-        x, y = np.hsplit(self.pCoords, 2)
-
-        if colors is not None:
-            art = self.axes[0].scatter(x, y,
-                                       color=colors[self.nInPlane],
-                                       **kwargs)
-        else:
-            if nodeVals is not None:
-                vals = nodeVals[self.nInPlane]
-            else:
-                vals = 'k'
-            art = self.axes[0].scatter(x, y, c=vals, **kwargs)
-
-        return art
-
-    def __drawSet(self):
-        # keep limits on redraw
-        undrawAxis(self.axes[0])
-
-        if self.prefs.edgePrefs.name is not None:
-            plotprefs = self.prefs.edgePrefs.applyPrefs(
-                self.axes[0], self.edgeData)
-            self.edgeArtist = self.showEdges(**plotprefs)
-
-        if self.prefs.nodePrefs.name is not None:
-            plotprefs = self.prefs.nodePrefs.applyPrefs(
-                self.axes[0], self.nodeData)
-            self.nodeArtist = self.showNodes(self.nodeData, **plotprefs)
-
-        self.fig.canvas.draw()
-
-    def onKey(self, event):
-        step = None
-        if event.key == 'up':
-            if self.lvlIndex < self.nLevels:
-                step = 1
-        if event.key == 'down':
-            if self.lvlIndex > 0:
-                step = -1
-
-        if step is not None:
-            self.movePlane(step)
-            self.__drawSet()
+# TODO: remove unused
+# class DisplayPrefs:
+#     def __init__(self, nodePrefs=None,
+#                  edgePrefs=None,
+#                  imgPrefs=None):
+#         if nodePrefs is None:
+#             nodePrefs = DataPrefs('nodePrefs')
+#         if edgePrefs is None:
+#             edgePrefs = DataPrefs('edgePrefs')
+#         if imgPrefs is None:
+#             imgPrefs = DataPrefs('imgPrefs')
+# 
+#         self.nodePrefs = nodePrefs
+#         self.edgePrefs = edgePrefs
+#         self.imgPrefs = imgPrefs
+#
+#
+# class SliceViewer:
+#     def __init__(self, axis, sim, displayPrefs=None, topoType='mesh'):
+#         if axis is None:
+#             self.fig = plt.figure()
+#             self.axes = [self.fig.add_subplot()]
+#         else:
+#             self.axes = [axis]
+#             self.fig = axis.figure
+#
+#         self.fig.canvas.mpl_connect('key_press_event', self._on_key)
+#         self.sim = sim
+#         self.nLevels = 0
+#
+#         format_xy_axis(self.axes[0], bounds=None)
+#         self.topoType = topoType
+#
+#         self.setPlane()
+#
+#         if displayPrefs is None:
+#             displayPrefs = DisplayPrefs()
+#
+#         self.prefs = displayPrefs
+#         self.edgeData = None
+#         self.nodeData = None
+#         self.edgeArtist = None
+#         self.nodeArtist = None
+#         self.edgeScaleViz = None
+#         self.nodeScaleViz = None
+#
+#
+#     def changeData(self, newSim):
+#         self.sim = newSim
+#
+#         self.setPlane(self.normAxis, self.planeZ)
+#
+#     def setPlane(self, normal_axis=2, normCoord=0, showAll=False):
+#
+#         coords = self.sim.get_coordinates_in_order(self.topoType)
+#         ic = self.sim.intify_coords(coords)
+#         self.intCoord = ic
+#
+#         pointCart = np.zeros(3)
+#         pointCart[normal_axis] = normCoord
+#
+#         levelIndex = self.sim.intify_coords(pointCart)[normal_axis]
+#         self.lvlIndex = levelIndex
+#         self.nLevels = max(ic[:, normal_axis])
+#
+#         self.normAxis = normal_axis
+#         self.__setmask(showAll)
+#
+#     def movePlane(self, stepAmount):
+#         self.lvlIndex += stepAmount
+#         self.__setmask()
+#
+#     def __setmask(self, showAll=False):
+#         axNames = ['x', 'y', 'z']
+#         axlist = np.arange(3)
+#
+#         coords = self.sim.get_coordinates_in_order(self.topoType)
+#         otherAxes = axlist != self.normAxis
+#
+#         if showAll:
+#             inPlane = np.ones(self.intCoord.shape[0], dtype=np.bool_)
+#         else:
+#             inPlane = self.intCoord[:, self.normAxis] == self.lvlIndex
+#         zval = coords[inPlane, self.normAxis][0]
+#         self.planeZ = zval
+#         self.nInPlane = inPlane
+#
+#         self.xyCoords = coords[:, otherAxes]
+#         self.zCoords = coords[:, ~otherAxes].squeeze()
+#         self.pCoords = self.xyCoords[inPlane]
+#
+#         # graph formatting
+#         xyNames = [axNames[i]+" [m]" for i in axlist[otherAxes]]
+#         titleStr = axNames[self.normAxis]+"=%.2g" % zval
+#         self.axes[0].set_xlabel(xyNames[0])
+#         self.axes[0].set_ylabel(xyNames[1])
+#         self.axes[0].set_title(titleStr)
+#
+#         bndInds = [d+3*ii for d in axlist[otherAxes] for ii in range(2)]
+#         bnds = self.sim.mesh.bbox[bndInds]
+#         self.axes[0].set_xlim(bnds[0], bnds[1])
+#         self.axes[0].set_ylim(bnds[2], bnds[3])
+#
+#     def show_3d_edges(self, connAngle=None, colors=None, **kwargs):
+#
+#         _, _, edgePts = self.sim.get_elements_in_plane(self.normAxis, self.planeZ)
+#
+#         art = show_2d_edges(self.axes[0],
+#                           edgePts,
+#                           colors,
+#                           **kwargs)
+#
+#         return art
+#
+#     def show_nodes(self, node_values, colors=None, **kwargs):
+#
+#         x, y = np.hsplit(self.pCoords, 2)
+#
+#         if colors is not None:
+#             art = self.axes[0].scatter(x, y,
+#                                        color=colors[self.nInPlane],
+#                                        **kwargs)
+#         else:
+#             if node_values is not None:
+#                 vals = node_values[self.nInPlane]
+#             else:
+#                 vals = 'k'
+#             art = self.axes[0].scatter(x, y, c=vals, **kwargs)
+#
+#         return art
+#
+#     def _draw_set(self):
+#         # keep limits on redraw
+#         undraw_axis(self.axes[0])
+#
+#         if self.prefs.edgePrefs.name is not None:
+#             plotprefs = self.prefs.edgePrefs.applyPrefs(
+#                 self.axes[0], self.edgeData)
+#             self.edgeArtist = self.show_3d_edges(**plotprefs)
+#
+#         if self.prefs.nodePrefs.name is not None:
+#             plotprefs = self.prefs.nodePrefs.applyPrefs(
+#                 self.axes[0], self.nodeData)
+#             self.nodeArtist = self.show_nodes(self.nodeData, **plotprefs)
+#
+#         self.fig.canvas.draw()
+#
+#     def _on_key(self, event):
+#         step = None
+#         if event.key == 'up':
+#             if self.lvlIndex < self.nLevels:
+#                 step = 1
+#         if event.key == 'down':
+#             if self.lvlIndex > 0:
+#                 step = -1
+#
+#         if step is not None:
+#             self.movePlane(step)
+#             self._draw_set()
 
 
-def discreteColors(values, legendStem='n='):
+def make_discrete_colors(values, legend_stem='n='):
     """
     Generate colors for discrete (categorical) data.
 
@@ -355,14 +354,14 @@ def discreteColors(values, legendStem='n='):
     ----------
     values : array of numeric
         Non-unique values to be color-coded.
-    legendStem : string, optional
+    legend_stem : string, optional
         Text preceding category values in legend. The default is 'n='.
 
     Returns
     -------
-    valColors : 2d array
+    colors : 2d array
         Colors assigned to each input value.
-    legEntries : list of matplotlib Patch
+    handles : :py:class:`matplotlib.patches.Patch`
         Dummy objects to generate color legend
         [with legend(handles=legEntry)].
 
@@ -375,26 +374,25 @@ def discreteColors(values, legendStem='n='):
     else:
         colSet = mpl.cm.get_cmap('tab20').colors
 
-    valColors = np.array(colSet)[colMap]
+    colors = np.array(colSet)[colMap]
 
-    legEntries = [mpl.patches.Patch(color=colSet[ii],
-                                    label=legendStem+'%d' % colVals[ii])
+    handles = [mpl.patches.Patch(color=colSet[ii],
+                                    label=legend_stem+'%d' % colVals[ii])
                   for ii in range(colVals.shape[0])]
 
-    return valColors, legEntries
+    return colors, handles
 
-
-def discreteLegend(axis, data, legendStem='n=', **kwargs):
+def discrete_legend(axis, data, legend_stem='n=', **kwargs):
     """
     Color-code data and generate corresponding legend.
 
     Parameters
     ----------
-    axis : matplotlib Axes
+    axis : :py:class:`matplotlib.axes.Axes`
         Axes to place legend in.
     data : numeric
         Data to be color-coded.
-    legendStem : string, optional
+    legend_stem : string, optional
         Legend text preceding values. The default is 'n='.
 
     Returns
@@ -403,50 +401,50 @@ def discreteLegend(axis, data, legendStem='n=', **kwargs):
         Color corresponding to value of each data point.
 
     """
-    colors, handles = discreteColors(data, legendStem)
+    colors, handles = make_discrete_colors(data, legend_stem)
     axis.legend(handles=handles, **kwargs)
 
     return colors
 
-
-class SortaLogNorm(mpl.colors.SymLogNorm):
-    def __init__(self, linthresh, linscale=0.1, vmin=None, vmax=None, clip=False):
-        super().__init__(linthresh, linscale=linscale, vmin=None, vmax=None, clip=False)
-
-    def __call__(self, value, clip=None):
-        # I'm ignoring masked values and all kinds of edge cases to make a
-        # simple example...
-        # Note also that we must extrapolate beyond vmin/vmax
-        aval = np.abs(value)
-        logval = np.sign(value)*np.log10(aval)
-
-        x = [-np.log10(self.linthresh), 0,
-             np.log10(self.linthresh), np.log10(self.vmax)]
-        y = [0, 0.5*self.linscale, self.linscale, 1]
-
-        return np.ma.masked_array(np.interp(logval, x, y,
-                                            left=-np.inf, right=np.inf))
-
-    def inverse(self, value):
-        y = [-np.log10(self.linthresh), 0,
-             np.log10(self.linthresh), np.log10(self.vmax)]
-        x = [0, 0.5*self.linscale, self.linscale, 1]
-
-        # sign=np.ones_like(value)-np.array(value<(0.5*self.linscale))
-
-        return np.interp(value, x, y, left=-np.inf, right=np.inf)
+# TODO: remove unused
+# class SortaLogNorm(mpl.colors.SymLogNorm):
+#     def __init__(self, linthreshold, linscale=0.1, vmin=None, vmax=None, clip=False):
+#         super().__init__(linthreshold, linscale=linscale, vmin=None, vmax=None, clip=False)
+#
+#     def __call__(self, value, clip=None):
+#         # I'm ignoring masked values and all kinds of edge cases to make a
+#         # simple example...
+#         # Note also that we must extrapolate beyond vmin/vmax
+#         aval = np.abs(value)
+#         logval = np.sign(value)*np.log10(aval)
+#
+#         x = [-np.log10(self.linthreshold), 0,
+#              np.log10(self.linthreshold), np.log10(self.vmax)]
+#         y = [0, 0.5*self.linscale, self.linscale, 1]
+#
+#         return np.ma.masked_array(np.interp(logval, x, y,
+#                                             left=-np.inf, right=np.inf))
+#
+#     def inverse(self, value):
+#         y = [-np.log10(self.linthreshold), 0,
+#              np.log10(self.linthreshold), np.log10(self.vmax)]
+#         x = [0, 0.5*self.linscale, self.linscale, 1]
+#
+#         return np.interp(value, x, y, left=-np.inf, right=np.inf)
 
 
-def formatXYAxis(axis, bounds=None, symlog=False, lindist=None, axlabels=False, xlabel='X [m]', ylabel='Y [m]'):
+def format_xy_axis(axis, bounds=None, symlog=False, lindist=None, 
+                   axlabels=False, xlabel='X [m]', ylabel='Y [m]'):
     """
     Set up axis for planar slices of 3d space.
 
     Parameters
     ----------
-    axis : matplotlib Axes
+    axis : :py:class:`matplotlib.axes.Axes`
         Axes to format.
-    bounds : TYPE, optional
-        Explicit limits for axes, [xmin, xmax, ymin, ymax]. The default is None.
+    bounds : float[4], optional
+        Explicit limits for axes, [xmin, xmax, ymin, ymax]. The default is 
+        None.
     symlog : bool, optional
         Use symmetric log scales, or linear if None. The default is None.
     lindist : float, optional
@@ -462,9 +460,8 @@ def formatXYAxis(axis, bounds=None, symlog=False, lindist=None, axlabels=False, 
 
     """
     axis.set_aspect('equal')
-    engform = mpl.ticker.EngFormatter('m')
-    axis.xaxis.set_major_formatter(engform)
-    axis.yaxis.set_major_formatter(engform)
+    axis.xaxis.set_major_formatter(eform('m'))
+    axis.yaxis.set_major_formatter(eform('m'))
 
     if axlabels:
         axis.set_xlabel(xlabel)
@@ -487,13 +484,13 @@ def formatXYAxis(axis, bounds=None, symlog=False, lindist=None, axlabels=False, 
         axis.set_yscale('symlog', linthresh=lindist)
 
 
-def undrawAxis(axis):
+def undraw_axis(axis):
     """
     Remove contents from axis, preserving scale/labels/ticks.
 
     Parameters
     ----------
-    axis : matplotlib Axes
+    axis : :py:class:`matplotlib.axes.Axes`
         Axes to clear.
 
     Returns
@@ -510,120 +507,201 @@ def undrawAxis(axis):
     axis.set_xlim(xlim)
     axis.set_ylim(ylim)
 
+# TODO: remove unused
+# def plotBoundEffect(fname, y_category='FVU', x_category='Domain size', 
+# groupby='Number of elements', legstem='%d elements'):
+#     dframe, _ = import_logfile(fname)
+#     dX = dframe[x_category]
+#     dEl = dframe[groupby]
+#     yval = dframe[y_category]
+#     l0 = np.array([x/(n**(1/3)) for x, n in zip(dX, dEl)])
+#
+#     sizes = np.unique(dEl)
+#     nSizes = len(sizes)
+#     labs = [legstem % n for n in sizes]
+#
+#     def makePlot(xvals, xlabel):
+#         plt.figure()
+#         ax = plt.gca()
+#         ax.set_title('Simulation accuracy, uniform mesh')
+#         ax.grid(True)
+#         ax.set_ylabel('FVU')
+#         ax.set_xlabel(xlabel)
+#         outsideLegend()
+#         for ii in range(nSizes):
+#             sel = dEl == sizes[ii]
+#             plt.loglog(xvals[sel], yval[sel], marker='.', label=labs[ii])
+#
+#         outsideLegend()
+#         plt.tight_layout()
+#
+#     makePlot(dX, 'Domain size [m]')
+#     makePlot(l0, 'Element $l_0$ [m]')
 
-def plotBoundEffect(fname, ycat='FVU', xcat='Domain size', groupby='Number of elements', legstem='%d elements'):
-    dframe, _ = importRunset(fname)
-    dX = dframe[xcat]
-    dEl = dframe[groupby]
-    yval = dframe[ycat]
-    l0 = np.array([x/(n**(1/3)) for x, n in zip(dX, dEl)])
 
-    sizes = np.unique(dEl)
-    nSizes = len(sizes)
-    labs = [legstem % n for n in sizes]
+def grouped_scatter(fname, x_category, y_category, group_category, df=None, 
+                    ax=None, **kwargs):
+    """
+    Plot study summary data from logfile, grouped by category key.
 
-    def makePlot(xvals, xlabel):
-        plt.figure()
-        ax = plt.gca()
-        ax.set_title('Simulation accuracy, uniform mesh')
-        ax.grid(True)
-        ax.set_ylabel('FVU')
-        ax.set_xlabel(xlabel)
-        outsideLegend()
-        for ii in range(nSizes):
-            sel = dEl == sizes[ii]
-            plt.loglog(xvals[sel], yval[sel], marker='.', label=labs[ii])
-
-        outsideLegend()
-        plt.tight_layout()
-
-    makePlot(dX, 'Domain size [m]')
-    makePlot(l0, 'Element $l_0$ [m]')
-
-
-def groupedScatter(fname, xcat, ycat, groupcat, filtercat=None, df=None, ax=None, **kwargs):
+    Parameters
+    ----------
+    fname : string
+        Filename to read from
+    x_category : string
+        Key for x-axis quantity
+    y_category : string
+        Key for y-axis quantity
+    group_category : string
+        Key to group simulations by
+    df : pandas dataframe, optional
+        Dataset to query, replaced by contents of fname if None (default)
+    ax : :py:class:`matplotlib.axes.Axes`, optional
+        Axes to plot on, or create new figure if None (default)
+    **kwargs : dict, optional
+        Arguments to pass to :py:function:`matplotlib.pyplot.plot`
+    """    
     if df is None:
-        df, cats = importRunset(fname)
+        df, cats = import_logfile(fname)
     else:
         cats = df.keys()
 
-    dX = df[xcat]
-    dY = df[ycat]
-    dL = df[groupcat]
+    dX = df[x_category]
+    dY = df[y_category]
+    dL = df[group_category]
 
     catNames = dL.unique()
 
     if ax is None:
         ax = plt.figure().add_subplot()
     ax.grid(True)
-    ax.set_xlabel(xcat)
-    ax.set_ylabel(ycat)
-    # outsideLegend()
+    ax.set_xlabel(x_category)
+    ax.set_ylabel(y_category)
     for ii, label in enumerate(catNames):
         sel = dL == label
         ax.loglog(dX[sel], dY[sel], marker='.',
-                  label=groupcat+':\n'+str(label), **kwargs)
+                  label=group_category+':\n'+str(label), **kwargs)
 
-    # outsideLegend()
-    # ax.legend()
     plt.tight_layout()
 
+# TODO: merge with study.load_logfile
+def import_logfile(fname):
+    """
+    Import .csv logfile to pandas dataframe
 
-def importRunset(fname):
+    Parameters
+    ----------
+    fname : string
+        Name of file to read
+
+    Returns
+    -------
+    df : pandas dataframe
+        Imported data
+    cats : strings
+        Category labels
+    """
     df = pandas.read_csv(fname)
     cats = df.keys()
 
     return df, cats
 
 
-def plotStudyPerformance(study, **kwargs):
+def plot_study_performance(study, plot_ratios=False, **kwargs):
+    """
+    Plot breakdown of computational time.
+
+    Parameters
+    ----------
+    study : `.Study`
+        Study to analyize
+    plot_ratios : bool, optional
+        Whether to plot the ratios of CPU to wall time, by default False
+
+    Returns
+    -------
+    figs : list of :py:class:`matplotlib.figures.Figure`
+        Output figures
+    """
     fig1, axes = plt.subplots(2, 1)
-    fn = study.studyPath+'/log.csv'
+    figs = [fig1]
+    fn = study.study_path+'/log.csv'
 
     for ax, ttype in zip(axes, ['Wall', 'CPU']):
-        importAndPlotTimes(fn, ttype, ax, **kwargs)
+        import_and_plot_times(fn, ttype, ax, **kwargs)
 
-    fig2, _ = importAndPlotTimes(fn, timeType='Ratio', ax=None, **kwargs)
+    if plot_ratios:
+        fig2, _ = import_and_plot_times(fn, time_type='Ratio', ax=None, 
+                                        **kwargs)
+        figs.append(fig2)
 
-    return [fig1, fig2]
+    return figs
+
+# TODO: remove unused
+# def errorCompositePlot(data, sortCat, labels=None):
+#
+#     f = plt.figure(figsize=[6.5, 8])
+#     axes = f.subplots(2)
+#
+#     sortVals = np.unique(data[sortCat])
+#     ntraces = len(sortVals)
+#
+#     for a, x_category in zip(axes, ['Number of elements', 'Total time [Wall]']):
+#         a.set_xlabel(x_category)
+#         a.set_ylabel('Error')
+#         for ii, trace in enumerate(sortVals):
+#             toPlot = data[sortCat] == trace
+#             if x_category[0] == 'T':
+#                 toPlot[:ntraces] = False
+#             x = data[x_category][toPlot]
+#             y = data['Error'][toPlot]
+#
+#             if labels is None:
+#                 label = trace
+#             else:
+#                 label = labels[ii]
+#
+#             a.loglog(x, y, label=label)
+#
+#     axes[0].legend()
 
 
-def errorCompositePlot(data, sortCat, labels=None):
+def import_and_plot_times(fname, time_type='Wall', ax=None, 
+                          only_category=None, only_value=None, 
+                          x_category='Number of elements', **kwargs):
+    """
+    Generate plots of step duration from study logfile.
 
-    f = plt.figure(figsize=[6.5, 8])
-    axes = f.subplots(2)
+    Parameters
+    ----------
+    fname : string
+        Name of logfile to import from
+    time_type : string, optional
+        Plot 'Wall' (default) or 'CPU' time
+    ax : :py:class:`matplotlib.axes.Axes`, optional
+        Axes to plot in, or create new figure if None (default)
+    only_category : string, optional
+        Category in dataset to filter by, or use all if None (default)
+    only_value : any, optional
+        Plot only simulations whose only_category matches this value, or 
+        use all if None (default)
+    x_category : string, optional
+        Category to use for x-axis values, by default 'Number of elements'
+    **kwargs : dict, optional
+        Arguments passed to :py:function:`matplotlib.pyplot.plot`
 
-    sortVals = np.unique(data[sortCat])
-    ntraces = len(sortVals)
+    Returns
+    -------
+    (fig, ax)
+        Figure and axes objects of plot
+    """
+    df, cats = import_logfile(fname)
+    if only_value is not None:
+        df = df[df[only_category] == only_value]
 
-    for a, xcat in zip(axes, ['Number of elements', 'Total time [Wall]']):
-        a.set_xlabel(xcat)
-        a.set_ylabel('Error')
-        for ii, trace in enumerate(sortVals):
-            toPlot = data[sortCat] == trace
-            if xcat[0] == 'T':
-                toPlot[:ntraces] = False
-            x = data[xcat][toPlot]
-            y = data['Error'][toPlot]
+    xvals = df[x_category].to_numpy()
 
-            if labels is None:
-                label = trace
-            else:
-                label = labels[ii]
-
-            a.loglog(x, y, label=label)
-
-    axes[0].legend()
-
-
-def importAndPlotTimes(fname, timeType='Wall', ax=None, onlyCat=None, onlyVal=None, xCat='Number of elements', **kwargs):
-    df, cats = importRunset(fname)
-    if onlyVal is not None:
-        df = df[df[onlyCat] == onlyVal]
-
-    xvals = df[xCat].to_numpy()
-
-    if timeType == 'Ratio':
+    if time_type == 'Ratio':
         cwall = [c for c in cats if c.find('Wall') > 0]
         cCPU = [c for c in cats if c.find('CPU') > 0]
         tcpu = df[cCPU].to_numpy().transpose()
@@ -634,10 +712,10 @@ def importAndPlotTimes(fname, timeType='Wall', ax=None, onlyCat=None, onlyVal=No
 
     else:
         tcols = [c for c in cats if c.find(
-            timeType) > 0 and c.find('Total') < 0]
+            time_type) > 0 and c.find('Total') < 0]
 
         stepTimes = df[tcols].to_numpy().transpose()
-    stepNames = [c[:c.find('[')-1] for c in tcols]
+    step_names = [c[:c.find('[')-1] for c in tcols]
 
     if ax is None:
         fig = plt.figure()
@@ -645,70 +723,56 @@ def importAndPlotTimes(fname, timeType='Wall', ax=None, onlyCat=None, onlyVal=No
     else:
         fig = ax.figure
 
-    if timeType == 'Ratio':
-        for val, lbl in zip(stepTimes, stepNames):
+    if time_type == 'Ratio':
+        for val, lbl in zip(stepTimes, step_names):
             ax.plot(xvals, val, label=lbl, **kwargs)
 
         ax.set_ylabel('Estimated parallel speedup')
-        ax.set_xlabel(xCat)
-        # outsideLegend(ax)
+        ax.set_xlabel(x_category)
         ax.set_yscale('log')
-        ax.xaxis.set_major_formatter(mpl.ticker.EngFormatter())
+        ax.xaxis.set_major_formatter(eform())
 
     else:
-        stackedTimePlot(ax, xvals, stepTimes, stepNames, **kwargs)
-        ax.set_xlabel(xCat)
-        ax.set_ylabel(timeType+" time [s]")
+        _stacked_time_plot(ax, xvals, stepTimes, step_names, **kwargs)
+        ax.set_xlabel(x_category)
+        ax.set_ylabel(time_type+" time [s]")
 
     ax.figure.tight_layout()
 
     return fig, ax
 
 
-def stackedTimePlot(axis, xvals, stepTimes, stepNames, **kwargs):
-
-    # if hatch:
-    #     nval = len(stepNames)
-    #     hatchopts = ['|', '-', '.', '/', '*', '\\']
-    #     nopt = len(hatchopts)
-    #     hatches = hatchopts*(nval//nopt)+hatchopts[:nval % nopt]
-    # else:
-    #     hatches = None
+def _stacked_time_plot(axis, xvals, stepTimes, step_names, **kwargs):
 
     blobs = axis.stackplot(xvals, stepTimes, baseline='zero',
-                           labels=stepNames, **kwargs)
+                           labels=step_names, **kwargs)
 
     if 'hatch' in kwargs:
         for b, h in zip(blobs, kwargs['hatch']):
             b.set_hatch(h)
-    # plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
-    # outsideLegend(axis)
-    # axis.figure.tight_layout()
-    axis.xaxis.set_major_formatter(mpl.ticker.EngFormatter())
+
+    axis.xaxis.set_major_formatter(eform())
 
 
-def outsideLegend(axis=None, flipOrder=False, where='right', **kwargs):
+def outsideLegend(axis=None, reverse_order=False, where='right', **kwargs):
     """
-    Create legend outside of axes, at top right.
+    Create legend outside of axes.
 
     Parameters
     ----------
-    axis : matplotlib Axes, optional
-        DESCRIPTION. The default is None.
-    **kwargs : TYPE
-        Parameters passed to legend().
-
-    Returns
-    -------
-    None.
-
+    axis : :py:class:`matplotlib.axes.Axes`, optional
+        Axes to generate legend, or current axes if None (default)
+    reverse_order : bool, optional
+        Invert order of legend entries, by default False
+    where : str, optional
+        Placement of legend, either 'right' (default) or at bottom
     """
     if axis is None:
         axis = plt.gca()
 
     handles, labels = axis.get_legend_handles_labels()
 
-    if flipOrder:
+    if reverse_order:
         h = reversed(handles)
         l = reversed(labels)
     else:
@@ -730,20 +794,45 @@ def outsideLegend(axis=None, flipOrder=False, where='right', **kwargs):
     axis.legend(h, l, **legargs)
 
 
-def showEdges(axis, coords, edgeIndices, edgeVals=None, colorbar=True, **kwargs):
-    edgePts = [[coords[a, :], coords[b, :]] for a, b in edgeIndices]
+def show_3d_edges(axis, coords, edge_indices, edge_values=None, 
+                  colorbar=True, **kwargs):
+    """
+    Plot 3d view of mesh edges.
+
+    Parameters
+    ----------
+    axis : :py:class:`matplotlib.axes.Axes`
+        Axes to plot within.
+    coords : float[:,3]
+        Cartesian coordinates of mesh nodes
+    edge_indices : int[:,2]
+        Array-like where each row contains the two indices of the
+        edge's endpoints. 
+    edge_values : any, optional
+        Value assigned to each edge for coloration, e.g. 
+        conductances or current; by default None
+    colorbar : bool, optional
+        Whether to generate a colorbar for the edge data, 
+        by default True
+
+    Returns
+    -------
+    :py:class:`mpl_toolkits.mplot3d.art3d.Line3DCollection`
+        Artist collection for 3d lines
+    """
+    edgePts = [[coords[a, :], coords[b, :]] for a, b in edge_indices]
 
     if 'colors' in kwargs:
         pass
     else:
-        if edgeVals is not None:
-            (cMap, cNorm) = getCmap(edgeVals)
-            gColor = cMap(cNorm(edgeVals))
+        if edge_values is not None:
+            (colormap, color_norm) = get_cmap(edge_values)
+            gColor = colormap(color_norm(edge_values))
             kwargs['alpha'] = 1.
             kwargs['colors'] = gColor
             if colorbar:
                 axis.figure.colorbar(
-                    mpl.cm.ScalarMappable(norm=cNorm, cmap=cMap))
+                    ScalarMap(norm=color_norm, cmap=colormap))
 
         else:
 
@@ -757,7 +846,8 @@ def showEdges(axis, coords, edgeIndices, edgeVals=None, colorbar=True, **kwargs)
     return gCollection
 
 
-def showNodes3d(axis, coords, nodeVals, cMap=None, cNorm=None, colors=None, **kwargs):
+def show_3d_nodes(axis, coords, node_values, colormap=None, 
+                  color_norm=None, colors=None, **kwargs):
     """
     Show mesh nodes in 3d.
 
@@ -765,44 +855,47 @@ def showNodes3d(axis, coords, nodeVals, cMap=None, cNorm=None, colors=None, **kw
     ----------
     axis : maplotlib Axes
         Axes to plot on.
-    coords : array of cartesian coordinates
-        DESCRIPTION.
-    nodeVals : numeric array
+    coords : float[:,3]
+        Cartesian coordinates of points to plot.
+    node_values : numeric array
         Values to set node coloring.
-    cMap : colormap, optional
-        DESCRIPTION. The default is None.
-    cNorm : matplotlib Norm, optional
-        DESCRIPTION. The default is None.
-    colors : TYPE, optional
-        DESCRIPTION. The default is None.
+    colormap : colormap, optional
+        Colormap to use for node coloring. 
+        The default is None, which uses :py:function:`.get_cmap`.
+    color_norm : matplotlib Norm, optional
+        Norm to use for node coloring.
+        The default is None, which uses :py:function:`.get_cmap`.
+    colors : color-like array, optional
+        Color to use at each point, overriding colormap. 
+        The default is None, which sets colors by colormap and norm.
 
     Returns
     -------
-    scatterArt : TYPE
-        DESCRIPTION.
+    artists : :py:class:`matplotlib.collections.PathCollection`
+        Collection of point artists.
 
     """
 
     if axis is None:
         axis = plt.gca()
     if colors is None:
-        if cMap is None and cNorm is None:
-            (cMap, cNorm) = getCmap(nodeVals)
-        vColors = cMap(cNorm(nodeVals))
-        axis.figure.colorbar(mpl.cm.ScalarMappable(norm=cNorm, cmap=cMap))
+        if colormap is None and color_norm is None:
+            (colormap, color_norm) = get_cmap(node_values)
+        vColors = colormap(color_norm(node_values))
+        axis.figure.colorbar(ScalarMap(norm=color_norm, cmap=colormap))
 
     elif len(colors) == 0:
-        vColors = discreteLegend(axis, nodeVals)
+        vColors = discrete_legend(axis, node_values)
     else:
         vColors = colors
 
     x, y, z = np.hsplit(coords, 3)
 
-    scatterArt = axis.scatter3D(x, y, z, c=vColors, **kwargs)
-    return scatterArt
+    artists = axis.scatter3D(x, y, z, c=vColors, **kwargs)
+    return artists
 
 
-def getCmap(vals, forceBipolar=False, logscale=False):
+def get_cmap(vals, forceBipolar=False, logscale=False):
     """
     Get appropriate colormap for given continuous data.
 
@@ -824,9 +917,9 @@ def getCmap(vals, forceBipolar=False, logscale=False):
 
     Returns
     -------
-    cMap : colormap
+    colormap : colormap
         Selected colormap.
-    cNorm : matplotlib Norm
+    color_norm : matplotlib Norm
         Norm function to map data to (0,1) range of colormap.
 
     """
@@ -853,54 +946,62 @@ def getCmap(vals, forceBipolar=False, logscale=False):
     if (crosses and (0.05 < fracPos < 0.95)) or forceBipolar:
         # significant data on either side of zero; use symmetric
         amax = max(abs(mn), mx)
-        # cMap = mpl.cm.seismic.copy()
-        # clist=[[0.0, 0.0, 1.0, 1.0],
-        #        [0.5, 0.5, 1.0, 1.0],
-        #        [1.0, 1.0, 1.0, 0.0],
-        #        [1.0, 0.5, 0.5, 1.0],
-        #        [1.0, 0.0, 0.0, 1.0]]
-        # cMap=mpl.colors.LinearSegmentedColormap.from_list('biBR', clist)
-        cMap = colors.CM_BIPOLAR
+
+        colormap = colors.CM_BIPOLAR
         if logscale:
-            cNorm = mpl.colors.SymLogNorm(linthresh=knee,
+            color_norm = mpl.colors.SymLogNorm(linthresh=knee,
                                           vmin=-amax,
                                           vmax=amax)
         else:
-            cNorm = mpl.colors.CenteredNorm(halfrange=amax)
+            color_norm = mpl.colors.CenteredNorm(halfrange=amax)
     else:
         if fracPos > fracNeg:
-            cMap = colors.CM_MONO.copy()
+            colormap = colors.CM_MONO.copy()
         else:
-            cMap = colors.CM_MONO.reversed()
+            colormap = colors.CM_MONO.reversed()
 
         if logscale:
-            cNorm = mpl.colors.LogNorm(vmin=knee,
+            color_norm = mpl.colors.LogNorm(vmin=knee,
                                        vmax=mx)
 
         else:
-            # if mx>0:
-            #     cNorm = mpl.colors.Normalize(vmin=0, vmax=mx)
-            # else:
-            #     cNorm = mpl.colors.Normalize(vmin=mn, vmax=0)
-            cNorm = mpl.colors.Normalize(vmin=mn, vmax=mx)
-    return (cMap, cNorm)
+            color_norm = mpl.colors.Normalize(vmin=mn, vmax=mx)
+    return (colormap, color_norm)
 
 
-def new3dPlot(boundingBox=None, *args, fig=None):
-    """ Force 3d axes to same scale
-        Based on https://stackoverflow.com/a/13701747
+def new3dPlot(bounding_box=None, *args, fig=None):
+    """
+    Create 3d axes with equal scaling in x, y, and z.
+
+    Parameters
+    ----------
+    bounding_box : float[6], optional
+        Bounding box in xcell ordering (-x,-y,-z,+x,...).
+        If None, scale to (-1,+1) (default)
+    fig : _type_, optional
+        Figure to create axes in, or make new figure if None (default)
+
+    Returns
+    -------
+    :py:class:`matplotlib.axes.Axes`
+        Newly created 3d axes
+
+    Notes
+    -----------
+    Based on https://stackoverflow.com/a/13701747
+
     """
     if fig is None:
         fig = plt.figure()
 
-    if boundingBox is None:
-        boundingBox = np.array([-1, -1, -1, 1, 1, 1], dtype=np.float64)
+    if bounding_box is None:
+        bounding_box = np.array([-1, -1, -1, 1, 1, 1], dtype=np.float64)
 
     axis = fig.add_subplot(*args, projection='3d')
     axis.set_proj_type('ortho')
-    origin = boundingBox[:3]
-    span = boundingBox[3:]-origin
-    center = 0.5*(origin+boundingBox[3:])
+    origin = bounding_box[:3]
+    span = bounding_box[3:]-origin
+    center = 0.5*(origin+bounding_box[3:])
 
     max_range = max(span)
 
@@ -919,8 +1020,24 @@ def new3dPlot(boundingBox=None, *args, fig=None):
     return axis
 
 
-def animatedTitle(figure, text, axis=None, **kwargs):
-    # kwargs = {}
+def animated_title(figure, text, axis=None, **kwargs):
+    """
+    Create animation-ready title.
+
+    Parameters
+    ----------
+    figure : _type_
+        Figure to place title in (or assign to axis if None)
+    text : string
+        Text of title
+    axis : _type_, optional
+        Axes to title if figure is None, by default None
+
+    Returns
+    -------
+    :py:class:`matplotlib.text.Text`
+        Title artist
+    """
     if figure is None:
         dest = axis
         kwargs['transform'] = axis.transAxes
@@ -938,89 +1055,98 @@ def animatedTitle(figure, text, axis=None, **kwargs):
                       **kwargs)
     return title
 
+# TODO: remove unused
+# def equalizeScale(ax):
+#     """
+#     Force 3d axes to same scale.
+#
+#     Method based on https://stackoverflow.com/a/13701747
+#
+#     Parameters
+#     ----------
+#     axis: matplotlib Axes
+#
+#     Returns
+#     -------
+#     None.
+#
+#     """
+#     xy = ax.xy_dataLim
+#     zz = ax.zz_dataLim
+#
+#     max_range = np.array([xy.xmax-xy.xmin, xy.ymax-xy.ymin,
+#                          zz.max.max()-zz.min.min()]).max()
+#     Xb = 0.5*max_range*np.mgrid[-1:2:2, -1:2:2, -
+#                                 1:2:2][0].flatten() + 0.5*(xy.xmax+xy.xmin)
+#     Yb = 0.5*max_range*np.mgrid[-1:2:2, -1:2:2, -
+#                                 1:2:2][1].flatten() + 0.5*(xy.ymax+xy.ymin)
+#     Zb = 0.5*max_range*np.mgrid[-1:2:2, -1:2:2, -
+#                                 1:2:2][2].flatten() + 0.5*(zz.max.max()+zz.min.min())
+#
+#     for xb, yb, zb in zip(Xb, Yb, Zb):
+#         ax.plot([xb], [yb], [zb], color=[1, 1, 1, 0])
 
-def equalizeScale(ax):
+# TODO: remove unused
+# def showRawSlice(valList, ndiv):
+#     nX = ndiv+1
+#     nslice = nX//2
+#
+#     vMat = valList.reshape((nX, nX, nX))
+#
+#     vSelection = vMat[:, :, nslice].squeeze()
+#
+#     (colormap, color_norm) = get_cmap(vSelection.ravel())
+#
+#     plt.imshow(vSelection, cmap=colormap, norm=color_norm)
+#     plt.colorbar()
+
+
+
+def resample_plane(axis, sim, move_to_center=True, elements=None, 
+                   data=None):
     """
-    Force 3d axes to same scale.
-
-    Method based on https://stackoverflow.com/a/13701747
+    Resample simulation data with a uniform planar grid.
 
     Parameters
     ----------
-    axis: matplotlib Axes
+    axis : :py:class:`matplotlib.axes.Axes`
+        Axes to plot within.
+    sim : :py:class:`.Simulation`
+        Simulation to sample data from.
+    move_to_center : bool, default True
+        Whether to sample at center of gridpoints instead of gridpoints 
+        proper. Default true.
+    elements : list of :py:class:`xcell.elements.Element`, default None
+        Elements to sample from, or use entire mesh if None (default).
+    data : numeric array-like, default None
+        Value at each mesh point to interpolate from, or use nodal 
+        voltages if None (default)
 
     Returns
     -------
-    None.
-
-    """
-    xy = ax.xy_dataLim
-    zz = ax.zz_dataLim
-
-    max_range = np.array([xy.xmax-xy.xmin, xy.ymax-xy.ymin,
-                         zz.max.max()-zz.min.min()]).max()
-    Xb = 0.5*max_range*np.mgrid[-1:2:2, -1:2:2, -
-                                1:2:2][0].flatten() + 0.5*(xy.xmax+xy.xmin)
-    Yb = 0.5*max_range*np.mgrid[-1:2:2, -1:2:2, -
-                                1:2:2][1].flatten() + 0.5*(xy.ymax+xy.ymin)
-    Zb = 0.5*max_range*np.mgrid[-1:2:2, -1:2:2, -
-                                1:2:2][2].flatten() + 0.5*(zz.max.max()+zz.min.min())
-
-    for xb, yb, zb in zip(Xb, Yb, Zb):
-        ax.plot([xb], [yb], [zb], color=[1, 1, 1, 0])
-
-
-def showRawSlice(valList, ndiv):
-    nX = ndiv+1
-    nslice = nX//2
-
-    vMat = valList.reshape((nX, nX, nX))
-
-    vSelection = vMat[:, :, nslice].squeeze()
-
-    (cMap, cNorm) = getCmap(vSelection.ravel())
-
-    plt.imshow(vSelection, cmap=cMap, norm=cNorm)
-    plt.colorbar()
-
-# TODO: deprecate?
-
-
-def resamplePlane(axis, sim, movetoCenter=True, elements=None, data=None):
-    """
-
-
-    Parameters
-    ----------
-    axis : TYPE
-        DESCRIPTION.
-    sim : TYPE
-        DESCRIPTION.
-
-    Returns
-    -------
-    TYPE
-        DESCRIPTION.
+    float[:,:]
+        2d array of interpolated data for visualization.
 
     """
     xl, xh = axis.get_xlim()
     yl, yh = axis.get_ylim()
 
-    if movetoCenter:
+    if move_to_center:
         nX = 512
     else:
         nX = 513
 
-    ppts = util.makeGridPoints(513, xh, xl, yh, yl, centers=movetoCenter)
+    ppts = util.make_grid_points(513, xh, xl, yh, yl, 
+                                 centers=move_to_center)
 
     pts = np.hstack((ppts, np.zeros((ppts.shape[0], 1))))
 
-    vInterp = sim.interpolateAt(pts, elements, data)
+    vInterp = sim.interpolate_at_points(pts, elements, data)
 
     return vInterp.reshape((nX, nX))
 
 
-def showCurrentVecs(axis, pts, vecs):
+def show_current_vectors(axis, pts, vecs):
     """
     Plot current vectors in 3d.
 
@@ -1044,15 +1170,15 @@ def showCurrentVecs(axis, pts, vecs):
 
     iMag = np.linalg.norm(vecs, axis=1)
 
-    cMap, cNorm = getCmap(iMag)
+    colormap, color_norm = get_cmap(iMag)
 
-    colors = cMap(iMag)
+    colors = colormap(iMag)
 
     art = axis.quiver3D(X, Y, Z, dx, dy, dz, colors=colors)
     return art
 
 
-def showEdges2d(axis, edgePoints, edgeColors=None, **kwargs):
+def show_2d_edges(axis, edge_points, edge_colors=None, **kwargs):
     """
     Show mesh edges in a 2d plot.
 
@@ -1060,39 +1186,41 @@ def showEdges2d(axis, edgePoints, edgeColors=None, **kwargs):
     ----------
     axis : matplotlib axis
         2d axis to plot in.
-    edgePoints : List of pairs of xy coords
-        .
-    edgeColors : float[:], optional
-        DESCRIPTION. The default is None.
-    **kwargs : TYPE
-        Args passed to matplotlib LineCollection.
+    edge_points : List of pairs of xy coords
+        List of endpoints of each edge.
+    edge_colors : array-like of color-like, optional
+        List of colors for each edge. The default is None, which uses 
+        :py:constant:`xcell.colors.FAINT`.
+    **kwargs : dict, optional
+        Args passed to :py:class:`matplotlib.collections.LineCollection`
 
     Returns
     -------
-    edgeCol : matplotlib LineCollection
+    edgeCol : :py:class:`matplotlib.collections.LineCollection`
         Artist for displaying the edges.
 
     """
     if 'colors' not in kwargs:
-        if edgeColors is None:
+        if edge_colors is None:
             # kwargs['colors'] = (0., 0., 0.,)
 
             # kwargs['alpha'] = 0.05
             kwargs['colors'] = colors.FAINT
         else:
-            kwargs['colors'] = edgeColors
+            kwargs['colors'] = edge_colors
             # alpha=0.05
 
     if 'linewidths' not in kwargs:
         kwargs['linewidths'] = 0.5
 
-    edgeCol = mpl.collections.LineCollection(edgePoints,
+    edgeCol = mpl.collections.LineCollection(edge_points,
                                              **kwargs)
     axis.add_collection(edgeCol)
     return edgeCol
 
 
-def pairedBar(data1, data2, labels, categories=None, axis=None, aright=None):
+def paired_bars(data1, data2, labels, categories=None, axis=None, 
+                aright=None):
     """
     Plot paired bars.
 
@@ -1120,17 +1248,14 @@ def pairedBar(data1, data2, labels, categories=None, axis=None, aright=None):
     if categories is None:
         categories = np.arange(len(data1))
 
-    # categories=[d['depths'] for d in data]
     barpos = np.arange(len(categories))
     barw = 0.25
 
     tart = axis.bar(barpos-barw/2, height=data1,
                     width=barw, color='C0', label=labels[0])
-    # axis.set_ylabel('Total simulation time')
 
     eart = aright.bar(barpos+barw/2, height=data2,
                       width=barw, color='C1', label=labels[1])
-    # aright.set_ylabel('Total simulation error')
 
     axis.set_xticks(barpos)
     axis.set_xticklabels(categories)
@@ -1147,17 +1272,17 @@ def pairedBar(data1, data2, labels, categories=None, axis=None, aright=None):
         a.set_yticks(np.arange(ntick)*dtick)
 
 
-def showSourceBoundary(axes, radius, srcCenter=np.zeros(2)):
+def show_source_boundary(axes, radius, source_center=np.zeros(2)):
     """
     Plot faint ring representing source's boundary.
 
     Parameters
     ----------
     axes : [axis]
-        Axes to plot to
+        Axes to plot within
     radius : float
         Source radius.
-    srcCenter : float[:], optional
+    source_center : float[:], optional
         Center of source. The default is np.zeros(2).
 
     Returns
@@ -1166,14 +1291,14 @@ def showSourceBoundary(axes, radius, srcCenter=np.zeros(2)):
 
     """
     tht = np.linspace(0, 2*np.pi)
-    x = radius*np.cos(tht)+srcCenter[0]
-    y = radius*np.sin(tht)+srcCenter[1]
+    x = radius*np.cos(tht)+source_center[0]
+    y = radius*np.sin(tht)+source_center[1]
 
     for ax in axes:
         ax.plot(x, y, color=colors.BASE)  # , alpha=0.1)
 
 
-def addInset(baseAxis, rInset, xmax, relativeLoc=(.5, -.65)):
+def _add_inset(baseAxis, rInset, xmax, relativeLoc=(.5, -.65)):
     """
     Create sub-axis for plotting a zoomed-in view of the main axis.
 
@@ -1212,7 +1337,7 @@ def addInset(baseAxis, rInset, xmax, relativeLoc=(.5, -.65)):
     inset.set_xlim(-rInset, rInset)
     inset.set_ylim(-rInset, rInset)
     bnds = rInset*np.array([-1, 1, -1, 1])
-    formatXYAxis(inset, bnds, xlabel=None, ylabel=None)
+    format_xy_axis(inset, bnds, xlabel=None, ylabel=None)
 
     mark_inset(baseAxis, inset, loc1=1, loc2=2,
                fc='none', ec="0.5")
@@ -1220,7 +1345,7 @@ def addInset(baseAxis, rInset, xmax, relativeLoc=(.5, -.65)):
     return inset
 
 
-def patchworkImage(axis, maskedArrays, cMap, cNorm, extent):
+def patchwork_image(axis, masked_arrays, colormap, color_norm, extent):
     """
     Produce composite image from discrete rectangular regions.
 
@@ -1236,10 +1361,10 @@ def patchworkImage(axis, maskedArrays, cMap, cNorm, extent):
         rectangle.
     quadVal : float[:,:]
         DESCRIPTION.
-    cMap : colormap
+    colormap : colormap
         Desired colormap for image.
-    cNorm : norm
-        Desired colormap.
+    color_norm : norm
+        Desired norm for image.
 
     Returns
     -------
@@ -1249,38 +1374,71 @@ def patchworkImage(axis, maskedArrays, cMap, cNorm, extent):
     """
     imlist = []
 
-    cmap = cMap.with_extremes(bad=(1., 1., 1., 0.))
+    cmap = colormap.with_extremes(bad=(1., 1., 1., 0.))
 
-    for vmask in maskedArrays:
+    for vmask in masked_arrays:
 
         im = axis.imshow(vmask,
                          origin='lower', extent=extent,
-                         cmap=cmap, norm=cNorm, interpolation='bilinear')
+                         cmap=cmap, norm=color_norm, 
+                         interpolation='bilinear')
         imlist.append(im)
 
     return imlist
 
 
-def showMesh(setup, axis=None):
+def show_mesh(setup, axis=None):
+    """
+    Visualize simulation mesh.
 
+    Parameters
+    ----------
+    setup : :py:class:`xcell.Simulation`
+        Simulation data to plot.
+    axis : _type_, optional
+        3d axes to plot within, or create new if None (default)
+
+    Returns
+    -------
+    _type_
+        3d axes
+    """
     if axis is None:
         ax = new3dPlot(setup.mesh.bbox)
     else:
         ax = axis
 
-    mcoord, medge = setup.getMeshGeometry()
+    mcoord, medge = setup.get_mesh_geometry()
 
-    showEdges(ax, mcoord, medge)
+    show_3d_edges(ax, mcoord, medge)
 
-    # x,y,z=np.hsplit(setup.mesh.nodeCoords,3)
-    # ax.scatter3D(x,y,z,color='k',alpha=0.5,marker='.')
     return ax
 
 
-def getPlanarEdgePoints(coords, edges, normalAxis=2, axisCoord=0):
+def get_planar_edge_points(coords, edges, normal_axis=2, 
+                           axis_coordinate=0.):
+    """
+    Get edges that lie in the specified plane.
 
-    sel = np.equal(coords[:, normalAxis], axisCoord)
-    selAx = np.array([n for n in range(3) if n != normalAxis])
+    Parameters
+    ----------
+    coords : float[:,3]
+        Cartesian coordinates of mesh nodes
+    edges : int[:,2]
+        List of indices of endpoints for each edge
+    normal_axis : int, optional
+        Axis out of (x,y,z) parallel plane normal, by default 2 (z)
+    axis_coordinate : int, optional
+        Coordinate of plane along normal, by default 0.0
+
+    Returns
+    -------
+    List of pairs of float[2]
+        Edge points, suitable for 
+        :py:class:`matplotlib.collections.LineCollection`
+    """
+    sel = np.equal(coords[:, normal_axis], axis_coordinate)
+    selAx = np.array([n for n in range(3) if n != normal_axis])
 
     planeCoords = coords[:, selAx]
 
@@ -1289,15 +1447,40 @@ def getPlanarEdgePoints(coords, edges, normalAxis=2, axisCoord=0):
 
     return edgePts
 
-
-def toEdgePoints(planeCoords, edges):
-    edgePts = np.array([planeCoords[e] for e in edges])
-
-    return edgePts
+# TODO: remove unused
+# def toEdgePoints(planeCoords, edges):
+#     edgePts = np.array([planeCoords[e] for e in edges])
+#
+#     return edgePts
 
 
 class FigureAnimator:
+    """
+    Base class for matplotlib animations.
+
+    Attributes
+    ----------
+
+    datasets : 
+        Array of dicts containing plot data.
+    data_category : str
+        Key for which type of data to use for plot.
+    data_scales : dict of `.ScaleRange`
+        Scaling information for each data type
+    """
     def __init__(self, fig, study, prefs=None):
+        """
+        Create new animator
+
+        Parameters
+        ----------
+        fig : _type_
+            Figure to animate, or create new figure if None (default)
+        study : _type_
+            Study managing file IO
+        prefs : dict, optional
+            Dict of plot preferences, by default None
+        """
         if fig is None:
             fig = plt.figure()
 
@@ -1310,11 +1493,11 @@ class FigureAnimator:
         else:
             self.prefs = prefs
 
-        self.dataSets = []
-        self.dataCat = []
-        self.dataScales = {}
+        self.datasets = []
+        self.data_category = []
+        self.data_scales = {}
 
-        self.setupFigure()
+        self.setup_figure()
 
     def __getstate__(self):
         state = self.__dict__.copy()
@@ -1330,24 +1513,56 @@ class FigureAnimator:
         self.fig = plt.gcf()
         self.axes = self.fig.axes
 
-    def setupFigure(self):
+    def setup_figure(self):
+        """Format figure."""
         pass
 
-    def addSimulationData(self, sim, append=False):
+    def add_simulation_data(self, sim, append=False):
+        """
+        Extract plottable data from simulation.
+
+        Parameters
+        ----------
+        sim : _type_
+            Simulation to add data from
+        append : bool, optional
+            Append to internal animation data, by default False
+        """
         pass
 
-    def animateStudy(self, fname=None, artists=None, extraArtists=None, fps=1.0, vectorFrames=[]):
+    def animate_study(self, fname=None, artists=None, extra_artists=None, 
+                      fps=1.0, vector_frames=[]):
+        """_summary_
 
+        Parameters
+        ----------
+        fname : string, optional
+            Name for saved file, or use class name if None (default)
+        artists : list of list of artists, optional
+            List of artists at each frame, or generate artists from 
+            self.datasets if None (default)
+        extra_artists : list of list of artists, optional
+            Artists for additional frames of animation, by default None
+        fps : float, optional
+            Framerate of animation, by default 1.0
+        vector_frames : list, optional
+            Indices of frames to save snapshots, by default []
+
+        Returns
+        -------
+        :py:class:`matplotlib.animation.ArtistAnimation`
+            Animated figure
+        """
         if artists is None:
             artists = []
-            if len(vectorFrames) > 0:
-                frameList = vectorFrames
+            if len(vector_frames) > 0:
+                frameList = vector_frames
             else:
-                frameList = range(len(self.dataSets))
+                frameList = range(len(self.datasets))
             for ii in frameList:
-                artists.append(self.getArtists(ii))
-                if extraArtists is not None:
-                    artists[-1].extend(extraArtists[ii])
+                artists.append(self.get_artists(ii))
+                if extra_artists is not None:
+                    artists[-1].extend(extra_artists[ii])
 
         animation = AAnimation(self.fig,
                                artists,
@@ -1359,64 +1574,106 @@ class FigureAnimator:
             plt.show()
 
         else:
-            fstem = os.path.join(self.study.studyPath,
+            fstem = os.path.join(self.study.study_path,
                                  fname)
             if not os.path.exists(fstem):
                 os.makedirs(fstem)
             writer = FWriter(fps=int(fps))
-            # writer.setup(self.fig, fstem+'.mp4', frame_prefix=fstem)
-            animation.save(fstem+'.mp4', writer=writer, vectorFrames=vectorFrames,
+            animation.save(fstem+'.mp4', writer=writer, 
+                           vector_frames=vector_frames,
                            frame_prefix=os.path.join(fstem, fname))
-            # fps=fps)
-            # pickle.dump(self.__dict__, open(fstem+'.aData', 'wb'))
+
             self.study.save(self, fname, '.adata')
 
         return animation
 
-    def getStudyData(self, **kwargs):
+    def get_study_data(self, **kwargs):
+        """
+        Load all data in study.
 
-        fnames, cats = self.study.getSavedSims(**kwargs)
+        Parameters
+        ----------
+        **kwargs, optional
+            Arguments passed to :py:method:`xcell.Study.get_saved_simulations`
+
+        """
+        fnames, cats = self.study.get_saved_simulations(**kwargs)
         for names, cat in zip(fnames, cats):
             dset = []
             dcat = []
             for name in names:
-                # for ii in nb.prange(len(names)):
-                sim = self.study.loadData(name)
-                # dset.append(self.addSimulationData(sim))
-                self.addSimulationData(sim, append=True)
+                sim = self.study.load_simulation(name)
+                self.add_simulation_data(sim, append=True)
                 dcat.append(cat)
 
-            # self.dataSets=dset
-            self.dataCat = dcat
+            self.data_category = dcat
 
-            # self.addSimulationData(self.study.loadData(name),dataLabel=dname)
+    def get_artists(self, setnumberber=0, data=None):
+        """
+        Get artists corresponding to given data
 
-    def getArtists(self, setnumber=None, data=None):
-        pass
+        Parameters
+        ----------
+        setnumberber : int, optional
+            Frame from self.datasets to use as data, by default 0
+        data : dict, optional
+            Data to use instead of self.datasets, by default None
 
-    def resetFigure(self):
+        Returns
+        -------
+        list of Artists
+            Artists for given data
+        """
+        artists = []
+        return artists
+
+    def reset_figure(self):
+        """Clear all artists from figure."""
         for axis in self.axes:
-            undrawAxis(axis)
+            undraw_axis(axis)
 
-    def unifyScales(self, otherScales):
-        for key in otherScales.keys():
-            self.dataScales[key].update(otherScales[key].get())
+    def unify_scales(self, other_scales):
+        """
+        Update internal data scales with new scales.
 
-    def toLiteMode(self):
-        colors.useLightStyle()
+        Parameters
+        ----------
+        other_scales : :py:class:`.ScaleRange`
+            New data scales to incorporate
+        """
+        for key in other_scales.keys():
+            self.data_scales[key].update(other_scales[key].get())
 
-        self.fig.set_facecolor(colors.WHITE)
-        self.fig.set_edgecolor(colors.DARK)
-        for ax in self.axes:
-            ax.tick_params(colors=colors.BASE,
-                           grid_color=colors.BASE)
-            ax.set_facecolor(colors.WHITE)
+    # TODO: remove unused
+    # def toLiteMode(self):
+    #     colors.use_light_style()
+    #
+    #     self.fig.set_facecolor(colors.WHITE)
+    #     self.fig.set_edgecolor(colors.DARK)
+    #     for ax in self.axes:
+    #         ax.tick_params(colors=colors.BASE,
+    #                        grid_color=colors.BASE)
+    #         ax.set_facecolor(colors.WHITE)
 
-    def copy(self, newFigure=None, overridePrefs={}):
-        # colors.useLightStyle()
+    def copy(self, new_figure=None, override_prefs={}):
+        """
+        Create fresh copy of animator with updated preferences.
+
+        Parameters
+        ----------
+        new_figure : _type_, optional
+            Figure for new animator, or create new figure if None (default)
+        override_prefs : dict, optional
+            Preferences to override in copy, by default {}
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
         newPrefs = self.prefs.copy()
-        newPrefs.update(overridePrefs)
-        newAni = self.__class__(newFigure, self.study, newPrefs)
+        newPrefs.update(override_prefs)
+        newAni = self.__class__(new_figure, self.study, newPrefs)
 
         params = self.__dict__.copy()
         params['fig'] = newAni.fig
@@ -1425,29 +1682,29 @@ class FigureAnimator:
         newAni.__dict__ = params
 
         return newAni
-
-    def getSnapshots(self, frameNos, name):
-        self.toLiteMode()
-
-        for f in frameNos:
-            self.resetFigure()
-            self.getArtists(f)
-
-            fname = os.path.join(name, 'frame-%d' % f)
-            self.study.savePlot(self.fig,
-                                fname,
-                                ext='.svg')
+    # TODO: remove unused
+    # def getSnapshots(self, frameNos, name):
+    #     self.toLiteMode()
+    #
+    #     for f in frameNos:
+    #         self.reset_figure()
+    #         self.get_artists(f)
+    #
+    #         fname = os.path.join(name, 'frame-%d' % f)
+    #         self.study.save_plot(self.fig,
+    #                             fname,
+    #                             ext='.svg')
 
 
 class SliceSet(FigureAnimator):
     def __init__(self, fig, study, prefs=None):
         self.rElec = 0
-        if len(study.currentSim.currentSources) > 0:
-            rElec = study.currentSim.currentSources[0].radius
+        if len(study.current_simulation.current_sources) > 0:
+            rElec = study.current_simulation.current_sources[0].geometry.radius
             self.rElec = rElec
 
-        if len(study.currentSim.voltageSources) > 0:
-            rElec = study.currentSim.voltageSources[0].radius
+        if len(study.current_simulation.voltage_sources) > 0:
+            rElec = study.current_simulation.voltage_sources[0].geometry.radius
             self.rElec = rElec
 
         stdPrefs = {
@@ -1455,7 +1712,7 @@ class SliceSet(FigureAnimator):
             'showInsets': True,
             'relativeError': False,
             'logScale': True,
-            'showNodes': False,
+            'show_nodes': False,
             'fullInterp': True,
         }
 
@@ -1463,7 +1720,7 @@ class SliceSet(FigureAnimator):
             stdPrefs.update(prefs)
 
         super().__init__(fig, study, stdPrefs)
-        self.dataScales = {
+        self.data_scales = {
             'vbounds': ScaleRange(),
             'errbounds': ScaleRange()}
 
@@ -1480,7 +1737,7 @@ class SliceSet(FigureAnimator):
 
         return state
 
-    def setupFigure(self, resetBounds=False):
+    def setup_figure(self, resetBounds=False):
         self.bnds = self.study.bbox[[0, 3, 2, 4]]
 
         if self.prefs['showError']:
@@ -1515,8 +1772,8 @@ class SliceSet(FigureAnimator):
         insets = []
         if self.rElec > 0 and self.prefs['showError']:
             for ax in self.grid:
-                inset = addInset(ax, 3*self.rElec, self.bnds[1])
-                showSourceBoundary([ax, inset], self.rElec)
+                inset = _add_inset(ax, 3*self.rElec, self.bnds[1])
+                show_source_boundary([ax, inset], self.rElec)
                 insets.append(inset)
 
                 self.axes.append(inset)
@@ -1524,47 +1781,41 @@ class SliceSet(FigureAnimator):
         self.insets = insets
 
         for ax in self.grid[:nplot]:
-            formatXYAxis(ax, self.bnds)
+            format_xy_axis(ax, self.bnds)
 
         if resetBounds:
-            self.dataScales['vbounds'] = ScaleRange()
-            self.dataScales['errbounds'] = ScaleRange()
+            self.data_scales['vbounds'] = ScaleRange()
+            self.data_scales['errbounds'] = ScaleRange()
             self.rElec = 0
 
-        # self.meshEdges = []
-        # self.sourceEdges = []
-
-        # self.maskedVArr = []
-        # self.maskedErrArr = []
-
-    def addSimulationData(self, sim, append=False):
+    def add_simulation_data(self, sim, append=False):
 
         ax = self.axes[0]
 
-        els, _, edgePts = sim.getElementsInPlane()
+        els, _, edgePts = sim.get_elements_in_plane()
 
         if self.prefs['fullInterp']:
-            vArrays = [resamplePlane(ax, sim, elements=els)]
+            vArrays = [resample_plane(ax, sim, elements=els)]
             v1d = vArrays[0].ravel()
         else:
             vArrays, coords = sim.getValuesInPlane(data=None)
-            v1d = util.unravelArraySet(vArrays)
+            v1d = util.unravel_array_set(vArrays)
 
-        self.dataScales['vbounds'].update(v1d)
+        self.data_scales['vbounds'].update(v1d)
 
         if self.prefs['showError']:
             # TODO: better filtering to only calculate err where needed
-            ana, _ = sim.analyticalEstimate()
-            err1d = sim.nodeVoltages-ana[0]
+            ana, _ = sim.calculate_analytical_voltage()
+            err1d = sim.node_voltages-ana[0]
             if self.prefs['fullInterp']:
-                erArrays = [resamplePlane(ax,
+                erArrays = [resample_plane(ax,
                                           sim,
                                           elements=els,
                                           data=err1d)]
 
             else:
                 erArrays, _ = sim.getValuesInPlane(data=err1d)
-            self.dataScales['errbounds'].update(err1d)
+            self.data_scales['errbounds'].update(err1d)
         else:
             erArrays = None
 
@@ -1572,42 +1823,39 @@ class SliceSet(FigureAnimator):
 
         try:
             inSource = np.zeros(edgePts.shape[0], dtype=bool)
-            for src in sim.currentSources:
-                inSource |= src.geometry.isInside(edgePts)
+            for src in sim.current_sources:
+                inSource |= src.geometry.is_inside(edgePts)
         except:
             inSource = np.linalg.norm(edgePts,
-                                      axis=2) <= sim.currentSources[0].radius
+                                      axis=2) <= sim.current_sources[0].geometry.radius
         touchesSource = np.logical_xor(inSource[:, 0], inSource[:, 1])
-        edgePoints = edgePts[~touchesSource]
+        edge_points = edgePts[~touchesSource]
         sourceEdge = edgePts[touchesSource]
 
-        # self.meshEdges.append(edgePoints)
-        # self.sourceEdges.append(sourceEdge)
-
         # quick hack to get nodes in plane directly
-        inPlane = sim.mesh.nodeCoords[:, -1] == 0.
+        inPlane = sim.mesh.node_coords[:, -1] == 0.
 
-        pval = sim.nodeVoltages[inPlane]
-        pcoord = sim.mesh.nodeCoords[inPlane, :-1]
+        pval = sim.node_voltages[inPlane]
+        pcoord = sim.mesh.node_coords[inPlane, :-1]
 
         data = {
             'vArrays': vArrays,
             'errArrays': erArrays,
-            'meshPoints': edgePoints,
+            'meshPoints': edge_points,
             'sourcePoints': sourceEdge,
             'pvals': pval,
             'pcoords': pcoord}
 
         if append:
-            self.dataSets.append(data)
+            self.datasets.append(data)
 
         return data
 
-    def getArtists(self, setnum, data=None):
+    def get_artists(self, setnumber, data=None):
         artists = []
 
         if data is None:
-            data = self.dataSets[setnum]
+            data = self.datasets[setnumber]
 
         imAxV = self.axes[0]
         imAxes = [imAxV]
@@ -1626,38 +1874,38 @@ class SliceSet(FigureAnimator):
                 insets = [self.axes[2]]
                 imAxes.extend(insets)
 
-        vbounds = self.dataScales['vbounds']
+        vbounds = self.data_scales['vbounds']
 
-        vmap, vnorm = getCmap(vbounds,
+        vmap, vnorm = get_cmap(vbounds,
                               logscale=self.prefs['logScale'])
 
-        vmappr = mpl.cm.ScalarMappable(norm=vnorm, cmap=vmap)
+        vmappr = ScalarMap(norm=vnorm, cmap=vmap)
 
         cbarAxV.colorbar(vmappr)
 
         if self.prefs['showError']:
-            errbounds = self.dataScales['errbounds']
-            emap, enorm = getCmap(errbounds,
+            errbounds = self.data_scales['errbounds']
+            emap, enorm = get_cmap(errbounds,
                                   forceBipolar=True,
                                   logscale=self.prefs['logScale'])
-            emappr = mpl.cm.ScalarMappable(norm=enorm, cmap=emap)
+            emappr = ScalarMap(norm=enorm, cmap=emap)
             # vmappr.set_clim((-enorm.halfrange, enorm.halfrange))
             cbarAxE.colorbar(emappr)
-            errArt = patchworkImage(imAxE,
+            errArt = patchwork_image(imAxE,
                                     # self.maskedErrArr[ii],
                                     data['errArrays'],
                                     emap, enorm,
                                     extent=self.bnds)
             artists.extend(errArt)
 
-        vArt = patchworkImage(imAxV,
+        vArt = patchwork_image(imAxV,
                               data['vArrays'],
                               vmap, vnorm,
                               extent=self.bnds)
 
         artists.extend(vArt)
 
-        if self.prefs['showNodes']:
+        if self.prefs['show_nodes']:
             px, py = np.hsplit(data['pcoords'], 2)
             pv = data['pvals']
             ptart = imAxV.scatter(
@@ -1669,27 +1917,23 @@ class SliceSet(FigureAnimator):
         if self.prefs['showInsets']:
             # insets=self.insets
 
-            artists.extend(patchworkImage(insets[0],
+            artists.extend(patchwork_image(insets[0],
                                           # self.maskedVArr[ii],
                                           data['vArrays'],
                                           vmap, vnorm,
                                           extent=self.bnds))
             if self.prefs['showError']:
-                artists.extend(patchworkImage(insets[1],
+                artists.extend(patchwork_image(insets[1],
                                               # self.maskedErrArr[ii],
                                               data['errArrays'],
                                               emap, enorm,
                                               extent=self.bnds))
 
         for ax in imAxes:
-            artists.append(showEdges2d(ax, data['meshPoints']))
-            artists.append(showEdges2d(
-                ax, data['sourcePoints'], edgeColors=(.5, .5, .5), alpha=.25, linestyles=':'))
-
-        # for ax in insets:
-        #     artists.append(showEdges2d(ax, data['meshPoints']))
-        #     artists.append(showEdges2d(
-        #         ax, data['sourcePoints'], edgeColors=colors.ACCENT_LIGHT, alpha=.25, linestyles=':'))
+            artists.append(show_2d_edges(ax, data['meshPoints']))
+            artists.append(show_2d_edges(
+                ax, data['sourcePoints'], edge_colors=(.5, .5, .5), 
+                alpha=.25, linestyles=':'))
 
         return artists
 
@@ -1709,15 +1953,23 @@ class ErrorGraph(FigureAnimator):
             stdPrefs.update(prefs)
         super().__init__(fig, study, stdPrefs)
 
-        self.dataScales = {
+        self.data_scales = {
             'vsim': ScaleRange(),
             'error': ScaleRange()}
 
-    def setupFigure(self, labelX=True, labelY=True, newAxes=True):
-        # axV = self.fig.add_subplot(5, 1, (1, 2))
-        # axErr = self.fig.add_subplot(5, 1, (3, 4))
-        # axL=self.fig.add_subplot(5,1,5)
+    def setup_figure(self, labelX=True, labelY=True, newAxes=True):
+        """
+        Format figure.
 
+        Parameters
+        ----------
+        labelX : bool, optional
+            Show x label, by default True
+        labelY : bool, optional
+            Show y label, by default True
+        newAxes : bool, optional
+            Generate new axes, by default True (use self.axes otherwise)
+        """
         # TODO: sane way to set figure size, aspect ratio for print vs screen
         if type(self.fig) == mpl.figure.Figure:
             figH = self.fig.get_figheight()
@@ -1757,7 +2009,7 @@ class ErrorGraph(FigureAnimator):
 
         if labelX:
             axL.set_xlabel('Distance from source')
-            axL.xaxis.set_major_formatter(mpl.ticker.EngFormatter('m'))
+            axL.xaxis.set_major_formatter(eform('m'))
         else:
             hideXticks.append(axL)
 
@@ -1768,12 +2020,12 @@ class ErrorGraph(FigureAnimator):
                 axErr.set_ylabel('Relative error')
             else:
                 axErr.set_ylabel('Absolute error')
-                axErr.yaxis.set_major_formatter(mpl.ticker.EngFormatter('V'))
+                axErr.yaxis.set_major_formatter(eform('V'))
 
             axL.set_ylabel(r'$\ell_0$')
 
-            axV.yaxis.set_major_formatter(mpl.ticker.EngFormatter('V'))
-            axL.yaxis.set_major_formatter(mpl.ticker.EngFormatter('m'))
+            axV.yaxis.set_major_formatter(eform('V'))
+            axL.yaxis.set_major_formatter(eform('m'))
         else:
             [plt.setp(a.get_yticklabels(), visible=False) for a in axes]
 
@@ -1784,36 +2036,34 @@ class ErrorGraph(FigureAnimator):
         self.analytic = []
         self.analyticR = []
 
-    def addSimulationData(self, sim, append=False):
-        isDoF = sim.nodeRoleTable == 0
-        dofInds = sim.mesh.indexMap[isDoF]
-        # v = sim.nodeVoltages
+    def add_simulation_data(self, sim, append=False):
+        isDoF = sim.node_role_table == 0
+        dofInds = sim.mesh.index_map[isDoF]
 
         if self.prefs['universalPts']:
-            pts, v = sim.getUniversalPoints()
+            pts, v = sim.get_universal_points()
             if sim.meshtype == 'uniform':
-                coords = sim.mesh.nodeCoords
+                coords = sim.mesh.node_coords
             else:
-                coords = util.indexToCoords(pts,
+                coords = util.indices_to_coordinates(pts,
                                             sim.mesh.bbox[:3],
                                             sim.mesh.span)
-            # sim.nodeVoltages = v
         else:
-            v = sim.nodeVoltages
-            coords = sim.mesh.nodeCoords
-            pts = sim.mesh.indexMap
+            v = sim.node_voltages
+            coords = sim.mesh.node_coords
+            pts = sim.mesh.index_map
 
-        nNodes = len(sim.mesh.nodeCoords)
+        nNodes = len(sim.mesh.node_coords)
         nElems = len(sim.mesh.elements)
 
         r = np.linalg.norm(coords, axis=1)
 
-        if len(sim.currentSources) > 0:
-            rElec = sim.currentSources[0].radius
+        if len(sim.current_sources) > 0:
+            rElec = sim.current_sources[0].geometry.radius
             self.rElec = rElec
 
-        if len(sim.voltageSources) > 0:
-            rElec = sim.voltageSources[0].radius
+        if len(sim.voltage_sources) > 0:
+            rElec = sim.voltage_sources[0].geometry. radius
             self.rElec = rElec
 
         lmin = np.log10(rElec/2)
@@ -1822,17 +2072,16 @@ class ErrorGraph(FigureAnimator):
         if len(self.analyticR) == 0:
             rDense = np.logspace(lmin, lmax, 200)
 
-            # _,_,vAna,_=sim.calculateErrors(rDense)
-            vD, _ = sim.analyticalEstimate(rDense)
+            vD, _ = sim.calculate_analytical_voltage(rDense)
             vAna = vD[0]
             self.analyticR = rDense
             self.analytic = vAna
 
-            self.dataScales['vsim'].update(vAna)
+            self.data_scales['vsim'].update(vAna)
 
             self.axes[0].set_xlim(left=rElec/2, right=2*max(r))
 
-        ErrSum, err, vAna, sorter, _ = sim.calculateErrors(pts)
+        ErrSum, err, vAna, sorter, _ = sim.calculate_errors(pts)
 
         rsort = r[sorter]
         rsort[0] = 10**lmin  # for nicer plotting
@@ -1845,7 +2094,6 @@ class ErrorGraph(FigureAnimator):
             filt = isDoF[sorter]
         else:
             filt = np.ones_like(sorter, dtype=bool)
-            # filt=sim.nodeRoleTable>=0
 
         rFilt = rsort[filt]
         if self.prefs['showRelativeError']:
@@ -1856,30 +2104,15 @@ class ErrorGraph(FigureAnimator):
 
         errFilt = errSort[filt]
 
-        # sse,sstot=misc.getSquares(err,vAna)
-        # FVU=sse/sstot
-
-        # title = '%s:%d nodes, %d elements, error %.2g, FVU %.2g' % (
-        #     sim.meshtype, nNodes, nElems, ErrSum,FVU)
         if self.prefs['infoTitle']:
             title = '%s:%d nodes, %d elements, error %.2g' % (
                 sim.meshtype, nNodes, nElems, ErrSum)
         else:
             title = ''
 
-        # self.titles.append(title)
-        # self.errR.append(rFilt)
-        # self.errors.append(errFilt)
-
-        # self.simR.append(rsort)
-        # self.sims.append(vsort)
-
         l0 = np.array([e.l0 for e in sim.mesh.elements])
         center = np.array([e.origin+0.5*e.span for e in sim.mesh.elements])
         elR = np.linalg.norm(center, axis=1)
-
-        # self.elemL.append(l0)
-        # self.elemR.append(elR)
 
         data = {
             'title': title,
@@ -1890,22 +2123,22 @@ class ErrorGraph(FigureAnimator):
             'elemL': l0,
             'elemR': elR}
 
-        self.dataScales['vsim'].update(vsort)
-        self.dataScales['error'].update(errFilt)
+        self.data_scales['vsim'].update(vsort)
+        self.data_scales['error'].update(errFilt)
 
         if self.prefs['colorNodeConnectivity']:
             # check how connected nodes are
-            connGlobal = sim.getNodeConnectivity(True)
+            connGlobal = sim.count_node_connectivity(True)
             connsort = connGlobal[sorter]
             connFilt = connsort[filt]
             self.rColors.append(connFilt)
             data['rColors'] = connFilt
 
         if append:
-            self.dataSets.append(data)
+            self.datasets.append(data)
         return data
 
-    def getArtists(self, setnum, data=None):
+    def get_artists(self, setnumber, data=None):
         artistSet = []
 
         axV = self.axes[0]
@@ -1913,18 +2146,16 @@ class ErrorGraph(FigureAnimator):
         axL = self.axes[2]
 
         if data is None:
-            #     dataset=[self.dataSets[setnum]]
-            # else:
-            #     dataset=[data]
-            data = self.dataSets[setnum]
+
+            data = self.datasets[setnumber]
 
         axV.plot(self.analyticR, self.analytic,
                  c=colors.BASE, label='Analytical')
 
-        vbnd = self.dataScales['vsim'].get()
+        vbnd = self.data_scales['vsim'].get()
         axV.set_ylim(vbnd[0], vbnd[-1])
 
-        errbnd = self.dataScales['error'].get()
+        errbnd = self.data_scales['error'].get()
         axErr.set_ylim(errbnd[0], errbnd[-1])
 
         if self.prefs['colorNodeConnectivity']:
@@ -1935,23 +2166,18 @@ class ErrorGraph(FigureAnimator):
             toN = np.zeros(max(connNs)+1, dtype=int)
             toN[connNs] = np.arange(connNs.shape[0])
 
-            mcolors = discreteLegend(axErr, connNs, loc='upper right')
-            # colors,legEntries=discreteColors(connNs)
-            # outsideLegend(axis=self.axErr,handles=legEntries)
+            mcolors = discrete_legend(axErr, connNs, loc='upper right')
 
-        # for ii in range(len(self.titles)):
-        # for data in dataset:
 
         artists = []
         simLine = axV.plot(
-            # self.simR[ii], self.sims[ii],
             data['simR'], data['simV'],
             c='C0', marker='.', label='Simulated')
 
-        if setnum == 0 and self.prefs['showLegend']:
+        if setnumber == 0 and self.prefs['showLegend']:
             axV.legend(loc='upper right')
 
-        title = animatedTitle(self.fig, data['title'])
+        title = animated_title(self.fig, data['title'])
 
         if self.prefs['colorNodeConnectivity']:
             rcol = data['rColors']
@@ -1964,16 +2190,12 @@ class ErrorGraph(FigureAnimator):
                                 c=nodeColors, marker='.', linestyle='None')
         errArea = axErr.fill_between(data['errR'],
                                      data['errors'],
-                                     #  self.errR[ii],
-                                     # self.errors[ii],
                                      color='r',
                                      alpha=0.75)
 
         # Third pane: element sizes
         l0line = axL.scatter(data['elemR'],
                              data['elemL'],
-                             # self.elemR[ii],
-                             #                     self.elemL[ii],
                              c=colors.BASE, marker='.')
 
         # fix scaling issue
@@ -1985,12 +2207,12 @@ class ErrorGraph(FigureAnimator):
         artists.append(l0line)
         artists.append(errArea)
 
-        # artistSet.append(artists)
         return artists
 
 
 class CurrentPlot(FigureAnimator):
-    def __init__(self, fig, study, fullarrow=False, showInset=True, showAll=False, normalAxis=2, normalCoord=0.):
+    def __init__(self, fig, study, fullarrow=False, showInset=True, 
+                 showAll=False, normal_axis=2, normalCoord=0.):
         super().__init__(fig, study)
 
         self.prefs['logScale'] = True
@@ -2017,15 +2239,12 @@ class CurrentPlot(FigureAnimator):
                 ax = plt.subplot2grid((3, 3), (0, 1),
                                       colspan=2, rowspan=2,
                                       fig=fig)
-                # self.inset=addInset(self.axes[0],
-                #                  3*self.rElec,
-                #                  self.study.bbox[3],
-                #                  (-.2, -.2))
+
             else:
                 ax = fig.add_subplot()
 
             bnds = study.bbox[[0, 3, 1, 4]]
-            formatXYAxis(ax, bnds)
+            format_xy_axis(ax, bnds)
 
         if len(self.axes) > 0:
             self.axes[0] = ax
@@ -2033,117 +2252,83 @@ class CurrentPlot(FigureAnimator):
             self.axes.append(ax)
 
         self.rElec = 0
-        self.iSrc = []
+        self.i_source = []
         self.fullarrow = fullarrow
         self.showInset = showInset
         self.showAll = showAll
 
-        self.normalAxis = normalAxis
+        self.normal_axis = normal_axis
         self.normalCoord = normalCoord
 
-        self.dataScales = {
+        self.data_scales = {
             'iRange': ScaleRange()}
 
-    def addSimulationData(self, sim, append=False):
-        # i, E = sim.getEdgeCurrents()
+    def add_simulation_data(self, sim, append=False):
 
-        # coords = sim.mesh.nodeCoords
-        # isSrc = sim.nodeRoleTable == 2
-        # whichSrc = sim.nodeRoleVals[isSrc]
-        # srcCoords = np.array([s.coords for s in sim.currentSources])
-        # coords[isSrc] = srcCoords[whichSrc]
-
-        if len(sim.currentSources) > 0:
-            rElec = sim.currentSources[0].radius
+        if len(sim.current_sources) > 0:
+            rElec = sim.current_sources[0].geometry.radius
             self.rElec = rElec
 
-        if len(sim.voltageSources) > 0:
-            rElec = sim.voltageSources[0].radius
+        if len(sim.voltage_sources) > 0:
+            rElec = sim.voltage_sources[0].geometry.radius
             self.rElec = rElec
 
-        self.iSrc.append(sim.currentSources[0].value)
-
-        # if self.dim == 3:
-        #     eplane = E
-        #     iplane = i
-
-        # else:
-        #     #only get points in specified plane
-        #     centerCoord=np.zeros(3)
-        #     centerCoord[self.normalAxis]=self.normalCoord
-        #     level=sim.intifyCoords(centerCoord)[self.normalAxis]
-
-        #     if self.showAll:
-        #         edgeInPlane=np.ones_like(i,dtype=np.bool_)
-        #     else:
-        #         ptInPlane = sim.intifyCoords()[:, self.normalAxis] == level
-        #         edgeInPlane = [np.all(ptInPlane[e]) for e in E]
-
-        #     eplane = E[edgeInPlane]
-        #     iplane = i[edgeInPlane]
-
-        # #reworked projection
-        # el,_,meshpt=sim.getElementsInPlane()
-
-        # # discard zero currents
-        # isok = iplane > 0
-        # iOK = iplane[isok]
-        # ptOK = coords[eplane[isok]]
+        self.i_source.append(
+            sim.current_sources[0].value.get_value_at_time(sim.current_time))
 
         iOK, ptOK, meshpt = sim.getCurrentsInPlane()
-        # _,_,meshpt=sim.getElementsInPlane()
 
         data = {
             'mesh': meshpt,
             'currents': iOK,
             'pts': ptOK,
-            'iSrc': sim.currentSources[0].value
+            'i_source': sim.current_sources[0].value.get_value_at_time(sim.current_time)
         }
 
         self.cvals.append(iOK)
         self.pts.append(ptOK)
 
-        self.dataScales['iRange'].update(iOK)
+        self.data_scales['iRange'].update(iOK)
 
         if append:
-            self.dataSets.append(data)
+            self.datasets.append(data)
 
         return data
 
-    def getArtists(self, setnum):
+    def get_artists(self, setnumber):
         # include injected currents in scaling
-        dscale = self.dataScales['iRange']
+        dscale = self.data_scales['iRange']
 
         if self.prefs['scaleToSource']:
-            dscale.update(np.array(self.iSrc))
+            dscale.update(np.array(self.i_source))
 
-        cmap, cnorm = getCmap(dscale,  logscale=self.prefs['logScale'])
+        cmap, cnorm = get_cmap(dscale,  logscale=self.prefs['logScale'])
         # cmap=mpl.cm.YlOrBr
         # cnorm=mpl.colors.LogNorm(vmin=self.crange[0],
         #                           vmax=self.crange[1])
 
-        if setnum == 0:
+        if setnumber == 0:
 
             if self.prefs['colorbar']:
-                plt.colorbar(mpl.cm.ScalarMappable(norm=cnorm, cmap=cmap),
+                plt.colorbar(ScalarMap(norm=cnorm, cmap=cmap),
                              ax=self.axes[0])
 
             if self.prefs['title']:
                 plt.title('Edge currents')
             inset = None
             if self.showInset & (self.rElec > 0) & (self.dim != 3):
-                self.inset = addInset(self.axes[0],
+                self.inset = _add_inset(self.axes[0],
                                       3*self.rElec,
                                       self.study.bbox[3],
                                       (-.2, -.2))
-                showSourceBoundary([self.axes[0], self.inset],
+                show_source_boundary([self.axes[0], self.inset],
                                    self.rElec)
 
         artists = []
 
-        data = self.dataSets[setnum]
+        data = self.datasets[setnumber]
 
-        # for data in range(len(self.dataSets)):
+        # for data in range(len(self.datasets)):
         # pt = self.pts[ii]
         # cv = self.cvals[ii]
         pt = data['pts']
@@ -2190,9 +2375,9 @@ class CurrentPlot(FigureAnimator):
                     # headwidth=10))
                 else:
                     # TODO: hack to get edges; assumes xy plane at z=0
-                    # art.append(showEdges2d(ax,
+                    # art.append(show_2d_edges(ax,
                     #                        pt[:,:,:-1],
-                    #                        edgeColors=(0.,0.,0.),
+                    #                        edge_colors=(0.,0.,0.),
                     #                        alpha=0.25))
                     art.append(ax.quiver(m1, m2,
                                          a/2, b/2,
@@ -2205,7 +2390,7 @@ class CurrentPlot(FigureAnimator):
                     # headwidth=10))
 
                 art.append(ax.scatter(0, 0,
-                                      color=cmap(cnorm(data['iSrc']))))
+                                      color=cmap(cnorm(data['i_source']))))
 
             # artists.append(art)
 
@@ -2260,7 +2445,8 @@ def hideBorders(axis, hidex=False):
 
 
 class SingleSlice(FigureAnimator):
-    def __init__(self, fig, study, timevec=[], tdata=None, datasrc='spaceV', prefs=None):
+    def __init__(self, fig, study, timevec=[], tdata=None, 
+                 datasrc='spaceV', prefs=None):
         self.bnds = study.bbox[[0, 3, 2, 4]]
         self.tdata = tdata
         self.dataSrc = datasrc
@@ -2271,7 +2457,7 @@ class SingleSlice(FigureAnimator):
                      'barRatio': [9, 1],
                      'labelAxes': True}
         super().__init__(fig, study, prefs=prefs)
-        self.dataScales = {
+        self.data_scales = {
             'spaceV': ScaleRange(),
             'absErr': ScaleRange(),
             'relErr': ScaleRange(),
@@ -2285,7 +2471,8 @@ class SingleSlice(FigureAnimator):
         if newPrefs is not None:
             oldPrefs.update(newPrefs)
         newAni = self.__class__(None, self.study, timevec=self.timevec,
-                                tdata=self.tdata, datasrc=self.dataSrc, prefs=oldPrefs)
+                                tdata=self.tdata, datasrc=self.dataSrc, 
+                                prefs=oldPrefs)
 
         params['fig'] = newAni.fig
         params['axes'] = newAni.axes
@@ -2295,7 +2482,7 @@ class SingleSlice(FigureAnimator):
 
         return newAni
 
-    def setupFigure(self):
+    def setup_figure(self):
         ratios = self.prefs['barRatio']
 
         if self.prefs['colorbar']:
@@ -2326,16 +2513,16 @@ class SingleSlice(FigureAnimator):
             ax = axes[0]
             tax = axes[1]
 
-        formatXYAxis(ax, self.bnds, axlabels=self.prefs['labelAxes'])
+        format_xy_axis(ax, self.bnds, axlabels=self.prefs['labelAxes'])
         self.tbar = TimingBar(self.fig, tax, self.tdata)
         tax.set_xlim(self.timevec[0], self.timevec[-1])
 
         self.axes = [ax, cax, tax]
 
-    def getArtists(self, setnum, data=None):
+    def get_artists(self, setnumber, data=None):
 
         if data is None:
-            data = self.dataSets[setnum]
+            data = self.datasets[setnumber]
 
         if data[self.dataSrc] is None:
             artists = []
@@ -2346,62 +2533,58 @@ class SingleSlice(FigureAnimator):
                 plt.tight_layout()
         else:
             meshAlpha = colors.MESH_ALPHA
-            cMap, cNorm = getCmap(self.dataScales[self.dataSrc],
+            colormap, color_norm = get_cmap(self.data_scales[self.dataSrc],
                                   logscale=True)
 
-            if setnum == 0 and self.prefs['colorbar']:
-                mapper = mpl.cm.ScalarMappable(norm=cNorm, cmap=cMap)
+            if setnumber == 0 and self.prefs['colorbar']:
+                mapper = ScalarMap(norm=color_norm, cmap=colormap)
 
-                if self.dataSrc == 'spaceV' or self.dataSrc == 'absErr' or self.dataSrc == 'vAna':
+                if self.dataSrc == 'spaceV' or self.dataSrc == 'absErr'\
+                     or self.dataSrc == 'vAna':
                     cbarFormat = eform('V')
                 else:
                     cbarFormat = mpl.ticker.PercentFormatter(xmax=1.,
                                                              decimals=2)
                     self.axes[1].set_ylabel('Relative error')
-                self.fig.colorbar(mapper, ax=self.axes[0], cax=self.axes[1],
-                                  format=cbarFormat)
-            # if setnum == 0:
+                self.fig.colorbar(mapper, ax=self.axes[0], 
+                                  cax=self.axes[1], format=cbarFormat)
+            # if setnumber == 0:
                 plt.tight_layout()
 
-            artists = patchworkImage(self.axes[0],
-                                     data[self.dataSrc], cMap, cNorm,
-                                     self.bnds)
+            artists = patchwork_image(self.axes[0],
+                                     data[self.dataSrc], colormap, 
+                                     color_norm, self.bnds)
 
-        artists.append(showEdges2d(self.axes[0],
+        artists.append(show_2d_edges(self.axes[0],
                                    data['meshPts'],
                                    alpha=meshAlpha))
         if self.tbar is not None:
-            artists.extend(self.tbar.getArt(self.timevec[setnum],
-                                            setnum))
+            artists.extend(self.tbar.get_artists(self.timevec[setnumber],
+                                            setnumber))
 
         return artists
 
-    def addSimulationData(self, sim, append=False):
-        els, _, edgePts = sim.getElementsInPlane()
+    def add_simulation_data(self, sim, append=False):
+        els, _, edgePts = sim.get_elements_in_plane()
 
-        if sim.nodeVoltages.shape[0] == 0:
+        if sim.node_voltages.shape[0] == 0:
             vArrays = None
             absErr = None
         else:
-            vest, _ = sim.analyticalEstimate()
+            vest, _ = sim.calculate_analytical_voltage()
 
             vAna = np.sum(vest, axis=0)
 
-            absErr = sim.nodeVoltages-vAna
-            # relErr = absErr/np.abs(vAna)
+            absErr = sim.node_voltages-vAna
 
-            # vArrays, _ = sim.getValuesInPlane()
-            # absArr, _ = sim.getValuesInPlane(data=absErr)
 
-            # v1d = util.unravelArraySet(vArrays)
-
-            vArrays = [resamplePlane(self.axes[0], sim, elements=els)]
+            vArrays = [resample_plane(self.axes[0], sim, elements=els)]
             v1d = vArrays[0].ravel()
 
-            self.dataScales['spaceV'].update(v1d)
-            # self.dataScales['relErr'].update(relErr)
-            self.dataScales['absErr'].update(absErr)
-            self.dataScales['vAna'].update(vAna)
+            self.data_scales['spaceV'].update(v1d)
+            # self.data_scales['relErr'].update(relErr)
+            self.data_scales['absErr'].update(absErr)
+            self.data_scales['vAna'].update(vAna)
 
         data = {
             'meshPts': edgePts}
@@ -2410,24 +2593,26 @@ class SingleSlice(FigureAnimator):
             data['spaceV'] = vArrays
 
         if self.dataSrc == 'absErr':
-            data['absErr'] = [resamplePlane(self.axes[0],
+            data['absErr'] = [resample_plane(self.axes[0],
                                             sim,
                                             elements=els,
                                             data=absErr)]
 
         if self.dataSrc == 'vAna':
-            data['vAna'] = [resamplePlane(self.axes[0],
+            data['vAna'] = [resample_plane(self.axes[0],
                                           sim,
                                           elements=els,
                                           data=absErr)]
 
         if append:
-            self.dataSets.append(data)
+            self.datasets.append(data)
 
-    def animateStudy(self, fname=None, artists=None, fps=30., vectorFrames=[], unitStr=None):
-        animation = super().animateStudy(fname=fname,
+    def animate_study(self, fname=None, artists=None, fps=30.,
+                      vector_frames=[], unitStr=None):
+        animation = super().animate_study(fname=fname,
                                          artists=artists,
-                                         fps=fps, vectorFrames=vectorFrames)
+                                         fps=fps, 
+                                         vector_frames=vector_frames)
 
         if self.prefs['colorbar']:
             self.solobar(fname=fname, unit=unitStr)
@@ -2435,11 +2620,11 @@ class SingleSlice(FigureAnimator):
         return animation
 
     def solobar(self, fname, unit=None):
-        data = self.dataScales[self.dataSrc]
+        data = self.data_scales[self.dataSrc]
 
         fbar = makeSoloColorbar(data, unit=unit)
 
-        self.study.savePlot(fbar, fname+'-colorbar')
+        self.study.save_plot(fbar, fname+'-colorbar')
         plt.close(fbar)
 
 
@@ -2447,11 +2632,11 @@ def makeSoloColorbar(data, cmap=None, norm=None, unit=None, **kwargs):
     fbar, printbar = plt.subplots(figsize=[5., 0.75])
 
     if cmap is None and norm is None:
-        cmap, norm = getCmap(data, logscale=True)
+        cmap, norm = get_cmap(data, logscale=True)
 
     fbar.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap),
                   cax=printbar, orientation='horizontal', **kwargs)
-    engineerTicks(printbar, xunit=unit)
+    engineering_ticks(printbar, xunit=unit)
 
     return fbar
 
@@ -2467,14 +2652,14 @@ class LogError(FigureAnimator):
             ax.xaxis.set_major_formatter(eform('m'))
             ax.yaxis.set_major_formatter(eform('V'))
 
-    def addSimulationData(self, sim, append=False):
-        err1d, err, ana, sr, r = sim.calculateErrors()
+    def add_simulation_data(self, sim, append=False):
+        err1d, err, ana, sr, r = sim.calculate_errors()
 
-        FVU = misc.FVU(ana, err)
-        rmin = min([cs.radius for cs in sim.currentSources])
+        FVU = misc.calculate_fvu(ana, err)
+        rmin = min([cs.geometry.radius for cs in sim.current_sources])
         r[r < rmin] = rmin/2
 
-        nsrc = np.nonzero(sim.nodeRoleTable == 2)[0].shape[0]
+        nsrc = util.fastcount(sim.node_role_table == 2)
 
         rAna = np.array([rmin/2, rmin, max(r)])
         absAna = abs(ana)
@@ -2491,12 +2676,12 @@ class LogError(FigureAnimator):
             'srcPts': nsrc}
 
         if append:
-            self.dataSets.append(data)
+            self.datasets.append(data)
 
-    def getArtists(self, setnum, data=None):
+    def get_artists(self, setnumber, data=None):
 
         if data is None:
-            data = self.dataSets[setnum]
+            data = self.datasets[setnumber]
 
         artists = []
         ax = self.fig.axes[0]
@@ -2508,9 +2693,9 @@ class LogError(FigureAnimator):
         titlestr = "FVU=%.2g, int1=%.2g, %d points in source" % (
             data['FVU'], data['err1d'], data['srcPts'])
 
-        title = animatedTitle(None, titlestr, ax)
+        title = animated_title(None, titlestr, ax)
 
-        if setnum == 0:
+        if setnumber == 0:
             self.axes[0].legend(loc='upper right')
             # ax.text()
 
@@ -2519,18 +2704,6 @@ class LogError(FigureAnimator):
         artists.append(title)
 
         return artists
-
-
-# class FrameSet:
-#     def __init__(self,frameSize=[6.5,9.0], nrow=1, ncol=1):
-#         fig=plt.figure(figsize=frameSize)
-
-#         self.mainfig=fig
-#         self.subfigs=fig.subfigures(nrow,ncol)
-
-
-#     def plotFrames(self,frameNums):
-#         for num in frameNums:
 
 
 class PVScene(pv.Plotter):
@@ -2560,8 +2733,6 @@ class PVScene(pv.Plotter):
             ax = None
             self.tbar = None
         else:
-            # f, ax = plt.subplots(tight_layout=True, figsize=figsize, dpi=dpi, )
-
             f = plt.figure(dpi=dpi, figsize=figsize)
             ax = f.add_axes((0.1, 0.5, 0.8, 0.5))
             self.tbar = TimingBar(figure=f, axis=ax, data=time)
@@ -2576,7 +2747,7 @@ class PVScene(pv.Plotter):
 
     def setTime(self, time):
         if self.tbar is not None:
-            self.tbar.getArt(time)
+            self.tbar.get_artists(time)
 
     def setup(self, regions, mesh=None, simData=None, **meshkwargs):
         sigargs = {'opacity': 0.5}
@@ -2723,7 +2894,7 @@ class PVScene(pv.Plotter):
 
     def save_graphic(self, filename, **kwargs):
         if self.study is not None:
-            fname = os.path.join(self.study.studyPath, filename)
+            fname = os.path.join(self.study.study_path, filename)
         else:
             fname = filename
         super().save_graphic(filename, **kwargs)

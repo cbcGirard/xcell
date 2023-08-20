@@ -13,7 +13,7 @@ import os
 class AAnimation(ArtistAnimation):
     def save(self, filename, writer=None, fps=None, dpi=None, codec=None,
              bitrate=None, extra_args=None, metadata=None, extra_anim=None,
-             savefig_kwargs=None, *, progress_callback=None, vectorFrames=[], **writerKwargs):
+             savefig_kwargs=None, *, progress_callback=None, vector_frames=[], **writerKwargs):
         """
         Save the animation as a movie file by drawing every frame.
 
@@ -165,7 +165,7 @@ class AAnimation(ArtistAnimation):
         # widget (both are likewise done in savefig()).
 
         #patch to add selected vector frames
-        writer.vector_frames = vectorFrames
+        writer.vector_frames = vector_frames
         with mpl.rc_context({'savefig.bbox': None}), \
              writer.saving(self._fig, filename, dpi, **writerKwargs), \
              cbook._setattr_cm(self._fig.canvas,
