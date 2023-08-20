@@ -38,9 +38,9 @@ def set_v_ext(vext, vstim, tstim):
     vmems = []
     for sec, V in zip(h.allsec(), vext):
         for seg in sec.allseg():
-            vseg = V*nUnit.V
+            vseg = V * nUnit.V
 
-            vvecs.append(h.Vector(vseg*vstim.as_numpy()))
+            vvecs.append(h.Vector(vseg * vstim.as_numpy()))
             vvecs[-1].play(seg.extracellular._ref_e, tstim, False)
             vmems.append(h.Vector().record(seg._ref_v))
 
@@ -86,15 +86,14 @@ def return_segment_coordinates(section, in_microns=False):
         x3d[i] = section.x3d(i)
         y3d[i] = section.y3d(i)
         z3d[i] = section.z3d(i)
-        rad[i] = section.diam3d(i)/2
+        rad[i] = section.diam3d(i) / 2
 
     # Compute length of each 3d segment
     for i in range(n3d):
         if i == 0:
             L[i] = 0
         else:
-            L[i] = np.sqrt((x3d[i]-x3d[i-1])**2 +
-                           (y3d[i]-y3d[i-1])**2 + (z3d[i]-z3d[i-1])**2)
+            L[i] = np.sqrt((x3d[i] - x3d[i - 1]) ** 2 + (y3d[i] - y3d[i - 1]) ** 2 + (z3d[i] - z3d[i - 1]) ** 2)
 
     # Get cumulative length of 3d segments
     cumLength = np.cumsum(L)
@@ -109,42 +108,37 @@ def return_segment_coordinates(section, in_microns=False):
         rads = np.array(rad[1])
 
     else:
-
         # Now upsample coordinates to segment locations
         xCoord = np.empty(N)
         yCoord = np.empty(N)
         zCoord = np.empty(N)
         rads = np.empty(N)
-        dx = section.L / (N-1)
+        dx = section.L / (N - 1)
         for n in range(N):
-            if n == N-1:
+            if n == N - 1:
                 xCoord[n] = x3d[-1]
                 yCoord[n] = y3d[-1]
                 zCoord[n] = z3d[-1]
                 rads[n] = rad[-1]
             else:
                 # which idx of 3d segments are we starting at
-                cIdxStart = np.where(n*dx >= cumLength)[0][-1]
+                cIdxStart = np.where(n * dx >= cumLength)[0][-1]
                 # how far along that segment is this upsampled coordinate
-                cDistFrom3dStart = n*dx - cumLength[cIdxStart]
+                cDistFrom3dStart = n * dx - cumLength[cIdxStart]
                 # what's the fractional distance along this 3d segment
-                cFraction3dLength = cDistFrom3dStart / L[cIdxStart+1]
+                cFraction3dLength = cDistFrom3dStart / L[cIdxStart + 1]
                 # compute x and y positions
-                xCoord[n] = x3d[cIdxStart] + cFraction3dLength * \
-                    (x3d[cIdxStart+1] - x3d[cIdxStart])
-                yCoord[n] = y3d[cIdxStart] + cFraction3dLength * \
-                    (y3d[cIdxStart+1] - y3d[cIdxStart])
-                zCoord[n] = z3d[cIdxStart] + cFraction3dLength * \
-                    (z3d[cIdxStart+1] - z3d[cIdxStart])
-                rads[n] = rad[cIdxStart] + cFraction3dLength * \
-                    (rad[cIdxStart+1] - rad[cIdxStart])
+                xCoord[n] = x3d[cIdxStart] + cFraction3dLength * (x3d[cIdxStart + 1] - x3d[cIdxStart])
+                yCoord[n] = y3d[cIdxStart] + cFraction3dLength * (y3d[cIdxStart + 1] - y3d[cIdxStart])
+                zCoord[n] = z3d[cIdxStart] + cFraction3dLength * (z3d[cIdxStart + 1] - z3d[cIdxStart])
+                rads[n] = rad[cIdxStart] + cFraction3dLength * (rad[cIdxStart + 1] - rad[cIdxStart])
 
     if in_microns:
-        scale = 1.
+        scale = 1.0
     else:
         scale = 1e-6
 
-    return xCoord*scale, yCoord*scale, zCoord*scale, rads*scale
+    return xCoord * scale, yCoord * scale, zCoord * scale, rads * scale
 
 
 def get_neuron_geometry():
@@ -165,7 +159,7 @@ def get_neuron_geometry():
     rads = []
     is_sphere = []
     for sec in h.allsec():
-        N = sec.n3d()-1
+        N = sec.n3d() - 1
         x, y, z, r = return_segment_coordinates(sec)
 
         coord = np.vstack((x, y, z)).transpose()
@@ -179,7 +173,7 @@ def get_neuron_geometry():
                 if ii == 0 or ii == N:
                     continue
                 else:
-                    sph = sec.hname().split('.')[-1] == 'soma'
+                    sph = sec.hname().split(".")[-1] == "soma"
 
                     is_sphere.append(sph)
     return coords, rads, is_sphere
@@ -197,7 +191,7 @@ def get_membrane_currents():
     """
     ivecs = []
     for sec in h.allsec():
-        N = sec.n3d()-1
+        N = sec.n3d() - 1
         if N > 0:
             for ii, seg in enumerate(sec.allseg()):
                 if ii == 0 or ii == N:
@@ -209,6 +203,7 @@ def get_membrane_currents():
 
     return ivecs
 
+
 def show_cell_geo(axis, polys=None, show_nodes=False):
     """
     Add cell geometry to designated plot.
@@ -218,7 +213,7 @@ def show_cell_geo(axis, polys=None, show_nodes=False):
     axis : matplotlib axis
         Axis to plot on.
     polys : List of M x 2 arrays, optional
-        Polygons to plot. The default is None, 
+        Polygons to plot. The default is None,
         which queries NEURON for all compartments.
 
     Returns
@@ -234,9 +229,8 @@ def show_cell_geo(axis, polys=None, show_nodes=False):
     polycol = PolyCollection(polys, color=shade)
     axis.add_collection(polycol)
     if show_nodes:
-        coords = np.array([return_segment_coordinates(sec)
-                          for sec in h.allsec()])
-        axis.scatter(coords[:, 0], coords[:, 1], color='C0', marker='*')
+        coords = np.array([return_segment_coordinates(sec) for sec in h.allsec()])
+        axis.scatter(coords[:, 0], coords[:, 1], color="C0", marker="*")
 
     return polys
 
@@ -248,20 +242,20 @@ def get_cell_image():
     Returns
     -------
     polys : List of M x 2 arrays
-        List of vertices for creating a 
+        List of vertices for creating a
         `matplotlib.collections.PolyCollection`.
 
     """
-    tht = np.linspace(0, 2*np.pi)
+    tht = np.linspace(0, 2 * np.pi)
 
     polys = []
     for sec in h.allsec():
         x, y, z, r = return_segment_coordinates(sec)
         coords = np.vstack((x, y, z)).transpose()
 
-        if sec.hname().split('.')[-1] == 'soma':
-            sx = x+r*np.cos(tht)
-            sy = y+r*np.sin(tht)
+        if sec.hname().split(".")[-1] == "soma":
+            sx = x + r * np.cos(tht)
+            sy = y + r * np.sin(tht)
 
             # axis.fill(sx, sy, color=shade)
             pts = np.vstack((sx, sy))
@@ -272,21 +266,18 @@ def get_cell_image():
             lx = coords.shape[0]
             if lx == 1:
                 # special case of single node
-                coords = 1e-6*np.array([[sec.x3d(i),
-                                         sec.y3d(i),
-                                         sec.z3d(i)]
-                                        for i in [0, sec.n3d()-1]])
+                coords = 1e-6 * np.array([[sec.x3d(i), sec.y3d(i), sec.z3d(i)] for i in [0, sec.n3d() - 1]])
                 lx = 2
                 r = [r]
 
                 # TODO: handle projections other than xy plane
-            for ii in range(lx-1):
+            for ii in range(lx - 1):
                 p0 = coords[ii, :2]
-                p1 = coords[ii+1, :2]
-                d = p1-p0
-                dn = r[ii]*d/np.linalg.norm(d)
+                p1 = coords[ii + 1, :2]
+                d = p1 - p0
+                dn = r[ii] * d / np.linalg.norm(d)
                 n = np.array([-dn[1], dn[0]])
-                pts = np.vstack((p0+n, p1+n, p1-n, p0-n))
+                pts = np.vstack((p0 + n, p1 + n, p1 - n, p0 - n))
 
                 polys.append(pts)
 
@@ -306,7 +297,7 @@ def make_biphasic_pulse(amplitude, tstart, pulsedur, trise=None):
     pulsedur : float
         Duration of float in ms.
     trise : float, optional
-        Pulse rise/fall time in ms. 
+        Pulse rise/fall time in ms.
         Defaults to pulsedur/1000 if None.
 
     Returns
@@ -317,11 +308,11 @@ def make_biphasic_pulse(amplitude, tstart, pulsedur, trise=None):
         Amplitudes stimulus takes on.
     """
     if trise is None:
-        trise = pulsedur/1000
+        trise = pulsedur / 1000
     dts = [0, tstart, trise, pulsedur, trise, pulsedur, trise]
 
     tvals = np.cumsum(dts)
-    amps = amplitude*np.array([0, 0, 1, 1, -1, -1, 0])
+    amps = amplitude * np.array([0, 0, 1, 1, -1, -1, 0])
 
     stimTvec = h.Vector(tvals)
     stimVvec = h.Vector(amps)
@@ -342,7 +333,7 @@ def make_monophasic_pulse(amplitude, tstart, pulsedur, trise=None):
     pulsedur : float
         Duration of float in ms.
     trise : float, optional
-        Pulse rise/fall time in ms. 
+        Pulse rise/fall time in ms.
         Defaults to pulsedur/1000 if None.
 
     Returns
@@ -353,11 +344,11 @@ def make_monophasic_pulse(amplitude, tstart, pulsedur, trise=None):
         Amplitudes stimulus takes on.
     """
     if trise is None:
-        trise = pulsedur/1000
+        trise = pulsedur / 1000
     dts = [0, tstart, trise, pulsedur, trise]
 
     tvals = np.cumsum(dts)
-    amps = amplitude*np.array([0, 0, 1, 1, 0])
+    amps = amplitude * np.array([0, 0, 1, 1, 0])
 
     stimTvec = h.Vector(tvals)
     stimVvec = h.Vector(amps)
@@ -381,7 +372,7 @@ def make_interface():
     cellcoords = []
     inds = []
     for nsec, sec in enumerate(h.allsec()):
-        sec.insert('extracellular')
+        sec.insert("extracellular")
 
         ptN = sec.n3d()
 
@@ -389,18 +380,17 @@ def make_interface():
             cellcoords.append([sec.x3d(ii), sec.y3d(ii), sec.z3d(ii)])
             inds.append([[nsec, ii]])
 
-    return np.array(cellcoords)/nUnit.m
+    return np.array(cellcoords) / nUnit.m
 
 
 class ThresholdSim(Simulation):
-    def __init__(self, name, xdom, source_amps, source_geometry, sigma=1.):
-        bbox = xdom*np.concatenate((-np.ones(3), np.ones(3)))
+    def __init__(self, name, xdom, source_amps, source_geometry, sigma=1.0):
+        bbox = xdom * np.concatenate((-np.ones(3), np.ones(3)))
         super().__init__(name, bbox)
         self.sigma = sigma
 
         for amp, geo in zip(source_amps, source_geometry):
-            self.add_current_source(amp,
-                                  geometry=geo)
+            self.add_current_source(amp, geometry=geo)
 
     def mesh_and_solve(self, depth):
         """
@@ -411,11 +401,11 @@ class ThresholdSim(Simulation):
         depth : int
             Max recursion depth
         """
-        source_coords, depths, metric_coefficents = get_standard_mesh_params(
-            self.current_sources, depth)
+        source_coords, depths, metric_coefficents = get_standard_mesh_params(self.current_sources, depth)
 
-        self.make_adaptive_grid(ref_pts=source_coords, max_depth=depths,
-                              min_l0_function=general_metric, coefs=metric_coefficents)
+        self.make_adaptive_grid(
+            ref_pts=source_coords, max_depth=depths, min_l0_function=general_metric, coefs=metric_coefficents
+        )
 
         self.finalize_mesh()
         self.set_boundary_nodes()
@@ -434,18 +424,18 @@ class ThresholdSim(Simulation):
         -------
         float[:]
             Voltage at each point in volts.
-        """        
+        """
         analytic_values = np.zeros(coords.shape[0])
         for src in self.current_sources:
-            analytic_values += util.point_current_source_voltage(coords, i_source=src.value,
-                                          sigma=self.sigma,
-                                          source_location=src.coords)
+            analytic_values += util.point_current_source_voltage(
+                coords, i_source=src.value, sigma=self.sigma, source_location=src.coords
+            )
 
         return analytic_values
 
 
 class ThresholdStudy:
-    def __init__(self, simulation, pulsedur=1., biphasic=True, viz=None):
+    def __init__(self, simulation, pulsedur=1.0, biphasic=True, viz=None):
         self.segment_coordinates = None
         self.v_external = None
         self.sim = simulation
@@ -468,7 +458,7 @@ class ThresholdStudy:
 
         return cell
 
-    def get_threshold(self, depth, pmin=0., pmax=1e2, analytic=False, strict=True):
+    def get_threshold(self, depth, pmin=0.0, pmax=1e2, analytic=False, strict=True):
         """
         Find activation threshold of electrode/neuron system.
 
@@ -484,7 +474,7 @@ class ThresholdStudy:
             Use analytic point-source approximation (True)
             or meshed geometry (False, default)
         strict : bool, optional
-            Raise exception if neuron is not subthreshold 
+            Raise exception if neuron is not subthreshold
             at pmin and superthreshold at pmax; otherwise,
             return NaN for all values. Default True.
 
@@ -510,7 +500,6 @@ class ThresholdStudy:
             threshold = np.nan
             n_sources = np.nan
         else:
-
             if strict:
                 assert self._run_trial(pmax, analytic=analytic)
                 assert not self._run_trial(pmin, analytic=analytic)
@@ -518,8 +507,8 @@ class ThresholdStudy:
                 if self._run_trial(pmax, analytic=analytic) and not self._run_trial(pmin, analytic=analytic):
                     return np.nan, np.nan, np.nan
 
-            while (pmax-pmin) > 1e-6:
-                md = 0.5*(pmin+pmax)
+            while (pmax - pmin) > 1e-6:
+                md = 0.5 * (pmin + pmax)
                 # print(md)
                 spike = self._run_trial(md, analytic=analytic)
 
@@ -541,15 +530,13 @@ class ThresholdStudy:
         cell = self._build_neuron()
 
         if self.is_biphasic:
-            tstim, vstim = make_biphasic_pulse(
-                amplitude, 2., self.pulsedur)
+            tstim, vstim = make_biphasic_pulse(amplitude, 2.0, self.pulsedur)
         else:
-            tstim, vstim = make_monophasic_pulse(
-                amplitude, 2., self.pulsedur)
+            tstim, vstim = make_monophasic_pulse(amplitude, 2.0, self.pulsedur)
 
         self.tstim = tstim
         self.vstim = vstim
-        tstop = 10*max(tstim.as_numpy())
+        tstop = 10 * max(tstim.as_numpy())
 
         vvecs, vmems = self._set_v_ext(analytic=analytic)
 
@@ -578,7 +565,6 @@ class ThresholdStudy:
         return spiked
 
     def _set_v_ext(self, analytic=False):
-
         setup = self.sim
         if self.v_external is None:
             if analytic:
@@ -595,9 +581,9 @@ class ThresholdStudy:
         vmems = []
         for sec, V in zip(h.allsec(), vext):
             for seg in sec.allseg():
-                vseg = V*nUnit.V
+                vseg = V * nUnit.V
 
-                vvecs.append(h.Vector(vseg*self.vstim.as_numpy()))
+                vvecs.append(h.Vector(vseg * self.vstim.as_numpy()))
                 vvecs[-1].play(seg.extracellular._ref_e, self.tstim, False)
                 vmems.append(h.Vector().record(seg._ref_v))
                 # vvecs[-1].play(seg._ref_e_extracellular, tstim, False)
@@ -605,7 +591,7 @@ class ThresholdStudy:
         return vvecs, vmems
 
 
-class RecordedCell():
+class RecordedCell:
     def attach_spike_detector(self, section):
         """
         Attach spike detector to section.
@@ -620,8 +606,7 @@ class RecordedCell():
         None.
 
         """
-        self._spike_detector = h.NetCon(
-            section(0.5)._ref_v, None, sec=section)
+        self._spike_detector = h.NetCon(section(0.5)._ref_v, None, sec=section)
         self.spike_times = h.Vector()
         self._spike_detector.record(self.spike_times)
 
@@ -632,7 +617,7 @@ class RecordedCell():
         Parameters
         ----------
         sections : NEURON section, optional
-            NEURON sections to record, or all sections 
+            NEURON sections to record, or all sections
             if None (default)
 
         Returns
@@ -643,9 +628,9 @@ class RecordedCell():
         if sections is None:
             sections = h.allsec()
 
-        if 'vrecs' not in dir(self):
+        if "vrecs" not in dir(self):
             self.vrecs = []
-        if 'irecs' not in dir(self):
+        if "irecs" not in dir(self):
             self.irecs = []
 
         for section in sections:

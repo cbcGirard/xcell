@@ -11,7 +11,6 @@ Original canvas bounds are ((0,32), (0,32))
 
 """
 
-import xcell
 import pandas
 import numpy as np
 import matplotlib.pyplot as plt

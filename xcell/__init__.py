@@ -19,5 +19,5 @@ from . import colors
 from . import signals
 from .xCell import *
 
-if os.name!='nt':
+if os.name != "nt":
     from . import nrnutil

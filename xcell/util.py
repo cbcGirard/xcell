@@ -16,9 +16,10 @@ import psutil
 MAXDEPTH = np.array(20, dtype=np.uint64)[()]
 
 #: Number of points along axis at absolute maximum subdivision
-MAXPT = np.array(2**(MAXDEPTH+1)+1, dtype=np.uint64)[()]
+MAXPT = np.array(2 ** (MAXDEPTH + 1) + 1, dtype=np.uint64)[()]
 
-def point_current_source_voltage(eval_coords, i_source, sigma=1., source_location=np.zeros(3, dtype=np.float64)):
+
+def point_current_source_voltage(eval_coords, i_source, sigma=1.0, source_location=np.zeros(3, dtype=np.float64)):
     """
     Calculate field from point current source.
 
@@ -39,13 +40,13 @@ def point_current_source_voltage(eval_coords, i_source, sigma=1., source_locatio
         Potential at specified points.
 
     """
-    dif = eval_coords-source_location
-    k = i_source/(4*np.pi*sigma)
-    v = np.array([k/np.linalg.norm(d) for d in dif])
+    dif = eval_coords - source_location
+    k = i_source / (4 * np.pi * sigma)
+    v = np.array([k / np.linalg.norm(d) for d in dif])
     return v
 
 
-def disk_current_source_voltage(eval_coords, i_source, sigma=1., source_location=np.zeros(3, dtype=np.float64)):
+def disk_current_source_voltage(eval_coords, i_source, sigma=1.0, source_location=np.zeros(3, dtype=np.float64)):
     """
     Calculate field from a disk current source on planar insulator.
 
@@ -73,14 +74,14 @@ def disk_current_source_voltage(eval_coords, i_source, sigma=1., source_location
     References
     -----------
     .. [1] J. Newman, “Resistance for Flow of Current to a Disk,”
-       J. Electrochem. Soc., vol. 113, no. 5, p. 501, May 1966, 
+       J. Electrochem. Soc., vol. 113, no. 5, p. 501, May 1966,
        doi: 10.1149/1.2424003.
 
 
     """
-    dif = eval_coords-source_location
-    k = i_source/(4*sigma)
-    v = np.array([k/np.linalg.norm(d) for d in dif])
+    dif = eval_coords - source_location
+    k = i_source / (4 * sigma)
+    v = np.array([k / np.linalg.norm(d) for d in dif])
     return v
 
 
@@ -99,9 +100,9 @@ def round_to_digit(x):
         Rounded number.
 
     """
-    factor = 10**np.floor(np.log10(x))
+    factor = 10 ** np.floor(np.log10(x))
 
-    return factor*np.ceil(x/factor)
+    return factor * np.ceil(x / factor)
 
 
 def logfloor(val):
@@ -118,7 +119,7 @@ def logfloor(val):
     same as val
         Rounded value(s)
     """
-    return 10**np.floor(np.log10(val))
+    return 10 ** np.floor(np.log10(val))
 
 
 def logceil(val):
@@ -135,10 +136,10 @@ def logceil(val):
     same as val
         Rounded value(s)
     """
-    return 10**np.ceil(np.log10(val))
+    return 10 ** np.ceil(np.log10(val))
 
 
-def loground(axis, which='both'):
+def loground(axis, which="both"):
     """
     Set plot axes' bounds to powers of 10.
 
@@ -149,11 +150,10 @@ def loground(axis, which='both'):
     which : str, optional
         Which axes to change bounds: 'x', 'y', or 'both' (default).
     """
-    lims = [[logfloor(aa[0]), logceil(aa[1])]
-            for aa in axis.dataLim.get_points().transpose()]  # [xl, yl]]
-    if which == 'x' or which == 'both':
+    lims = [[logfloor(aa[0]), logceil(aa[1])] for aa in axis.dataLim.get_points().transpose()]  # [xl, yl]]
+    if which == "x" or which == "both":
         axis.set_xlim(lims[0])
-    if which == 'y' or which == 'both':
+    if which == "y" or which == "both":
         axis.set_ylim(lims[1])
 
 
@@ -174,14 +174,14 @@ def make_grid_points(nx, xmax, xmin=None, ymax=None, ymin=None, centers=False):
     ymin : float, optional
         Smallest y coordinate, or use -xmax if None (default)
     centers : bool, optional
-        Return the center points of the grid instead of the 
+        Return the center points of the grid instead of the
         corner vertices, by default False
 
     Returns
     -------
     float[:,2]
         XY coordinates of points on grid.
-    """    
+    """
     if xmin is None:
         xmin = -xmax
     if ymax is None:
@@ -193,167 +193,13 @@ def make_grid_points(nx, xmax, xmin=None, ymax=None, ymin=None, centers=False):
     yy = np.linspace(ymin, ymax, nx)
 
     if centers:
-        xx = 0.5*(xx[:-1]+xx[1:])
-        yy = 0.5*(yy[:-1]+yy[1:])
+        xx = 0.5 * (xx[:-1] + xx[1:])
+        yy = 0.5 * (yy[:-1] + yy[1:])
 
     XX, YY = np.meshgrid(xx, yy)
 
     pts = np.vstack((XX.ravel(), YY.ravel())).transpose()
     return pts
-
-
-
-# TODO: remove unused(?) class
-# Attempt to create faster, Numba implementation of map
-# from integer tag to position in list/array of integers
-# e.g. map from universal node index to mesh node index
-# Need further testing to see if speed benefit is possible
-#
-# @nb.experimental.jitclass()
-# class index_map:
-#     def __init__(self, sparse_indices):
-#         self.sparse = sparse_indices
-#
-#     def _find_match(self, value, lower, upper):
-#         if lower == upper:
-#             match = lower
-#         else:
-#             mid = (lower+upper)//2
-#             if self.sparse[mid] > value:
-#                 match = self._find_match(value, lower, mid)
-#             else:
-#                 match = self._find_match(value, mid, upper)
-#
-#         return match
-
-#     def to_dense(self, sparse_index):
-#         match = self._findMatch(sparse_index, 0, self.sparse.shape[0])
-#         return match
-
-
-# TODO: remove unused function
-# def eliminate_rows(matrix):
-#     N = matrix.shape[0]
-#     # lo=scipy.sparse.tril(matrix,-1)
-#     lo = matrix.copy()
-#     lo.sum_duplicates()
-#
-#     rowIdx, colIdx = lo.nonzero()
-#     _, count = np.unique(rowIdx, return_counts=True)
-#
-#     tup = __eliminate_rowsLoop(rowIdx, colIdx, count)
-#     v, r, c = tup
-#
-#     # xmat=scipy.sparse.coo_matrix(tup,
-#     #                              shape=(N,N))
-#     xmat = scipy.sparse.coo_matrix((v, (r, c)),
-#                                    shape=(N, N))
-#
-#     return xmat
-
-# TODO: remove unused function
-# def htile(array, ncopy):
-#     return np.vstack([array]*ncopy).transpose()
-
-# TODO: remove unused function
-# @nb.njit(nb.types.Tuple(nb.float64[:], nb.int64[:], nb.int64[:])(nb.int64[:], nb.int64[:], nb.int64[:]),
-#          parallel=True)
-# @nb.njit(parallel=True)
-# def __eliminate_rowsLoop(rowIdx, colIdx, count):
-#     r = []
-#     c = []
-#     v = []
-#     hanging = count < 6
-#     for ii in nb.prange(count.shape[0]):
-#         if hanging[ii]:
-#             nconn = count[ii]-1
-#             cols = colIdx[rowIdx == ii]
-#             cols = cols[cols != ii]
-
-#             vals = np.ones(nconn)/nconn
-
-#             if vals.shape != cols.shape:
-#                 print()
-
-#             for jj in nb.prange(cols.shape[0]):
-#                 c.append(cols[jj])
-#                 r.append(ii)
-#                 v.append(vals[jj])
-
-#         else:
-#             r.append(ii)
-#             c.append(ii)
-#             v.append(1.0)
-
-#     # tupIdx=(np.array(r),np.array(c))
-#     # tup=(np.array(v),tupIdx)
-#     # tup=(np.array(v), np.array(r), np.array(c))
-#     return (v, r, c)
-#     # return tup
-
-# TODO: remove unused function?
-# def deduplicate_edges(edges, conductances):
-#     """
-#     Combine conductances that are in parallel.
-#
-#     Parameters
-#     ----------
-#     edges : int[:,2]
-#         Global indices of the edge endpoints.
-#     conductances : float[:]
-#         Discrete conductance between the nodes.
-#
-#     Returns
-#     -------
-#     new_edges : int[:,2]
-#         Minimal set of conductances' endpoints.
-#     new_conductances : float[:]
-#         Minimal set of conductances.
-#
-#     """
-#     N = max(edges.ravel())+1
-#     mat = scipy.sparse.coo_matrix((conductances,
-#                                    (edges[:, 0], edges[:, 1])),
-#                                   shape=(N, N))
-#
-#     dmat = mat.copy()+mat.transpose()
-#
-#     dedup = scipy.sparse.tril(dmat, k=-1)
-#
-#     new_edges = np.array(dedup.nonzero()).transpose()
-#
-#     new_conductances = dedup.data
-#
-#     return new_edges, new_conductances
-
-# TODO: test alternative to get_index_dict
-# @nb.njit
-# def condense_indices(global_mask):
-#     """
-#     Get array for mapping local to global numbering.
-#
-#    .. deprecated
-#        Lower mem usage, but horribly slow.
-#        Use `.get_index_dict` instead
-#
-#     Parameters
-#     ----------
-#     global_mask : bool array
-#         Global elements included in subset.
-#
-#     Returns
-#     -------
-#     whereSubset : int array
-#         DESCRIPTION.
-#
-#     """
-#     # whereSubset=-np.ones_like(global_mask)
-#     whereSubset = np.empty_like(global_mask)
-#     nSubset = fastcount(global_mask)
-#     whereSubset[global_mask] = np.arange(nSubset)
-#
-#     return whereSubset
-
 
 
 @nb.njit()
@@ -377,6 +223,7 @@ def get_index_dict(sparse_indices):
         index_dict[sparse_indices[ii]] = ii
 
     return index_dict
+
 
 # TODO: unify dictionary usage
 def get_py_dict(sparse_indices):
@@ -431,34 +278,6 @@ def renumber_indices(sparse_indices, dense_list):
 
     return renumbered
 
-# TODO: marked for deletion
-# @nb.njit(parallel=True)
-# def octreeLoop_get_boundary_nodesLoop(nX, index_map):
-#     """
-#     Numba loop to return the boundary nodes of a mesh.
-
-#     Parameters
-#     ----------
-#     nX : TYPE
-#         DESCRIPTION.
-#     index_map : TYPE
-#         DESCRIPTION.
-
-#     Returns
-#     -------
-#     TYPE
-#         DESCRIPTION.
-
-#     """
-#     bnodes = []
-#     for ii in nb.prange(index_map.shape[0]):
-#         nn = index_map[ii]
-#         xyz = index_to_xyz(nn, nX)
-#         if np.any(xyz == 0) or np.any(xyz == (nX-1)):
-#             bnodes.append(ii)
-
-#     return np.array(bnodes, dtype=np.int64)
-
 
 @nb.njit()
 def reindex(sparse_value, dense_list):
@@ -487,206 +306,7 @@ def reindex(sparse_value, dense_list):
         if val == sparse_value:
             return n
 
-    raise ValueError('not a member of dense_list')
-
-
-# TODO: marked for deletion
-# def coords2masked_arrays(intCoords, edges, planeMask, vals):
-#     pcoords = np.ma.masked_array(intCoords, mask=~planeMask.repeat(2))
-#     edgeInPlane = np.all(planeMask[edges], axis=1)
-#     pEdges = np.ma.masked_array(edges, mask=~edgeInPlane.repeat(2))
-#     edgeLs = abs(np.diff(np.diff(pcoords[pEdges], axis=2), axis=1)).squeeze()
-
-#     span = pcoords.max()
-#     edgeSizes = get_unmasked(np.unique(edgeLs))
-
-#     arrays = []
-#     for s in edgeSizes:
-#         nArray = span//s+1
-#         arr = np.nan*np.empty((nArray, nArray))
-
-#         # get
-#         edgesThisSize = np.ma.array(pEdges, mask=(edgeLs != s).repeat(2))
-#         nodesThisSize, nConn = np.unique(
-#             edgesThisSize.compressed(), return_counts=True)
-
-#         # nodesThisSize[nConn<2]=np.ma.masked
-#         # whichNodes=get_unmasked(nodesThisSize)
-#         whichNodes = nodesThisSize
-
-#         arrCoords = get_unmasked(pcoords[whichNodes])//s
-#         arrI, arrJ = np.hsplit(arrCoords, 2)
-
-#         arr[arrI.squeeze(), arrJ.squeeze()] = vals[whichNodes]
-#         arrays.append(np.ma.masked_invalid(arr))
-
-#     return arrays
-
-# TODO: remove unused function
-# def get_unmasked(mask_array):
-#     if len(mask_array.shape) > 1:
-#         isValid = np.all(~mask_array.mask, axis=1)
-#     else:
-#         isValid = ~mask_array.mask
-#     return mask_array.data[isValid]
-
-# TODO: marked for deletion
-# def quadsTomasked_arrays(quadInds, quadVals):
-#     arrays = []
-#     quadSize = quadInds[:, 1]-quadInds[:, 0]
-#     nmax = max(quadInds.ravel())
-
-#     sizes = np.unique(quadSize)
-
-#     for s in sizes:
-#         which = quadSize == s
-#         nGrid = nmax//s+1
-#         vArr = np.nan*np.empty((nGrid, nGrid))
-#         grid0s = quadInds[:, [0, 2]][which]//s
-#         vgrids = quadVals[which]
-
-#         # if nGrid==9:
-#         #     print()
-
-#         for ii in range(vgrids.shape[0]):
-#             a, b = grid0s[ii]
-#             v = vgrids[ii]
-#             vArr[a, b] = v[0]
-#             vArr[a+1, b] = v[1]
-#             vArr[a, b+1] = v[2]
-#             vArr[a+1, b+1] = v[3]
-
-#         vmask = np.ma.masked_invalid(vArr)
-#         arrays.append(vmask)
-#     return arrays
-
-# TODO: marked for deletion?
-# @nb.njit(parallel=True)
-# def edgeCurrentLoop(gList, edgeMat, dof2Global, vvec, gCoords, source_coords):
-#     currents = np.empty_like(gList, dtype=np.float64)
-#     nEdges = gList.shape[0]
-#     edges = np.empty((nEdges, 2, 3),
-#                      dtype=np.float64)
-#     for ii in nb.prange(nEdges):
-#         g = gList[ii]
-#         dofEdge = edgeMat[ii]
-#         globalEdge = dof2Global[dofEdge]
-
-#         vs = vvec[dofEdge]
-#         dv = vs[1]-vs[0]
-
-#         if dv < 0:
-#             dv = -dv
-#             globalEdge = np.array([globalEdge[1], globalEdge[0]])
-
-#         for pp in np.arange(2):
-#             p = globalEdge[pp]
-#             if p < 0:
-#                 c = source_coords[-1-p]
-#             else:
-#                 c = gCoords[p]
-
-#             edges[ii, pp] = c
-
-#         # i=g*dv
-
-#         currents[ii] = g*dv
-#         # edges[ii]=np.array(coords)
-
-#     return (currents, edges)
-
-# TODO: marked for deletion
-# @nb.njit()
-# def edgeRoles(edges, node_role_table):
-#     edgeRoles = np.empty_like(edges)
-#     for ii in nb.prange(edges.shape[0]):
-#         edgeRoles[ii] = node_role_table[edges[ii]]
-
-#     return edgeRoles
-
-
-# TODO: marked for deletion
-# @nb.njit()
-# def edgeNodesOfType(edges, nodeSelect):
-#     N = edges.shape[0]
-#     matches = np.empty(N, dtype=np.int64)
-
-#     for ii in nb.prange(N):
-#         e = edges[ii]
-#         matches[ii] = np.sum(e)
-
-#     return matches
-
-# TODO: marked for deletion
-# def getquads(x, y, xInt, yInt, values):
-#     # x,y=np.hsplit(xy,2)
-#     # x=xy[:,0]
-#     # y=xy[:,1]
-#     _, kx, nx = np.unique(xInt, return_index=True, return_inverse=True)
-#     _, ky, ny = np.unique(yInt, return_index=True, return_inverse=True)
-
-#     quadVals, quadCoords = __getquadLoop(x, y, kx, ky, nx, ny, values)
-
-#     return quadVals, quadCoords
-
-# TODO: marked for deletion
-# @nb.njit(parallel=True)
-# def __getquadLoop(x, y, kx, ky, nx, ny, values):
-#     quadVals = []
-#     quadCoords = []
-
-#     sel = np.empty((4, x.shape[0]), dtype=np.bool8)
-
-#     for yy in nb.prange(len(ky)-1):
-#         for xx in nb.prange(len(kx)-1):
-
-#             indices = __getSel(nx, ny, xx, yy)
-
-#             if indices.shape[0] > 0:
-#                 # x0,y0=xy[sel[0]][0]
-#                 # x1,y1=xy[sel[3]][0]
-#                 x0 = x[indices[0]]
-#                 y0 = y[indices[0]]
-#                 x1 = x[indices[3]]
-#                 y1 = y[indices[3]]
-#                 qcoords = np.array([x0, x1, y0, y1])
-#                 # where=np.array([np.nonzero(s)[0][0] for s in sel])
-#                 qvals = values[indices]
-#                 # qvals=np.array([values[sel[n,:]] for n in np.arange(4)]).squeeze()
-
-#                 quadVals.append(qvals)
-#                 quadCoords.append(qcoords)
-
-#     return np.array(quadVals), np.array(quadCoords)
-
-# TODO: Remove unused
-# @nb.njit
-# def toBilinearVars(coord):
-#     return np.array([1.,
-#                      coord[0],
-#                      coord[1],
-#                      coord[0]*coord[1]])
-
-# TODO: Remove unused
-# @nb.njit
-# def interpolateBilin(node_values, location):
-#     locCoef = toBilinearVars(location)
-#
-#     interpCoefs = getBilinCoefs(node_values)
-#
-#     interpVal = np.dot(interpCoefs, locCoef)
-#     return interpVal
-
-# TODO: Remove unused
-# @nb.njit()
-# def getBilinCoefs(vals):
-#     inv = np.array([[1.,  0.,  0.,  0.],
-#                     [-1.,  1.,  0.,  0.],
-#                     [-1.,  0.,  1.,  0.],
-#                     [1., -1., -1.,  1.]])
-#
-#     interpCoefs = inv @ vals
-#     return interpCoefs
+    raise ValueError("not a member of dense_list")
 
 
 @nb.njit
@@ -699,68 +319,6 @@ def minOver(target, vals):
 def maxUnder(target, vals):
     sel = vals <= target
     return max(vals[sel])
-
-# TODO: remove unused
-# # @nb.njit
-# # def getElementInterpolant(element,node_values):
-# @nb.njit()
-# def getElementInterpolant(node_values):
-#     # coords=element.getOwnCoords()
-#     # xx=np.arange(2,dtype=np.float64)
-#     # # coords=np.array([[x,y,z] for z in xx for y in xx for x in xx])
-#     # coords=np.array([[0.,0.,0.],
-#     #                  [1.,0.,0.],
-#     #                  [0.,1.,0.],
-#     #                  [1.,1.,0.],
-#     #                  [0.,0.,1.],
-#     #                  [1.,0.,1.],
-#     #                  [0.,1.,1.],
-#     #                  [1.,1.,1.]])
-#     # coefs=np.empty((8,8),dtype=np.float64)
-#     # for ii in range(8):
-#     #     coefs[ii]=coord2InterpVals(coords[ii])
-
-#     # interpCoefs=np.linalg.solve(coefs, node_values)
-
-#     im = np.array([[1.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-#                    [-1.,  1.,  0.,  0.,  0.,  0.,  0.,  0.],
-#                    [-1.,  0.,  1.,  0.,  0.,  0.,  0.,  0.],
-#                    [-1.,  0.,  0.,  0.,  1.,  0.,  0.,  0.],
-#                    [1., -1., -1.,  1.,  0.,  0.,  0.,  0.],
-#                    [1., -1.,  0.,  0., -1.,  1.,  0.,  0.],
-#                    [1.,  0., -1.,  0., -1.,  0.,  1.,  0.],
-#                    [-1.,  1.,  1., -1.,  1., -1., -1.,  1.]])
-#     # interpCoefs=np.matmul(im,node_values)
-#     interpCoefs = im @ node_values
-
-#     return interpCoefs
-
-# TODO: Remove unused
-# @nb.njit
-# def evalulateInterpolant(interp, location):
-
-#     # coeffs of a, bx, cy, dz, exy, fxz, gyz, hxyz
-#     varList = coord2InterpVals(location)
-
-#     # interpVal=np.matmul(interp,varList)
-#     interpVal = np.dot(interp, varList)
-
-#     return interpVal
-
-# TODO: remove unused
-# @nb.njit
-# def coord2InterpVals(coord):
-#     x, y, z = coord
-#     return np.array([1,
-#                      x,
-#                      y,
-#                      z,
-#                      x*y,
-#                      x*z,
-#                      y*z,
-#                      x*y*z]).transpose()
-
-
 
 
 @nb.njit()  # ,parallel=True)
@@ -777,7 +335,7 @@ def to_bit_array(val):  # , nBits=3):
     -------
     bool[3]
         Array of lower 3 bits from input
-    """    
+    """
     return np.array([(val >> n) & 1 for n in range(3)])
 
 
@@ -799,18 +357,18 @@ def from_bit_array(arr):
     -------
     uint64
         Integer value of bit array
-    """    
+    """
     val = 0
     nbit = arr.shape[0]
     for ii in nb.prange(nbit):
-        val += arr[ii]*2**(nbit-ii-1)
+        val += arr[ii] * 2 ** (nbit - ii - 1)
     return val
 
 
 @nb.njit
 def any_match(search_array, search_values):
     """
-    Rapid search if any matches occur 
+    Rapid search if any matches occur
     (returns immediately at first match).
 
     Parameters
@@ -910,12 +468,12 @@ def reduce_functions(l0_function, ref_pts, element_bbox, coefs=None, return_unde
         Which point/coefficent pairs are not satisfied by current element size.
         These should be passed to the child elements, and the rest assumed to be
         satisfied by the children as well.
-    """    
+    """
     nFun = ref_pts.shape[0]
 
     l0s = l0_function(element_bbox, ref_pts, coefs)
 
-    actual_l0 = np.prod(element_bbox[3:]-element_bbox[:3])**(1/3)
+    actual_l0 = np.prod(element_bbox[3:] - element_bbox[:3]) ** (1 / 3)
 
     which_pts = np.logical_xor(l0s > actual_l0, return_under)
 
@@ -943,7 +501,7 @@ def intdot(a, b):
     dot = np.empty(a.shape[0], dtype=np.uint64)
 
     for ii in nb.prange(a.shape[0]):
-        dot[ii] = np.sum(a[ii]*b)
+        dot[ii] = np.sum(a[ii] * b)
 
     return dot
 
@@ -959,7 +517,7 @@ def get_indices_of_octant(parent_list, relative_position):
     parent_list : int8[:]
         List of parent octants' indices.
     relative_position : int8[:,3]
-        Offsets of points to return indices for, relative to 
+        Offsets of points to return indices for, relative to
         root node of octant.
 
     Returns
@@ -973,17 +531,6 @@ def get_indices_of_octant(parent_list, relative_position):
 
     return indices
 
-# TODO: remove unused function
-# @nb.njit(parallel=True)
-# def bulkCalcOctantIndices(parent_lists,elDepths):
-#     numel=parent_lists.shape[0]
-#     inds=np.empty((numel,15),dtype=np.uint64)
-#     for nel in nb.prange(numel):
-#         parent_list=parent_lists[nel,:elDepths[nel]]
-#         inds[nel,:]=get_indices_of_octant(parent_list,
-#                                        HEX_POINT_INDICES)
-
-#     return inds
 
 @nb.njit()  # parallel=True, fastmath=True) # 10x slower when parallel...
 def calc_xyz_within_octant(parent_list, relative_position):
@@ -995,29 +542,31 @@ def calc_xyz_within_octant(parent_list, relative_position):
     parent_list : int8[:]
         List of parent octants' indices.
     relative_position : int8[:,3]
-        Offsets of points to return indices for, relative to 
+        Offsets of points to return indices for, relative to
         root node of octant.
 
     Returns
     -------
     uint64[:]
         Universal indices of node
-    """    
+    """
     origin = octant_list_to_xyz(parent_list)
 
     npt = relative_position.shape[0]
-    depth = MAXDEPTH-parent_list.shape[0]
+    depth = MAXDEPTH - parent_list.shape[0]
     scale = 1 << depth
 
     absPos = np.empty_like(relative_position, dtype=np.uint64)
     for ii in nb.prange(npt):
         for jj in nb.prange(3):
-            absPos[ii, jj] = origin[jj] + scale*relative_position[ii, jj]
+            absPos[ii, jj] = origin[jj] + scale * relative_position[ii, jj]
 
     return absPos
 
 
-@nb.njit(parallel=True,)
+@nb.njit(
+    parallel=True,
+)
 def indices_to_coordinates(indices, origin, span):
     """
     Convert universal indices to Cartesian coordinates
@@ -1042,9 +591,10 @@ def indices_to_coordinates(indices, origin, span):
     coords = np.empty((nPt, 3), dtype=np.float64)
     for ii in nb.prange(nPt):
         ijk = index_to_xyz(indices[ii], MAXPT)
-        coords[ii] = span*ijk/(MAXPT-1)+origin
+        coords[ii] = span * ijk / (MAXPT - 1) + origin
 
     return coords
+
 
 @nb.njit()  # parallel=True) #2x slower if parallel
 def octant_list_to_xyz(octant_list):
@@ -1065,7 +615,7 @@ def octant_list_to_xyz(octant_list):
     depth = octant_list.shape[0]
     xyz = np.zeros(3, dtype=np.uint64)
     for ii in nb.prange(depth):
-        scale = 1 << (MAXDEPTH-ii)
+        scale = 1 << (MAXDEPTH - ii)
         ind = octant_list[ii]
         for ax in nb.prange(3):
             if (ind >> ax) & 1:
@@ -1073,8 +623,9 @@ def octant_list_to_xyz(octant_list):
 
     return xyz
 
+
 def get_octant_neighbor_lists(own_index_list):
-    '''
+    """
     Calculate the lists of indices for each neighbor of an octant.
 
     Parameters
@@ -1087,22 +638,21 @@ def get_octant_neighbor_lists(own_index_list):
     neighbor_lists : list of int
         List of parent indices for the 6 neighboring octants.
 
-    '''
+    """
     ownDepth = own_index_list.shape[0]
     nXYZ = reverse_octant_list_to_xyz(own_index_list)
     neighbor_lists = []
     # keep Numba type inference happy
 
     for nn in nb.prange(6):
-        axis = nn//2
+        axis = nn // 2
         dx = nn % 2
 
-        dr = 2*dx-1
+        dr = 2 * dx - 1
         xyz = nXYZ.copy()
         xyz[axis] += dr
 
         neighbor_lists.append(__xyzToOList(xyz, ownDepth))
-
 
     return neighbor_lists
 
@@ -1122,7 +672,7 @@ def reverse_octant_list_to_xyz(octant_list):
     XYZ : uint64[3]
         XYZ triple of smallest octant node.
 
-    """    
+    """
     depth = octant_list.shape[0]
 
     xyz = np.zeros(3, dtype=np.int64)
@@ -1130,7 +680,7 @@ def reverse_octant_list_to_xyz(octant_list):
         for jj in nb.prange(3):
             bit = (octant_list[nn] >> jj) & 1
             # xyz[jj]+=bit<<nn
-            xyz[jj] += bit << (depth-nn-1)
+            xyz[jj] += bit << (depth - nn - 1)
 
     return xyz
 
@@ -1158,7 +708,7 @@ def __xyzToOList(xyz, depth):
         return olist
 
 
-class Logger():
+class Logger:
     """Monitor timing, memory use, and step progress."""
 
     def __init__(self, step_name, printout=False):
@@ -1180,7 +730,7 @@ class Logger():
         self.name = step_name
         self.printout = printout
         if printout:
-            print(step_name+" starting")
+            print(step_name + " starting")
         self.startWall = time.monotonic()
         self.start = time.process_time()
         self.durationCPU = 0
@@ -1198,13 +748,12 @@ class Logger():
         """
         tWall = time.monotonic()
         tend = time.process_time()
-        durationCPU = tend-self.start
-        durationWall = tWall-self.startWall
+        durationCPU = tend - self.start
+        durationWall = tWall - self.startWall
 
         if self.printout:
             engFormat = tickr.EngFormatter()
-            print(self.name+": "+engFormat(durationCPU) +
-                  "s [CPU], "+engFormat(durationWall)+'s [wall]')
+            print(self.name + ": " + engFormat(durationCPU) + "s [CPU], " + engFormat(durationWall) + "s [wall]")
         self.durationCPU = durationCPU
         self.durationWall = durationWall
         # self.memory=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss

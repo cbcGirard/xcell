@@ -1,0 +1,37 @@
+{
+    "liveServer.settings.root": "docs/html/",
+    "[python]": {
+        "editor.wordBasedSuggestions": true
+    },
+    "python.analysis.packageIndexDepths": [
+        {
+            "name": "xcell",
+            "depth": 4,
+            "includeAllSymbols": True
+        },
+        {
+            "name": "sklearn",
+            "depth": 2
+        },
+        {
+            "name": "matplotlib",
+            "depth": 2
+        },
+        {
+            "name": "scipy",
+            "depth": 2
+        },
+        {
+            "name": "django",
+            "depth": 2
+        },
+        {
+            "name": "flask",
+            "depth": 2
+        },
+        {
+            "name": "fastapi",
+            "depth": 2
+        }
+    ]
+}

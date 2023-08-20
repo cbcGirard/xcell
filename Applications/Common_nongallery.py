@@ -12,15 +12,12 @@ from neuron import h
 from neuron.units import ms, mV
 import neuron as nrn
 
-h.load_file('stdrun.hoc')
+h.load_file("stdrun.hoc")
 h.CVode().use_fast_imem(1)
-nrn.load_mechanisms('estimsurvey/')
+nrn.load_mechanisms("estimsurvey/")
 
 
-def makeSynthStudy(folderName,
-                   rElec=1e-6,
-                   vSource=False,
-                   xmax=1e-4):
+def makeSynthStudy(folderName, rElec=1e-6, vSource=False, xmax=1e-4):
     """
 
 
@@ -43,22 +40,19 @@ def makeSynthStudy(folderName,
         DESCRIPTION.
 
     """
-    datadir = '/home/benoit/smb4k/ResearchData/Results'
+    datadir = "/home/benoit/smb4k/ResearchData/Results"
     folder = path.join(datadir, folderName)
-    bbox = np.append(-xmax*np.ones(3), xmax*np.ones(3))
+    bbox = np.append(-xmax * np.ones(3), xmax * np.ones(3))
 
     study = xc.Study(folder, bbox)
 
     setup = study.new_simulation()
-    geo = xc.geometry.Sphere(center=np.zeros(3),
-                                radius = rElec)
+    geo = xc.geometry.Sphere(center=np.zeros(3), radius=rElec)
 
     if vSource:
-        setup.add_voltage_source(xc.signals.Signal(1.),
-                                 geometry=geo)
+        setup.add_voltage_source(xc.signals.Signal(1.0), geometry=geo)
     else:
-        setup.add_current_source(xc.signals.Signal(4*np.pi*rElec),
-                                 geometry=geo)
+        setup.add_current_source(xc.signals.Signal(4 * np.pi * rElec), geometry=geo)
 
     return study, setup
 
@@ -67,9 +61,7 @@ def runAdaptation(setup, max_depth=8, meshdensity=0.2, metrics=None):
     if metrics is None:
         metrics = []
         for src in setup.current_sources:
-            metrics.append(xc.makeExplicitLinearMetric(max_depth, 
-                                                          meshdensity,
-                                                          origin=src.coords))
+            metrics.append(xc.makeExplicitLinearMetric(max_depth, meshdensity, origin=src.coords))
 
     setup.make_adaptive_grid(metrics, max_depth)
     setup.finalize_mesh()
@@ -79,10 +71,11 @@ def runAdaptation(setup, max_depth=8, meshdensity=0.2, metrics=None):
 
 def setParams(testCat, testVal, overrides=None):
     params = {
-        'Mesh type': 'adaptive',
-        'Element type': 'Admittance',
-        'Vsrc?': False,
-        'boundary_functionction': None}
+        "Mesh type": "adaptive",
+        "Element type": "Admittance",
+        "Vsrc?": False,
+        "boundary_functionction": None,
+    }
 
     if overrides is not None:
         params.update(overrides)
@@ -93,57 +86,50 @@ def setParams(testCat, testVal, overrides=None):
 
 
 def pairedDepthSweep(study, depthRange, testCat, testVals, rElec=1e-6, sigma=np.ones(3), overrides=None):
-    lastmesh = {'numel': 0, 'nX': 0}
+    lastmesh = {"numel": 0, "nX": 0}
     meshnum = 0
     for max_depth in depthRange:
         for tstVal in testVals:
             params = setParams(testCat, tstVal, overrides)
 
             setup = study.new_simulation()
-            setup.mesh.element_type = params['Element type']
-            setup.meshtype = params['Mesh type']
+            setup.mesh.element_type = params["Element type"]
+            setup.meshtype = params["Mesh type"]
             setup.meshnum = meshnum
 
-            geo = xc.geometry.Sphere(center = np.zeros(3),
-                                        radius = rElec)
+            geo = xc.geometry.Sphere(center=np.zeros(3), radius=rElec)
 
-            if params['Vsrc?']:
-                setup.add_voltage_source(xc.signals.Signal(1), 
-                                       geometry=geo)
-                srcMag = 1.
+            if params["Vsrc?"]:
+                setup.add_voltage_source(xc.signals.Signal(1), geometry=geo)
+                srcMag = 1.0
             else:
-                srcMag = 4*np.pi*sigma[0]*rElec
-                setup.add_current_source(xc.signals.Signal(srcMag), 
-                                       geometry = geo)
+                srcMag = 4 * np.pi * sigma[0] * rElec
+                setup.add_current_source(xc.signals.Signal(srcMag), geometry=geo)
 
-            if params['Mesh type'] == 'uniform':
-                newNx = int(np.ceil(lastmesh['numel']**(1/3)))
-                nX = newNx+newNx % 2
-                setup.make_uniform_grid(newNx+newNx % 2)
-                print('uniform, %d per axis' % nX)
-            elif params['Mesh type'] == r'equal $l_0$':
-                setup.make_uniform_grid(lastmesh['nX'])
+            if params["Mesh type"] == "uniform":
+                newNx = int(np.ceil(lastmesh["numel"] ** (1 / 3)))
+                nX = newNx + newNx % 2
+                setup.make_uniform_grid(newNx + newNx % 2)
+                print("uniform, %d per axis" % nX)
+            elif params["Mesh type"] == r"equal $l_0$":
+                setup.make_uniform_grid(lastmesh["nX"])
             else:
-                metricCoef = np.array(2**(-max_depth*0.2),
-                                      dtype=np.float64, ndmin=1)
-                setup.make_adaptive_grid(np.zeros((1, 3)),
-                                         np.array(max_depth, ndmin=1), 
-                                         xc.general_metric,
-                                         coefs=metricCoef)
+                metricCoef = np.array(2 ** (-max_depth * 0.2), dtype=np.float64, ndmin=1)
+                setup.make_adaptive_grid(
+                    np.zeros((1, 3)), np.array(max_depth, ndmin=1), xc.general_metric, coefs=metricCoef
+                )
 
-            setup.mesh.element_type = params['Element type']
+            setup.mesh.element_type = params["Element type"]
             setup.finalize_mesh()
 
             def boundary_function(coord):
                 r = np.linalg.norm(coord)
-                return rElec/(r*np.pi*4)
+                return rElec / (r * np.pi * 4)
 
-            if params['boundary_functionction'] == 'Analytic':
+            if params["boundary_functionction"] == "Analytic":
                 setup.set_boundary_nodes(boundary_function)
-            elif params['boundary_functionction'] == 'Rubik0':
-                setup.set_boundary_nodes(None,
-                                       expand=True,
-                                       sigma=1.)
+            elif params["boundary_functionction"] == "Rubik0":
+                setup.set_boundary_nodes(None, expand=True, sigma=1.0)
             else:
                 setup.set_boundary_nodes()
             # setup.get_edge_currents()
@@ -160,9 +146,9 @@ def pairedDepthSweep(study, depthRange, testCat, testVals, rElec=1e-6, sigma=np.
 
             minel = setup.mesh.get_min_l0()
 
-            print('error: %g' % errEst)
+            print("error: %g" % errEst)
 
-            data_categorys = ['Error', 'FVU', 'min_l0', testCat]
+            data_categorys = ["Error", "FVU", "min_l0", testCat]
             dataVals = [errEst, FVU, minel, tstVal]
 
             data = xc.misc.get_error_estimates(setup)
@@ -173,9 +159,8 @@ def pairedDepthSweep(study, depthRange, testCat, testVals, rElec=1e-6, sigma=np.
 
             study.log_current_simulation(data_categorys, dataVals)
             study.save_simulation(setup)
-            if params['Mesh type'] == 'adaptive':
-                lastmesh = {'numel': len(setup.mesh.elements),
-                            'nX': setup.ptPerAxis-1}
+            if params["Mesh type"] == "adaptive":
+                lastmesh = {"numel": len(setup.mesh.elements), "nX": setup.ptPerAxis - 1}
 
 
 class Cell:
@@ -183,7 +168,7 @@ class Cell:
         self._gid = gid
         self._setup_morphology()
 
-        if 'soma' in dir(self):
+        if "soma" in dir(self):
             self.all = self.soma.wholetree()
         else:
             self.all = h.allsec()
@@ -196,16 +181,14 @@ class Cell:
         self._ncs = []
 
     def __repr__(self):
-        return '{}[{}]'.format(self.name, self._gid)
+        return "{}[{}]".format(self.name, self._gid)
 
     def _set_position(self, x, y, z):
         for sec in self.all:
             for i in range(sec.n3d()):
-                sec.pt3dchange(i,
-                               x - self.x + sec.x3d(i),
-                               y - self.y + sec.y3d(i),
-                               z - self.z + sec.z3d(i),
-                               sec.diam3d(i))
+                sec.pt3dchange(
+                    i, x - self.x + sec.x3d(i), y - self.y + sec.y3d(i), z - self.z + sec.z3d(i), sec.diam3d(i)
+                )
         self.x, self.y, self.z = x, y, z
 
     def _rotate_z(self, theta):
@@ -249,22 +232,22 @@ class Cell:
 
 
 class BallAndStick(Cell, xc.nrnutil.RecordedCell):
-    name = 'BallAndStick'
+    name = "BallAndStick"
 
     def __init__(self, gid, x, y, z, theta):
         super().__init__(gid, x, y, z, theta)
-        r = self.soma.diam/2
-        dx = r*np.cos(theta)
-        dy = r*np.sin(theta)
+        r = self.soma.diam / 2
+        dx = r * np.cos(theta)
+        dy = r * np.sin(theta)
 
-        self._set_position(self.x-dx, self.y-dy, self.z)
+        self._set_position(self.x - dx, self.y - dy, self.z)
 
         self.attach_membrane_recordings([self.soma])
         self.attach_spike_detector(self.soma)
 
     def _setup_morphology(self):
-        self.soma = h.Section(name='soma', cell=self)
-        self.dend = h.Section(name='dend', cell=self)
+        self.soma = h.Section(name="soma", cell=self)
+        self.dend = h.Section(name="dend", cell=self)
         self.dend.connect(self.soma)
         self.soma.L = self.soma.diam = 12.6157
         self.dend.L = 200
@@ -272,19 +255,19 @@ class BallAndStick(Cell, xc.nrnutil.RecordedCell):
 
     def _setup_biophysics(self):
         for sec in self.all:
-            sec.Ra = 100    # Axial resistance in Ohm * cm
-            sec.cm = 1      # Membrane capacitance in micro Farads / cm^2
-        self.soma.insert('hh')
+            sec.Ra = 100  # Axial resistance in Ohm * cm
+            sec.cm = 1  # Membrane capacitance in micro Farads / cm^2
+        self.soma.insert("hh")
         for seg in self.soma:
             seg.hh.gnabar = 0.12  # Sodium conductance in S/cm2
             seg.hh.gkbar = 0.036  # Potassium conductance in S/cm2
-            seg.hh.gl = 0.0003    # Leak conductance in S/cm2
-            seg.hh.el = -54.3     # Reversal potential in mV
+            seg.hh.gl = 0.0003  # Leak conductance in S/cm2
+            seg.hh.el = -54.3  # Reversal potential in mV
         # Insert passive current in the dendrite
-        self.dend.insert('pas')
+        self.dend.insert("pas")
         for seg in self.dend:
             seg.pas.g = 0.001  # Passive conductance in S/cm2
-            seg.pas.e = -65    # Leak reversal potential mV
+            seg.pas.e = -65  # Leak reversal potential mV
 
         # NEW: the synapse
         self.syn = h.ExpSyn(self.dend(0.5))
@@ -292,7 +275,7 @@ class BallAndStick(Cell, xc.nrnutil.RecordedCell):
 
 
 class Axon10(Cell, xc.nrnutil.RecordedCell):
-    name = 'axon10'
+    name = "axon10"
 
     GAP = 2.5e-4  # width of node of Ranvier in cm
     DIAM = 10  # fiber diameter in um including myelin
@@ -316,29 +299,24 @@ class Axon10(Cell, xc.nrnutil.RecordedCell):
         self.x = self.y = self.z = 0
         h.define_shape()
 
-        origin = xc.nrnutil.return_segment_coordinates(
-            self.nodes[nnodes//2], in_microns=True)
+        origin = xc.nrnutil.return_segment_coordinates(self.nodes[nnodes // 2], in_microns=True)
 
-        self._set_position(x - origin[0],
-                           y - origin[1],
-                           z - origin[2])
+        self._set_position(x - origin[0], y - origin[1], z - origin[2])
 
-        self.attach_spike_detector(self.nodes[nnodes//2])
+        self.attach_spike_detector(self.nodes[nnodes // 2])
 
         self.vrest = -70
 
     def _setup_morphology(self):
-        self.nodes = [h.Section(name='node%d' % n, cell=self)
-                      for n in range(self.nnodes)]
-        self.internodes = [h.Section(name='internode%d' % n, cell=self)
-                           for n in range(self.nnodes-1)]
+        self.nodes = [h.Section(name="node%d" % n, cell=self) for n in range(self.nnodes)]
+        self.internodes = [h.Section(name="internode%d" % n, cell=self) for n in range(self.nnodes - 1)]
 
         for node, internode, ii in zip(self.nodes, self.internodes, range(self.nnodes)):
-            node.diam = self.SDD*self.DIAM
-            node.L = self.GAP*1e4
+            node.diam = self.SDD * self.DIAM
+            node.L = self.GAP * 1e4
 
-            internode.diam = self.SDD*self.DIAM
-            internode.L = self.ELD*self.DIAM
+            internode.diam = self.SDD * self.DIAM
+            internode.L = self.ELD * self.DIAM
 
             internode.connect(node)
 
@@ -362,10 +340,10 @@ class Axon10(Cell, xc.nrnutil.RecordedCell):
 
     def _setup_biophysics(self):
         for sec in self.all:
-            sec.Ra = self.RHOI    # Axial resistance in Ohm * cm
+            sec.Ra = self.RHOI  # Axial resistance in Ohm * cm
         for sec in self.nodes:
-            sec.cm = self.CM      # Membrane capacitance in micro Farads / cm^2
-            sec.insert('fh')
+            sec.cm = self.CM  # Membrane capacitance in micro Farads / cm^2
+            sec.insert("fh")
             for seg in sec:
                 seg.pnabar_fh = 8e-3
                 seg.pkbar_fh = 1.2e-3
@@ -374,16 +352,16 @@ class Axon10(Cell, xc.nrnutil.RecordedCell):
                 seg.nai = 13.74
                 seg.nao = 114.5
                 seg.ki = 120
-                seg.ko = 2.
+                seg.ko = 2.0
 
         for sec in self.internodes:
             sec.cm = 1e-6
 
-        h.celsius = 20.
+        h.celsius = 20.0
 
 
 class MRG(Cell, xc.nrnutil.RecordedCell):
-    name = 'MRG'
+    name = "MRG"
     RHOA = 0.7e6
     CM = 0.1
     GM = 1e-3
@@ -394,23 +372,22 @@ class MRG(Cell, xc.nrnutil.RecordedCell):
     SPACE_P2 = 4e-3
     SPACE_I = 4e-3
 
-    def __init__(self, gid, x, y, z, theta, fiberD=10.,
-                 axonNodes=21):
-        nrn.load_mechanisms('../../3810/', False)
+    def __init__(self, gid, x, y, z, theta, fiberD=10.0, axonNodes=21):
+        nrn.load_mechanisms("../../3810/", False)
 
         self.fiberD = fiberD
         self.axonNodes = axonNodes
-        self.paraNodes1 = 2*(axonNodes-1)
-        self.paraNodes2 = 2*(axonNodes-1)
-        self.axonInter = 6*(axonNodes-1)
-        self.axontotal = 11*axonNodes-10
+        self.paraNodes1 = 2 * (axonNodes - 1)
+        self.paraNodes2 = 2 * (axonNodes - 1)
+        self.axonInter = 6 * (axonNodes - 1)
+        self.axontotal = 11 * axonNodes - 10
         self._deps(fiberD)
 
         super().__init__(gid, x, y, z, theta)
 
         self.vrest = -80
 
-        self.attach_spike_detector(self.nodes[axonNodes//2])
+        self.attach_spike_detector(self.nodes[axonNodes // 2])
 
     def _deps(self, fiberD):
         if fiberD == 5.7:
@@ -495,107 +472,102 @@ class MRG(Cell, xc.nrnutil.RecordedCell):
             self.paralength2 = 60
             self.nl = 150
 
-        self.Rpn0 = (self.RHOA*.01)/(np.pi *
-                                     ((((self.nodeD/2)+self.SPACE_P1) ** 2)-((self.nodeD/2) ** 2)))
-        self.Rpn1 = (self.RHOA*.01)/(np.pi *
-                                     ((((self.paraD1/2)+self.SPACE_P1) ** 2)-((self.paraD1/2) ** 2)))
-        self.Rpn2 = (self.RHOA*.01)/(np.pi *
-                                     ((((self.paraD2/2)+self.SPACE_P2) ** 2)-((self.paraD2/2) ** 2)))
-        self.Rpx = (self.RHOA*.01)/(np.pi *
-                                    ((((self.axonD/2)+self.SPACE_I) ** 2)-((self.axonD/2) ** 2)))
-        self.interlength = (self.deltax-self.NODELENGTH -
-                            (2*self.PARALENGTH1)-(2*self.paralength2))/6
+        self.Rpn0 = (self.RHOA * 0.01) / (
+            np.pi * ((((self.nodeD / 2) + self.SPACE_P1) ** 2) - ((self.nodeD / 2) ** 2))
+        )
+        self.Rpn1 = (self.RHOA * 0.01) / (
+            np.pi * ((((self.paraD1 / 2) + self.SPACE_P1) ** 2) - ((self.paraD1 / 2) ** 2))
+        )
+        self.Rpn2 = (self.RHOA * 0.01) / (
+            np.pi * ((((self.paraD2 / 2) + self.SPACE_P2) ** 2) - ((self.paraD2 / 2) ** 2))
+        )
+        self.Rpx = (self.RHOA * 0.01) / (
+            np.pi * ((((self.axonD / 2) + self.SPACE_I) ** 2) - ((self.axonD / 2) ** 2))
+        )
+        self.interlength = (self.deltax - self.NODELENGTH - (2 * self.PARALENGTH1) - (2 * self.paralength2)) / 6
 
     def _setup_morphology(self):
-        self.nodes = [h.Section(name='node%d' % n, cell=self)
-                      for n in range(self.axonNodes)]
+        self.nodes = [h.Section(name="node%d" % n, cell=self) for n in range(self.axonNodes)]
 
-        self.MYSA = [h.Section(name='MYSA%d' % n, cell=self)
-                     for n in range(self.paraNodes1)]
+        self.MYSA = [h.Section(name="MYSA%d" % n, cell=self) for n in range(self.paraNodes1)]
 
-        self.FLUT = [h.Section(name='FLUT%d' % n, cell=self)
-                     for n in range(self.paraNodes2)]
-        self.STIN = [h.Section(name='STIN%d' % n, cell=self)
-                     for n in range(self.axonInter)]
+        self.FLUT = [h.Section(name="FLUT%d" % n, cell=self) for n in range(self.paraNodes2)]
+        self.STIN = [h.Section(name="STIN%d" % n, cell=self) for n in range(self.axonInter)]
 
-        for ii in range(self.axonNodes-1):
-            chain = [self.nodes[ii],
-                     self.MYSA[2*ii],
-                     self.FLUT[2*ii]]
-            chain.extend([self.STIN[6*ii+n] for n in range(6)])
-            chain.extend([self.FLUT[2*ii+1],
-                          self.MYSA[2*ii+1],
-                          self.nodes[ii+1]])
+        for ii in range(self.axonNodes - 1):
+            chain = [self.nodes[ii], self.MYSA[2 * ii], self.FLUT[2 * ii]]
+            chain.extend([self.STIN[6 * ii + n] for n in range(6)])
+            chain.extend([self.FLUT[2 * ii + 1], self.MYSA[2 * ii + 1], self.nodes[ii + 1]])
 
-            for jj in range(len(chain)-1):
-                chain[jj+1].connect(chain[jj])
+            for jj in range(len(chain) - 1):
+                chain[jj + 1].connect(chain[jj])
 
     def _setup_biophysics(self):
         for sec in self.nodes:
-            sec.insert('axnode')
-            sec.insert('extracellular')
+            sec.insert("axnode")
+            sec.insert("extracellular")
             sec.nseg = 1
             sec.diam = self.nodeD
             sec.L = self.NODELENGTH
-            sec.Ra = self.RHOA/1e4
+            sec.Ra = self.RHOA / 1e4
             sec.cm = 2
             sec.xraxial[0] = self.Rpn0
             sec.xg[0] = 1e10
             sec.xc[0] = 0
 
         for sec in self.MYSA:
-            sec.insert('pas')
-            sec.insert('extracellular')
-            ratio = self.paraD1/self.fiberD
+            sec.insert("pas")
+            sec.insert("extracellular")
+            ratio = self.paraD1 / self.fiberD
 
             sec.nseg = 1
             sec.diam = self.fiberD
             sec.L = self.PARALENGTH1
-            sec.Ra = self.RHOA*(1/(ratio)**2)/1e4
-            sec.cm = 2*ratio
+            sec.Ra = self.RHOA * (1 / (ratio) ** 2) / 1e4
+            sec.cm = 2 * ratio
 
             sec.g_pas = 1e-3 * ratio
             sec.e_pas = -80
 
             sec.xraxial[0] = self.Rpn1
-            sec.xg[0] = self.GM/(2*self.nl)
-            sec.xc[0] = self.CM/(2*self.nl)
+            sec.xg[0] = self.GM / (2 * self.nl)
+            sec.xc[0] = self.CM / (2 * self.nl)
 
         for sec in self.FLUT:
-            sec.insert('pas')
-            sec.insert('extracellular')
-            ratio = self.paraD2/self.fiberD
+            sec.insert("pas")
+            sec.insert("extracellular")
+            ratio = self.paraD2 / self.fiberD
 
             sec.nseg = 1
             sec.diam = self.fiberD
             sec.L = self.paralength2
-            sec.Ra = self.RHOA*(1/(ratio)**2)/1e4
-            sec.cm = 2*ratio
+            sec.Ra = self.RHOA * (1 / (ratio) ** 2) / 1e4
+            sec.cm = 2 * ratio
 
             sec.g_pas = 1e-3 * ratio
             sec.e_pas = -80
 
             sec.xraxial[0] = self.Rpn2
-            sec.xg[0] = self.GM/(2*self.nl)
-            sec.xc[0] = self.CM/(2*self.nl)
+            sec.xg[0] = self.GM / (2 * self.nl)
+            sec.xc[0] = self.CM / (2 * self.nl)
 
         for sec in self.STIN:
-            sec.insert('pas')
-            sec.insert('extracellular')
-            ratio = self.axonD/self.fiberD
+            sec.insert("pas")
+            sec.insert("extracellular")
+            ratio = self.axonD / self.fiberD
 
             sec.nseg = 1
             sec.diam = self.fiberD
             sec.L = self.interlength
-            sec.Ra = self.RHOA*(1/(ratio)**2)/1e4
-            sec.cm = 2*ratio
+            sec.Ra = self.RHOA * (1 / (ratio) ** 2) / 1e4
+            sec.cm = 2 * ratio
 
             sec.g_pas = 1e-3 * ratio
             sec.e_pas = -80
 
             sec.xraxial[0] = self.Rpx
-            sec.xg[0] = self.GM/(2*self.nl)
-            sec.xc[0] = self.CM/(2*self.nl)
+            sec.xg[0] = self.GM / (2 * self.nl)
+            sec.xc[0] = self.CM / (2 * self.nl)
 
 
 class Ring:
@@ -635,9 +607,8 @@ class Ring:
         self.cells = []
         for i in range(N):
             theta = i * 2 * h.PI / N
-            newCell = BallAndStick(
-                i, h.cos(theta) * r, h.sin(theta) * r, 0, theta)
-            newCell.rotateLocal(-h.PI/2)
+            newCell = BallAndStick(i, h.cos(theta) * r, h.sin(theta) * r, 0, theta)
+            newCell.rotateLocal(-h.PI / 2)
             self.cells.append(newCell)
 
     def _connect_cells(self):

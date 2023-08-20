@@ -12,8 +12,8 @@ import numba as nb
 import xcell
 import matplotlib.pyplot as plt
 
-meshtype = 'adaptive'
-datadir = '/home/benoit/smb4k/ResearchData/Results/studyTst/'
+meshtype = "adaptive"
+datadir = "/home/benoit/smb4k/ResearchData/Results/studyTst/"
 # study_path=datadir+'regularization/'
 # filter_categories=["Regularized?"]
 # filter_values=[True]
@@ -28,7 +28,7 @@ datadir = '/home/benoit/smb4k/ResearchData/Results/studyTst/'
 # filter_values=['current','voltage']
 
 # study_path = datadir+'uniVsAdapt'
-study_path = '/home/benoit/smb4k/ResearchData/Results/Quals/PoC'
+study_path = "/home/benoit/smb4k/ResearchData/Results/Quals/PoC"
 filter_categories = ["Mesh type"]
 filter_values = ["adaptive", "uniform"]
 # filter_values=['adaptive']
@@ -59,7 +59,7 @@ filter_values = ["adaptive", "uniform"]
 xmax = 1e-4
 
 
-bbox = np.append(-xmax*np.ones(3), xmax*np.ones(3))
+bbox = np.append(-xmax * np.ones(3), xmax * np.ones(3))
 
 
 study = xcell.Study(study_path, bbox)
@@ -96,26 +96,27 @@ plotters = [
 
 
 if staticPlots:
-    xcell.Visualizers.grouped_scatter(study.study_path+'/log.csv',
-                                     x_category='Number of elements',
-                                     y_category='FVU',
-                                     group_category=filter_categories[0])
+    xcell.Visualizers.grouped_scatter(
+        study.study_path + "/log.csv",
+        x_category="Number of elements",
+        y_category="FVU",
+        group_category=filter_categories[0],
+    )
     nufig = plt.gcf()
-    study.save_plot(nufig, 'AccuracyCost', '.eps')
-    study.save_plot(nufig, 'AccuracyCost', '.png')
+    study.save_plot(nufig, "AccuracyCost", ".eps")
+    study.save_plot(nufig, "AccuracyCost", ".png")
 
     for fv in filter_values:
+        fstack, fratio = xcell.visualizers.plot_study_performance(
+            study, only_category=filter_categories[0], only_value=fv
+        )
+        fstem = "_" + filter_categories[0] + str(fv)
 
-        fstack, fratio = xcell.visualizers.plot_study_performance(study,
-                                                                only_category=filter_categories[0],
-                                                                only_value=fv)
-        fstem = '_'+filter_categories[0]+str(fv)
+        study.save_plot(fstack, "Performance" + fstem, ".eps")
+        study.save_plot(fstack, "Performance" + fstem, ".png")
 
-        study.save_plot(fstack, 'Performance'+fstem, '.eps')
-        study.save_plot(fstack, 'Performance'+fstem, '.png')
-
-        study.save_plot(fratio, 'Ratio'+fstem, '.eps')
-        study.save_plot(fratio, 'Ratio'+fstem, '.png')
+        study.save_plot(fratio, "Ratio" + fstem, ".eps")
+        study.save_plot(fratio, "Ratio" + fstem, ".png")
 
 
 # #THIS WORKS
@@ -134,18 +135,16 @@ if staticPlots:
 
 
 for ii, p in enumerate(plotters):
-
     plots = []
     names = []
     ranges = None
     for fv in filter_values:
-        fname = p.__name__+'_'+str(fv)
+        fname = p.__name__ + "_" + str(fv)
         plotr = p(plt.figure(), study)
-        if 'universalPts' in plotr.prefs:
-            plotr.prefs['universalPts'] = True
+        if "universalPts" in plotr.prefs:
+            plotr.prefs["universalPts"] = True
 
-        plotr.get_study_data(filter_categories=filter_categories,
-                           filter_values=[fv])
+        plotr.get_study_data(filter_categories=filter_categories, filter_values=[fv])
 
         plots.append(plotr)
         names.append(fname)
@@ -157,4 +156,4 @@ for ii, p in enumerate(plotters):
     for plot, name in zip(plots, names):
         plot.data_scales = ranges
 
-        plot.animate_study(fname=name+'redux')
+        plot.animate_study(fname=name + "redux")

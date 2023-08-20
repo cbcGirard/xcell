@@ -3,6 +3,7 @@ Handlers for dynamic signals
 """
 import numpy as np
 
+
 # TODO: implement __getitem__
 class Signal:
     """
@@ -13,7 +14,8 @@ class Signal:
     value : float
         Constant value of signal.
 
-    """    
+    """
+
     def __init__(self, value):
         self.value = value
 
@@ -30,7 +32,7 @@ class Signal:
         -------
         float
             Value at time.
-        """        
+        """
         return self.value
 
     def reset(self):
@@ -40,7 +42,8 @@ class Signal:
 class PiecewiseSignal(Signal):
     """
     Piecewise signal from time, value pairs.
-    """    
+    """
+
     def __init__(self, t0=0, y0=0):
         self.times = [t0]
         self.values = [y0]
@@ -59,7 +62,7 @@ class BiphasicSignal(PiecewiseSignal):
     def __init__(self, t0=0, y0=0):
         super().__init__(t0, y0)
 
-    def add_pulse(self, t_start, pulse_duration, pulse_amplitude, interphase=0.):
+    def add_pulse(self, t_start, pulse_duration, pulse_amplitude, interphase=0.0):
         """
         Add a biphasic pulse to the signal.
 
@@ -73,7 +76,7 @@ class BiphasicSignal(PiecewiseSignal):
             Amplitude of pulse. Use a negative value to place the negative phase first.
         interphase : float
             Time between phases of the pulse (default 0.) Not yet implemented.
-        """        
+        """
         times = [t_start, t_start + pulse_duration, t_start + 2 * pulse_duration]
         vals = [pulse_amplitude, -pulse_amplitude, 0]
 

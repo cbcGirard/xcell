@@ -8,11 +8,7 @@ from numba import float64
 import pyvista as pv
 
 
-
-@nb.experimental.jitclass([
-    ('center', float64[::1]),
-    ('radius', float64)
-]) # type: ignore
+@nb.experimental.jitclass([("center", float64[::1]), ("radius", float64)])  # type: ignore
 class Sphere:
     def __init__(self, center, radius):
         self.center = center
@@ -31,12 +27,12 @@ class Sphere:
         -------
         bool[:]
             Boolean array of points inside region.
-        """        
+        """
         N = coords.shape[0]
         isIn = np.empty(N, dtype=np.bool_)
         for ii in nb.prange(N):
             c = coords[ii]
-            isIn[ii] = np.linalg.norm(c-self.center) <= self.radius
+            isIn[ii] = np.linalg.norm(c - self.center) <= self.radius
 
         return isIn
 
@@ -45,22 +41,19 @@ class Sphere:
         dist = np.empty(N, dtype=np.float64)
         for ii in nb.prange(N):
             c = coords[ii]
-            dist[ii] = np.linalg.norm(c-self.center) - self.radius
+            dist[ii] = np.linalg.norm(c - self.center) - self.radius
 
         return dist
 
 
-@nb.experimental.jitclass(spec=[
-    ('center', float64[::1]),
-    ('radius', float64),
-    ('axis', float64[::1]),
-    ('tol', float64)
-]) # type: ignore
+@nb.experimental.jitclass(
+    spec=[("center", float64[::1]), ("radius", float64), ("axis", float64[::1]), ("tol", float64)]
+)  # type: ignore
 class Disk:
     def __init__(self, center, radius, axis, tol=1e-2):
         self.center = center
         self.radius = radius
-        self.axis = axis/np.linalg.norm(axis)
+        self.axis = axis / np.linalg.norm(axis)
         self.tol = tol
 
     def is_inside(self, coords):
@@ -76,35 +69,34 @@ class Disk:
         -------
         bool[:]
             Boolean array of points inside region.
-        """        
+        """
         N = coords.shape[0]
         isIn = np.empty(N, dtype=np.bool_)
 
-        delta = coords-self.center
+        delta = coords - self.center
         deviation = np.dot(delta, self.axis)
 
         for ii in nb.prange(N):
             dist = np.linalg.norm(delta[ii])
 
-            isIn[ii] = abs(deviation[ii]) < (
-                self.radius*self.tol) and dist <= self.radius
+            isIn[ii] = abs(deviation[ii]) < (self.radius * self.tol) and dist <= self.radius
 
         return isIn
 
-# todo: check math
+    # todo: check math
     def get_signed_distance(self, coords):
         N = coords.shape[0]
         signedDist = np.empty(N, dtype=np.float64)
 
-        delta = coords-self.center
+        delta = coords - self.center
         deviation = np.dot(delta, self.axis)
         # distance along axis
 
         for ii in nb.prange(N):
             dist = np.linalg.norm(delta[ii])
             # distance to center
-            dz = deviation[ii]*self.axis-coords[ii]
-            vr = dz-self.center
+            dz = deviation[ii] * self.axis - coords[ii]
+            vr = dz - self.center
             dr = np.linalg.norm(vr)
 
             if dr < self.radius:
@@ -112,24 +104,21 @@ class Disk:
                 signedDist[ii] = np.abs(deviation[ii])
                 # projected point inside disk
             else:
-                signedDist[ii] = np.sqrt(dist**2-(dr-self.radius)**2)
+                signedDist[ii] = np.sqrt(dist**2 - (dr - self.radius) ** 2)
             # else:
 
         return signedDist
 
 
-@nb.experimental.jitclass([
-    ('center', float64[::1]),
-    ('radius', float64),
-    ('length', float64),
-    ('axis', float64[::1])
-]) # type: ignore
+@nb.experimental.jitclass(
+    [("center", float64[::1]), ("radius", float64), ("length", float64), ("axis", float64[::1])]
+)  # type: ignore
 class Cylinder:
     def __init__(self, center, radius, length, axis):
         self.center = center
         self.radius = radius
         self.length = length
-        self.axis = axis/np.linalg.norm(axis)
+        self.axis = axis / np.linalg.norm(axis)
 
     def is_inside(self, coords):
         """
@@ -144,20 +133,19 @@ class Cylinder:
         -------
         bool[:]
             Boolean array of points inside region.
-        """        
+        """
         N = coords.shape[0]
         isIn = np.empty(N, dtype=np.bool_)
 
-        delta = coords-self.center
+        delta = coords - self.center
         deviation = np.abs(np.dot(delta, self.axis))
 
         for ii in nb.prange(N):
-
             vec = delta[ii]
             dz = deviation[ii]
-            dr = np.sqrt(np.dot(vec, vec)-dz**2)
+            dr = np.sqrt(np.dot(vec, vec) - dz**2)
 
-            isIn[ii] = 0 <= dz <= self.length/2 and dr <= self.radius
+            isIn[ii] = 0 <= dz <= self.length / 2 and dr <= self.radius
         return isIn
 
 
@@ -177,7 +165,7 @@ def is_in_bbox(bbox, point):
     -------
     bool
         Whether point is contained in bounding box
-    """    
+    """
     gt = np.greater_equal(point, bbox[:3])
     lt = np.less_equal(point, bbox[3:])
 
@@ -198,7 +186,7 @@ def _avg_points(pts):
     -------
     float[:,3]
         Center of points.
-    """    
+    """
     center = np.zeros(3)
 
     for ii in nb.prange(pts.shape[0]):
@@ -216,11 +204,11 @@ def _calc_tri_normals(pts, surf):
 
     for ii in nb.prange(ntris):
         inds = surf[ii, :]
-        a = pts[inds[0], :]-pts[inds[1], :]
-        b = pts[inds[1], :]-pts[inds[2], :]
+        a = pts[inds[0], :] - pts[inds[1], :]
+        b = pts[inds[1], :] - pts[inds[2], :]
 
         tmp = np.cross(a, b)
-        norms[ii, :] = tmp/np.linalg.norm(tmp)
+        norms[ii, :] = tmp / np.linalg.norm(tmp)
 
     return norms
 
@@ -241,7 +229,7 @@ def fix_tri_normals(pts, surf):
     -------
     int[:,3]
         Indices of triangles' vertices, flipped as needed to orient outward.
-    """    
+    """
     norms = _calc_tri_normals(pts, surf)
 
     uniqueInds = np.unique(surf.ravel())
@@ -252,7 +240,7 @@ def fix_tri_normals(pts, surf):
 
     for ii in nb.prange(ntri):
         triCtr = _avg_points(pts[surf[ii], :])
-        ok = np.dot(norms[ii, :], triCtr-ctr) > 0
+        ok = np.dot(norms[ii, :], triCtr - ctr) > 0
 
         if ok:
             fixedSurf[ii, :] = surf[ii, :]
@@ -280,14 +268,15 @@ def to_pyvista(geometry, **kwargs):
 
     """
     tstring = _get_geometry_shape(geometry)
-    if tstring == 'Cylinder':
+    if tstring == "Cylinder":
         rawmesh = pv.Cylinder(
             radius=geometry.radius,
             center=geometry.center,
             height=geometry.length,
             direction=geometry.axis,
             capping=False,
-            **kwargs)
+            **kwargs
+        )
         cells = []
         celltypes = []
 
@@ -296,34 +285,27 @@ def to_pyvista(geometry, **kwargs):
             cells.extend(c.point_ids)
             celltypes.append(c.type)
 
-        npoly = rawmesh.points.shape[0]//2
+        npoly = rawmesh.points.shape[0] // 2
 
         cells.append(npoly)
-        cells.extend(np.arange(0, 2*npoly, 2, dtype=int))
+        cells.extend(np.arange(0, 2 * npoly, 2, dtype=int))
         cells.append(npoly)
-        cells.extend(np.arange(2*npoly-1, 0, -2, dtype=int))
+        cells.extend(np.arange(2 * npoly - 1, 0, -2, dtype=int))
 
-        mesh = pv.PolyData(var_inp=rawmesh.points.copy(),
-                           faces=cells,
-                           n_faces=rawmesh.n_faces+2)
+        mesh = pv.PolyData(var_inp=rawmesh.points.copy(), faces=cells, n_faces=rawmesh.n_faces + 2)
 
         # tets = rawmesh.delaunay_3d()
         # mesh = tets.extract_surface()
-    elif tstring == 'Sphere':
-        mesh = pv.Sphere(radius=geometry.radius,
-                         center=geometry.center,
-                         **kwargs)
-    elif tstring == 'Disk':
-        mesh = pv.Disc(outer=geometry.radius,
-                       inner=0,
-                       center=geometry.center,
-                       normal=geometry.axis,
-                       **kwargs)
+    elif tstring == "Sphere":
+        mesh = pv.Sphere(radius=geometry.radius, center=geometry.center, **kwargs)
+    elif tstring == "Disk":
+        mesh = pv.Disc(outer=geometry.radius, inner=0, center=geometry.center, normal=geometry.axis, **kwargs)
 
     return mesh
 
+
 def _get_geometry_shape(geometry):
     t = str(type(geometry))
-    tstring = t.split('.')[-1].split('\'')[0]
-    
+    tstring = t.split(".")[-1].split("'")[0]
+
     return tstring

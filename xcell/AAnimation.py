@@ -10,10 +10,25 @@ import matplotlib as mpl
 from pathlib import Path
 import os
 
+
 class AAnimation(ArtistAnimation):
-    def save(self, filename, writer=None, fps=None, dpi=None, codec=None,
-             bitrate=None, extra_args=None, metadata=None, extra_anim=None,
-             savefig_kwargs=None, *, progress_callback=None, vector_frames=[], **writerKwargs):
+    def save(
+        self,
+        filename,
+        writer=None,
+        fps=None,
+        dpi=None,
+        codec=None,
+        bitrate=None,
+        extra_args=None,
+        metadata=None,
+        extra_anim=None,
+        savefig_kwargs=None,
+        *,
+        progress_callback=None,
+        vector_frames=[],
+        **writerKwargs
+    ):
         """
         Save the animation as a movie file by drawing every frame.
 
@@ -91,45 +106,45 @@ class AAnimation(ArtistAnimation):
         """
 
         if writer is None:
-            writer = mpl.rcParams['animation.writer']
-        elif (not isinstance(writer, str) and
-              any(arg is not None
-                  for arg in (fps, codec, bitrate, extra_args, metadata))):
-            raise RuntimeError('Passing in values for arguments '
-                               'fps, codec, bitrate, extra_args, or metadata '
-                               'is not supported when writer is an existing '
-                               'MovieWriter instance. These should instead be '
-                               'passed as arguments when creating the '
-                               'MovieWriter instance.')
+            writer = mpl.rcParams["animation.writer"]
+        elif not isinstance(writer, str) and any(
+            arg is not None for arg in (fps, codec, bitrate, extra_args, metadata)
+        ):
+            raise RuntimeError(
+                "Passing in values for arguments "
+                "fps, codec, bitrate, extra_args, or metadata "
+                "is not supported when writer is an existing "
+                "MovieWriter instance. These should instead be "
+                "passed as arguments when creating the "
+                "MovieWriter instance."
+            )
 
         if savefig_kwargs is None:
             savefig_kwargs = {}
 
-        if fps is None and hasattr(self, '_interval'):
+        if fps is None and hasattr(self, "_interval"):
             # Convert interval in ms to frames per second
-            fps = 1000. / self._interval
+            fps = 1000.0 / self._interval
 
         # Re-use the savefig DPI for ours if none is given
         if dpi is None:
-            dpi = mpl.rcParams['savefig.dpi']
-        if dpi == 'figure':
+            dpi = mpl.rcParams["savefig.dpi"]
+        if dpi == "figure":
             dpi = self._fig.dpi
 
         writer_kwargs = {}
         if codec is not None:
-            writer_kwargs['codec'] = codec
+            writer_kwargs["codec"] = codec
         if bitrate is not None:
-            writer_kwargs['bitrate'] = bitrate
+            writer_kwargs["bitrate"] = bitrate
         if extra_args is not None:
-            writer_kwargs['extra_args'] = extra_args
+            writer_kwargs["extra_args"] = extra_args
         if metadata is not None:
-            writer_kwargs['metadata'] = metadata
+            writer_kwargs["metadata"] = metadata
 
         all_anim = [self]
         if extra_anim is not None:
-            all_anim.extend(anim
-                            for anim
-                            in extra_anim if anim._fig is self._fig)
+            all_anim.extend(anim for anim in extra_anim if anim._fig is self._fig)
 
         # If we have the name of a writer, instantiate an instance of the
         # registered class.
@@ -139,16 +154,17 @@ class AAnimation(ArtistAnimation):
                 writer_cls = writers[writer]
             except RuntimeError:  # Raised if not available.
                 writer_cls = PillowWriter  # Always available.
-                _log.warning("MovieWriter %s unavailable; using Pillow "
-                             "instead.", writer)
+                _log.warning("MovieWriter %s unavailable; using Pillow " "instead.", writer)
             writer = writer_cls(fps, **writer_kwargs)
-        _log.info('Animation.save using %s', type(writer))
+        _log.info("Animation.save using %s", type(writer))
 
-        if 'bbox_inches' in savefig_kwargs:
-            _log.warning("Warning: discarding the 'bbox_inches' argument in "
-                         "'savefig_kwargs' as it may cause frame size "
-                         "to vary, which is inappropriate for animation.")
-            savefig_kwargs.pop('bbox_inches')
+        if "bbox_inches" in savefig_kwargs:
+            _log.warning(
+                "Warning: discarding the 'bbox_inches' argument in "
+                "'savefig_kwargs' as it may cause frame size "
+                "to vary, which is inappropriate for animation."
+            )
+            savefig_kwargs.pop("bbox_inches")
 
         # Create a new sequence of frames for saved data. This is different
         # from new_frame_seq() to give the ability to save 'live' generated
@@ -156,27 +172,27 @@ class AAnimation(ArtistAnimation):
         # TODO: Right now, after closing the figure, saving a movie won't work
         # since GUI widgets are gone. Either need to remove extra code to
         # allow for this non-existent use case or find a way to make it work.
-        if mpl.rcParams['savefig.bbox'] == 'tight':
-            _log.info("Disabling savefig.bbox = 'tight', as it may cause "
-                      "frame size to vary, which is inappropriate for "
-                      "animation.")
+        if mpl.rcParams["savefig.bbox"] == "tight":
+            _log.info(
+                "Disabling savefig.bbox = 'tight', as it may cause "
+                "frame size to vary, which is inappropriate for "
+                "animation."
+            )
         # canvas._is_saving = True makes the draw_event animation-starting
         # callback a no-op; canvas.manager = None prevents resizing the GUI
         # widget (both are likewise done in savefig()).
 
-        #patch to add selected vector frames
+        # patch to add selected vector frames
         writer.vector_frames = vector_frames
-        with mpl.rc_context({'savefig.bbox': None}), \
-             writer.saving(self._fig, filename, dpi, **writerKwargs), \
-             cbook._setattr_cm(self._fig.canvas,
-                               _is_saving=True, manager=None):
+        with mpl.rc_context({"savefig.bbox": None}), writer.saving(
+            self._fig, filename, dpi, **writerKwargs
+        ), cbook._setattr_cm(self._fig.canvas, _is_saving=True, manager=None):
             for anim in all_anim:
                 anim._init_draw()  # Clear the initial frame
             frame_number = 0
             # TODO: Currently only FuncAnimation has a save_count
             #       attribute. Can we generalize this to all Animations?
-            save_count_list = [getattr(a, 'save_count', None)
-                               for a in all_anim]
+            save_count_list = [getattr(a, "save_count", None) for a in all_anim]
             if None in save_count_list:
                 total_frames = None
             else:
@@ -198,13 +214,11 @@ class FWriter(FFMpegFileWriter):
         path = Path(self._base_temp_name() % self._frame_counter)
         self._temp_paths.append(path)  # Record the filename for later use.
         self._frame_counter += 1  # Ensures each created name is unique.
-        _log.debug('FileMovieWriter.grab_frame: Grabbing frame %d to path=%s',
-                   self._frame_counter, path)
-        with open(path, 'wb') as sink:  # Save figure to the sink.
-            self.fig.savefig(sink, format=self.frame_format, dpi=self.dpi,
-                             **savefig_kwargs)
+        _log.debug("FileMovieWriter.grab_frame: Grabbing frame %d to path=%s", self._frame_counter, path)
+        with open(path, "wb") as sink:  # Save figure to the sink.
+            self.fig.savefig(sink, format=self.frame_format, dpi=self.dpi, **savefig_kwargs)
 
         if self._frame_counter in self.vector_frames:
-            fstem,_ = os.path.splitext(path)
-            with open(fstem+'.svg', 'w') as f:
-                self.fig.savefig(f, format='svg', dpi=self.dpi, **savefig_kwargs)
+            fstem, _ = os.path.splitext(path)
+            with open(fstem + ".svg", "w") as f:
+                self.fig.savefig(f, format="svg", dpi=self.dpi, **savefig_kwargs)

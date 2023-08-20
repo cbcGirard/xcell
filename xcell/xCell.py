@@ -11,6 +11,7 @@ from numba import int64, float64
 import math
 import scipy
 from scipy.sparse.linalg import spsolve, cg
+
 # from visualizers import *
 # from util import *
 import os
@@ -18,6 +19,7 @@ import pickle
 
 import matplotlib.ticker as tickr
 import matplotlib.pyplot as plt
+
 # plt.style.use('dark_background')
 
 
@@ -47,40 +49,37 @@ class Source:
         state = self.__dict__.copy()
 
         shape = geometry._get_geometry_shape(self.geometry)
-        geodict = {'shape':shape}
-        geodict['center']=self.geometry.center
-        geodict['radius'] = self.geometry.radius
+        geodict = {"shape": shape}
+        geodict["center"] = self.geometry.center
+        geodict["radius"] = self.geometry.radius
 
-        if shape=='Disk':
-            geodict['axis']=self.geometry.axis
-            geodict['tol'] = self.geometry.tol
-        if shape == 'Cylinder':
-            geodict['length'] = self.geometry.length
-            geodict['axis'] = self.geometry.axis
+        if shape == "Disk":
+            geodict["axis"] = self.geometry.axis
+            geodict["tol"] = self.geometry.tol
+        if shape == "Cylinder":
+            geodict["length"] = self.geometry.length
+            geodict["axis"] = self.geometry.axis
 
-        state['geometry']=geodict
+        state["geometry"] = geodict
 
         return state
-    
+
     def __setstate__(self, state):
         self.__dict__.update(state)
         geodict = self.geometry.copy()
 
-        shape = geodict['shape']
-        if shape == 'Sphere':
-            self.geometry = geometry.Sphere(center=geodict['center'],
-                                            radius = geodict['radius'])
-        if shape =='Disk':
-            self.geometry = geometry.Disk(center=geodict['center'],
-                                            radius = geodict['radius'],
-                                            axis = geodict['axis'],
-                                            tol=geodict['tol'])
-        if shape == 'Cylinder':
-            self.geometry = geometry.Cylinder(center=geodict['center'],
-                                            radius = geodict['radius'],
-                                            length= geodict['length'],
-                                            axis=geodict['axis'])
-            
+        shape = geodict["shape"]
+        if shape == "Sphere":
+            self.geometry = geometry.Sphere(center=geodict["center"], radius=geodict["radius"])
+        if shape == "Disk":
+            self.geometry = geometry.Disk(
+                center=geodict["center"], radius=geodict["radius"], axis=geodict["axis"], tol=geodict["tol"]
+            )
+        if shape == "Cylinder":
+            self.geometry = geometry.Cylinder(
+                center=geodict["center"], radius=geodict["radius"], length=geodict["length"], axis=geodict["axis"]
+            )
+
 
 class Simulation:
     def __init__(self, name, bbox, print_step_times=False):
@@ -106,7 +105,7 @@ class Simulation:
         self.node_role_values = np.empty(0)
 
         self.mesh = meshes.Mesh(bbox)
-        self.current_time = 0.
+        self.current_time = 0.0
         self.iteration = 0
         self.meshnum = 0
 
@@ -122,7 +121,7 @@ class Simulation:
         self.nDoF = 0
 
         self.name = name
-        self.meshtype = 'uniform'
+        self.meshtype = "uniform"
 
         self.ptPerAxis = 0
 
@@ -130,7 +129,7 @@ class Simulation:
 
     def quick_adaptive_grid(self, max_depth, coefficent=0.2):
         """
-        Make a generic octree mesh where resolution increases near 
+        Make a generic octree mesh where resolution increases near
         current sources.
 
         Parameters
@@ -149,16 +148,19 @@ class Simulation:
 
         npt = pts.shape[0]
 
-        self.make_adaptive_grid(ref_pts=pts,
-                              max_depth=max_depth*np.ones(npt),
-                              min_l0_function=general_metric,
-                              coefs=coefficent*np.ones(npt),
-                              coarsen=False)
+        self.make_adaptive_grid(
+            ref_pts=pts,
+            max_depth=max_depth * np.ones(npt),
+            min_l0_function=general_metric,
+            coefs=coefficent * np.ones(npt),
+            coarsen=False,
+        )
 
         self.finalize_mesh()
 
-    def make_adaptive_grid(self, ref_pts, max_depth, min_l0_function, 
-                           max_l0_function=None, coefs=None, coarsen=True):
+    def make_adaptive_grid(
+        self, ref_pts, max_depth, min_l0_function, max_l0_function=None, coefs=None, coarsen=True
+    ):
         """
         Construct octree mesh.
 
@@ -184,35 +186,33 @@ class Simulation:
 
         """
         self.start_timing("Make elements")
-        self.ptPerAxis = 2**max_depth+1
-        self.meshtype = 'adaptive'
+        self.ptPerAxis = 2**max_depth + 1
+        self.meshtype = "adaptive"
 
         if coefs is None:
             coefs = np.ones(ref_pts.shape[0])
 
         # convert to octree mesh
-        if (type(self.mesh) != meshes.Octree):
+        if type(self.mesh) != meshes.Octree:
             bbox = self.mesh.bbox
 
-            self.mesh = meshes.Octree(bbox, max_depth,
-                                      element_type=self.mesh.element_type)
+            self.mesh = meshes.Octree(bbox, max_depth, element_type=self.mesh.element_type)
 
         self.mesh.max_depth = max_depth
 
-        changed = self.mesh.refine_by_metric(
-            min_l0_function,  ref_pts, max_l0_function, coefs, coarsen=coarsen)
+        changed = self.mesh.refine_by_metric(min_l0_function, ref_pts, max_l0_function, coefs, coarsen=coarsen)
         self.log_time()
 
         return changed
 
-    def make_uniform_grid(self, nX, sigma=np.array([1., 1., 1.])):
+    def make_uniform_grid(self, nX, sigma=np.array([1.0, 1.0, 1.0])):
         """
         Fast utility to construct a uniformly spaced mesh of the domain.
 
         Parameters
         ----------
         nX : int
-            Number of elements along each axis 
+            Number of elements along each axis
             (yielding nX**3 total elements).
         sigma : float or float[3], optional
             Global conductivity. The default is np.array([1.,1.,1.]).
@@ -222,41 +222,33 @@ class Simulation:
         None.
 
         """
-        self.meshtype = 'uniform'
+        self.meshtype = "uniform"
         self.start_timing("Make elements")
 
         xmax = self.mesh.extents[0]
-        self.ptPerAxis = nX+1
+        self.ptPerAxis = nX + 1
 
-        xx = np.linspace(self.mesh.bbox[0],
-                         self.mesh.bbox[3],
-                         nX+1)
-        yy = np.linspace(self.mesh.bbox[1],
-                         self.mesh.bbox[4],
-                         nX+1)
-        zz = np.linspace(self.mesh.bbox[2],
-                         self.mesh.bbox[5],
-                         nX+1)
+        xx = np.linspace(self.mesh.bbox[0], self.mesh.bbox[3], nX + 1)
+        yy = np.linspace(self.mesh.bbox[1], self.mesh.bbox[4], nX + 1)
+        zz = np.linspace(self.mesh.bbox[2], self.mesh.bbox[5], nX + 1)
         XX, YY, ZZ = np.meshgrid(xx, yy, zz)
 
         coords = np.vstack((XX.ravel(), YY.ravel(), ZZ.ravel())).transpose()
 
         self.mesh.node_coords = coords
 
-        elOffsets = np.array([1, nX+1, (nX+1)**2])
-        nodeOffsets = np.array(
-            [np.dot(util.to_bit_array(i), elOffsets) for i in range(8)])
-        elExtents = self.mesh.span/nX
+        elOffsets = np.array([1, nX + 1, (nX + 1) ** 2])
+        nodeOffsets = np.array([np.dot(util.to_bit_array(i), elOffsets) for i in range(8)])
+        elExtents = self.mesh.span / nX
 
         for zz in range(nX):
             for yy in range(nX):
                 for xx in range(nX):
-                    elOriginNode = xx+yy*(nX+1)+zz*(nX+1)**2
+                    elOriginNode = xx + yy * (nX + 1) + zz * (nX + 1) ** 2
                     origin = coords[elOriginNode]
-                    elementNodes = elOriginNode+nodeOffsets
+                    elementNodes = elOriginNode + nodeOffsets
 
-                    self.mesh.add_element(
-                        origin, elExtents, sigma, elementNodes)
+                    self.mesh.add_element(origin, elExtents, sigma, elementNodes)
                     self.mesh.elements[-1].vertices = elementNodes
 
         self.log_time()
@@ -317,16 +309,10 @@ class Simulation:
             mem = max(mem, log.memory)
 
         if print_value:
-            engFormat = tickr.EngFormatter(unit='b')
-            print(engFormat(mem)+" used")
+            engFormat = tickr.EngFormatter(unit="b")
+            print(engFormat(mem) + " used")
 
         return mem
-
-    # TODO: remove unused
-    # def getPower(self):
-    #     dv = self.node_voltages[self.edges]
-    #     v2 = np.diff(dv, axis=1)**2
-    #     return np.dot(v2.squeeze(), self.conductances)
 
     def print_total_time(self):
         """Print total simulation time"""
@@ -337,8 +323,7 @@ class Simulation:
             tWall += l.durationWall
 
         engFormat = tickr.EngFormatter()
-        print('\tTotal time: '+engFormat(tCPU) +
-              "s [CPU], "+engFormat(tWall)+'s [Wall]')
+        print("\tTotal time: " + engFormat(tCPU) + "s [CPU], " + engFormat(tWall) + "s [Wall]")
 
     def get_edge_currents(self):
         """
@@ -358,7 +343,7 @@ class Simulation:
         edges = np.array(condMat.nonzero()).transpose()
 
         dv = np.diff(self.node_voltages[edges]).squeeze()
-        iTmp = -condMat.data*dv
+        iTmp = -condMat.data * dv
 
         # make currents positive, and flip direction if negative
         needsFlip = iTmp < 0
@@ -371,7 +356,7 @@ class Simulation:
         """
         Expresses coordinates as triplet of positive integers.
 
-        Prevents rounding errors when determining if two points correspond 
+        Prevents rounding errors when determining if two points correspond
         to the same mesh node
 
         Parameters
@@ -385,15 +370,15 @@ class Simulation:
             Mesh nodes as integers.
 
         """
-        nx = self.ptPerAxis-1
+        nx = self.ptPerAxis - 1
         bb = self.mesh.bbox
 
         if coords is None:
             coords = self.mesh.node_coords
 
-        span = bb[3:]-bb[:3]
-        float0 = coords-bb[:3]
-        ints = np.rint((nx*float0)/span)
+        span = bb[3:] - bb[:3]
+        float0 = coords - bb[:3]
+        ints = np.rint((nx * float0) / span)
 
         return ints.astype(np.int64)
 
@@ -407,18 +392,18 @@ class Simulation:
             "Number of elements",
         ]
 
-        for time_type in ['CPU', 'Wall']:
+        for time_type in ["CPU", "Wall"]:
             for log in self.step_logs:
-                cols.append(log.name+' ['+time_type+']')
+                cols.append(log.name + " [" + time_type + "]")
 
         cols.extend(["Total time [CPU]", "Total time [Wall]", "Max memory"])
-        return ','.join(cols)
+        return ",".join(cols)
 
     def log_table_entry(self, csvFile, extraCols=None, extraVals=None):
         """
         Log key metrics of simulation as an additional line of a .csv file.
 
-        Custom categories (column headers) and their values can be added 
+        Custom categories (column headers) and their values can be added
         to the line.
 
         Parameters
@@ -428,7 +413,7 @@ class Simulation:
         extraCols : string[:], optional
             Additional categories (column headers). The default is None.
         extraVals : numeric[:], optional
-            Values corresponding to the additional categories. 
+            Values corresponding to the additional categories.
             The default is None.
 
         Returns
@@ -437,15 +422,15 @@ class Simulation:
 
         """
         oldfile = os.path.exists(csvFile)
-        f = open(csvFile, 'a')
+        f = open(csvFile, "a")
 
         if not oldfile:
             f.write(self._make_table_header())
 
             if extraCols is not None:
-                f.write(','+','.join(extraCols))
+                f.write("," + ",".join(extraCols))
 
-            f.write('\n')
+            f.write("\n")
 
         data = [
             self.name,
@@ -471,16 +456,15 @@ class Simulation:
         data.append(sum(cpuTimes))
         data.append(sum(wallTimes))
 
-        f.write(','.join(map(str, data)))
-        f.write(','+str(memory))
+        f.write(",".join(map(str, data)))
+        f.write("," + str(memory))
         if extraVals is not None:
-            f.write(','+','.join(map(str, extraVals)))
+            f.write("," + ",".join(map(str, extraVals)))
 
-        f.write('\n')
+        f.write("\n")
         f.close()
 
-    def finalize_mesh(self, regularize=False, sigma_mesh=None, 
-                      default_sigma=1.):
+    def finalize_mesh(self, regularize=False, sigma_mesh=None, default_sigma=1.0):
         """
         Prepare mesh for simulation.
 
@@ -497,8 +481,8 @@ class Simulation:
         default_sigma : float, optional
             Fallback conductivity for elements outside sigma_mesh,
             by default 1.0.
-        """        
-        self.start_timing('Finalize mesh')
+        """
+        self.start_timing("Finalize mesh")
         self.mesh.finalize()
 
         #: Sum of currents into each node with >=1 source attached
@@ -506,10 +490,9 @@ class Simulation:
         self.log_time()
 
         if sigma_mesh is not None:
-            self.start_timing('Assign sigma')
+            self.start_timing("Assign sigma")
 
-            vmesh = sigma_mesh.assign_sigma(
-                self.mesh, default_sigma=default_sigma)
+            vmesh = sigma_mesh.assign_sigma(self.mesh, default_sigma=default_sigma)
             self.log_time()
 
         self.start_timing("Calculate conductances")
@@ -518,7 +501,7 @@ class Simulation:
         self.conductances = conductances
         self.log_time()
 
-        self.start_timing('Renumber nodes')
+        self.start_timing("Renumber nodes")
         connInds = np.unique(edges).astype(np.uint64)
         floatInds = np.array([xf[-1] for xf in transforms], dtype=np.uint64)
         allInds = np.concatenate((connInds, floatInds), dtype=np.uint64)
@@ -538,10 +521,8 @@ class Simulation:
         idic = util.get_py_dict(allInds)
         self.mesh.inverse_index_map = idic
 
-        if self.meshtype != 'uniform':
-            self.mesh.node_coords = util.indices_to_coordinates(allInds,
-                                                      self.mesh.bbox[:3],
-                                                      self.mesh.span)
+        if self.meshtype != "uniform":
+            self.mesh.node_coords = util.indices_to_coordinates(allInds, self.mesh.bbox[:3], self.mesh.span)
 
             self.edges = util.renumber_indices(edges, self.mesh.index_map)
         else:
@@ -565,8 +546,7 @@ class Simulation:
         None.
 
         """
-        targetPts = [self.mesh.inverse_index_map[xf.pop()]
-                     for xf in self.transforms]
+        targetPts = [self.mesh.inverse_index_map[xf.pop()] for xf in self.transforms]
 
         for ii, xf in zip(targetPts, self.transforms):
             pts = np.array([self.mesh.inverse_index_map[nn] for nn in xf])
@@ -581,10 +561,10 @@ class Simulation:
         value : float or :py:class:`xcell.signals.Signal`
             Amplitude of source
         geometry : :py:class:`xcell.geometry.Shape`
-            
+
         """
         src = Source(value, geometry)
-        
+
         self.current_sources.append(src)
 
     def add_voltage_source(self, value, geometry):
@@ -596,17 +576,17 @@ class Simulation:
         value : float or :py:class:`xcell.signals.Signal`
             Amplitude of source
         geometry : :py:class:`xcell.geometry.Shape`
-            
+
         """
         self.voltage_sources.append(Source(value, geometry))
 
-    def insert_sources_in_mesh(self, snaplength=0.):
+    def insert_sources_in_mesh(self, snaplength=0.0):
         """_summary_
 
         Parameters
         ----------
         snaplength : float, optional
-            Maximum distance allowed between source and mesh node, 
+            Maximum distance allowed between source and mesh node,
             by default 0.0.
             Value currently unused.
         """
@@ -619,8 +599,7 @@ class Simulation:
             self.node_role_values[indices] = ii
 
             # self.node_voltages[indices] = src.value
-            self.node_voltages[indices] = src.value.get_value_at_time(
-                self.current_time)
+            self.node_voltages[indices] = src.value.get_value_at_time(self.current_time)
 
         # meshCurrentSrc=self._node_current_sources
         # meshCurrentSrc=[0 for k in self._node_current_sources]
@@ -628,8 +607,7 @@ class Simulation:
 
         for ii in nb.prange(len(self.current_sources)):
             src = self.current_sources[ii]
-            currentValue = src.value.get_value_at_time(
-                self.current_time)
+            currentValue = src.value.get_value_at_time(self.current_time)
 
             ######
             # #TODO: introduces bugs?
@@ -676,13 +654,12 @@ class Simulation:
         self._node_current_sources = meshCurrentSrc
 
     def __nodesInSource(self, source):
-
-        if 'geometry' in dir(source):
+        if "geometry" in dir(source):
             source_center = source.geometry.center
             inside = source.geometry.is_inside(self.mesh.node_coords)
         else:
             source_center = source.coords
-            d = np.linalg.norm(source_center-self.mesh.node_coords, axis=1)
+            d = np.linalg.norm(source_center - self.mesh.node_coords, axis=1)
             inside = d <= source.radius
 
         if sum(inside) > 0:
@@ -693,24 +670,20 @@ class Simulation:
             # Get closest mesh node
             el = self.mesh.get_containing_element(source_center)
 
-            if self.mesh.element_type == 'Face':
+            if self.mesh.element_type == "Face":
                 element_universal_indicess = el.faces
             else:
                 element_universal_indicess = el.vertices
 
-            elIndices = np.array([
-                self.mesh.inverse_index_map[n]
-                for n in element_universal_indicess])
+            elIndices = np.array([self.mesh.inverse_index_map[n] for n in element_universal_indicess])
             elCoords = self.mesh.node_coords[elIndices]
 
-            d = np.linalg.norm(source.geometry.center-elCoords, 
-                               axis=1)
+            d = np.linalg.norm(source.geometry.center - elCoords, axis=1)
             index = elIndices[d == min(d)]
 
         return index
 
-    def set_boundary_nodes(self, boundary_function=None, expand=False, 
-                           sigma=1.0):
+    def set_boundary_nodes(self, boundary_function=None, expand=False, sigma=1.0):
         """
         Set potential of nodes at simulation boundary.
 
@@ -723,7 +696,7 @@ class Simulation:
             User-defined potential as function of coords.
             The default is None.
         expand : bool, optional
-            Embed current domain as center of 3x3x3 grid of cubes before 
+            Embed current domain as center of 3x3x3 grid of cubes before
             assigning boundaries.
         sigma : float, optional
             Conductivity to assign the new elements if expand is True.
@@ -758,26 +731,23 @@ class Simulation:
 
             # v0: only corners
             nX = util.MAXPT
-            xyz = np.array([[x, y, z] for z in [0, nX-1]
-                           for y in [0, nX-1] for x in [0, nX-1]], 
-                           dtype=np.uint64)
+            xyz = np.array(
+                [[x, y, z] for z in [0, nX - 1] for y in [0, nX - 1] for x in [0, nX - 1]], dtype=np.uint64
+            )
             ind = util.position_to_index(xyz, nX)
             bnodes = np.array([self.mesh.inverse_index_map[n] for n in ind])
 
-            new_edges = np.array([[n, nInt] for n in bnodes], 
-                                 dtype=np.uint64)
+            new_edges = np.array([[n, nInt] for n in bnodes], dtype=np.uint64)
 
-# TODO: assumes isotropic mesh/conductance
-            cond = sum(sigma*self.mesh.span)
+            # TODO: assumes isotropic mesh/conductance
+            cond = sum(sigma * self.mesh.span)
 
-            self.node_role_values = np.concatenate((self.node_role_values, 
-                                                    [0.]))
+            self.node_role_values = np.concatenate((self.node_role_values, [0.0]))
             self.node_role_table = np.concatenate((oldRoles, [1]))
-            self.node_voltages = np.zeros(oldRoles.shape[0]+1)
+            self.node_voltages = np.zeros(oldRoles.shape[0] + 1)
 
             self.edges = np.vstack((oldEdges, new_edges))
-            self.conductances = np.concatenate(
-                (oldConductances, cond*np.ones(bnodes.shape)))
+            self.conductances = np.concatenate((oldConductances, cond * np.ones(bnodes.shape)))
 
     def solve(self, iterative=True, tol=1e-12, v_guess=None):
         """
@@ -808,14 +778,14 @@ class Simulation:
 
         M, b = self._construct_system()
 
-        self.start_timing('Solve')
+        self.start_timing("Solve")
 
         if iterative:
             vDoF, cginfo = cg(M.tocsc(), b, v_guess, tol)
             self.log_time()
 
             if cginfo != 0:
-                print('cg:%d' % cginfo)
+                print("cg:%d" % cginfo)
         else:
             # Direct sparse solver
             vDoF = spsolve(M.tocsc(), b)
@@ -845,84 +815,27 @@ class Simulation:
 
         nsrc = len(self._node_current_sources)
 
-        vDoF = np.empty(nsrc+ndof)
+        vDoF = np.empty(nsrc + ndof)
 
         vDoF[:ndof] = self.node_voltages[isDoF]
 
         for nn in range(nsrc):
-            matchArr = self._select_by_dof(nn+ndof)
+            matchArr = self._select_by_dof(nn + ndof)
             matches = np.nonzero(matchArr)[0]
             if matches.shape[0] > 0:
                 sel = matches[0]
-                vDoF[ndof+nn] = self.node_voltages[sel]
+                vDoF[ndof + nn] = self.node_voltages[sel]
 
         return vDoF
-
-# TODO: remove unused
-    # def solve(self, vGuess=None, tol=1e-12):
-    #     """
-    #     Solve nodal voltages using conjgate gradient method.
-
-    #     Likely to achieve similar accuracy to direct solution at much greater
-    #     speed for element counts above a few thousand
-
-    #     Parameters
-    #     ----------
-    #     vGuess : float[:]
-    #         Initial guess for nodal voltages. Default None.
-    #     tol : float, optional
-    #         Maximum allowed norm of the residual. The default is 1e-9.
-
-    #     Returns
-    #     -------
-    #     voltages : float[:]
-    #         Simulated nodal voltages.
-
-    #     """
-    #     self.start_timing("Sort node types")
-    #     self._get_node_types()
-    #     self.log_time()
-
-    #     # nNodes=self.mesh.node_coords.shape[0]
-    #     voltages = self.node_voltages
-
-    #     # nFixedV=len(vFix2Global)
-
-    #     # dofNodes=np.setdiff1d(range(nNodes), self.vSourceNodes)
-    #     dof2Global = np.nonzero(self.node_role_table == 0)[0]
-    #     nDoF = dof2Global.shape[0]
-
-    #     # b = self.setRHS(nDoF)
-
-    #     # M=self.getMatrix()
-
-    #     M, b = self._construct_system()
-
-    #     self.start_timing('Solve')
-    #     vDoF, cginfo = cg(M.tocsc(), b, vGuess, tol)
-    #     self.log_time()
-
-    #     if cginfo != 0:
-    #         print('cg:%d' % cginfo)
-
-    #     voltages[dof2Global] = vDoF[:nDoF]
-
-    #     for nn in range(nDoF, len(vDoF)):
-    #         sel = self._select_by_dof(nn)
-    #         voltages[sel] = vDoF[nn]
-
-    #     self.node_voltages = voltages
-    #     return voltages
 
     def _select_by_dof(self, dofNdx):
         nDoF = sum(self.node_role_table == 0)
 
-        nCur = dofNdx-nDoF
+        nCur = dofNdx - nDoF
         if nCur < 0:
             selector = np.zeros_like(self.node_role_table, dtype=bool)
         else:
-            selector = np.logical_and(
-                self.node_role_table == 2, self.node_role_values == nCur)
+            selector = np.logical_and(self.node_role_table == 2, self.node_role_values == nCur)
 
         return selector
 
@@ -965,7 +878,7 @@ class Simulation:
             srcRadii.append(rad)
 
             if rad > 0:
-                V = I/(4*np.pi*rad)
+                V = I / (4 * np.pi * rad)
             srcV.append(V)
 
         for ii in nb.prange(len(self.voltage_sources)):
@@ -976,7 +889,7 @@ class Simulation:
             rad = source.radius
             srcRadii.append(rad)
             if rad > 0:
-                I = V*4*np.pi*rad
+                I = V * 4 * np.pi * rad
 
             srcI.append(I)
 
@@ -984,9 +897,7 @@ class Simulation:
         intAna = []
         for ii in nb.prange(len(srcI)):
             if rvec is None:
-                r = np.linalg.norm(
-                    self.mesh.node_coords-source_locations[ii],
-                    axis=1)
+                r = np.linalg.norm(self.mesh.node_coords - source_locations[ii], axis=1)
             else:
                 r = rvec
 
@@ -1029,36 +940,31 @@ class Simulation:
 
         for el in self.mesh.elements:
             span = el.span
-            if self.mesh.element_type == 'Face':
+            if self.mesh.element_type == "Face":
                 elInd = el.faces
             else:
                 elInd = el.vertices
             globalInd = np.array([self.mesh.inverse_index_map[v] for v in elInd])
             elVals = self.node_voltages[globalInd]
 
-            if self.mesh.element_type == 'Face':
-                vals = meshes.fem.interpolate_from_face(
-                    elVals, meshes.fem.HEX_VERTEX_COORDS)
-                avals = np.abs(meshes.fem.interpolate_from_face(
-                    netAna[globalInd], meshes.fem.HEX_VERTEX_COORDS))
+            if self.mesh.element_type == "Face":
+                vals = meshes.fem.interpolate_from_face(elVals, meshes.fem.HEX_VERTEX_COORDS)
+                avals = np.abs(meshes.fem.interpolate_from_face(netAna[globalInd], meshes.fem.HEX_VERTEX_COORDS))
             else:
                 vals = elVals
                 avals = np.abs(netAna[globalInd])
 
-            dvals = np.abs(vals-avals)
+            dvals = np.abs(vals - avals)
 
             if basic:
                 vol = np.prod(span)
-                intV = vol*np.mean(vals)
-                intAna = vol*np.mean(avals)
-                intErr = vol*np.mean(dvals)
+                intV = vol * np.mean(vals)
+                intAna = vol * np.mean(avals)
+                intErr = vol * np.mean(dvals)
             else:
-                intV = meshes.FEM.integrate_from_verts(vals,
-                                                     span)
-                intAna = meshes.FEM.integrate_from_verts(avals,
-                                                       span)
-                intErr = meshes.FEM.integrate_from_verts(dvals,
-                                                       span)
+                intV = meshes.FEM.integrate_from_verts(vals, span)
+                intAna = meshes.FEM.integrate_from_verts(avals, span)
+                intErr = meshes.FEM.integrate_from_verts(dvals, span)
 
             elErrInts.append(intErr)
             elVints.append(intV)
@@ -1075,13 +981,13 @@ class Simulation:
 
         The normalized error metric approximates the area between the
         analytical solution i/(4*pi*sigma*r) and a linear interpolation
-        between the simulated nodal voltages, evaluated across the 
+        between the simulated nodal voltages, evaluated across the
         simulation domain
 
         Parameters
         ----------
         universal_indices : int[:], optional
-            Alternative points at which to evaluate the analytical solution. 
+            Alternative points at which to evaluate the analytical solution.
             The default is None.
 
         Returns
@@ -1106,12 +1012,10 @@ class Simulation:
             v = v[sel]
             ind = ind[sel]
 
-        if self.meshtype == 'uniform':
+        if self.meshtype == "uniform":
             coord = self.mesh.node_coords
         else:
-            coord = util.indices_to_coordinates(ind,
-                                       origin=self.mesh.bbox[:3],
-                                       span=self.mesh.span)
+            coord = util.indices_to_coordinates(ind, origin=self.mesh.bbox[:3], span=self.mesh.span)
         r = np.linalg.norm(coord, axis=1)
 
         vEst, intAna = self.calculate_analytical_voltage(r)
@@ -1122,9 +1026,9 @@ class Simulation:
         sorter = np.argsort(r)
         rsort = r[sorter]
 
-        err = v-vAna
+        err = v - vAna
         errSort = err[sorter]
-        errSummary = np.trapz(abs(errSort), rsort)/anaInt
+        errSummary = np.trapz(abs(errSort), rsort) / anaInt
 
         return errSummary, err, vAna, sorter, r
 
@@ -1179,8 +1083,7 @@ class Simulation:
         nNodes = self.mesh.node_coords.shape[0]
         a = np.tile(self.conductances, 2)
         E = np.vstack((self.edges, np.fliplr(self.edges)))
-        gAll = scipy.sparse.coo_matrix((a, (E[:, 0], E[:, 1])),
-                                       shape=(nNodes, nNodes))
+        gAll = scipy.sparse.coo_matrix((a, (E[:, 0], E[:, 1])), shape=(nNodes, nNodes))
         if dedup:
             gAll.sum_duplicates()
 
@@ -1252,19 +1155,16 @@ class Simulation:
             for eg, g in zip(longEdges, gLong):
                 for n in eg:
                     new_edges.append([n, node])
-                    new_conductances.append(0.5*g)
+                    new_conductances.append(0.5 * g)
 
             keepEdge[isLongEdge] = False
 
         if len(new_edges) > 0:
-            revisedEdges = np.vstack((self.edges[keepEdge],
-                                      np.array(new_edges)))
-            revisedConds = np.concatenate((self.conductances[keepEdge],
-                                           np.array(new_conductances)))
+            revisedEdges = np.vstack((self.edges[keepEdge], np.array(new_edges)))
+            revisedConds = np.concatenate((self.conductances[keepEdge], np.array(new_conductances)))
 
             self.conductances = revisedConds
             self.edges = revisedEdges
-
 
     def _deduplicate_edges(self):
         e = self.edges
@@ -1276,8 +1176,7 @@ class Simulation:
 
         a, b = np.hsplit(edup, 2)
 
-        gmat = scipy.sparse.coo_matrix((gdup, (edup[:, 0], edup[:, 1])),
-                                       shape=(nnodes, nnodes))
+        gmat = scipy.sparse.coo_matrix((gdup, (edup[:, 0], edup[:, 1])), shape=(nnodes, nnodes))
         gmat.sum_duplicates()
 
         tmp = scipy.sparse.tril(gmat, -1)
@@ -1330,9 +1229,9 @@ class Simulation:
         # dofNumbering[isSrc]=Nx+dofNumbering[isSrc]
         # dofNumbering[isFix]=Nd+np.arange(Nf)
 
-        dofNumbering, Nset = self._get_ordering('dof')
+        dofNumbering, Nset = self._get_ordering("dof")
         Nx, Nf, Ns, Nd = Nset
-        N_ext = Nd+Nf
+        N_ext = Nd + Nf
 
         edges = dofNumbering[self.edges]
 
@@ -1354,9 +1253,7 @@ class Simulation:
 
         self.log_time()
         self.start_timing("Assemble system")
-        G = scipy.sparse.coo_matrix(
-            (-c, (E[:, 0], E[:, 1])),
-            shape=(Nd, N_ext))
+        G = scipy.sparse.coo_matrix((-c, (E[:, 0], E[:, 1])), shape=(Nd, N_ext))
 
         gR = G.tocsr()
 
@@ -1367,7 +1264,7 @@ class Simulation:
 
         for ii in range(Ns):
             # b[ii+Nx]+=self.current_sources[ii].value
-            b[ii+Nx] = self._node_current_sources[ii]
+            b[ii + Nx] = self._node_current_sources[ii]
 
         # idx=self.node
 
@@ -1382,7 +1279,7 @@ class Simulation:
         self.gMat = G
         return G, b
 
-    def get_coordinates_in_order(self, order_type='mesh', mask_array=None):
+    def get_coordinates_in_order(self, order_type="mesh", mask_array=None):
         """
         Get mesh node coordinates according to specified ordering scheme.
 
@@ -1390,8 +1287,8 @@ class Simulation:
         ----------
         order_type : str, optional
             'mesh'       - Sorted by universal index (default)
-            'dof'        - Sorted by unknowns in system of equations 
-                           (floating nodes by universal index, then 
+            'dof'        - Sorted by unknowns in system of equations
+                           (floating nodes by universal index, then
                            current-source nodes in order of source)
             'electrical' - Like mesh, but current-source nodes moved to
                             end and replaced by source center
@@ -1403,35 +1300,33 @@ class Simulation:
         float[:,3]
             Coordinates in specified ordering scheme, possibly masked.
         """
-        if order_type == 'mesh':
+        if order_type == "mesh":
             reorderCoords = self.mesh.node_coords
 
-        if order_type == 'dof':
-            ordering, _ = self._get_ordering('dof')
+        if order_type == "dof":
+            ordering, _ = self._get_ordering("dof")
             dofCoords = self.mesh.node_coords[self.node_role_table == 0]
-            source_coords = np.array([s.geometry.center 
-                                      for s in self.current_sources])
+            source_coords = np.array([s.geometry.center for s in self.current_sources])
             reorderCoords = np.vstack((dofCoords, source_coords))
 
-        if order_type == 'electrical':
-            ordering, (Nx, Nf, Ns, Nd) = self._get_ordering('electrical')
+        if order_type == "electrical":
+            ordering, (Nx, Nf, Ns, Nd) = self._get_ordering("electrical")
             universal_voltagesals, valid = np.unique(ordering, return_index=True)
             if mask_array is None:
                 coords = self.mesh.node_coords
             else:
-                coords = np.ma.array(self.mesh.node_coords,
-                                     mask=~mask_array)
+                coords = np.ma.array(self.mesh.node_coords, mask=~mask_array)
 
-            reorderCoords = np.empty((Nx+Nf+Ns, 3))
+            reorderCoords = np.empty((Nx + Nf + Ns, 3))
 
             nonSrc = self.node_role_table < 2
-            reorderCoords[:Nx+Nf] = coords[nonSrc]
+            reorderCoords[: Nx + Nf] = coords[nonSrc]
             for ii in nb.prange(len(self.current_sources)):
-                reorderCoords[Nx+Nf+ii] = self.current_sources[ii].coords
+                reorderCoords[Nx + Nf + ii] = self.current_sources[ii].coords
 
         return reorderCoords
 
-    def get_edges_in_order(self, order_type='mesh', mask_array=None):
+    def get_edges_in_order(self, order_type="mesh", mask_array=None):
         """
         Get mesh edges with nodes ordered by specified scheme.
 
@@ -1439,8 +1334,8 @@ class Simulation:
         ----------
         order_type : str, optional
             'mesh'       - Sorted by universal index (default)
-            'dof'        - Sorted by unknowns in system of equations 
-                           (floating nodes by universal index, then 
+            'dof'        - Sorted by unknowns in system of equations
+                           (floating nodes by universal index, then
                            current-source nodes in order of source)
             'electrical' - Like mesh, but current-source nodes moved to
                             end and replaced by source center
@@ -1452,12 +1347,12 @@ class Simulation:
         int[:,2]
             Edges with indices from specified ordering
         """
-        if order_type == 'mesh':
+        if order_type == "mesh":
             edges = self.edges
-        if order_type == 'electrical':
+        if order_type == "electrical":
             ordering, (Nx, Nf, Ns, Nd) = self._get_ordering(order_type)
             isSrc = ordering < 0
-            ordering[isSrc] = Nx+Nf-1-ordering[isSrc]
+            ordering[isSrc] = Nx + Nf - 1 - ordering[isSrc]
             if mask_array is None:
                 oldEdges = self.edges
             else:
@@ -1467,8 +1362,8 @@ class Simulation:
             # edges=oldEdges.copy()
             isSrc = self.node_role_table == 2
             order = np.empty(isSrc.shape[0], dtype=np.int64)
-            order[~isSrc] = np.arange(Nx+Nf)
-            order[isSrc] = self.node_role_values[isSrc]+Nx+Nf
+            order[~isSrc] = np.arange(Nx + Nf)
+            order[isSrc] = self.node_role_values[isSrc] + Nx + Nf
             edges = order[oldEdges]
 
         return edges
@@ -1493,12 +1388,9 @@ class Simulation:
             raw_edgess.extend(edge)
 
         inds = np.unique(np.array(verts, dtype=np.uint64))
-        coords = util.indices_to_coordinates(inds,
-                                    self.mesh.bbox[:3],
-                                    self.mesh.span)
+        coords = util.indices_to_coordinates(inds, self.mesh.bbox[:3], self.mesh.span)
 
-        edges = util.renumber_indices(np.array(raw_edgess, dtype=np.uint64),
-                                     inds)
+        edges = util.renumber_indices(np.array(raw_edgess, dtype=np.uint64), inds)
 
         return coords, edges
 
@@ -1532,15 +1424,14 @@ class Simulation:
 
         for el in elements:
             upper = np.greater_equal(coords, el.origin)
-            lower = np.less_equal(coords, el.origin+el.span)
+            lower = np.less_equal(coords, el.origin + el.span)
             inside = np.all(np.logical_and(upper, lower), axis=1)
 
             newpt = np.logical_and(inside, unknown)
             intCoords = coords[newpt]
 
             if intCoords.shape[0] > 0:
-
-                if self.mesh.element_type == 'Face':
+                if self.mesh.element_type == "Face":
                     inds = el.faces
                 else:
                     inds = el.vertices
@@ -1548,8 +1439,7 @@ class Simulation:
                 simInds = np.array([self.mesh.inverse_index_map[n] for n in inds])
                 elValues = data[simInds]
 
-                interpVals = el.interpolate_within(intCoords,
-                                                  elValues)
+                interpVals = el.interpolate_within(intCoords, elValues)
 
                 vals[newpt] = interpVals
                 unknown = np.logical_or(unknown, inside)
@@ -1585,31 +1475,30 @@ class Simulation:
         # Ns=len(self.current_sources)
         Ns = len(self._node_current_sources)
         Nx = util.fastcount(self.node_role_table == 0)
-        Nd = Nx+Ns
+        Nd = Nx + Ns
         Nf = util.fastcount(isFix)
 
         # if order_type=='electrical':
-        if order_type == 'dof':
-
+        if order_type == "dof":
             # renumber nodes in order of dof, current source, fixed v
             numbering = self.node_role_values.copy()
-            numbering[isSrc] = Nx+numbering[isSrc]
-            numbering[isFix] = Nd+np.arange(Nf)
+            numbering[isSrc] = Nx + numbering[isSrc]
+            numbering[isFix] = Nd + np.arange(Nf)
 
-        if order_type == 'electrical':
+        if order_type == "electrical":
             numbering = self.node_role_values.copy()
-            numbering[isFix] = Nx+np.arange(Nf)
-            numbering[isSrc] = -1-numbering[isSrc]
+            numbering[isFix] = Nx + np.arange(Nf)
+            numbering[isSrc] = -1 - numbering[isSrc]
 
         return numbering, (Nx, Nf, Ns, Nd)
 
-# TODO: deprecate and remove
-    def get_elements_in_plane(self, axis=2, point=0.):
+    # TODO: deprecate and remove
+    def get_elements_in_plane(self, axis=2, point=0.0):
         """
         Get all elements that intersect a plane orthogonal to the axes.
 
         .. deprecated
-            Use PyVista slicing routines instead for greater 
+            Use PyVista slicing routines instead for greater
             robustness and flexibility.
 
         Parameters
@@ -1643,16 +1532,12 @@ class Simulation:
         edgePts = []
         for ii, el in enumerate(elements):
             ori = el.origin[otherAx]
-            ext = el.span[otherAx]+ori
+            ext = el.span[otherAx] + ori
             q = [ori, ext]
 
-            elCoords = np.array([[q[b][0], q[a][1]]
-                                for a in range(2) for b in range(2)])
+            elCoords = np.array([[q[b][0], q[a][1]] for a in range(2) for b in range(2)])
 
-            edges = np.array([[0, 1],
-                             [0, 2],
-                              [1, 3],
-                              [2, 3]])
+            edges = np.array([[0, 1], [0, 2], [1, 3], [2, 3]])
             edgePts.extend(elCoords[edges])
             coords.extend(elCoords)
 
@@ -1671,8 +1556,8 @@ class Simulation:
 
         return [vals.reshape((nx, nx))], planeCoords
 
-# TODO: deprecate and remove
-    def getValuesInPlane(self, axis=2, point=0., data=None):
+    # TODO: deprecate and remove
+    def getValuesInPlane(self, axis=2, point=0.0, data=None):
         """
         Extract values in a plane.
 
@@ -1696,8 +1581,7 @@ class Simulation:
         if data is None:
             data = self.node_voltages
 
-        if self.meshtype == 'uniform':
-
+        if self.meshtype == "uniform":
             return self._getUniformPlane(axis=axis, point=point, data=data)
 
         elements, coords, _ = self.get_elements_in_plane(axis, point)
@@ -1707,14 +1591,12 @@ class Simulation:
         dcats = np.unique(depths)
         nDcats = dcats.shape[0]
 
-        element_lists = (max(dcats)+1)*[[]]
+        element_lists = (max(dcats) + 1) * [[]]
 
         for el, d in zip(elements, depths):
             element_lists[d].append(el)
 
-        whichInds = np.array([[0, 2, 4, 6],
-                              [0, 1, 4, 5],
-                              [0, 1, 2, 3]])
+        whichInds = np.array([[0, 2, 4, 6], [0, 1, 4, 5], [0, 1, 2, 3]])
         selInd = whichInds[axis]
 
         notAx = [ax != axis for ax in range(3)]
@@ -1725,7 +1607,7 @@ class Simulation:
             if len(els) == 0:
                 continue
 
-            nX = 2**(dcats[ii])+1
+            nX = 2 ** (dcats[ii]) + 1
             # arr0=np.nan*np.empty((nX,nX))
             arr = np.ma.masked_all((nX, nX))
 
@@ -1739,27 +1621,24 @@ class Simulation:
                 if el.depth != dcats[ii]:
                     continue
 
-                if self.mesh.element_type == 'Face':
+                if self.mesh.element_type == "Face":
                     element_universal_indices = el.faces
                 else:
                     element_universal_indices = el.vertices
 
-                nodes = [self.mesh.inverse_index_map[n] 
-                         for n in element_universal_indices]
+                nodes = [self.mesh.inverse_index_map[n] for n in element_universal_indices]
                 if len(nodes) == 0:
-                    print('empty element:')
+                    print("empty element:")
                     print(el.index)
-                    print('verts: '+str(el.vertices))
-                    print('faces: '+str(el.faces))
+                    print("verts: " + str(el.vertices))
+                    print("faces: " + str(el.faces))
                     continue
-                interp = el.get_planar_values(
-                    data[nodes], axis=axis, coord=point)
+                interp = el.get_planar_values(data[nodes], axis=axis, coord=point)
 
                 # xy0=util.octant_list_to_xyz(np.array(el.index))[notAx]
                 xy0 = util.reverse_octant_list_to_xyz(np.array(el.index))[notAx]
 
-                xys = np.array([xy0.astype(np.int_)+np.array([x, y])
-                               for y in [0, 1] for x in [0, 1]])
+                xys = np.array([xy0.astype(np.int_) + np.array([x, y]) for y in [0, 1] for x in [0, 1]])
                 pts.extend(nodes)
                 vals.extend(interp)
                 # xy.extend(xys)
@@ -1790,7 +1669,7 @@ class Simulation:
         Parameters
         ----------
         elements : list of :py:class:`xcell.mesh.Element`, optional
-            Elements to extract points from, or all elements in mesh if 
+            Elements to extract points from, or all elements in mesh if
             None (default)
 
         Returns
@@ -1800,7 +1679,7 @@ class Simulation:
         universal_voltages : float[:]
             Voltage at each universal point, interpolated if necessary
         """
-        if self.meshtype == 'uniform':
+        if self.meshtype == "uniform":
             universal_indices = self.mesh.index_map
             universal_voltages = self.node_voltages
         else:
@@ -1812,13 +1691,14 @@ class Simulation:
             for ii in nb.prange(len(elements)):
                 el = self.mesh.elements[ii]
 
-                if self.mesh.element_type == 'Face':
+                if self.mesh.element_type == "Face":
                     element_universal_indices = el.faces
                 else:
                     element_universal_indices = el.vertices
 
-                vals = np.array([self.node_voltages[self.mesh.inverse_index_map[nn]]
-                                 for nn in element_universal_indices])
+                vals = np.array(
+                    [self.node_voltages[self.mesh.inverse_index_map[nn]] for nn in element_universal_indices]
+                )
                 uVal, uInd = el.get_universal_vals(vals)
 
                 universalIndices.extend(uInd.tolist())
@@ -1833,7 +1713,7 @@ class Simulation:
 
         return universal_indices, universal_voltages
 
-    def getCurrentsInPlane(self, axis=2, point=0.):
+    def getCurrentsInPlane(self, axis=2, point=0.0):
         """
         Get currents through edges within plane.
 
@@ -1859,7 +1739,7 @@ class Simulation:
         """
         els, coords, mesh = self.get_elements_in_plane(axis, point)
 
-        if self.mesh.element_type == 'Face':
+        if self.mesh.element_type == "Face":
             inds = np.unique([el.faces for el in els])
         else:
             inds = np.unique([el.vertices for el in els])
@@ -1869,10 +1749,9 @@ class Simulation:
 
         inPlane = np.all(np.isin(self.edges, gInds), axis=1)
 
-        dv = np.diff(self.node_voltages[self.edges[inPlane]],
-                     axis=1)
+        dv = np.diff(self.node_voltages[self.edges[inPlane]], axis=1)
 
-        i = self.conductances[inPlane]*dv.squeeze()
+        i = self.conductances[inPlane] * dv.squeeze()
 
         ineg = i < 0
 
@@ -1890,9 +1769,9 @@ class Simulation:
         return currents, currentPts, mesh
 
 
-
 class Study:
     """IO manager for multiple related simulations"""
+
     def __init__(self, study_path, bounding_box):
         """
         Create manager.
@@ -1911,8 +1790,8 @@ class Study:
         self.nSims = -1
         self.current_simulation = None
         self.bbox = bounding_box
-        self.span = bounding_box[3:]-bounding_box[:3]
-        self.center = bounding_box[:3]+self.span/2
+        self.span = bounding_box[3:] - bounding_box[:3]
+        self.center = bounding_box[:3] + self.span / 2
 
         # self.iSourceCoords = []
         # self.iSourceVals = []
@@ -1939,7 +1818,7 @@ class Study:
         self.nSims += 1
 
         if simName is None:
-            simName = 'sim%d' % self.nSims
+            simName = "sim%d" % self.nSims
 
         sim = Simulation(simName, bbox=self.bbox)
         if keepMesh:
@@ -1965,8 +1844,8 @@ class Study:
         mesh = simulation.mesh
         num = str(simulation.meshnum)
 
-        fname = os.path.join(self.study_path, 'mesh'+num+'.p')
-        pickle.dump(mesh, open(fname, 'wb'))
+        fname = os.path.join(self.study_path, "mesh" + num + ".p")
+        pickle.dump(mesh, open(fname, "wb"))
 
     def load_mesh(self, meshnum):
         """
@@ -1982,10 +1861,10 @@ class Study:
         `xcell.meshes.Mesh`
             Reloaded mesh
         """
-        fstem = 'mesh'+str(meshnum)+'.p'
+        fstem = "mesh" + str(meshnum) + ".p"
         fname = os.path.join(self.study_path, fstem)
 
-        mesh = pickle.load(open(fname, 'rb'))
+        mesh = pickle.load(open(fname, "rb"))
 
         self.current_simulation.mesh = mesh
 
@@ -2007,28 +1886,13 @@ class Study:
         None.
 
         """
-        fname = os.path.join(self.study_path, 'log.csv')
-        self.current_simulation.log_table_entry(
-            fname, extraCols=extraCols, extraVals=extraVals)
-        
-# TODO: remove
-    # def makeStandardPlots(self, save_plots=True, keepOpen=False):
-    #     plotfuns = [visualizers.error2d, visualizers.centerSlice]
-    #     plotnames = ['err2d', 'imgMesh']
+        fname = os.path.join(self.study_path, "log.csv")
+        self.current_simulation.log_table_entry(fname, extraCols=extraCols, extraVals=extraVals)
 
-    #     for f, n in zip(plotfuns, plotnames):
-    #         fig = plt.figure()
-    #         f(fig, self.current_simulation)
-
-    #         if save_plots:
-    #             self.save_plot(fig, n, '.png')
-    #             if not keepOpen:
-    #                 plt.close(fig)
-
-# TODO: see if removable in saving logic
-    def save_simulation(self, simulation, baseName=None, addedTags=''):
+    # TODO: see if removable in saving logic
+    def save_simulation(self, simulation, baseName=None, addedTags=""):
         """
-        Save 
+        Save
 
         Parameters
         ----------
@@ -2041,8 +1905,7 @@ class Study:
         """
         data = {}
 
-        meshpath = os.path.join(self.study_path,
-                                str(simulation.meshnum)+'.p')
+        meshpath = os.path.join(self.study_path, str(simulation.meshnum) + ".p")
 
         if ~os.path.exists(meshpath):
             self.save_mesh(simulation)
@@ -2052,33 +1915,33 @@ class Study:
         if baseName is None:
             baseName = simulation.name
 
-        fname = os.path.join(self.study_path, baseName+addedTags+'.p')
-        pickle.dump(simulation, open(fname, 'wb'))
+        fname = os.path.join(self.study_path, baseName + addedTags + ".p")
+        pickle.dump(simulation, open(fname, "wb"))
 
     def load_simulation(self, simName):
         fname = self._get_file_path(simName)
-        data = pickle.load(open(fname, 'rb'))
+        data = pickle.load(open(fname, "rb"))
         if data.mesh is None:
-            meshpath = self._get_file_path('mesh'+str(data.meshnum))
-            mesh = pickle.load(open(meshpath, 'rb'))
+            meshpath = self._get_file_path("mesh" + str(data.meshnum))
+            mesh = pickle.load(open(meshpath, "rb"))
             data.mesh = mesh
 
         return data
 
-    def save(self, obj, fname, ext='.p'):
+    def save(self, obj, fname, ext=".p"):
         fpath = self.__makepath(fname, ext)
-        if 'read' in dir(obj):
+        if "read" in dir(obj):
             obj.read(fpath)
         else:
-            pickle.dump(obj, open(fpath, 'wb'))
+            pickle.dump(obj, open(fpath, "wb"))
 
-    def load(self, fname, ext='.p'):
+    def load(self, fname, ext=".p"):
         fpath = self._get_file_path(fname, ext)
-        obj = pickle.load(open(fpath, 'rb'))
+        obj = pickle.load(open(fpath, "rb"))
         return obj
 
-    def _get_file_path(self, name, extension='.p'):
-        filepath = os.path.join(self.study_path, name+extension)
+    def _get_file_path(self, name, extension=".p"):
+        filepath = os.path.join(self.study_path, name + extension)
         return filepath
 
     def save_plot(self, fig, file_name, ext=None):
@@ -2096,8 +1959,7 @@ class Study:
             (default)
         """
         if ext is None:
-            fnames = [self.__makepath(file_name, x)
-                      for x in ['.png', '.svg', '.eps']]
+            fnames = [self.__makepath(file_name, x) for x in [".png", ".svg", ".eps"]]
 
         else:
             fnames = [self.__makepath(file_name, ext)]
@@ -2106,7 +1968,7 @@ class Study:
             fig.savefig(f, transparent=True, dpi=300)
 
     def __makepath(self, file_name, ext):
-        fpath = os.path.join(self.study_path, file_name+ext)
+        fpath = os.path.join(self.study_path, file_name + ext)
 
         basepath, _ = os.path.split(fpath)
 
@@ -2130,8 +1992,8 @@ class Study:
         None.
 
         """
-        fname = self.__makepath(filename, '.adata')
-        pickle.dump(animator, open(fname, 'wb'))
+        fname = self.__makepath(filename, ".adata")
+        pickle.dump(animator, open(fname, "wb"))
 
     def save_pv_image(self, plotter, filename, **kwargs):
         """
@@ -2144,7 +2006,7 @@ class Study:
         filename : str
             File name, with or without extension.
             Saves as .pdf if not specified.
-        ** kwargs : 
+        ** kwargs :
             Options for plotter.show()
 
         Returns
@@ -2153,11 +2015,11 @@ class Study:
 
         """
         f, ext = os.path.splitext(filename)
-        if ext == '':
-            ext = '.pdf'
+        if ext == "":
+            ext = ".pdf"
         fname = self.__makepath(f, ext)
 
-        if ext == '.png':
+        if ext == ".png":
             plotter.screenshot(fname, **kwargs)
         else:
             plotter.save_graphic(fname, **kwargs)
@@ -2173,7 +2035,7 @@ class Study:
         filename : str
             File name, with or without extension.
             Saves as .mp4 if not specified.
-        ** kwargs : 
+        ** kwargs :
             Options for plotter.open_movie()
 
         Returns
@@ -2182,13 +2044,13 @@ class Study:
 
         """
         f, ext = os.path.splitext(filename)
-        if ext == '':
-            ext = '.mp4'
+        if ext == "":
+            ext = ".mp4"
         fname = self.__makepath(f, ext)
 
         plotter.open_movie(fname, **kwargs)
 
-# TODO: merge with visualizers.import_logfile?
+    # TODO: merge with visualizers.import_logfile?
     def load_logfile(self):
         """
         Returns Pandas dataframe of logged runs
@@ -2201,34 +2063,12 @@ class Study:
             DESCRIPTION.
 
         """
-        logfile = os.path.join(self.study_path, 'log.csv')
+        logfile = os.path.join(self.study_path, "log.csv")
         df, cats = visualizers.import_logfile(logfile)
         return df, cats
 
-# TODO: remove unused
-    # def plot_times(self, x_category='Number of elements', sortCat=None):
-    #     logfile = os.path.join(self.study_path, 'log.csv')
-    #     df, cats = visualizers.import_logfile(logfile)
-
-    #     if sortCat is not None:
-    #         plotnames = df[sortCat].unique()
-    #     else:
-    #         plotnames = [None]
-
-    #     for cat in plotnames:
-    #         visualizers.import_and_plot_times(
-    #             logfile, only_category=sortCat, only_value=cat, x_category=x_category)
-    #         plt.title(cat)
-
-# TODO: remove unused function
-    # def plot_accuracy_cost(self):
-    #     logfile = os.path.join(self.study_path, 'log.csv')
-    #     visualizers.grouped_scatter(
-    #         logfile, x_category='Total time', y_category='Error', group_category='Mesh type')
-
-# TODO: seems to be dup functionality....
-    def get_saved_simulations(self, filter_categories=None, 
-                              filter_values=None, group_category=None):
+    # TODO: seems to be dup functionality....
+    def get_saved_simulations(self, filter_categories=None, filter_values=None, group_category=None):
         """
         Get all simulations in study, grouped and filtered as specified.
 
@@ -2251,7 +2091,7 @@ class Study:
 
         """
 
-        logfile = os.path.join(self.study_path, 'log.csv')
+        logfile = os.path.join(self.study_path, "log.csv")
         df, cats = visualizers.import_logfile(logfile)
 
         selector = np.ones(len(df), dtype=bool)
@@ -2267,65 +2107,15 @@ class Study:
             categories = []
             for val in sortvals:
                 sorter = df[group_category] == val
-                fnames.append(df['File name'][sorter & selector])
+                fnames.append(df["File name"][sorter & selector])
 
                 categories.append(val)
 
         else:
-            fnames = [df['File name'][selector]]
+            fnames = [df["File name"][selector]]
             categories = [None]
 
         return fnames, categories
-
-        #TODO: deprecate
-    # def animatePlot(self, plotfun, aniName=None, filter_categories=None, filter_values=None, sort_category=None):
-    #     # logfile=os.path.join(self.study_path,'log.csv')
-    #     # df,cats=import_logfile(logfile)
-
-    #     # if filter_categories is not None:
-    #     #     selector=np.ones(len(df),dtype=bool)
-    #     #     for cat,val in zip(filter_categories,filter_values):
-    #     #         selector&=df[cat]==val
-
-    #     #     fnames=df['File name'][selector]
-    #     # else:
-    #     #     fnames=df['File name']
-
-    #     # if sort_category is not None:
-    #     #     sortcats=df[sort_category]
-    #     fnames, _ = self.get_saved_simulations(filter_categories=filter_categories,
-    #                                filter_values=filter_values,
-    #                                sort_category=sort_category)
-
-    #     # ims=[]
-    #     fig = plt.figure()
-    #     # loopargs=None
-    #     # # for ii in range(len(fnames)):
-    #     # #     dat=self.load_simulation(fnames[forder[ii]])
-    #     # for ii,fname in enumerate(fnames):
-    #     #     dat=self.load_simulation(fname)
-    #     #     im,loopargs=plotfun(fig,dat,loopargs)
-    #     #     # txt=fig.text(0.01,0.95,'frame %d'%ii,
-    #     #     #                horizontalalignment='left',verticalalignment='bottom')
-    #     #     # im.append(txt)
-    #     #     ims.append(im)
-
-    #     plottr = plotfun(fig, self)
-    #     for ii, fname in enumerate(fnames):
-    #         dat = self.load_simulation(fname)
-    #         plottr.add_simulation_data(dat)
-
-    #     ims = plottr.get_artists()
-
-    #     ani = mpl.animation.ArtistAnimation(
-    #         fig, ims, interval=1000, repeat_delay=2000, blit=False)
-    #     # ani=mpl.animation.FuncAnimation(fig, aniFun, interval=1000,repeat_delay=2000,blit=True)
-    #     if aniName is None:
-    #         plt.show()
-    #     else:
-    #         ani.save(os.path.join(self.study_path, aniName+'.mp4'), fps=1)
-
-    #     return ani
 
 
 # def make_bounded_linear_metric(min_l0, max_l0, domain_x, origin=np.zeros(3)):
@@ -2390,9 +2180,9 @@ def _analytic(rad, V, I, r):
     inside = r < rad
     voltage = np.empty_like(r)
     voltage[inside] = V
-    voltage[~inside] = I/(4*np.pi*r[~inside])
+    voltage[~inside] = I / (4 * np.pi * r[~inside])
 
-    integral = V*rad*(1+np.log(max(r)/rad))
+    integral = V * rad * (1 + np.log(max(r) / rad))
     return voltage, integral
 
 
@@ -2434,11 +2224,11 @@ def general_metric(element_bbox, reference_coords, reference_coefficents):
     """
 
     nPts = reference_coords.shape[0]
-    coord = (element_bbox[:3]+element_bbox[3:])/2
+    coord = (element_bbox[:3] + element_bbox[3:]) / 2
     l0s = np.empty(nPts)
 
     for ii in nb.prange(nPts):
-        l0s[ii] = reference_coefficents[ii]*np.linalg.norm(reference_coords[ii]-coord)
+        l0s[ii] = reference_coefficents[ii] * np.linalg.norm(reference_coords[ii] - coord)
 
     return l0s
 
@@ -2454,7 +2244,7 @@ def get_standard_mesh_params(sources, mesh_depth, density=0.2):
     mesh_depth : int
         Maximum splitting depth for mesh.
     density : float, optional
-        Density of mesh (0.0 = maximally sparse, 1.0 = maximally dense). 
+        Density of mesh (0.0 = maximally sparse, 1.0 = maximally dense).
         The default is 0.2.
 
     Returns
@@ -2469,12 +2259,12 @@ def get_standard_mesh_params(sources, mesh_depth, density=0.2):
     """
     nSrc = len(sources)
 
-    coefs = np.ones(nSrc)*2**(-density*mesh_depth)
-    max_depths = np.ones(nSrc, dtype=int)*mesh_depth
+    coefs = np.ones(nSrc) * 2 ** (-density * mesh_depth)
+    max_depths = np.ones(nSrc, dtype=int) * mesh_depth
 
     srcPts = []
     for src in sources:
-        if 'geometry' in dir(src):
+        if "geometry" in dir(src):
             srcPts.append(src.geometry.center)
         else:
             srcPts.append(src.coords)

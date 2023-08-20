@@ -27,8 +27,8 @@ def current_source_power(current, radius, sigma):
     if type(sigma) == np.ndarray:
         sigma = np.linalg.norm(sigma)
 
-    rInf = 1/(4*np.pi*sigma*radius)
-    power = rInf*current**2
+    rInf = 1 / (4 * np.pi * sigma * radius)
+    power = rInf * current**2
     return power
 
 
@@ -52,7 +52,7 @@ def voltage_source_integral(voltage, radius, r_max):
         Integral of V from center to r_max.
 
     """
-    return radius*voltage*(1+np.log(r_max/radius))
+    return radius * voltage * (1 + np.log(r_max / radius))
 
 
 def current_source_integral(current, radius, r_max, sigma):
@@ -77,7 +77,7 @@ def current_source_integral(current, radius, r_max, sigma):
         Integral of V from center to r_max.
 
     """
-    voltage = current/(4*np.pi*sigma)
+    voltage = current / (4 * np.pi * sigma)
     return voltage_source_integral(voltage, radius, r_max)
 
 
@@ -101,7 +101,7 @@ def estimate_power(voltages, edges, conductances):
 
     """
     dv = voltages[edges]
-    v2 = np.diff(dv, axis=1)**2
+    v2 = np.diff(dv, axis=1) ** 2
     return np.dot(v2.squeeze(), conductances)
 
 
@@ -124,32 +124,32 @@ def get_error_estimates(simulation):
     errSummary, err, vAna, sorter, r = simulation.calculate_errors()
     intErr = np.trapz(err[sorter], r[sorter])
 
-    v = vAna-err
+    v = vAna - err
 
     sse = np.sum(err**2)
-    sstot = np.sum((vAna-np.mean(vAna))**2)
-    FVU = sse/sstot
+    sstot = np.sum((vAna - np.mean(vAna)) ** 2)
+    FVU = sse / sstot
 
     elV, elAna, elErr, _ = simulation.estimate_volume_error(basic=True)
 
     volErr = sum(np.abs(elErr))
     volAna = sum(np.abs(elAna))
-    vol = volErr/volAna
+    vol = volErr / volAna
 
     absErr = abs(err)
     data = {
-        'max': max(absErr),
-        'min': min(absErr),
-        'avg': np.mean(absErr),
-        'int1': errSummary,
-        'int3': vol,
-        'volErr': volErr,
-        'volAna': volAna,
-        'intErr': intErr,
-        'intAna': intErr/errSummary,
-        'SSE': sse,
-        'SSTot': sstot,
-        'FVU': FVU,
+        "max": max(absErr),
+        "min": min(absErr),
+        "avg": np.mean(absErr),
+        "int1": errSummary,
+        "int3": vol,
+        "volErr": volErr,
+        "volAna": volAna,
+        "intErr": intErr,
+        "intAna": intErr / errSummary,
+        "SSE": sse,
+        "SSTot": sstot,
+        "FVU": FVU,
     }
 
     return data
@@ -174,8 +174,8 @@ def get_statistical_squares(err, vAna):
         Total sum of squares.
 
     """
-    SSE = np.sum((err)**2)
-    SSTot = np.sum((vAna-np.mean(vAna))**2)
+    SSE = np.sum((err) ** 2)
+    SSTot = np.sum((vAna - np.mean(vAna)) ** 2)
 
     return SSE, SSTot
 
@@ -227,6 +227,6 @@ def calculate_fvu(analytic_values, err):
     """
     SSE, SSTot = get_statistical_squares(err, analytic_values)
 
-    FVU = SSE/SSTot
+    FVU = SSE / SSTot
 
     return FVU
