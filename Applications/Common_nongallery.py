@@ -40,8 +40,7 @@ def makeSynthStudy(folderName, rElec=1e-6, vSource=False, xmax=1e-4):
         DESCRIPTION.
 
     """
-    datadir = "/home/benoit/smb4k/ResearchData/Results"
-    folder = path.join(datadir, folderName)
+    folder = path.join(xc.DATA_DIR, folderName)
     bbox = np.append(-xmax * np.ones(3), xmax * np.ones(3))
 
     study = xc.Study(folder, bbox)

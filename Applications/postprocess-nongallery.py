@@ -13,7 +13,6 @@ import xcell
 import matplotlib.pyplot as plt
 
 meshtype = "adaptive"
-datadir = "/home/benoit/smb4k/ResearchData/Results/studyTst/"
 # study_path=datadir+'regularization/'
 # filter_categories=["Regularized?"]
 # filter_values=[True]
@@ -28,7 +27,7 @@ datadir = "/home/benoit/smb4k/ResearchData/Results/studyTst/"
 # filter_values=['current','voltage']
 
 # study_path = datadir+'uniVsAdapt'
-study_path = "/home/benoit/smb4k/ResearchData/Results/Quals/PoC"
+study_path = os.path.join(xcell.DATA_DIR, 'quals','PoC')
 filter_categories = ["Mesh type"]
 filter_values = ["adaptive", "uniform"]
 # filter_values=['adaptive']

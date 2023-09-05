@@ -15,7 +15,7 @@ import matplotlib as mpl
 import os
 from xcell import util
 from xcell import visualizers
-import Common_nongallery
+from Common_nongallery import makeSynthStudy
 
 # %%
 # Setup animation
@@ -57,7 +57,7 @@ if fullCircle:
 else:
     bbox = np.append(xmax * np.zeros(3), xmax * np.ones(3))
 
-study, setup = Common_nongallery.makeSynthStudy(study_path, rElec=rElec, xmax=xmax)
+study, setup = makeSynthStudy(study_path, rElec=rElec, xmax=xmax)
 
 
 arts = []

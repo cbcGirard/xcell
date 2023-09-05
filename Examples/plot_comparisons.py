@@ -97,7 +97,7 @@ costcat = "Error"
 # costcat='FVU'
 # x_category='l0min'
 
-xvalues = ["Number of elements", "l0min", "Total time [Wall]"]
+xvalues = ["Number of elements", "min_l0", "Total time [Wall]"]
 xtags = ["numel", "l0", "totTime"]
 if staticPlots:
     for x_category, xtag in zip(xvalues, xtags):

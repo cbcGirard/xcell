@@ -11,19 +11,17 @@ import numba as nb
 import xcell as xc
 import matplotlib.pyplot as plt
 import pickle
+import os
 
 meshtype = "adaptive"
 # study_path='Results/studyTst/miniCur/'#+meshtype
-datadir = "/home/benoit/smb4k/ResearchData/Results/"  # +meshtype
 # study_path=datadir+'post-renumber/'
-
 sigma = np.ones(3)
 
 X = 1000
 V = 1
 R = 2
-study_path = datadir + "errorMetrics/"
-
+study_path = xc.DATA_DIR
 generate = True
 
 

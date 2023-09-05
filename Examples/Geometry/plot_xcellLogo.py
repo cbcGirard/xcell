@@ -3,14 +3,14 @@
 """
 Logo
 =============
-Generates the xcell logo from point cloud
+Generates the xc logo from point cloud
 
 Original text layout in Inkscape, text bounds resampled using Roughen path effect with all displacements=0, then exported with Path to Gcode extension.
 
 Original canvas bounds are ((0,32), (0,32))
 
 """
-
+import xcell as xc
 import pandas
 import numpy as np
 import matplotlib.pyplot as plt
@@ -27,7 +27,7 @@ showOriginalPoints = False
 
 bbox = np.array([0, 0, -32, 32, 32, 32])
 
-xcell.colors.use_dark_style()
+xc.colors.use_dark_style()
 color = 'base'
 logoFPS = 6
 
@@ -38,7 +38,7 @@ logoFPS = 6
 
 if convertGcode:
 
-    f = open('xcelldense.ngc', 'r')
+    f = open('xcdense.ngc', 'r')
     txt = f.read()
     f.close()
 
@@ -61,7 +61,7 @@ if convertGcode:
 pts = pickle.load(open(ptsFile, 'rb'))
 
 tstart = time.monotonic()
-setup = xcell.Simulation('', bbox)
+setup = xc.Simulation('', bbox)
 
 
 meshPts = []
@@ -76,7 +76,7 @@ for d in range(0, 12):
     setup.make_adaptive_grid(ref_pts=pts,
                            max_depth=depths,
                            coefs=co,
-                           min_l0_function=xcell.general_metric,
+                           min_l0_function=xc.general_metric,
                            coarsen=False)
     setup.finalize_mesh()
 
@@ -105,8 +105,8 @@ with plt.rc_context({'figure.figsize': [19.2, 10.8],
     ax.axis('Off')
     ax.margins(0)
 
-    col = xcell.colors.BASE
-    artists = [[xcell.visualizers.show_2d_edges(
+    col = xc.colors.BASE
+    artists = [[xc.visualizers.show_2d_edges(
         ax, p, edge_colors=col, alpha=0.2, linewidth=1.5)] for p in meshPts[:13]]
 
     # pad ending frame

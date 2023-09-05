@@ -332,7 +332,6 @@ axes[0, 0].set_xlim(left=0)
 
 
 # %% Image slice redux
-# v=pickle.load(open('/home/benoit/smb4k/ResearchData/Results/Quals/PoC/SliceSet_adaptive.adata','rb'))
 
 with plt.rc_context({"figure.figsize": [7, 6.5], "figure.dpi": 144}):
     # v2=v.copy(override_prefs={'logScale':True})
