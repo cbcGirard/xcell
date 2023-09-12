@@ -1,3 +1,20 @@
+[project]
+name = "xcell"
+# version = 'pep440'
+dynamic = ["version"]
+
+
+[tool.versioneer]
+VCS = 'git'
+style = 'pep440'
+versionfile_source = 'xcell/_version.py'
+versionfile_build = 'xcell/_version.py'
+tag_prefix = 'v'
+
+[build-system]
+requires = ["setuptools", "versioneer[toml]"]
+build-backend = "setuptools.build_meta"
+
 [tool.black]
 line-length = 115
 include = '\.pyi?$'
@@ -18,3 +35,20 @@ exclude = '''
   | tests/data
 )/
 '''
+
+[project.optional-dependencies]
+remote = [
+  "nodejs",
+  "jupyter",
+  "trame",
+]
+docs = [
+  "sphinx-gallery",
+  "cookiecutter==1.7.3",
+  "setuptools>=62.2.0",
+  # "sphinx_rtd_theme"
+  "pydata-sphinx-theme",
+  "sphinx-autoapi",
+  "versioneer",
+  "sphinx-copybutton"
+]

@@ -13,7 +13,7 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../xcell/xcell'))
-import sphinx_rtd_theme
+# import sphinx_rtd_theme
 
 import pyvista
 # necessary when building the sphinx gallery
@@ -33,12 +33,11 @@ author = 'CBC Girard'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-  'sphinx_rtd_theme',
-#  'sphinx_rtd_dark_mode',
   'sphinx.ext.napoleon',
   'autoapi.extension',
   'sphinx.ext.autodoc',
   'sphinx.ext.inheritance_diagram',
+  'sphinx_copybutton',
 #   'sphinx.ext.autosummary',
 #   'sphinx_codeautolink',
   'sphinx_gallery.gen_gallery',
@@ -59,20 +58,21 @@ exclude_patterns = []
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'pydata_sphinx_theme'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-html_style = 'css/xcell.css'
+html_css_files = ['css/xcell.css']
 
-
+html_context = {"default_mode" : 'auto'}
 html_theme_options = {
-
-    'style_nav_header_background': '#990000',
-    'logo_only': True,
-
+   "pygment_light_style": "default",
+   "pygment_dark_style": "monokai",
+   "logo" : {
+       "text": "xcell: simulating extracellular electrophysiology"
+   }
 }
 
 html_logo = '../../Examples/Geometry/logo.png'
@@ -109,6 +109,8 @@ autoapi_dirs = ['../../xcell', ]
 # external API doc links
 intersphinx_mapping = {
     'pyvista': ('https://docs.pyvista.org/version/stable/', None),
-    'matplotlib': ('https://matplotlib.org/stable/index.html', None),
+    'matplotlib': ('https://matplotlib.org/stable/', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
+
 }
 

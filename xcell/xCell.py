@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Main API for handling extracellular simulations."""
 
+from inspect import isclass
 from sre_parse import State
 from turtle import st
 import numpy as np
@@ -42,8 +43,14 @@ from .signals import Signal
 #      ])
 class Source:
     def __init__(self, value, geom):
-        self.value = value
+        if isinstance(value, Signal):
+            self.signal = value
+        else:
+            self.signal = Signal(value)
         self.geometry = geom
+
+    def get_value_at_time(self, time):
+        return self.signal.get_value_at_time(time)
 
     def __getstate__(self):
         state = self.__dict__.copy()
@@ -599,7 +606,7 @@ class Simulation:
             self.node_role_values[indices] = ii
 
             # self.node_voltages[indices] = src.value
-            self.node_voltages[indices] = src.value.get_value_at_time(self.current_time)
+            self.node_voltages[indices] = src.get_value_at_time(self.current_time)
 
         # meshCurrentSrc=self._node_current_sources
         # meshCurrentSrc=[0 for k in self._node_current_sources]
@@ -607,7 +614,7 @@ class Simulation:
 
         for ii in nb.prange(len(self.current_sources)):
             src = self.current_sources[ii]
-            currentValue = src.value.get_value_at_time(self.current_time)
+            currentValue = src.get_value_at_time(self.current_time)
 
             ######
             # #TODO: introduces bugs?
@@ -871,7 +878,7 @@ class Simulation:
 
         for ii in nb.prange(len(self.current_sources)):
             source = self.current_sources[ii]
-            I = source.value.get_value_at_time(self.current_time)
+            I = source.get_value_at_time(self.current_time)
             rad = source.geometry.radius
             srcI.append(I)
             source_locations.append(source.geometry.center)
@@ -883,7 +890,7 @@ class Simulation:
 
         for ii in nb.prange(len(self.voltage_sources)):
             source = self.voltage_sources[ii]
-            V = source.value.get_value_at_time(self.current_time)
+            V = source.get_value_at_time(self.current_time)
             srcV.append(V)
             source_locations.append(source.geometry.center)
             rad = source.radius

@@ -4,7 +4,8 @@
 Simulation overview
 ===================================
 
-A simplified view of the meshing process, electrical network generation, and solution
+A simplified view of the meshing process, electrical network generation, 
+and solution
 
 """
 
@@ -12,14 +13,8 @@ import numpy as np
 import xcell as xc
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import os
-from xcell import util
 from xcell import visualizers
 from Common_nongallery import makeSynthStudy
-
-# %%
-# Setup animation
-# -----------------
 
 lite = False
 asDual = False
@@ -39,7 +34,8 @@ if lite:
         }
     )
 else:
-    mpl.rcParams.update({"figure.figsize": [2.0, 2.0], "font.size": 9, "figure.dpi": 500})
+    mpl.rcParams.update({"figure.figsize": [2.0, 2.0], 
+                         "font.size": 9, "figure.dpi": 500})
 
 showSrcCircuit = True
 lastGen = 4
@@ -64,7 +60,8 @@ arts = []
 fig = plt.figure(constrained_layout=True)
 
 
-cm = visualizers.CurrentPlot(fig, study, fullarrow=True, showInset=False, showAll=asDual)
+cm = visualizers.CurrentPlot(fig, study, fullarrow=True, 
+                             showInset=False, showAll=asDual)
 cm.prefs["colorbar"] = False
 cm.prefs["title"] = False
 cm.prefs["logScale"] = True
@@ -87,12 +84,15 @@ arcY = rElec * np.sin(tht)
 src = ax.fill(arcX, arcY, color=mpl.cm.plasma(1.0), alpha=0.5, label="Source")
 
 noteColor = xc.colors.ACCENT_DARK
+# sphinx_gallery_defer_figures
 
 # %%
 # Subdivide mesh
 # ----------------
 #
-# The target element size is proportional to its distance from the source. Elements larger than their target size are recursively split until all are smaller than their respective target.
+# The target element size is proportional to its distance from the source. 
+# Elements larger than their target size are recursively split until all are 
+# smaller than their respective target.
 
 for max_depth in range(1, lastGen + 1):
     l0Param = 2 ** (-max_depth * 0.2)
@@ -137,13 +137,14 @@ for max_depth in range(1, lastGen + 1):
 
         ctrArt = ax.scatter(cpts[:, 0], cpts[:, 1], c=noteColor, marker="o")
         arts.append([ctrArt, art, title])
-
+# sphinx_gallery_defer_figures
 # %%
 # Electrical network
 # ----------------------
 #
-# Each element has discrete conducances between its vertices. All nodes inside a source are combined into a single electrical node
-#
+# Each element has discrete conducances between its vertices. All nodes inside 
+# a source are combined into a single electrical node
+
 if showSrcCircuit:
     # outside, inside source
     nodeColors = np.array([[0, 0, 0, 0], [0.6, 0, 0, 1]], dtype=float)
@@ -221,11 +222,14 @@ if showSrcCircuit:
     for ii in range(3):
         arts.append(eqArtists)
 
+
     # %%
     # Solve for node voltages
     # -------------------------
     #
-    # The
+    # The resulting electrical network can be solved by nodal analysis, giving 
+    # potential at the mesh nodes and current along edges
+    #
 
     cm.add_simulation_data(setup, append=True)
     endArts = cm.get_artists(0)

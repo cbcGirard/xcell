@@ -29,13 +29,17 @@ for swept in ["density", "depth"]:
         vrange = 0.5 * sweepval
     elif swept == "depth":
         # vrange=dmin+np.array((dmax-dmin)*sweepval,dtype=int)
-        vrange = np.concatenate((np.arange(dmin, dmax + 1), np.arange(dmax - 1, dmin - 1, -1)))
+        vrange = np.concatenate((np.arange(dmin, dmax + 1), 
+                                 np.arange(dmax - 1, dmin - 1, -1)))
     tvec = np.linspace(0, 1, vrange.shape[0])
 
-    tdata = {"x": tvec, "y": vrange, "ylabel": swept, "unit": "", "style": "dot"}
+    tdata = {"x": tvec, "y": vrange, "ylabel": swept, 
+             "unit": "", "style": "dot"}
 
-    with plt.rc_context({"figure.figsize": [4.5, 3.75], "font.size": 10, "figure.dpi": 144}):
-        img = xc.visualizers.SingleSlice(None, study, timevec=tvec, tdata=tdata, prefs=plotprefs)
+    with plt.rc_context({"figure.figsize": [4.5, 3.75], "font.size": 10, 
+                         "figure.dpi": 144}):
+        img = xc.visualizers.SingleSlice(None, study, timevec=tvec, 
+                                         tdata=tdata, prefs=plotprefs)
         img.axes[2].set_xticks([])
 
         lastdepth = -1

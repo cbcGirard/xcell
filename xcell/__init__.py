@@ -32,5 +32,9 @@ else:
 DATA_DIR = _folder
 
 #TODO: better handling of cross-platform NEURON dependencies
-if os.name != "nt":
+try:
     from . import nrnutil
+except:
+    import dummy as nrnutil
+from . import _version
+__version__ = _version.get_versions()['version']

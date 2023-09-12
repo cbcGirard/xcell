@@ -85,7 +85,7 @@ for activeElec in elecSelector:
             sim.current_time = t
 
             activeSrces = [
-                src for src in sim.current_sources if src.value.get_value_at_time(t) > 0]
+                src for src in sim.current_sources if src.get_value_at_time(t) > 0]
 
             refpt = np.array(
                 [src.geometry.center for src in activeSrces], ndmin=2)

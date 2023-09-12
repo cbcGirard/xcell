@@ -1,7 +1,10 @@
 """
 Handlers for dynamic signals
 """
+from unicodedata import numeric
 import numpy as np
+
+from xcell.util import is_scalar
 
 
 # TODO: implement __getitem__
@@ -17,7 +20,16 @@ class Signal:
     """
 
     def __init__(self, value):
-        self.value = value
+        self._value = value
+
+    @property
+    def value(self):
+        """Current value of signal"""
+        return self._value
+    
+    @value.setter
+    def value(self,val):
+        self._value = val
 
     def get_value_at_time(self, t):
         """
@@ -33,7 +45,7 @@ class Signal:
         float
             Value at time.
         """
-        return self.value
+        return self._value
 
     def reset(self):
         pass
@@ -44,10 +56,25 @@ class PiecewiseSignal(Signal):
     Piecewise signal from time, value pairs.
     """
 
-    def __init__(self, t0=0, y0=0):
-        self.times = [t0]
-        self.values = [y0]
+    def __init__(self, t=0, y=0):
+
+        if is_scalar(t):
+            self.times = [t]
+        else:
+            self.times = t
+        if is_scalar(y):
+            self.values = [y]
+        else:
+            self.values = y
         self._current_index = 0
+
+    @property
+    def value(self):
+        return self.values[self._current_index]
+    
+    @value.setter
+    def value(self,val):
+        self.values[self._current_index] = val
 
     def get_value_at_time(self, t):
         is_before = np.less_equal(self.times, t)

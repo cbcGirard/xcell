@@ -16,12 +16,14 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from tqdm import trange
 
+# from ..Common_nongallery import Ring, makeSynthStudy
+
 import Common_nongallery
 import time
 
 from xcell import nrnutil as nUtil
 
-resultFolder = '/tmp'
+resultFolder = 'LFP'
 
 
 h.load_file('stdrun.hoc')
@@ -33,7 +35,7 @@ nRing = 5
 nSegs = 5
 
 dmax = 8
-dmin = 4
+dmin = 3
 
 nskip = 4
 
@@ -44,7 +46,8 @@ tstop = 40
 tPerFrame = 5
 barRatio = [9, 1]
 
-ivecs, is_sphere, coords, rads = nUtil.get_neuron_geometry()
+coords, rads, is_sphere = nUtil.get_neuron_geometry()
+ivecs = nUtil.get_membrane_currents()
 
 
 t = h.Vector().record(h._ref_t)
@@ -91,14 +94,17 @@ tdata = None
 img = xc.visualizers.SingleSlice(None, study,
                                     tv, tdata=tdata)
 
-for r, c, v in zip(rads, coords, I[0]):
+for r, c, i in zip(rads, coord, I.transpose()):
     geo = xc.geometry.Sphere(center=c, radius = r)
-    setup.add_current_source(v, geometry = geo)
+    signal=xc.signals.PiecewiseSignal(tv, i )
+    setup.add_current_source(signal, geometry = geo)
 
 tmax = tv.shape[0]
 errdicts = []
 
-for ii in trange(0, tmax):
+stepper = trange(0,tmax,postfix="")
+
+for ii in stepper:
 
     t0 = time.monotonic()
     ivals = I[ii]
@@ -109,16 +115,16 @@ for ii in trange(0, tmax):
 
     changed = False
 
-    for jj in range(len(setup.current_sources)):
-        ival = ivals[jj]
-        setup.current_sources[jj].value = ival
+    # for jj in range(len(setup.current_sources)):
+    #     ival = ivals[jj]
+    #     setup.current_sources[jj].value = ival
 
     # Depth strategy
     scale = dmin+dspan*vScale
     dint = np.rint(scale)
     max_depth = np.floor(scale).astype(int)
 
-    density = 0.2  # +0.2*dfrac
+    density = 0.2
 
     metricCoef = 2**(-density*scale)
 
@@ -139,38 +145,26 @@ for ii in trange(0, tmax):
         lastNumEl = n_elements
         setup.iteration += 1
 
-        study.save_simulation(setup)  # ,baseName=str(setup.iteration))
-        print('%d source nodes' % sum(setup.node_role_table == 2))
-    else:
-        # TODO: why is reset needed?
-        setup.node_role_table[setup.node_role_table == 2] = 0
+        study.save_simulation(setup)
+        # stepper.set_postfix_str('%d source nodes' % sum(setup.node_role_table == 2))
+        # stepper.set_postfix_str('%d elements'%n_elements)
 
+        # stepper.set_postfix_str('(%.2g, %.2g)'%(v.min(), v.max()))
+    else:
+    #     # TODO: why is reset needed?
+    #     setup.node_role_table[setup.node_role_table == 2] = 0
         v = setup.solve()
 
     dt = time.monotonic()-t0
-
-    lastI = ival
 
     study.log_current_simulation(['Timestep', 'Meshnum'], [
                       setup.current_time, setup.meshnum])
 
     setup.step_logs = []
 
-    errdict = xc.misc.get_error_estimates(setup)
-    errdict['densities'] = density
-    errdict['depths'] = max_depth
-    errdict['numels'] = lastNumEl
-    errdict['dt'] = dt
-    errdict['vMax'] = max(v)
-    errdict['vMin'] = min(v)
-    errdicts.append(errdict)
 
     img.add_simulation_data(setup, append=True)
 
-lists = xc.misc.transpose_dicts(errdicts)
-
-
-xc.colors.use_dark_style()
 nUtil.show_cell_geo(img.axes[0])
 
 ani = img.animate_study('', fps=30)

@@ -294,7 +294,7 @@ for ii in timer:
     if adaptive and ii != 0:
         depths = []
         for src in sim.current_sources[:nmicro]:
-            if src.value.get_value_at_time(t) == 0:
+            if src.get_value_at_time(t) == 0:
                 depths.append(depthmin)
             else:
                 depths.append(Depth)

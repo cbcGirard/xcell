@@ -19,6 +19,10 @@ MAXDEPTH = np.array(20, dtype=np.uint64)[()]
 MAXPT = np.array(2 ** (MAXDEPTH + 1) + 1, dtype=np.uint64)[()]
 
 
+def is_scalar(var):
+    """Verify var is not a list/array"""
+    return not hasattr(var,"__len__")
+
 def point_current_source_voltage(eval_coords, i_source, sigma=1.0, source_location=np.zeros(3, dtype=np.float64)):
     """
     Calculate field from point current source.

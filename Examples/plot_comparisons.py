@@ -7,7 +7,7 @@ Depth sweep
 Compare performance as mesh resolution increases. Generates ch3-4 data.
 """
 
-import xcell
+import xcell as xc
 import Common_nongallery
 import matplotlib.pyplot as plt
 import argparse
@@ -32,20 +32,20 @@ depths = np.arange(3, 12)
 xtraParams = None
 xmax = 1e-4
 if args.comparison == "mesh" or args.comparison == "bigPOC":
-    foldername = "Quals/PoC"
+    foldername = "Comparison/PoC"
     tstVals = ["adaptive", "uniform"]
     # tstVals=['adaptive','equal elements',r'equal $l_0$']
     tstCat = "Mesh type"
 if args.comparison == "formula" or args.comparison == "fixedDisc":
-    foldername = "Quals/formulations"
+    foldername = "Comparison/formulations"
     tstVals = ["Admittance", "FEM", "Face"]
     tstCat = "Element type"
 if args.comparison == "bounds":
-    foldername = "Quals/boundaries"
+    foldername = "Comparison/boundaries"
     tstVals = ["Analytic", "Ground", "Rubik0"]
     tstCat = "Boundary"
 if args.comparison == "testing":
-    foldername = "Quals/miniset"
+    foldername = "Comparison/miniset"
     tstVals = ["adaptive", "uniform"]
     tstCat = "Mesh type"
     generate = False
@@ -53,11 +53,11 @@ if args.comparison == "testing":
     depths = np.arange(3, 8)
 
 if args.comparison == "bigPOC":
-    foldername = "Quals/bigPOC"
+    foldername = "Comparison/bigPOC"
     xmax = 1e-2
 
 if args.comparison == "fixedDisc":
-    foldername = "Quals/fixedDisc"
+    foldername = "Comparison/fixedDisc"
     xtraParams = {"boundary_functionction": "Analytic"}
 
 
@@ -68,11 +68,11 @@ if args.comparison == "fixedDisc":
 
 # generate animation(s)
 plotters = [
-    xcell.visualizers.ErrorGraph,
-    # xcell.visualizers.ErrorGraph,
-    # xcell.visualizers.SliceSet,
-    # xcell.visualizers.LogError,
-    # xcell.visualizers.CurrentPlot,
+    xc.visualizers.ErrorGraph,
+    # xc.visualizers.ErrorGraph,
+    # xc.visualizers.SliceSet,
+    # xc.visualizers.LogError,
+    # xc.visualizers.CurrentPlot,
 ]
 
 plotPrefs = [
@@ -101,7 +101,7 @@ xvalues = ["Number of elements", "min_l0", "Total time [Wall]"]
 xtags = ["numel", "l0", "totTime"]
 if staticPlots:
     for x_category, xtag in zip(xvalues, xtags):
-        xcell.visualizers.grouped_scatter(
+        xc.visualizers.grouped_scatter(
             study.study_path + "/log.csv", x_category=x_category, y_category=costcat, group_category=tstCat
         )
         fname = tstCat + "_" + costcat + "-vs-" + xtag
@@ -109,7 +109,7 @@ if staticPlots:
         nufig = plt.gcf()
         study.save_plot(nufig, fname)
         for fv in tstVals:
-            fstack, fratio = xcell.visualizers.plot_study_performance(
+            fstack, fratio = xc.visualizers.plot_study_performance(
                 study, plot_ratios=True, only_category=tstCat, only_value=fv
             )
             fstem = "_" + tstCat + str(fv)

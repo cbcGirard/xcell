@@ -74,7 +74,8 @@ max_depth = int(np.log2(xdom / dmicro)) + 2
 sim = xc.Simulation("test", bbox=bbox)
 
 
-body = xc.geometry.Cylinder(tipPt + bodyL * orientation / 2, radius=dbody / 2, length=bodyL, axis=orientation)
+body = xc.geometry.Cylinder(tipPt + bodyL * orientation / 2, radius=dbody / 2,
+                             length=bodyL, axis=orientation)
 
 # bugfix to force detection of points inside cylindrical body
 bodyMesh = xc.geometry.to_pyvista(body)
@@ -116,7 +117,9 @@ for ii in range(microRows):
 
         microOrientation = rot.apply(0.5 * dbody * np.array([0.0, 0.0, 1.0]))
 
-        geo = xc.geometry.Disk(center=rowpt + microOrientation, radius=dmicro / 2, axis=microOrientation, tol=0.5)
+        geo = xc.geometry.Disk(center=rowpt + microOrientation, 
+                               radius=dmicro / 2, axis=microOrientation, 
+                               tol=0.5)
 
         sim.add_current_source(xc.signals.Signal(0), geometry=geo)
 
@@ -138,7 +141,7 @@ vmesh.cell_data["sigma"] = sigma_0
 
 regions.assign_sigma(sim.mesh, default_sigma=sigma_0)
 
-sim.current_sources[nmacro + 1].value.value = 150e-6
+sim.current_sources[nmacro + 1].value = 150e-6
 
 
 sim.set_boundary_nodes()

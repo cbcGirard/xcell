@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """Color schemes for xcell."""
 
+import os
+import sys
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.colors import LinearSegmentedColormap as LinCM
@@ -16,7 +18,7 @@ from pyvista import themes
 
 # TODO: autodetect remote execution?
 # pyvista startup for remote server
-if "DISPLAY" not in environ:
+if sys.platform.startswith('linux') and "DISPLAY" not in environ:
     pv.start_xvfb()
 
 pv.set_jupyter_backend("trame")

@@ -1,30 +1,19 @@
 /** css/yourtheme.css **/
 
 /* This line is theme specific - it includes the base theme CSS */
-@import 'theme.css';       /* for the Read the Docs theme */
+/* @import 'theme.css';       for the Read the Docs theme */
+@import 'palette.css';
 
-body {
-    /* ... */
-    
-    
-
-    .wy-nav-content-wrap{
-        background: #272525;
-    }
-    .wy-nav-content{
-        background: #19232d;
-        color: #dcd4c7;
-    }
-
-    .highlight{
-        color:#000000;
-        background: #FFFFFF;
-    }
-
-
-
+/* html[data-theme="light"] {
+    --pst-color-primary: var(--chapmanRed);
+    --pst-color-secondary: var(--chapmanRed);
+    --pst-color-background: #eaeaea;
+    --pst-color-text-base: var(--bgDark);
 }
 
-h1{
-    color:#afcfff;
-}
+html[data-theme="dark"] {
+    --pst-color-primary: var(--ltBlue);
+    --pst-color-secondary: var(--scCardinal);
+    --pst-color-background: var(--bgDark);
+    --pst-color-text-base: var(--cream);
+} */

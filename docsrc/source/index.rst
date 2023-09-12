@@ -12,7 +12,7 @@ Welcome to xcell's documentation!
 
    ./intro
    ./auto_examples/index
-   xcell/xcell
+   .. xcell/xcell
 
 .. .. autosummary::
 ..    :toctree: _autosummary

@@ -40,7 +40,7 @@ setup(
     description="Toolkit for handling the extracellular domain in neural simulations",
     long_description=readme,
     author="Christopher BC Girard",
-    author_email='cgirard@usc.edu',
+    author_email='cgirard@chapman.edu',
     url='https://github.com/cbcgirard/xcell',
     python_requires='>={}'.format('.'.join(str(n) for n in min_version)),
     packages=find_packages(exclude=['docs', 'tests']),

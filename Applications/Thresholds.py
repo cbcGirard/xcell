@@ -133,11 +133,11 @@ class ThisSim(xc.nrnutil.ThresholdSim):
         for src in self.current_sources:
             # analytic_values += xc.util.disk_current_source_voltage(coords,
             # analytic_values += xc.util.point_current_source_voltage(coords,
-            #                                  i_source=src.value.get_value_at_time(0.),
+            #                                  i_source=src.get_value_at_time(0.),
             #                                  sigma=self.sigma,
             #                                  source_location=src.coords)
             dists = src.geometry.get_signed_distance(coords)
-            k = src.value.get_value_at_time(0.0) / (4 * np.pi * self.sigma)
+            k = src.get_value_at_time(0.0) / (4 * np.pi * self.sigma)
             vals = k / dists
             vals[dists < src.geometry.radius] = k / src.geometry.radius
             analytic_values += vals

@@ -1865,7 +1865,7 @@ class CurrentPlot(FigureAnimator):
             rElec = sim.voltage_sources[0].geometry.radius
             self.rElec = rElec
 
-        self.i_source.append(sim.current_sources[0].value.get_value_at_time(sim.current_time))
+        self.i_source.append(sim.current_sources[0].get_value_at_time(sim.current_time))
 
         iOK, ptOK, meshpt = sim.getCurrentsInPlane()
 
@@ -1873,7 +1873,7 @@ class CurrentPlot(FigureAnimator):
             "mesh": meshpt,
             "currents": iOK,
             "pts": ptOK,
-            "i_source": sim.current_sources[0].value.get_value_at_time(sim.current_time),
+            "i_source": sim.current_sources[0].get_value_at_time(sim.current_time),
         }
 
         self.cvals.append(iOK)
