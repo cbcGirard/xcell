@@ -12,8 +12,10 @@
 #
 import os
 import sys
+import re
 sys.path.insert(0, os.path.abspath('../xcell/xcell'))
 # import sphinx_rtd_theme
+from sphinx_gallery.scrapers import matplotlib_scraper
 
 import pyvista
 # necessary when building the sphinx gallery
@@ -71,7 +73,7 @@ html_theme_options = {
    "pygment_light_style": "default",
    "pygment_dark_style": "monokai",
    "logo" : {
-       "text": "xcell: simulating extracellular electrophysiology"
+       "text": "xcell"
    }
 }
 
@@ -89,11 +91,23 @@ class ResetArgv:
         else:
             return []
         
+
+# Attempt to force dark-light class in all gallery images (no dimming in dark mode)
+class dark_scraper(object):
+    def __repr__(self):
+        return self.__class__.__name__
+    
+    def __call__(self,*args, **kwargs):
+
+        rst= matplotlib_scraper(*args, transparent=True, #format='svg', 
+                                  **kwargs)#+'\n    :dark-light:'
+        return re.sub(r'<img', '<img class="dark-light"',rst)
+        
 sphinx_gallery_conf = {
      'examples_dirs': '../../Examples',   # path to your example scripts
      'gallery_dirs': 'auto_examples',  # path to where to save gallery generated 
      'matplotlib_animations': True,
-     'image_scrapers': ('matplotlib', 'pyvista'),
+     'image_scrapers': (dark_scraper(), 'pyvista'),
      'ignore_pattern': 'nongallery',
      'reset_argv': ResetArgv(),
      "backreferences_dir": None

@@ -21,6 +21,9 @@ animations = []
 
 study, setup = Common_nongallery.makeSynthStudy("adaptationDemos")
 plotprefs = {"colorbar": False, "barRatio": [7, 1], "labelAxes": False}
+mpl_context = {"figure.figsize": [4.5, 3.75], "font.size": 10, 
+                         "figure.dpi": 144}
+
 
 sweepval = 1 - abs(np.linspace(-1, 1, 20))
 
@@ -36,8 +39,7 @@ for swept in ["density", "depth"]:
     tdata = {"x": tvec, "y": vrange, "ylabel": swept, 
              "unit": "", "style": "dot"}
 
-    with plt.rc_context({"figure.figsize": [4.5, 3.75], "font.size": 10, 
-                         "figure.dpi": 144}):
+    with plt.rc_context(mpl_context):
         img = xc.visualizers.SingleSlice(None, study, timevec=tvec, 
                                          tdata=tdata, prefs=plotprefs)
         img.axes[2].set_xticks([])
@@ -64,4 +66,7 @@ for swept in ["density", "depth"]:
             img.add_simulation_data(setup, append=True)
 
         animations.append(img.animate_study(fname=swept, fps=5.0))
+
+
+denstiy_ani, depth_ani = animations
 # sphinx_gallery_thumbnail_number = 2

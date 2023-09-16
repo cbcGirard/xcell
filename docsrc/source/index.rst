@@ -5,14 +5,19 @@
 
 Welcome to xcell's documentation!
 =================================
+.. |xcellLogo| image:: logo.png
+   :width: 100%
+   :class: only-dark
+
+|xcellLogo|
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
    ./intro
+
    ./auto_examples/index
-   .. xcell/xcell
 
 .. .. autosummary::
 ..    :toctree: _autosummary
