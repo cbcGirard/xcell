@@ -23,7 +23,7 @@ Singularity
 
 Get a detailed sweep of the behavior as element l0 approaches the source's radius
 
-.. GENERATED FROM PYTHON SOURCE LINES 10-197
+.. GENERATED FROM PYTHON SOURCE LINES 10-154
 
 
 
@@ -37,8 +37,806 @@ Get a detailed sweep of the behavior as element l0 approaches the source's radiu
 
  .. code-block:: none
 
-    NEURON mechanisms not found in estimsurvey/.
-    WARNING:matplotlib.backends.backend_ps:The PostScript backend does not support transparency; partially transparent artists will be rendered opaque.
+    4.10965 Gb used
+            Total time: 248.777 ms [CPU], 222.26 ms [Wall]
+    4.10966 Gb used
+            Total time: 250.385 ms [CPU], 220.724 ms [Wall]
+    4.1116 Gb used
+            Total time: 250.057 ms [CPU], 224.02 ms [Wall]
+    4.1116 Gb used
+            Total time: 570.146 ms [CPU], 394.094 ms [Wall]
+    4.1116 Gb used
+            Total time: 563.439 ms [CPU], 385.295 ms [Wall]
+    4.1116 Gb used
+            Total time: 566.001 ms [CPU], 388.239 ms [Wall]
+    4.1116 Gb used
+            Total time: 779.879 ms [CPU], 605.719 ms [Wall]
+    4.1116 Gb used
+            Total time: 567.015 ms [CPU], 386.193 ms [Wall]
+    4.1116 Gb used
+            Total time: 563.036 ms [CPU], 388.597 ms [Wall]
+    4.11165 Gb used
+            Total time: 562.96 ms [CPU], 387.975 ms [Wall]
+    4.11165 Gb used
+            Total time: 555.442 ms [CPU], 386.236 ms [Wall]
+    4.11171 Gb used
+            Total time: 1.0259s [CPU], 763.718 ms [Wall]
+    4.11171 Gb used
+            Total time: 799.723 ms [CPU], 539.963 ms [Wall]
+    4.11171 Gb used
+            Total time: 790.536 ms [CPU], 534.39 ms [Wall]
+    4.11171 Gb used
+            Total time: 786.223 ms [CPU], 531.487 ms [Wall]
+    4.11171 Gb used
+            Total time: 1.01848s [CPU], 765.484 ms [Wall]
+    4.11171 Gb used
+            Total time: 793.468 ms [CPU], 534.235 ms [Wall]
+    4.13395 Gb used
+            Total time: 788.517 ms [CPU], 531.931 ms [Wall]
+    4.13395 Gb used
+            Total time: 1.05758s [CPU], 698.621 ms [Wall]
+    4.13395 Gb used
+            Total time: 1.27608s [CPU], 912.756 ms [Wall]
+    4.13396 Gb used
+            Total time: 1.07551s [CPU], 707.008 ms [Wall]
+    4.13401 Gb used
+            Total time: 1.05222s [CPU], 694.453 ms [Wall]
+    4.13403 Gb used
+            Total time: 1.27669s [CPU], 915.424 ms [Wall]
+    4.13449 Gb used
+            Total time: 1.07755s [CPU], 711.544 ms [Wall]
+    4.13449 Gb used
+            Total time: 1.05228s [CPU], 697.763 ms [Wall]
+    4.1345 Gb used
+            Total time: 1.58989s [CPU], 1.10653s [Wall]
+    4.13455 Gb used
+            Total time: 1.35869s [CPU], 875.742 ms [Wall]
+    4.13455 Gb used
+            Total time: 1.58581s [CPU], 1.1044s [Wall]
+    4.13457 Gb used
+            Total time: 1.36294s [CPU], 880.712 ms [Wall]
+    4.13457 Gb used
+            Total time: 1.34373s [CPU], 862.587 ms [Wall]
+    4.14251 Gb used
+            Total time: 1.5511s [CPU], 1.08114s [Wall]
+    4.14255 Gb used
+            Total time: 1.32312s [CPU], 863.681 ms [Wall]
+    4.14546 Gb used
+            Total time: 1.2265s [CPU], 820.782 ms [Wall]
+    4.14548 Gb used
+            Total time: 1.71382s [CPU], 1.20308s [Wall]
+    4.14984 Gb used
+            Total time: 1.50679s [CPU], 981.659 ms [Wall]
+    4.14984 Gb used
+            Total time: 1.7259s [CPU], 1.21961s [Wall]
+    4.14984 Gb used
+            Total time: 1.50251s [CPU], 989.854 ms [Wall]
+    4.14994 Gb used
+            Total time: 1.69068s [CPU], 1.19828s [Wall]
+    4.15193 Gb used
+            Total time: 1.41833s [CPU], 947.368 ms [Wall]
+    4.15941 Gb used
+            Total time: 1.41018s [CPU], 945.67 ms [Wall]
+    4.15941 Gb used
+            Total time: 1.86761s [CPU], 1.32161s [Wall]
+    4.15941 Gb used
+            Total time: 1.6177s [CPU], 1.08869s [Wall]
+    4.15968 Gb used
+            Total time: 1.84825s [CPU], 1.32786s [Wall]
+    4.16485 Gb used
+            Total time: 1.59231s [CPU], 1.08292s [Wall]
+    4.1638 Gb used
+            Total time: 1.82325s [CPU], 1.3033s [Wall]
+    4.16388 Gb used
+            Total time: 1.55489s [CPU], 1.06588s [Wall]
+    4.17029 Gb used
+            Total time: 1.7376s [CPU], 1.26662s [Wall]
+    4.17047 Gb used
+            Total time: 2.09209s [CPU], 1.4832s [Wall]
+    4.17497 Gb used
+            Total time: 1.74861s [CPU], 1.19403s [Wall]
+    4.17541 Gb used
+            Total time: 1.96537s [CPU], 1.42815s [Wall]
+    4.17173 Gb used
+            Total time: 42.604 ms [CPU], 37.9427 ms [Wall]
+    4.17068 Gb used
+            Total time: 46.292 ms [CPU], 41.3909 ms [Wall]
+    4.17068 Gb used
+            Total time: 44.649 ms [CPU], 39.537 ms [Wall]
+    4.17068 Gb used
+            Total time: 60.347 ms [CPU], 53.893 ms [Wall]
+    4.17068 Gb used
+            Total time: 59.621 ms [CPU], 53.7403 ms [Wall]
+    4.17068 Gb used
+            Total time: 59.668 ms [CPU], 53.579 ms [Wall]
+    4.17068 Gb used
+            Total time: 60.443 ms [CPU], 53.884 ms [Wall]
+    4.17068 Gb used
+            Total time: 60.086 ms [CPU], 53.7186 ms [Wall]
+    4.17068 Gb used
+            Total time: 59.905 ms [CPU], 53.3679 ms [Wall]
+    4.17068 Gb used
+            Total time: 59.849 ms [CPU], 53.3217 ms [Wall]
+    4.17068 Gb used
+            Total time: 59.929 ms [CPU], 53.5585 ms [Wall]
+    4.17068 Gb used
+            Total time: 76.75 ms [CPU], 67.7983 ms [Wall]
+    4.17068 Gb used
+            Total time: 74.886 ms [CPU], 67.0486 ms [Wall]
+    4.17068 Gb used
+            Total time: 69.776 ms [CPU], 61.9722 ms [Wall]
+    4.17068 Gb used
+            Total time: 77.733 ms [CPU], 68.5813 ms [Wall]
+    4.17068 Gb used
+            Total time: 70.362 ms [CPU], 62.4704 ms [Wall]
+    4.17068 Gb used
+            Total time: 75.05 ms [CPU], 67.2464 ms [Wall]
+    4.17068 Gb used
+            Total time: 75.067 ms [CPU], 66.9917 ms [Wall]
+    4.17068 Gb used
+            Total time: 89.986 ms [CPU], 80.6439 ms [Wall]
+    4.17068 Gb used
+            Total time: 85.742 ms [CPU], 75.8134 ms [Wall]
+    4.17068 Gb used
+            Total time: 92.531 ms [CPU], 82.2935 ms [Wall]
+    4.17071 Gb used
+            Total time: 90.413 ms [CPU], 80.8433 ms [Wall]
+    4.17071 Gb used
+            Total time: 90.405 ms [CPU], 80.616 ms [Wall]
+    4.17071 Gb used
+            Total time: 88.955 ms [CPU], 79.6249 ms [Wall]
+    4.17071 Gb used
+            Total time: 90.145 ms [CPU], 80.7211 ms [Wall]
+    4.17071 Gb used
+            Total time: 103.897 ms [CPU], 93.1066 ms [Wall]
+    4.17071 Gb used
+            Total time: 103.61 ms [CPU], 92.3776 ms [Wall]
+    4.17071 Gb used
+            Total time: 103.309 ms [CPU], 92.0785 ms [Wall]
+    4.17071 Gb used
+            Total time: 103.069 ms [CPU], 91.8279 ms [Wall]
+    4.17071 Gb used
+            Total time: 108.694 ms [CPU], 96.0585 ms [Wall]
+    4.17071 Gb used
+            Total time: 105.273 ms [CPU], 93.0922 ms [Wall]
+    4.17071 Gb used
+            Total time: 101.21 ms [CPU], 90.0964 ms [Wall]
+    4.17071 Gb used
+            Total time: 100.9 ms [CPU], 90.0556 ms [Wall]
+    4.17071 Gb used
+            Total time: 116.442 ms [CPU], 103.64 ms [Wall]
+    4.17071 Gb used
+            Total time: 115.789 ms [CPU], 102.828 ms [Wall]
+    4.17071 Gb used
+            Total time: 325.63 ms [CPU], 313.127 ms [Wall]
+    4.17071 Gb used
+            Total time: 109.312 ms [CPU], 97.5392 ms [Wall]
+    4.17071 Gb used
+            Total time: 114.742 ms [CPU], 102.568 ms [Wall]
+    4.17071 Gb used
+            Total time: 114.518 ms [CPU], 102.254 ms [Wall]
+    4.17071 Gb used
+            Total time: 115.081 ms [CPU], 102.115 ms [Wall]
+    4.17071 Gb used
+            Total time: 129.898 ms [CPU], 116.184 ms [Wall]
+    4.17071 Gb used
+            Total time: 128.349 ms [CPU], 113.828 ms [Wall]
+    4.17071 Gb used
+            Total time: 124.688 ms [CPU], 108.628 ms [Wall]
+    4.17071 Gb used
+            Total time: 120.255 ms [CPU], 106.81 ms [Wall]
+    4.17071 Gb used
+            Total time: 126.802 ms [CPU], 111.974 ms [Wall]
+    4.17071 Gb used
+            Total time: 127.967 ms [CPU], 113.068 ms [Wall]
+    4.17071 Gb used
+            Total time: 121.375 ms [CPU], 106.309 ms [Wall]
+    4.17071 Gb used
+            Total time: 140.693 ms [CPU], 125.024 ms [Wall]
+    4.17071 Gb used
+            Total time: 141.719 ms [CPU], 123.447 ms [Wall]
+    4.17071 Gb used
+            Total time: 140.523 ms [CPU], 122.27 ms [Wall]
+    4.17187 Gb used
+            Total time: 120.786 ms [CPU], 105.929 ms [Wall]
+    4.17187 Gb used
+            Total time: 123.606 ms [CPU], 111.034 ms [Wall]
+    4.17187 Gb used
+            Total time: 117.952 ms [CPU], 104.767 ms [Wall]
+    4.17187 Gb used
+            Total time: 469.147 ms [CPU], 442.212 ms [Wall]
+    4.17187 Gb used
+            Total time: 245.513 ms [CPU], 217.508 ms [Wall]
+    4.17187 Gb used
+            Total time: 241.764 ms [CPU], 214.994 ms [Wall]
+    4.17187 Gb used
+            Total time: 249.566 ms [CPU], 219.017 ms [Wall]
+    4.17187 Gb used
+            Total time: 241.58 ms [CPU], 213.996 ms [Wall]
+    4.17187 Gb used
+            Total time: 242.038 ms [CPU], 215.22 ms [Wall]
+    4.17187 Gb used
+            Total time: 240.503 ms [CPU], 216.076 ms [Wall]
+    4.17187 Gb used
+            Total time: 242.669 ms [CPU], 215.963 ms [Wall]
+    4.17187 Gb used
+            Total time: 786.045 ms [CPU], 610.996 ms [Wall]
+    4.17187 Gb used
+            Total time: 564.955 ms [CPU], 387.137 ms [Wall]
+    4.17214 Gb used
+            Total time: 567.942 ms [CPU], 392.688 ms [Wall]
+    4.17214 Gb used
+            Total time: 573.541 ms [CPU], 393.855 ms [Wall]
+    4.17214 Gb used
+            Total time: 558.715 ms [CPU], 384.906 ms [Wall]
+    4.17214 Gb used
+            Total time: 561.636 ms [CPU], 386.946 ms [Wall]
+    4.17214 Gb used
+            Total time: 780.099 ms [CPU], 603.572 ms [Wall]
+    4.17214 Gb used
+            Total time: 792.195 ms [CPU], 535.809 ms [Wall]
+    4.1723 Gb used
+            Total time: 792.529 ms [CPU], 538.501 ms [Wall]
+    4.1723 Gb used
+            Total time: 790.587 ms [CPU], 536.351 ms [Wall]
+    4.1723 Gb used
+            Total time: 1.0104s [CPU], 750.526 ms [Wall]
+    4.1723 Gb used
+            Total time: 781.721 ms [CPU], 526.017 ms [Wall]
+    4.17456 Gb used
+            Total time: 782.624 ms [CPU], 529.971 ms [Wall]
+    4.17456 Gb used
+            Total time: 790.252 ms [CPU], 533.584 ms [Wall]
+    4.17456 Gb used
+            Total time: 1.28725s [CPU], 918.443 ms [Wall]
+    4.17456 Gb used
+            Total time: 1.05416s [CPU], 697.295 ms [Wall]
+    4.17456 Gb used
+            Total time: 1.0551s [CPU], 698.094 ms [Wall]
+    4.17456 Gb used
+            Total time: 1.28957s [CPU], 917.589 ms [Wall]
+    4.17456 Gb used
+            Total time: 1.05788s [CPU], 701.662 ms [Wall]
+    4.17456 Gb used
+            Total time: 1.05995s [CPU], 696.186 ms [Wall]
+    4.17456 Gb used
+            Total time: 1.26941s [CPU], 914.166 ms [Wall]
+    4.17456 Gb used
+            Total time: 1.05921s [CPU], 704.795 ms [Wall]
+    4.17456 Gb used
+            Total time: 1.37076s [CPU], 882.02 ms [Wall]
+    4.17456 Gb used
+            Total time: 1.60683s [CPU], 1.1166s [Wall]
+    4.17456 Gb used
+            Total time: 1.36766s [CPU], 882.349 ms [Wall]
+    4.17879 Gb used
+            Total time: 1.35547s [CPU], 875.066 ms [Wall]
+    4.17879 Gb used
+            Total time: 1.56427s [CPU], 1.07953s [Wall]
+    4.17879 Gb used
+            Total time: 1.30538s [CPU], 849.998 ms [Wall]
+    4.17879 Gb used
+            Total time: 1.49639s [CPU], 1.06149s [Wall]
+    4.17879 Gb used
+            Total time: 1.53344s [CPU], 995.898 ms [Wall]
+    4.18318 Gb used
+            Total time: 1.74803s [CPU], 1.23853s [Wall]
+    4.18318 Gb used
+            Total time: 1.4917s [CPU], 981.627 ms [Wall]
+    4.18318 Gb used
+            Total time: 1.47919s [CPU], 974.816 ms [Wall]
+    4.17871 Gb used
+            Total time: 1.72679s [CPU], 1.22543s [Wall]
+    4.17871 Gb used
+            Total time: 1.45307s [CPU], 962.154 ms [Wall]
+    4.17872 Gb used
+            Total time: 1.65715s [CPU], 1.18862s [Wall]
+    4.17872 Gb used
+            Total time: 1.67989s [CPU], 1.11943s [Wall]
+    4.19594 Gb used
+            Total time: 1.82375s [CPU], 1.31365s [Wall]
+    4.19594 Gb used
+            Total time: 1.63543s [CPU], 1.09606s [Wall]
+    4.19594 Gb used
+            Total time: 28.859 ms [CPU], 25.5074 ms [Wall]
+    4.19594 Gb used
+            Total time: 28.879 ms [CPU], 25.7192 ms [Wall]
+    4.19594 Gb used
+            Total time: 30.152 ms [CPU], 26.9823 ms [Wall]
+    4.19594 Gb used
+            Total time: 40.956 ms [CPU], 36.942 ms [Wall]
+    4.19594 Gb used
+            Total time: 41.335 ms [CPU], 36.8128 ms [Wall]
+    4.19594 Gb used
+            Total time: 43.938 ms [CPU], 39.2157 ms [Wall]
+    4.19594 Gb used
+            Total time: 43.469 ms [CPU], 38.9494 ms [Wall]
+    4.19594 Gb used
+            Total time: 43.764 ms [CPU], 39.5003 ms [Wall]
+    4.19594 Gb used
+            Total time: 44.199 ms [CPU], 39.1698 ms [Wall]
+    4.19594 Gb used
+            Total time: 40.71 ms [CPU], 36.4132 ms [Wall]
+    4.19594 Gb used
+            Total time: 43.533 ms [CPU], 38.9989 ms [Wall]
+    4.19594 Gb used
+            Total time: 55.683 ms [CPU], 49.5565 ms [Wall]
+    4.19594 Gb used
+            Total time: 55.398 ms [CPU], 49.3847 ms [Wall]
+    4.19594 Gb used
+            Total time: 59.691 ms [CPU], 53.7035 ms [Wall]
+    4.19594 Gb used
+            Total time: 59.557 ms [CPU], 53.0477 ms [Wall]
+    4.19594 Gb used
+            Total time: 58.927 ms [CPU], 52.4367 ms [Wall]
+    4.19594 Gb used
+            Total time: 59.616 ms [CPU], 53.9687 ms [Wall]
+    4.19594 Gb used
+            Total time: 60.477 ms [CPU], 53.4665 ms [Wall]
+    4.19594 Gb used
+            Total time: 73.25 ms [CPU], 65.7408 ms [Wall]
+    4.19594 Gb used
+            Total time: 72.294 ms [CPU], 63.7126 ms [Wall]
+    4.19594 Gb used
+            Total time: 69.863 ms [CPU], 62.0427 ms [Wall]
+    4.19594 Gb used
+            Total time: 74.688 ms [CPU], 66.0821 ms [Wall]
+    4.19594 Gb used
+            Total time: 69.121 ms [CPU], 61.6686 ms [Wall]
+    4.19594 Gb used
+            Total time: 71.723 ms [CPU], 64.1285 ms [Wall]
+    4.19594 Gb used
+            Total time: 286.085 ms [CPU], 276.329 ms [Wall]
+    4.19594 Gb used
+            Total time: 86.46 ms [CPU], 76.3798 ms [Wall]
+    4.19594 Gb used
+            Total time: 89.424 ms [CPU], 80.1689 ms [Wall]
+    4.19594 Gb used
+            Total time: 90.078 ms [CPU], 80.3187 ms [Wall]
+    4.19594 Gb used
+            Total time: 91.272 ms [CPU], 81.2351 ms [Wall]
+    4.19594 Gb used
+            Total time: 89.532 ms [CPU], 80.168 ms [Wall]
+    4.19594 Gb used
+            Total time: 83.974 ms [CPU], 74.2594 ms [Wall]
+    4.19594 Gb used
+            Total time: 84.073 ms [CPU], 74.172 ms [Wall]
+    4.19594 Gb used
+            Total time: 82.961 ms [CPU], 73.2817 ms [Wall]
+    4.19594 Gb used
+            Total time: 100.169 ms [CPU], 88.7487 ms [Wall]
+    4.19594 Gb used
+            Total time: 96.094 ms [CPU], 85.4411 ms [Wall]
+    4.19594 Gb used
+            Total time: 102.988 ms [CPU], 91.7021 ms [Wall]
+    4.19594 Gb used
+            Total time: 104.718 ms [CPU], 92.5469 ms [Wall]
+    4.19594 Gb used
+            Total time: 97.524 ms [CPU], 85.2946 ms [Wall]
+    4.19594 Gb used
+            Total time: 100.801 ms [CPU], 89.8198 ms [Wall]
+    4.19594 Gb used
+            Total time: 100.525 ms [CPU], 89.7746 ms [Wall]
+    4.19594 Gb used
+            Total time: 117.531 ms [CPU], 103.989 ms [Wall]
+    4.19594 Gb used
+            Total time: 117.984 ms [CPU], 103.682 ms [Wall]
+    4.19594 Gb used
+            Total time: 110.074 ms [CPU], 97.7397 ms [Wall]
+    4.19594 Gb used
+            Total time: 113.975 ms [CPU], 102.517 ms [Wall]
+    4.19594 Gb used
+            Total time: 116.027 ms [CPU], 102.782 ms [Wall]
+    4.19594 Gb used
+            Total time: 115.677 ms [CPU], 102.706 ms [Wall]
+    4.19594 Gb used
+            Total time: 114.298 ms [CPU], 100.562 ms [Wall]
+    4.19594 Gb used
+            Total time: 131.725 ms [CPU], 116.136 ms [Wall]
+    4.19594 Gb used
+            Total time: 350.593 ms [CPU], 334.033 ms [Wall]
+    4.19594 Gb used
+            Total time: 129.347 ms [CPU], 114.47 ms [Wall]
+    4.19594 Gb used
+            Total time: 1.07688s [CPU], 704.811 ms [Wall]
+    4.19955 Gb used
+            Total time: 1.44927s [CPU], 909.314 ms [Wall]
+    4.19955 Gb used
+            Total time: 1.66956s [CPU], 1.13655s [Wall]
+    4.19951 Gb used
+            Total time: 1.44889s [CPU], 914.901 ms [Wall]
+    4.19951 Gb used
+            Total time: 1.44657s [CPU], 912.52 ms [Wall]
+    4.19951 Gb used
+            Total time: 1.68173s [CPU], 1.14325s [Wall]
+    4.19989 Gb used
+            Total time: 1.4405s [CPU], 906.73 ms [Wall]
+    4.19989 Gb used
+            Total time: 1.44334s [CPU], 909.437 ms [Wall]
+    4.19991 Gb used
+            Total time: 2.12515s [CPU], 1.38795s [Wall]
+    4.20012 Gb used
+            Total time: 1.9076s [CPU], 1.17738s [Wall]
+    4.20012 Gb used
+            Total time: 2.07259s [CPU], 1.35025s [Wall]
+    4.20012 Gb used
+            Total time: 1.88611s [CPU], 1.14278s [Wall]
+    4.20012 Gb used
+            Total time: 2.09957s [CPU], 1.36393s [Wall]
+    4.2001 Gb used
+            Total time: 1.9001s [CPU], 1.16934s [Wall]
+    4.20009 Gb used
+            Total time: 2.12217s [CPU], 1.39359s [Wall]
+    4.21079 Gb used
+            Total time: 1.87092s [CPU], 1.14283s [Wall]
+    4.21079 Gb used
+            Total time: 2.4784s [CPU], 1.45468s [Wall]
+    4.21074 Gb used
+            Total time: 2.66904s [CPU], 1.64576s [Wall]
+    4.21652 Gb used
+            Total time: 2.67864s [CPU], 1.66873s [Wall]
+    4.21555 Gb used
+            Total time: 2.40999s [CPU], 1.42597s [Wall]
+    4.22162 Gb used
+            Total time: 2.39822s [CPU], 1.41494s [Wall]
+    4.22189 Gb used
+            Total time: 2.6315s [CPU], 1.63371s [Wall]
+    4.22266 Gb used
+            Total time: 2.38308s [CPU], 1.39908s [Wall]
+    4.22227 Gb used
+            Total time: 3.51641s [CPU], 2.15961s [Wall]
+    4.22439 Gb used
+            Total time: 3.3317s [CPU], 1.98075s [Wall]
+    4.22658 Gb used
+            Total time: 3.17782s [CPU], 1.84054s [Wall]
+    4.24034 Gb used
+            Total time: 3.31958s [CPU], 2.01706s [Wall]
+    4.24662 Gb used
+            Total time: 3.13896s [CPU], 1.84922s [Wall]
+    4.25193 Gb used
+            Total time: 3.22349s [CPU], 1.95276s [Wall]
+    4.2516 Gb used
+            Total time: 3.13405s [CPU], 1.86341s [Wall]
+    4.25099 Gb used
+            Total time: 4.04256s [CPU], 2.37215s [Wall]
+    4.25089 Gb used
+            Total time: 4.01207s [CPU], 2.39842s [Wall]
+    4.25116 Gb used
+            Total time: 3.43977s [CPU], 1.96804s [Wall]
+    4.26092 Gb used
+            Total time: 3.66414s [CPU], 2.30406s [Wall]
+    4.26117 Gb used
+            Total time: 3.29106s [CPU], 1.98023s [Wall]
+    4.26946 Gb used
+            Total time: 3.40074s [CPU], 2.09474s [Wall]
+    4.28039 Gb used
+            Total time: 3.12561s [CPU], 1.84059s [Wall]
+    4.28078 Gb used
+            Total time: 3.25803s [CPU], 2.02354s [Wall]
+    4.27978 Gb used
+            Total time: 4.16627s [CPU], 2.47327s [Wall]
+    4.28096 Gb used
+            Total time: 3.71916s [CPU], 2.14141s [Wall]
+    4.28168 Gb used
+            Total time: 3.61488s [CPU], 2.21033s [Wall]
+    4.28153 Gb used
+            Total time: 3.59466s [CPU], 2.24706s [Wall]
+    4.28155 Gb used
+            Total time: 3.56988s [CPU], 2.22807s [Wall]
+    4.28076 Gb used
+            Total time: 3.23888s [CPU], 1.93387s [Wall]
+    4.28076 Gb used
+            Total time: 3.44529s [CPU], 2.15594s [Wall]
+    4.27948 Gb used
+            Total time: 4.30634s [CPU], 2.60609s [Wall]
+    4.27926 Gb used
+            Total time: 3.89017s [CPU], 2.2671s [Wall]
+    4.27834 Gb used
+            Total time: 3.88426s [CPU], 2.40054s [Wall]
+    4.2914 Gb used
+            Total time: 3.73229s [CPU], 2.35884s [Wall]
+    4.29072 Gb used
+            Total time: 3.37737s [CPU], 2.05023s [Wall]
+    4.29094 Gb used
+            Total time: 87.318 ms [CPU], 77.7734 ms [Wall]
+    4.28989 Gb used
+            Total time: 110.354 ms [CPU], 99.428 ms [Wall]
+    4.28989 Gb used
+            Total time: 104.605 ms [CPU], 93.9583 ms [Wall]
+    4.28989 Gb used
+            Total time: 103.241 ms [CPU], 91.9735 ms [Wall]
+    4.28989 Gb used
+            Total time: 103.576 ms [CPU], 91.5298 ms [Wall]
+    4.28989 Gb used
+            Total time: 108.48 ms [CPU], 98.4388 ms [Wall]
+    4.28884 Gb used
+            Total time: 324.079 ms [CPU], 312.699 ms [Wall]
+    4.28884 Gb used
+            Total time: 109.057 ms [CPU], 97.7118 ms [Wall]
+    4.28884 Gb used
+            Total time: 128.429 ms [CPU], 115.306 ms [Wall]
+    4.28884 Gb used
+            Total time: 128.044 ms [CPU], 114.963 ms [Wall]
+    4.28886 Gb used
+            Total time: 127.039 ms [CPU], 114.056 ms [Wall]
+    4.28886 Gb used
+            Total time: 124.339 ms [CPU], 110.929 ms [Wall]
+    4.28886 Gb used
+            Total time: 126.795 ms [CPU], 114.903 ms [Wall]
+    4.28886 Gb used
+            Total time: 128.287 ms [CPU], 114.84 ms [Wall]
+    4.28886 Gb used
+            Total time: 121.2 ms [CPU], 108.175 ms [Wall]
+    4.28886 Gb used
+            Total time: 129.07 ms [CPU], 115.682 ms [Wall]
+    4.2893 Gb used
+            Total time: 150.127 ms [CPU], 135.11 ms [Wall]
+    4.2893 Gb used
+            Total time: 148.658 ms [CPU], 133.404 ms [Wall]
+    4.2893 Gb used
+            Total time: 146.688 ms [CPU], 132.722 ms [Wall]
+    4.2893 Gb used
+            Total time: 147.057 ms [CPU], 133.032 ms [Wall]
+    4.2893 Gb used
+            Total time: 146.649 ms [CPU], 132.426 ms [Wall]
+    4.29017 Gb used
+            Total time: 142.53 ms [CPU], 126.595 ms [Wall]
+    4.29017 Gb used
+            Total time: 144.763 ms [CPU], 130.64 ms [Wall]
+    4.29018 Gb used
+            Total time: 166.862 ms [CPU], 151.323 ms [Wall]
+    4.29018 Gb used
+            Total time: 161.411 ms [CPU], 146.114 ms [Wall]
+    4.29018 Gb used
+            Total time: 160.747 ms [CPU], 145.911 ms [Wall]
+    4.29018 Gb used
+            Total time: 373.708 ms [CPU], 358.414 ms [Wall]
+    4.29018 Gb used
+            Total time: 158.568 ms [CPU], 142.308 ms [Wall]
+    4.29018 Gb used
+            Total time: 157.622 ms [CPU], 141.83 ms [Wall]
+    4.29018 Gb used
+            Total time: 151.298 ms [CPU], 136.068 ms [Wall]
+    4.29018 Gb used
+            Total time: 180.563 ms [CPU], 162.622 ms [Wall]
+    4.29018 Gb used
+            Total time: 182.954 ms [CPU], 162.757 ms [Wall]
+    4.29018 Gb used
+            Total time: 174.621 ms [CPU], 157.8 ms [Wall]
+    4.29018 Gb used
+            Total time: 172.366 ms [CPU], 154.833 ms [Wall]
+    4.29018 Gb used
+            Total time: 165.28 ms [CPU], 147.028 ms [Wall]
+    4.29018 Gb used
+            Total time: 168.488 ms [CPU], 151.428 ms [Wall]
+    4.29018 Gb used
+            Total time: 172.156 ms [CPU], 154.62 ms [Wall]
+    4.29018 Gb used
+            Total time: 168.155 ms [CPU], 150.832 ms [Wall]
+    4.29018 Gb used
+            Total time: 191.123 ms [CPU], 172.385 ms [Wall]
+    4.29018 Gb used
+            Total time: 189.076 ms [CPU], 169.29 ms [Wall]
+    4.29018 Gb used
+            Total time: 405.615 ms [CPU], 386.597 ms [Wall]
+    4.29018 Gb used
+            Total time: 180.959 ms [CPU], 161.504 ms [Wall]
+    4.29018 Gb used
+            Total time: 183.577 ms [CPU], 163.969 ms [Wall]
+    4.29018 Gb used
+            Total time: 177.518 ms [CPU], 158.296 ms [Wall]
+    4.29018 Gb used
+            Total time: 176.105 ms [CPU], 157.892 ms [Wall]
+    4.29018 Gb used
+            Total time: 204.286 ms [CPU], 183.458 ms [Wall]
+    4.29018 Gb used
+            Total time: 199.459 ms [CPU], 178.706 ms [Wall]
+    4.29018 Gb used
+            Total time: 196.673 ms [CPU], 176.779 ms [Wall]
+    4.29018 Gb used
+            Total time: 193.122 ms [CPU], 172.627 ms [Wall]
+    4.29018 Gb used
+            Total time: 190.404 ms [CPU], 170.678 ms [Wall]
+    4.28733 Gb used
+            Total time: 800.036 ms [CPU], 539.033 ms [Wall]
+    4.28733 Gb used
+            Total time: 1.29001s [CPU], 921.548 ms [Wall]
+    4.28733 Gb used
+            Total time: 1.07111s [CPU], 701.227 ms [Wall]
+    4.28822 Gb used
+            Total time: 1.06913s [CPU], 698.425 ms [Wall]
+    4.28822 Gb used
+            Total time: 1.2923s [CPU], 924.138 ms [Wall]
+    4.28822 Gb used
+            Total time: 1.08904s [CPU], 705.884 ms [Wall]
+    4.28822 Gb used
+            Total time: 1.07372s [CPU], 703.744 ms [Wall]
+    4.28851 Gb used
+            Total time: 1.31774s [CPU], 946.691 ms [Wall]
+    4.28851 Gb used
+            Total time: 1.45626s [CPU], 920.798 ms [Wall]
+    4.28851 Gb used
+            Total time: 1.43939s [CPU], 911.165 ms [Wall]
+    4.29202 Gb used
+            Total time: 1.67514s [CPU], 1.12375s [Wall]
+    4.29207 Gb used
+            Total time: 1.46327s [CPU], 919.129 ms [Wall]
+    4.29192 Gb used
+            Total time: 1.67089s [CPU], 1.13896s [Wall]
+    4.29192 Gb used
+            Total time: 1.44208s [CPU], 913.604 ms [Wall]
+    4.29192 Gb used
+            Total time: 1.4376s [CPU], 911.728 ms [Wall]
+    4.29192 Gb used
+            Total time: 1.65293s [CPU], 1.13263s [Wall]
+    4.29192 Gb used
+            Total time: 1.88727s [CPU], 1.14767s [Wall]
+    4.29197 Gb used
+            Total time: 2.12629s [CPU], 1.3826s [Wall]
+    4.29187 Gb used
+            Total time: 1.72412s [CPU], 1.43812s [Wall]
+    4.28882 Gb used
+            Total time: 1.97295s [CPU], 1.23788s [Wall]
+    4.28882 Gb used
+            Total time: 2.07632s [CPU], 1.35123s [Wall]
+    4.29153 Gb used
+            Total time: 1.84879s [CPU], 1.12307s [Wall]
+    4.29154 Gb used
+            Total time: 2.12116s [CPU], 1.39338s [Wall]
+    4.2914 Gb used
+            Total time: 2.50991s [CPU], 1.47836s [Wall]
+    4.29801 Gb used
+            Total time: 2.64864s [CPU], 1.64173s [Wall]
+    4.29792 Gb used
+            Total time: 2.41943s [CPU], 1.41698s [Wall]
+    4.29792 Gb used
+            Total time: 2.7044s [CPU], 1.7058s [Wall]
+    4.2979 Gb used
+            Total time: 2.38706s [CPU], 1.39944s [Wall]
+    4.29757 Gb used
+            Total time: 2.62414s [CPU], 1.63611s [Wall]
+    4.29756 Gb used
+            Total time: 2.3645s [CPU], 1.39422s [Wall]
+    4.29788 Gb used
+            Total time: 3.32888s [CPU], 1.9786s [Wall]
+    4.29779 Gb used
+            Total time: 3.07663s [CPU], 1.73238s [Wall]
+    4.29779 Gb used
+            Total time: 3.42142s [CPU], 2.08012s [Wall]
+    4.30198 Gb used
+            Total time: 3.35266s [CPU], 2.03865s [Wall]
+    4.31278 Gb used
+            Total time: 2.99235s [CPU], 1.69797s [Wall]
+    4.31173 Gb used
+            Total time: 3.33391s [CPU], 2.02798s [Wall]
+    4.31174 Gb used
+            Total time: 2.9606s [CPU], 1.70776s [Wall]
+    4.31222 Gb used
+            Total time: 3.14529s [CPU], 1.91878s [Wall]
+    4.31951 Gb used
+            Total time: 3.76293s [CPU], 2.1132s [Wall]
+    4.3193 Gb used
+            Total time: 3.86112s [CPU], 2.30188s [Wall]
+    4.3269 Gb used
+            Total time: 3.58054s [CPU], 2.18354s [Wall]
+    4.32741 Gb used
+            Total time: 3.33091s [CPU], 1.98048s [Wall]
+    4.32577 Gb used
+            Total time: 3.5414s [CPU], 2.21618s [Wall]
+    4.32628 Gb used
+            Total time: 3.04565s [CPU], 1.8008s [Wall]
+    4.32826 Gb used
+            Total time: 3.40207s [CPU], 2.14441s [Wall]
+    4.32708 Gb used
+            Total time: 4.36386s [CPU], 2.64901s [Wall]
+    4.32642 Gb used
+            Total time: 3.78996s [CPU], 2.16488s [Wall]
+    4.32685 Gb used
+            Total time: 3.9223s [CPU], 2.44599s [Wall]
+    4.3276 Gb used
+            Total time: 3.35417s [CPU], 2.00913s [Wall]
+    4.32772 Gb used
+            Total time: 3.55421s [CPU], 2.24556s [Wall]
+    4.32477 Gb used
+            Total time: 71.658 ms [CPU], 63.9247 ms [Wall]
+    4.32372 Gb used
+            Total time: 90.904 ms [CPU], 82.3436 ms [Wall]
+    4.32372 Gb used
+            Total time: 90.643 ms [CPU], 81.4175 ms [Wall]
+    4.32372 Gb used
+            Total time: 92.366 ms [CPU], 82.3722 ms [Wall]
+    4.32372 Gb used
+            Total time: 92.963 ms [CPU], 82.6792 ms [Wall]
+    4.32372 Gb used
+            Total time: 92.051 ms [CPU], 82.7646 ms [Wall]
+    4.32372 Gb used
+            Total time: 91.356 ms [CPU], 81.941 ms [Wall]
+    4.32372 Gb used
+            Total time: 85.435 ms [CPU], 76.8737 ms [Wall]
+    4.32372 Gb used
+            Total time: 111.398 ms [CPU], 99.3541 ms [Wall]
+    4.32372 Gb used
+            Total time: 108.695 ms [CPU], 97.5415 ms [Wall]
+    4.32372 Gb used
+            Total time: 320.027 ms [CPU], 308.65 ms [Wall]
+    4.32372 Gb used
+            Total time: 109.026 ms [CPU], 98.2822 ms [Wall]
+    4.32372 Gb used
+            Total time: 106.158 ms [CPU], 95.78 ms [Wall]
+    4.32372 Gb used
+            Total time: 112.442 ms [CPU], 99.811 ms [Wall]
+    4.32372 Gb used
+            Total time: 109.676 ms [CPU], 98.0149 ms [Wall]
+    4.32372 Gb used
+            Total time: 107.949 ms [CPU], 96.2505 ms [Wall]
+    4.32372 Gb used
+            Total time: 125.82 ms [CPU], 113.766 ms [Wall]
+    4.32372 Gb used
+            Total time: 128.938 ms [CPU], 115.887 ms [Wall]
+    4.32372 Gb used
+            Total time: 128.006 ms [CPU], 114.8 ms [Wall]
+    4.32372 Gb used
+            Total time: 125.791 ms [CPU], 113.613 ms [Wall]
+    4.32372 Gb used
+            Total time: 128.982 ms [CPU], 115.606 ms [Wall]
+    4.32538 Gb used
+            Total time: 121.987 ms [CPU], 109.208 ms [Wall]
+    4.32541 Gb used
+            Total time: 126.482 ms [CPU], 113.601 ms [Wall]
+    4.32667 Gb used
+            Total time: 150 ms [CPU], 135.012 ms [Wall]
+    4.32667 Gb used
+            Total time: 148.104 ms [CPU], 134.039 ms [Wall]
+    4.32669 Gb used
+            Total time: 147.689 ms [CPU], 133.007 ms [Wall]
+    4.32713 Gb used
+            Total time: 140.056 ms [CPU], 126.801 ms [Wall]
+    4.32713 Gb used
+            Total time: 142.819 ms [CPU], 127.188 ms [Wall]
+    4.32713 Gb used
+            Total time: 141.195 ms [CPU], 127.022 ms [Wall]
+    4.32713 Gb used
+            Total time: 143.112 ms [CPU], 129.024 ms [Wall]
+    4.32713 Gb used
+            Total time: 167.647 ms [CPU], 151.33 ms [Wall]
+    4.32713 Gb used
+            Total time: 378.632 ms [CPU], 362.389 ms [Wall]
+    4.32713 Gb used
+            Total time: 163.083 ms [CPU], 147.921 ms [Wall]
+    4.32713 Gb used
+            Total time: 155.611 ms [CPU], 140.001 ms [Wall]
+    4.32713 Gb used
+            Total time: 159.269 ms [CPU], 143.275 ms [Wall]
+    4.32713 Gb used
+            Total time: 156.172 ms [CPU], 140.758 ms [Wall]
+    4.32713 Gb used
+            Total time: 156.906 ms [CPU], 140.975 ms [Wall]
+    4.32752 Gb used
+            Total time: 159.035 ms [CPU], 142.306 ms [Wall]
+    4.32752 Gb used
+            Total time: 175.158 ms [CPU], 157.911 ms [Wall]
+    4.32752 Gb used
+            Total time: 174.417 ms [CPU], 156.465 ms [Wall]
+    4.32752 Gb used
+            Total time: 174.965 ms [CPU], 157.053 ms [Wall]
+    4.32752 Gb used
+            Total time: 170.223 ms [CPU], 153.085 ms [Wall]
+    4.32752 Gb used
+            Total time: 166.284 ms [CPU], 147.81 ms [Wall]
+    4.32752 Gb used
+            Total time: 165.365 ms [CPU], 147.955 ms [Wall]
+    4.32752 Gb used
+            Total time: 161.584 ms [CPU], 145.905 ms [Wall]
+    4.32752 Gb used
+            Total time: 196.572 ms [CPU], 172.81 ms [Wall]
+    4.32752 Gb used
+            Total time: 405.306 ms [CPU], 387.005 ms [Wall]
+    4.32752 Gb used
+            Total time: 188.761 ms [CPU], 166.735 ms [Wall]
+    4.32752 Gb used
+            Total time: 184.158 ms [CPU], 164.959 ms [Wall]
+    4.32752 Gb used
+            Total time: 182.468 ms [CPU], 163.181 ms [Wall]
 
 
 
@@ -50,30 +848,23 @@ Get a detailed sweep of the behavior as element l0 approaches the source's radiu
 .. code-block:: default
 
 
-    import xcell
+    import xcell as xc
     import numpy as np
-    import Common
+    import Common_nongallery
     import matplotlib.pyplot as plt
     import pickle
     import os
     import matplotlib as mpl
 
-    fname = 'Singularity_sweep'
+    fname = "Singularity_sweep"
     # fname="Singularity"
-    generate = False
     animate = False
-    lite = True
-
-    if lite:
-        xcell.colors.useLightStyle()
 
     rElec = 1e-6
-    x0max = rElec*200
-    study0, _ = Common.makeSynthStudy(fname,
-                                      rElec=rElec,
-                                      xmax=x0max)
+    x0max = rElec * 200
+    study0, _ = Common_nongallery.makeSynthStudy(fname, rElec=rElec, xmax=x0max)
 
-    elRs = 1e-6*np.array([1, 5])
+    elRs = 1e-6 * np.array([1, 5])
     x0s = np.array([50, 500])
     ks = [0.2, 0.4]
 
@@ -85,133 +876,105 @@ Get a detailed sweep of the behavior as element l0 approaches the source's radiu
     #                      'lines.linewidth': 1,
     #                      'font.size': 10,
     #                     'figure.figsize': [3.25, 5]}):
-    with mpl.rc_context({'lines.markersize': 2.5,
-                         'lines.marker': 'o',
-                         'lines.linewidth': 1.5,
-                         'font.size': 10,
-                        'figure.figsize': [6.5, 5.5]}):
-
-        f2, axes = plt.subplots(3, sharex=True, gridspec_kw={
-                                'height_ratios': [4, 4, 2]})
+    with mpl.rc_context(
+        {
+            "lines.markersize": 2.5,
+            "lines.marker": "o",
+            "lines.linewidth": 1.5,
+            "font.size": 10,
+            "figure.figsize": [6.5, 5.5],
+        }
+    ):
+        f2, axes = plt.subplots(3, sharex=True, gridspec_kw={"height_ratios": [4, 4, 2]})
         [ax.grid(True) for ax in axes]
         ax = axes[0]
         ax2 = axes[1]
         a3 = axes[2]
 
-        ax.set_xscale('log')
-        ax.set_yscale('log')
+        ax.set_xscale("log")
+        ax.set_yscale("log")
         ax.xaxis.set_inverted(True)
-        ax2.set_ylabel('Error at source [V]')
-        a3.set_ylabel('Points in source')
+        ax2.set_ylabel("Error at source [V]")
+        a3.set_ylabel("Points in source")
         # a3.set_xlabel('Closest node to origin [m]')
 
-        a3.set_xlabel(r'Ratio of $\ell_0$ to source radius')
-        a3.set_yscale('log')
+        a3.set_xlabel(r"Ratio of $\ell_0$ to source radius")
+        a3.set_yscale("log")
 
-        ax.set_ylabel('Total error')
+        ax.set_ylabel("Total error")
 
         for xx in x0s:
             for rElec in elRs:
                 for k in ks:
-                    x0max = xx*rElec
-                    condStr = "r%dx%dk%d" % (int(rElec*1e6), xx, int(10*k))
-                    fbase = study0.studyPath+'/'+condStr
+                    x0max = xx * rElec
+                    condStr = "r%dx%dk%d" % (int(rElec * 1e6), xx, int(10 * k))
+                    fbase = study0.study_path + "/" + condStr
 
-                    if generate:
-                        if animate:
-                            plotter = xcell.Visualizers.ErrorGraph(plt.figure(),
-                                                                   study0)
-                            plotter.axes[0].xaxis.set_inverted(True)
+                    if animate:
+                        plotter = xc.visualizers.ErrorGraph(plt.figure(), study0)
+                        plotter.axes[0].xaxis.set_inverted(True)
 
-                        def boundaryFun(coord):
-                            r = np.linalg.norm(coord)
-                            val = rElec/(r*np.pi*4)
-                            return val
+                    def boundary_function(coord):
+                        r = np.linalg.norm(coord)
+                        val = rElec / (r * np.pi * 4)
+                        return val
 
-                        etots = []
-                        esrc = []
-                        nInSrc = []
-                        rclosest = []
-                        rrel = []
+                    etots = []
+                    esrc = []
+                    nInSrc = []
+                    rclosest = []
+                    rrel = []
 
-                        logmin = int(np.floor(np.log10(rElec/2)))-1
-                        logmax = logmin+2
+                    logmin = int(np.floor(np.log10(rElec / 2))) - 1
+                    logmax = logmin + 2
 
-                        for l0min in np.logspace(logmax, logmin):
-                            maxdepth = int(np.floor(np.log2(x0max/l0min)))
-                            xmax = l0min*2**maxdepth
-                            study, setup = Common.makeSynthStudy(fname,
-                                                                 xmax=xmax,
-                                                                 rElec=rElec)
+                    for min_l0 in np.logspace(logmax, logmin):
+                        max_depth = int(np.floor(np.log2(x0max / min_l0)))
+                        xmax = min_l0 * 2**max_depth
+                        study, setup = Common_nongallery.makeSynthStudy(fname, xmax=xmax, rElec=rElec)
 
-                            metric = xcell.makeExplicitLinearMetric(maxdepth+1,
-                                                                    k)
-                            # metric=xcell.makeBoundedLinearMetric(l0min,
-                            #                                       xmax/4,
-                            #                                       xmax)
-                            setup.makeAdaptiveGrid(metric, maxdepth)
+                        setup.quick_adaptive_grid(max_depth=max_depth, coefficent=k)
+                        setup.set_boundary_nodes(boundary_function)
 
-                            setup.finalizeMesh()
-                            setup.setBoundaryNodes(boundaryFun)
+                        v = setup.solve()
 
-                            v = setup.iterativeSolve()
-                            # setup.applyTransforms()
-
-                            setup.getMemUsage(True)
-                            setup.printTotalTime()
-
-                            if animate:
-                                plotter.addSimulationData(setup)
-                            emetric, evec, _, sortr, _ = setup.calculateErrors()
-                            etots.append(emetric)
-                            esrc.append(evec[sortr][0])
-                            nInSrc.append(sum(setup.nodeRoleTable == 2))
-
-                            r = np.linalg.norm(setup.mesh.nodeCoords, axis=1)
-
-                            # rclose=min(r[setup.nodeRoleTable!=2])
-                            rclose = min(r[r != 0])
-
-                            rclosest.append(rclose)
-                            rrel.append(rclose/rElec)
+                        setup.getMemUsage(True)
+                        setup.print_total_time()
 
                         if animate:
-                            ani = plotter.animateStudy(fbase, fps=10)
+                            plotter.add_simulation_data(setup)
+                        emetric, evec, _, sortr, _ = setup.calculate_errors()
+                        etots.append(emetric)
+                        esrc.append(evec[sortr][0])
+                        nInSrc.append(sum(setup.node_role_table == 2))
 
-                        pdata = {
-                            'condStr': condStr,
-                            'rclosest': rclosest,
-                            'rrel': rrel,
-                            'etots': etots,
-                            'esrc': esrc,
-                            'nInSrc': nInSrc}
+                        r = np.linalg.norm(setup.mesh.node_coords, axis=1)
 
-                        pickle.dump(pdata, open(fbase+'.pdata', 'wb'))
-                    else:
+                        rclose = min(r[r != 0])
 
-                        if os.path.exists(fbase+'.pdata'):
+                        rclosest.append(rclose)
+                        rrel.append(rclose / rElec)
 
-                            data = pickle.load(open(fbase+'.pdata', 'rb'))
-                            rrel = data['rrel']
-                            esrc = data['esrc']
-                            etots = data['etots']
-                            nInSrc = data['nInSrc']
-                        else:
-                            continue
+                    if animate:
+                        ani = plotter.animate_study(fbase, fps=10)
+
+                    pdata = {
+                        "condStr": condStr,
+                        "rclosest": rclosest,
+                        "rrel": rrel,
+                        "etots": etots,
+                        "esrc": esrc,
+                        "nInSrc": nInSrc,
+                    }
+
+                    pickle.dump(pdata, open(fbase + ".pdata", "wb"))
 
                     # totcol='tab:orange'
                     # pkcol='tab:red'
-                    totcol = 'k'
-                    pkcol = 'k'
+                    totcol = "k"
+                    pkcol = "k"
 
-                    # rplot=rclosest
                     rplot = np.array(rrel)
-
-                    # ax.scatter(rplot,etots,label=condStr)
-
-                    # ax2.scatter(rplot,esrc)
-
-                    # a3.scatter(rplot,nInSrc)
 
                     sortr = np.argsort(rplot)
                     ax.plot(rplot[sortr], np.array(etots)[sortr], label=condStr)
@@ -221,26 +984,18 @@ Get a detailed sweep of the behavior as element l0 approaches the source's radiu
                     a3.plot(rplot[sortr], np.array(nInSrc)[sortr])
 
 
-    # xcell.visualizers.outsideLegend(axis=ax)
-    # ax.legend()
-    xcell.util.loground(ax, which='y')
+    xc.util.loground(ax, which="y")
     f2.align_labels()
 
     for a in axes:
         y0, y1 = a.get_ylim()
-        a.vlines(np.pi, y0, y1, linestyle='dashed', color=xcell.colors.BASE)
-    # [a.vline(a.)]
-
-    figname = 'multiplot-fullwidth'
-    if lite:
-        figname += '-lite'
-
-    study0.savePlot(f2, figname)
+        a.vlines(np.pi, y0, y1, linestyle="dashed", color=xc.colors.BASE)
+        a.text(np.pi, y0, r"$\uparrow \ell_0 = \pi r_0$")
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.939 seconds)
+   **Total running time of the script:** (9 minutes 10.817 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_singularityEffect.py:

@@ -100,11 +100,11 @@ Example applications
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="A simplified view of the meshing process, electrical network generation, and solution">
+    <div class="sphx-glr-thumbcontainer" tooltip="A simplified view of the meshing process, electrical network generation,  and solution">
 
 .. only:: html
 
-  .. image:: /auto_examples/images/thumb/sphx_glr_plot_algorithmOverview_thumb.png
+  .. image:: /auto_examples/images/thumb/sphx_glr_plot_algorithmOverview_thumb.gif
     :alt:
 
   :ref:`sphx_glr_auto_examples_plot_algorithmOverview.py`
@@ -112,23 +112,6 @@ Example applications
 .. raw:: html
 
       <div class="sphx-glr-thumbnail-title">Simulation overview</div>
-    </div>
-
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="Common resources for simulations.">
-
-.. only:: html
-
-  .. image:: /auto_examples/images/thumb/sphx_glr_Common_thumb.png
-    :alt:
-
-  :ref:`sphx_glr_auto_examples_Common.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">Common resources for simulations.</div>
     </div>
 
 
@@ -146,7 +129,6 @@ Example applications
    /auto_examples/plot_comparisons
    /auto_examples/plot_singularityEffect
    /auto_examples/plot_algorithmOverview
-   /auto_examples/Common
 
 Geometry
 =================
@@ -196,6 +178,37 @@ Interfacing with externally-defined geometries.
 
     </div>
 
+NEURON
+========
+Interfacing with compartmental models.
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Plot LFP from toy neurons">
+
+.. only:: html
+
+  .. image:: /auto_examples/NEURON/images/thumb/sphx_glr_plot_LFP_thumb.gif
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_NEURON_plot_LFP.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">LFP estimation with dynamic remeshing</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
 
 .. toctree::
    :hidden:
@@ -203,6 +216,7 @@ Interfacing with externally-defined geometries.
 
 
    /auto_examples/Geometry/index.rst
+   /auto_examples/NEURON/index.rst
 
 
 .. only:: html

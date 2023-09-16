@@ -23,13 +23,15 @@ Single timestep
 
 Illustrates setting up a simulation and solving at a single time step
 
-.. GENERATED FROM PYTHON SOURCE LINES 10-16
+.. GENERATED FROM PYTHON SOURCE LINES 10-18
 
 .. code-block:: default
 
 
+    from platform import release
+    import re
     import numpy as np
-    import xcell
+    import xcell as xc
     import matplotlib.pyplot as plt
 
 
@@ -40,47 +42,50 @@ Illustrates setting up a simulation and solving at a single time step
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 17-18
+.. GENERATED FROM PYTHON SOURCE LINES 19-22
 
-Simulation preferences
+Set simulation preferences
+--------------------------------
 
-.. GENERATED FROM PYTHON SOURCE LINES 18-39
+
+.. GENERATED FROM PYTHON SOURCE LINES 22-42
 
 .. code-block:: default
 
 
     # Misc parameters
-    xcell.colors.useLightStyle()
-    studyPath = '/dev/null'
+    study_path = "/dev/null"
 
     # options = uniform, adaptive
-    meshtype = 'adaptive'
+    meshtype = "adaptive"
 
-    maxdepth = 10  # Maximum successive splits allowed for octree mesh
+    max_depth = 10  # Maximum successive splits allowed for octree mesh
     nX = 10  # Number of elements along an axis for a uniform mesh
 
     # options: Admittance, Face, FEM
-    elementType = 'Admittance'
+    element_type = "Admittance"
     dual = True
     regularize = False
 
     # options: analytical, ground
-    boundaryType = 'ground'
+    boundaryType = "ground"
 
-    fixedVoltageSource = False  # otherwise, simulate current injection
-
-
+    fixedSource = False  # otherwise, simulate current injection
 
 
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 40-41
 
-Setup simulation
 
-.. GENERATED FROM PYTHON SOURCE LINES 41-100
+.. GENERATED FROM PYTHON SOURCE LINES 43-46
+
+Run simulation
+--------------------
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 46-111
 
 .. code-block:: default
 
@@ -91,57 +96,63 @@ Setup simulation
 
     sigma = np.ones(3)
 
-    bbox = np.append(-xmax*np.ones(3), xmax*np.ones(3))
-    study = xcell.SimStudy(studyPath, bbox)
+    bbox = np.append(-xmax * np.ones(3), xmax * np.ones(3))
+    study = xc.Study(study_path, bbox)
 
-    setup = study.newSimulation()
-    setup.mesh.elementType = elementType
+    setup = study.new_simulation()
+    setup.mesh.element_type = element_type
     setup.meshtype = meshtype
 
-    if fixedVoltageSource:
-        setup.addVoltageSource(xcell.signals.Signal(1), np.zeros(3), rElec)
-        srcMag = 1.
-        srcType = 'Voltage'
-    else:
-        srcMag = 4*np.pi*sigma[0]*rElec
-        setup.addCurrentSource(xcell.signals.Signal(srcMag), np.zeros(3), rElec)
-        srcType = 'Current'
+    geo = xc.geometry.Sphere(center=np.zeros(3), radius=rElec)
 
-    if meshtype == 'uniform':
-        setup.makeUniformGrid(nX)
-        print('uniform, %d per axis' % nX)
+    if fixedSource:
+        setup.add_voltage_source(xc.signals.Signal(1), geo)
+        srcMag = 1.0
+        srcType = "Voltage"
     else:
-        setup.makeAdaptiveGrid(refPts=np.zeros((1, 3)),
-                               maxdepth=np.array(maxdepth, ndmin=1),
-                               minl0Function=xcell.generalMetric,
-                               # coefs=np.array(2**(-0.2*maxdepth), ndmin=1))
-                               coefs=np.array(0.2, ndmin=1))
+        srcMag = 4 * np.pi * sigma[0] * rElec
+        setup.add_current_source(xc.signals.Signal(srcMag), geo)
+        srcType = "Current"
 
-    if boundaryType == 'analytical':
-        boundaryFun = None
+    if meshtype == "uniform":
+        setup.make_uniform_grid(nX)
+        print("uniform, %d per axis" % nX)
     else:
-        def boundaryFun(coord):
+        setup.make_adaptive_grid(
+            ref_pts=np.zeros((1, 3)),
+            max_depth=np.array(max_depth, ndmin=1),
+            min_l0_function=xc.general_metric,
+            # coefs=np.array(2**(-0.2*max_depth), ndmin=1))
+            coefs=np.array(0.2, ndmin=1),
+        )
+
+    if boundaryType == "analytical":
+        boundary_function = None
+    else:
+
+        def boundary_function(coord):
             r = np.linalg.norm(coord)
-            return rElec/(r*np.pi*4)
+            return rElec / (r * np.pi * 4)
 
 
-    setup.finalizeMesh()
+    setup.finalize_mesh()
 
-    setup.setBoundaryNodes(boundaryFun, sigma=1)
+    setup.set_boundary_nodes(boundary_function, sigma=1)
 
-    v = setup.iterativeSolve(None, 1e-9)
-    setup.applyTransforms()
+    v = setup.solve()
+    setup.apply_transforms()
 
 
     setup.getMemUsage(True)
-    setup.printTotalTime()
+    setup.print_total_time()
 
-    setup.startTiming('Estimate error')
+    setup.start_timing("Estimate error")
     # srcMag,srcType,showPlots=showGraphs)
-    errEst, arErr, _, _, _ = setup.calculateErrors()
-    print('error: %g' % errEst)
-    setup.logTime()
+    errEst, arErr, _, _, _ = setup.calculate_errors()
+    print("error: %g" % errEst)
+    setup.log_time()
 
+    bnd = setup.mesh.bbox[[0, 3, 2, 4]]
 
 
 
@@ -151,54 +162,70 @@ Setup simulation
 
  .. code-block:: none
 
-    898.777 Mb used
-            Total time: 12.6203s [CPU], 5.42217s [Wall]
+    927.842 Mb used
+            Total time: 2.15392s [CPU], 1.45783s [Wall]
     error: 0.217408
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 101-105
-
-SliceViewer
-----------------------
-Interactive slice viewer (use arrow keys to change location within ipython session)
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 105-108
+.. GENERATED FROM PYTHON SOURCE LINES 113-125
 
 .. code-block:: default
 
 
-    sv = xcell.visualizers.SliceViewer(axis=None, sim=setup)
+    ax = plt.figure().add_subplot()
+    xc.visualizers.format_xy_axis(ax, bnd)
+    arr = xc.visualizers.resample_plane(ax, setup)
+
+    colormap, color_norm = xc.visualizers.get_cmap(arr.ravel(), forceBipolar=True)
+    xc.visualizers.patchwork_image(ax, [arr], colormap, color_norm, extent=bnd)
+
+    _, _, edge_points = setup.get_elements_in_plane()
+    xc.visualizers.show_2d_edges(ax, edge_points)
+
 
 
 
 
 .. image-sg:: /auto_examples/images/sphx_glr_plot_singleStep_001.png
-   :alt: z=0
+   :alt: plot singleStep
    :srcset: /auto_examples/images/sphx_glr_plot_singleStep_001.png
    :class: sphx-glr-single-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+
+    <matplotlib.collections.LineCollection object at 0x2ccf7af10>
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 109-110
+.. GENERATED FROM PYTHON SOURCE LINES 126-127
 
-2d image
+TOPOLOGY/connectivity
 
-.. GENERATED FROM PYTHON SOURCE LINES 110-118
+.. GENERATED FROM PYTHON SOURCE LINES 127-143
 
 .. code-block:: default
 
-    bnd = setup.mesh.bbox[[0, 3, 2, 4]]
+    ax = xc.visualizers.show_mesh(setup)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_zticks([])
+    ghost = (0.0, 0.0, 0.0, 0.0)
+    ax.xaxis.set_pane_color(ghost)
+    ax.yaxis.set_pane_color(ghost)
+    ax.zaxis.set_pane_color(ghost)
 
-    arr, _ = setup.getValuesInPlane()
-    cMap, cNorm = xcell.visualizers.getCmap(setup.nodeVoltages, forceBipolar=True)
-    xcell.visualizers.patchworkImage(plt.figure().gca(),
-                                     arr, cMap, cNorm,
-                                     extent=bnd)
+
+    xc.visualizers.show_3d_edges(ax, setup.mesh.node_coords, setup.edges, setup.conductances)
+
+    bnodes = setup.mesh.get_boundary_nodes()
+    xc.visualizers.show_3d_nodes(ax, setup.mesh.node_coords[bnodes], node_values=np.ones_like(bnodes), colors="r")
+
 
 
 
@@ -214,74 +241,53 @@ Interactive slice viewer (use arrow keys to change location within ipython sessi
  .. code-block:: none
 
 
-    [<matplotlib.image.AxesImage object at 0x7f9ff04ea130>, <matplotlib.image.AxesImage object at 0x7f9ff04ea730>, <matplotlib.image.AxesImage object at 0x7f9ff04eac70>, <matplotlib.image.AxesImage object at 0x7f9ff04ea490>, <matplotlib.image.AxesImage object at 0x7f9ff04ead30>, <matplotlib.image.AxesImage object at 0x7f9ff04ee070>, <matplotlib.image.AxesImage object at 0x7f9ff04eea30>]
+    <mpl_toolkits.mplot3d.art3d.Path3DCollection object at 0x2ccfde910>
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 120-134
+.. GENERATED FROM PYTHON SOURCE LINES 144-147
+
+SliceSet
+--------------------
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 147-153
 
 .. code-block:: default
 
 
-    ax = plt.figure().add_subplot()
-    xcell.visualizers.formatXYAxis(ax, bnd)
-    arr = xcell.visualizers.resamplePlane(ax, setup)
-
-    cMap, cNorm = xcell.visualizers.getCmap(arr.ravel(), forceBipolar=True)
-    xcell.visualizers.patchworkImage(ax,
-                                     [arr], cMap, cNorm,
-                                     extent=bnd)
-
-    _, _, edgePoints = setup.getElementsInPlane()
-    xcell.visualizers.showEdges2d(ax, edgePoints)
-
+    # sphinx_gallery_thumbnail_number = 4
+    img = xc.visualizers.SliceSet(plt.figure(), study)
+    img.add_simulation_data(setup, append=True)
+    _ = img.get_artists(0)
 
 
 
 
 .. image-sg:: /auto_examples/images/sphx_glr_plot_singleStep_003.png
-   :alt: plot singleStep
+   :alt: Simulated potential [V], Absolute error [V]
    :srcset: /auto_examples/images/sphx_glr_plot_singleStep_003.png
    :class: sphx-glr-single-img
 
 
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-
-    <matplotlib.collections.LineCollection object at 0x7f9ff05603d0>
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 135-136
+.. GENERATED FROM PYTHON SOURCE LINES 154-157
 
-TOPOLOGY/connectivity
+ErrorGraph
+------------------
 
-.. GENERATED FROM PYTHON SOURCE LINES 136-158
+
+.. GENERATED FROM PYTHON SOURCE LINES 157-164
 
 .. code-block:: default
 
-    ax = xcell.visualizers.showMesh(setup)
-    ax.set_xticks([])
-    ax.set_yticks([])
-    ax.set_zticks([])
-    ghost = (.0, .0, .0, 0.0)
-    ax.xaxis.set_pane_color(ghost)
-    ax.yaxis.set_pane_color(ghost)
-    ax.zaxis.set_pane_color(ghost)
 
-
-    xcell.visualizers.showEdges(ax,
-                                setup.mesh.nodeCoords,
-                                setup.edges,
-                                setup.conductances)
-
-    bnodes = setup.mesh.getBoundaryNodes()
-    xcell.visualizers.showNodes3d(ax,
-                                  setup.mesh.nodeCoords[bnodes],
-                                  nodeVals=np.ones_like(bnodes),
-                                  colors='r')
+    ptr = xc.visualizers.ErrorGraph(plt.figure(), study)
+    ptr.prefs["universalPts"] = True
+    pdata = ptr.add_simulation_data(setup)
+    _ = ptr.get_artists(0, pdata)
 
 
 
@@ -293,120 +299,39 @@ TOPOLOGY/connectivity
    :class: sphx-glr-single-img
 
 
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-
-    <mpl_toolkits.mplot3d.art3d.Path3DCollection object at 0x7f9ff0499ee0>
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 159-162
-
-SliceSet
---------------------
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 162-168
-
-.. code-block:: default
-
-
-    # sphinx_gallery_thumbnail_number = 5
-    img = xcell.visualizers.SliceSet(plt.figure(), study)
-    img.addSimulationData(setup, append=True)
-    img.getArtists(0)
-
-
-
-
-.. image-sg:: /auto_examples/images/sphx_glr_plot_singleStep_005.png
-   :alt: Simulated potential [V], Absolute error [V]
-   :srcset: /auto_examples/images/sphx_glr_plot_singleStep_005.png
-   :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-
-    [<matplotlib.image.AxesImage object at 0x7f9f9f3fd910>, <matplotlib.image.AxesImage object at 0x7f9f9f3fdc10>, <matplotlib.image.AxesImage object at 0x7f9f9f3fdeb0>, <matplotlib.image.AxesImage object at 0x7f9f7f38e1f0>, <matplotlib.collections.LineCollection object at 0x7f9f7f38e250>, <matplotlib.collections.LineCollection object at 0x7f9fb5da8fa0>, <matplotlib.collections.LineCollection object at 0x7f9fb5dba4f0>, <matplotlib.collections.LineCollection object at 0x7f9fb5a18460>, <matplotlib.collections.LineCollection object at 0x7f9fb5a23910>, <matplotlib.collections.LineCollection object at 0x7f9fb5681880>, <matplotlib.collections.LineCollection object at 0x7f9fb568bd30>, <matplotlib.collections.LineCollection object at 0x7f9fb536aca0>]
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 169-172
-
-ErrorGraph
-------------------
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 172-179
-
-.. code-block:: default
-
-
-    ptr = xcell.visualizers.ErrorGraph(plt.figure(), study)
-    ptr.prefs['universalPts'] = True
-    pdata = ptr.addSimulationData(setup)
-    ptr.getArtists(0, pdata)
-
-
-
-
-
-.. image-sg:: /auto_examples/images/sphx_glr_plot_singleStep_006.png
-   :alt: plot singleStep
-   :srcset: /auto_examples/images/sphx_glr_plot_singleStep_006.png
-   :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-
-    [<matplotlib.collections.PathCollection object at 0x7f9fb51d8550>, <matplotlib.lines.Line2D object at 0x7f9fb51e6340>, <matplotlib.collections.PathCollection object at 0x7f9fb51e6fd0>, <matplotlib.collections.PolyCollection object at 0x7f9fb51e6f40>]
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 180-183
+.. GENERATED FROM PYTHON SOURCE LINES 165-168
 
 LogError
 -----------
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 183-187
+.. GENERATED FROM PYTHON SOURCE LINES 168-172
 
 .. code-block:: default
 
 
-    P = xcell.visualizers.LogError(None, study)
-    P.addSimulationData(setup, True)
-    P.getArtists(0)
+    P = xc.visualizers.LogError(None, study)
+    P.add_simulation_data(setup, True)
+    _ = P.get_artists(0)
 
 
 
-.. image-sg:: /auto_examples/images/sphx_glr_plot_singleStep_007.png
+.. image-sg:: /auto_examples/images/sphx_glr_plot_singleStep_005.png
    :alt: plot singleStep
-   :srcset: /auto_examples/images/sphx_glr_plot_singleStep_007.png
+   :srcset: /auto_examples/images/sphx_glr_plot_singleStep_005.png
    :class: sphx-glr-single-img
 
 
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-
-    [<matplotlib.lines.Line2D object at 0x7f9fb5070310>, <matplotlib.lines.Line2D object at 0x7f9fb5070490>, Text(0.5, 0.95, 'FVU=0.016, int1=0.22, 587 points in source')]
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  37.492 seconds)
+   **Total running time of the script:** (1 minutes 7.762 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_singleStep.py:

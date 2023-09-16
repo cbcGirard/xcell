@@ -23,11 +23,11 @@ DBS Electrode
 
 Programmatically generate micro-macro electrode array
 
-.. GENERATED FROM PYTHON SOURCE LINES 10-143
+.. GENERATED FROM PYTHON SOURCE LINES 10-136
 
 .. code-block:: default
 
-    import xcell
+    import xcell as xc
     import numpy as np
     from scipy.spatial.transform import Rotation
     import pyvista as pv
@@ -36,13 +36,10 @@ Programmatically generate micro-macro electrode array
     from matplotlib.colors import to_rgba_array
 
     composite = pv.MultiBlock()
-    regions = xcell.io.Regions()
+    regions = xc.io.Regions()
 
     # bodies, misc, oriens, and hilus
-    sigmas = 1/np.array([6.429,
-                         3.215,
-                         2.879,
-                         2.605])
+    sigmas = 1 / np.array([6.429, 3.215, 2.879, 2.605])
 
     # latest from https://github.com/Head-Conductivity/Human-Head-Conductivity
     sigma_0 = 0.3841
@@ -63,46 +60,46 @@ Programmatically generate micro-macro electrode array
     microRows = 5
     microCols = 3
 
-    orientation = np.array([1., 0., 0.])
+    orientation = np.array([1.0, 0.0, 0.0])
 
-    tipPt = 1e-3*np.array([-5., 2., 0])
+    tipPt = 1e-3 * np.array([-5.0, 2.0, 0])
     bodyL = 0.05
 
     tpulse = 1e-3  # per phase
     ipulse = 150e-6
-    vpulse = 1.
+    vpulse = 1.0
 
 
-    hippo = pv.read('./Geometry/slice77600_ext10000.vtk')
+    hippo = pv.read("./Geometry/slice77600_ext10000.vtk")
     brainXform = -np.array(hippo.center)
     hippo.translate(brainXform, inplace=True)
 
-    files = ['bodies', 'misc', 'oriens', 'hilus']
+    files = ["bodies", "misc", "oriens", "hilus"]
 
     for f, sig in zip(files, sigmas):
-        region = pv.read('Geometry/'+f+'.stl').translate(brainXform)
-        region.cell_data['sigma'] = sig
-        regions.addMesh(region, 'Conductors')
+        region = pv.read("Geometry/" + f + ".stl").translate(brainXform)
+        region.cell_data["sigma"] = sig
+        regions.addMesh(region, "Conductors")
         composite.append(region, name=f)
 
     # xdom = max(np.array(hippo.bounds[1::2])-np.array(hippo.bounds[::2]))
-    xdom = pitchMacro*(nmacro+1)
+    xdom = pitchMacro * (nmacro + 1)
 
 
     bbox = xdom * np.concatenate((-np.ones(3), np.ones(3)))
 
     # set smallest element to microelectrode radius or smaller
-    maxdepth = int(np.log2(xdom / dmicro)) + 2
+    max_depth = int(np.log2(xdom / dmicro)) + 2
 
-    sim = xcell.Simulation('test', bbox=bbox)
+    sim = xc.Simulation("test", bbox=bbox)
 
 
-    body = xcell.geometry.Cylinder(
-        tipPt+bodyL*orientation/2, radius=dbody/2, length=bodyL, axis=orientation)
+    body = xc.geometry.Cylinder(tipPt + bodyL * orientation / 2, radius=dbody / 2,
+                                 length=bodyL, axis=orientation)
 
     # bugfix to force detection of points inside cylindrical body
-    bodyMesh = xcell.geometry.toPV(body)
-    regions.addMesh(bodyMesh, category='Insulators')
+    bodyMesh = xc.geometry.to_pyvista(body)
+    regions.addMesh(bodyMesh, category="Insulators")
 
     # bodyMesh = pv.Cylinder(center=body.center,
     # direction=body.axis,
@@ -113,49 +110,45 @@ Programmatically generate micro-macro electrode array
     microElectrodes = []
     elecMeshes = []
 
-    refPts = []
+    ref_pts = []
     refSizes = []
 
     # Generate macroelectrodes (bands)
     for ii in range(nmacro):
-        pt = tipPt+(ii+1)*pitchMacro*orientation
+        pt = tipPt + (ii + 1) * pitchMacro * orientation
 
-        geo = xcell.geometry.Cylinder(pt, dbody/2, wmacro, orientation)
+        geo = xc.geometry.Cylinder(pt, dbody / 2, wmacro, orientation)
 
-        sim.addCurrentSource(xcell.signals.Signal(0),
-                             coords=pt,
-                             geometry=geo)
+        sim.add_current_source(xc.signals.Signal(0), geometry=geo)
 
         macroElectrodes.append(geo)
 
-        refPts.append(geo.center)
+        ref_pts.append(geo.center)
 
-        regions.addMesh(xcell.geometry.toPV(geo), category='Electrodes')
+        regions.addMesh(xc.geometry.to_pyvista(geo), category="Electrodes")
 
 
     # Generate microelectrodes
     for ii in range(microRows):
-        rowpt = tipPt+(ii+.5)*pitchMacro*orientation
+        rowpt = tipPt + (ii + 0.5) * pitchMacro * orientation
 
         for jj in range(microCols):
-            rot = Rotation.from_rotvec(orientation*2*jj/microCols*np.pi)
+            rot = Rotation.from_rotvec(orientation * 2 * jj / microCols * np.pi)
 
-            microOrientation = rot.apply(0.5*dbody*np.array([0., 0., 1.]))
+            microOrientation = rot.apply(0.5 * dbody * np.array([0.0, 0.0, 1.0]))
 
-            geo = xcell.geometry.Disk(
-                center=rowpt+microOrientation,
-                radius=dmicro/2, axis=microOrientation,
-                tol=0.5)
+            geo = xc.geometry.Disk(center=rowpt + microOrientation, 
+                                   radius=dmicro / 2, axis=microOrientation, 
+                                   tol=0.5)
 
-            sim.addCurrentSource(xcell.signals.Signal(0), coords=geo.center,
-                                 geometry=geo)
+            sim.add_current_source(xc.signals.Signal(0), geometry=geo)
 
             microElectrodes.append(geo)
 
-            refPts.append(geo.center)
-            regions.addMesh(xcell.geometry.toPV(geo), category='Electrodes')
+            ref_pts.append(geo.center)
+            regions.addMesh(xc.geometry.to_pyvista(geo), category="Electrodes")
 
-    p = xcell.visualizers.PVScene()
+    p = xc.visualizers.PVScene()
     p.setup(regions, opacity=0.5)
     p.show()
 
@@ -172,25 +165,25 @@ Programmatically generate micro-macro electrode array
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 144-160
+.. GENERATED FROM PYTHON SOURCE LINES 137-153
 
 .. code-block:: default
 
-    sim.quickAdaptiveGrid(maxdepth)
+    sim.quick_adaptive_grid(max_depth)
 
-    vmesh = xcell.io.toVTK(sim.mesh)
-    vmesh.cell_data['sigma'] = sigma_0
+    vmesh = xc.io.to_vtk(sim.mesh)
+    vmesh.cell_data["sigma"] = sigma_0
 
-    regions.assignSigma(sim.mesh, defaultSigma=sigma_0)
+    regions.assign_sigma(sim.mesh, default_sigma=sigma_0)
 
-    sim.currentSources[nmacro+1].value.value = 150e-6
+    sim.current_sources[nmacro + 1].value = 150e-6
 
 
-    sim.setBoundaryNodes()
-    v = sim.iterativeSolve()
-    vmesh.point_data['voltage'] = v
+    sim.set_boundary_nodes()
+    v = sim.solve()
+    vmesh.point_data["voltage"] = v
 
-    vmesh.set_active_scalars('voltage')
+    vmesh.set_active_scalars("voltage")
 
 
 
@@ -205,25 +198,24 @@ Programmatically generate micro-macro electrode array
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 161-176
+.. GENERATED FROM PYTHON SOURCE LINES 154-168
 
 .. code-block:: default
 
 
-    p = xcell.visualizers.PVScene()
+    p = xc.visualizers.PVScene()
     p.setup(regions)  # , mesh=vmesh, simData='voltage')
     # p.camera.tight(padding=0.1)
-    p.add_mesh(vmesh.slice(normal='z'), show_edges=True,
-               cmap=xcell.colors.CM_BIPOLAR)
+    p.add_mesh(vmesh.slice(normal="z"), show_edges=True, cmap=xc.colors.CM_BIPOLAR)
     cambox = np.array(hippo.bounds)
-    cambox[4:] = 0.
+    cambox[4:] = 0.0
     # p.reset_camera(bounds=cambox)
     p.view_xy()
     p.show()
     # sphinx_gallery_thumbnail_number = 3
 
     # Save outputs
-    regions.save('Geometry/composite.vtm')
+    regions.save("Geometry/composite.vtm")
 
 
 
@@ -239,7 +231,7 @@ Programmatically generate micro-macro electrode array
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  41.202 seconds)
+   **Total running time of the script:** (0 minutes 51.256 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_dbs_probe.py:

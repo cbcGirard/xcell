@@ -1,154 +1,428 @@
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
-<head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>xcell.xCell &mdash; xcell  documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/xcell.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/sg_gallery.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/sg_gallery-binder.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/sg_gallery-dataframe.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/sg_gallery-rendered-html.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+
+<html lang="en" data-theme="auto">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>xcell.xCell &#8212; xcell  documentation</title>
   
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
-    <script src="../../../_static/js/theme.js"></script>
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "auto";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/xcell.css?v=bd5ed93c" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script src="../../../_static/documentation_options.js?v=8a448e45"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'autoapi/xcell/xCell/index';</script>
     <link rel="index" title="Index" href="../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../search.html" /> 
-</head>
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="auto">
 
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search"  style="background: #990000" >
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
 
-          
-          
-          <a href="../../../index.html">
-            
-              <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
-          </a>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Purpose</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../intro.html#installing">Installing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../intro.html#citation">Citation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../auto_examples/index.html">Example applications</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../auto_examples/index.html#geometry">Geometry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../index.html">API Reference</a></li>
-</ul>
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/logo.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../../../_static/logo.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+    <p class="title logo__title">xcell</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../intro.html">
+                        Introduction
+                      </a>
+                    </li>
+                
 
-        </div>
-      </div>
-    </nav>
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../auto_examples/index.html">
+                        Example applications
+                      </a>
+                    </li>
+                
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #990000" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">xcell</a>
-      </nav>
-
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.xCell</span></code></li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="../../../_sources/autoapi/xcell/xCell/index.rst.txt" rel="nofollow"> View page source</a>
-      </li>
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
   </ul>
-  <hr/>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../intro.html">
+                        Introduction
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../auto_examples/index.html">
+                        Example applications
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../AAnimation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.AAnimation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_version/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell._version</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../colors/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.colors</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dummy/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.dummy</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.elements</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fem/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.fem</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../geometry/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.geometry</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../io/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.io</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../meshes/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.meshes</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../misc/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.misc</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nrnutil/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.nrnutil</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../signals/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.signals</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../util/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.util</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../visualizers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.visualizers</span></code></a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.xCell</span></code></a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.xCell</span></code></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
   <section id="module-xcell.xCell">
-<span id="xcell-xcell"></span><h1><a class="reference internal" href="#module-xcell.xCell" title="xcell.xCell"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.xCell</span></code></a><a class="headerlink" href="#module-xcell.xCell" title="Permalink to this heading"></a></h1>
+<span id="xcell-xcell"></span><h1><a class="reference internal" href="#module-xcell.xCell" title="xcell.xCell"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.xCell</span></code></a><a class="headerlink" href="#module-xcell.xCell" title="Link to this heading">#</a></h1>
 <p>Main API for handling extracellular simulations.</p>
 <section id="module-contents">
-<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading"></a></h2>
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">#</a></h2>
 <section id="classes">
-<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this heading"></a></h3>
-<table class="autosummary longtable docutils align-default">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading">#</a></h3>
+<table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.xCell.CurrentSource" title="xcell.xCell.CurrentSource"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CurrentSource</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.xCell.Source" title="xcell.xCell.Source"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Source</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#xcell.xCell.VoltageSource" title="xcell.xCell.VoltageSource"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VoltageSource</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.xCell.Simulation" title="xcell.xCell.Simulation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Simulation</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.xCell.Simulation" title="xcell.xCell.Simulation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Simulation</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#xcell.xCell.SimStudy" title="xcell.xCell.SimStudy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SimStudy</span></code></a></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.xCell.Study" title="xcell.xCell.Study"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Study</span></code></a></p></td>
+<td><p>IO manager for multiple related simulations</p></td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="functions">
-<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this heading"></a></h3>
-<table class="autosummary longtable docutils align-default">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading">#</a></h3>
+<table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.xCell.makeBoundedLinearMetric" title="xcell.xCell.makeBoundedLinearMetric"><code class="xref py py-obj docutils literal notranslate"><span class="pre">makeBoundedLinearMetric</span></code></a>(l0min, l0max, domainX[, origin])</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#xcell.xCell.makeExplicitLinearMetric" title="xcell.xCell.makeExplicitLinearMetric"><code class="xref py py-obj docutils literal notranslate"><span class="pre">makeExplicitLinearMetric</span></code></a>(maxdepth, meshdensity[, origin])</p></td>
-<td><p></p></td>
-</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#xcell.xCell._analytic" title="xcell.xCell._analytic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_analytic</span></code></a>(rad, V, I, r)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#xcell.xCell.makeScaledMetrics" title="xcell.xCell.makeScaledMetrics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">makeScaledMetrics</span></code></a>(maxdepth[, density])</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.xCell.general_metric" title="xcell.xCell.general_metric"><code class="xref py py-obj docutils literal notranslate"><span class="pre">general_metric</span></code></a>(element_bbox, reference_coords, ...)</p></td>
+<td><p>Standard linear size metric for element.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.xCell.generalMetric" title="xcell.xCell.generalMetric"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generalMetric</span></code></a>(elementBBox, refCoords, refCoefs)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#xcell.xCell.getStandardMeshParams" title="xcell.xCell.getStandardMeshParams"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getStandardMeshParams</span></code></a>(sources, meshDepth[, density])</p></td>
-<td><p><p>#</p>
-</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.xCell.get_standard_mesh_params" title="xcell.xCell.get_standard_mesh_params"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_standard_mesh_params</span></code></a>(sources, mesh_depth[, density])</p></td>
+<td><p>Generate default inputs to general metric for given parameters.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py class">
-<dt class="sig sig-object py" id="xcell.xCell.CurrentSource">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.xCell.</span></span><span class="sig-name descname"><span class="pre">CurrentSource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.CurrentSource" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Source">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.xCell.</span></span><span class="sig-name descname"><span class="pre">Source</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geom</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Source" title="Link to this definition">#</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="xcell.xCell.Source.get_value_at_time">
+<span class="sig-name descname"><span class="pre">get_value_at_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Source.get_value_at_time" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
-<dl class="py class">
-<dt class="sig sig-object py" id="xcell.xCell.VoltageSource">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.xCell.</span></span><span class="sig-name descname"><span class="pre">VoltageSource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.VoltageSource" title="Permalink to this definition"></a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.xCell.Source.__getstate__">
+<span class="sig-name descname"><span class="pre">__getstate__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Source.__getstate__" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.xCell.Source.__setstate__">
+<span class="sig-name descname"><span class="pre">__setstate__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Source.__setstate__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="xcell.xCell.Simulation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.xCell.</span></span><span class="sig-name descname"><span class="pre">Simulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">printSteps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.xCell.</span></span><span class="sig-name descname"><span class="pre">Simulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_step_times</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation" title="Link to this definition">#</a></dt>
 <dd><dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.quickAdaptiveGrid">
-<span class="sig-name descname"><span class="pre">quickAdaptiveGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maxdepth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefficent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.quickAdaptiveGrid" title="Permalink to this definition"></a></dt>
-<dd><p>Make a generic octree mesh where resolution increases near current sources.</p>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.quick_adaptive_grid">
+<span class="sig-name descname"><span class="pre">quick_adaptive_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefficent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.quick_adaptive_grid" title="Link to this definition">#</a></dt>
+<dd><p>Make a generic octree mesh where resolution increases near
+current sources.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>maxdepth</strong> (<em>int</em>) – Maximum subdivision depth.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>max_depth</strong> (<em>int</em>) – Maximum subdivision depth.</p></li>
+<li><p><strong>coefficent</strong> (<em>float</em>) – Density term (maximum resolution in whole mesh at 1.0)</p></li>
+</ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None.</p>
@@ -157,16 +431,16 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.makeAdaptiveGrid">
-<span class="sig-name descname"><span class="pre">makeAdaptiveGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">refPts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxdepth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minl0Function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxl0Function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coarsen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.makeAdaptiveGrid" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.make_adaptive_grid">
+<span class="sig-name descname"><span class="pre">make_adaptive_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_pts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_l0_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_l0_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coarsen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.make_adaptive_grid" title="Link to this definition">#</a></dt>
 <dd><p>Construct octree mesh.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>refPts</strong> (<em>float</em><em>[</em><em>:</em><em>,</em><em>3</em><em>]</em>) – DESCRIPTION.</p></li>
-<li><p><strong>maxdepth</strong> (<em>int</em>) – Maximum recursion depth.</p></li>
-<li><p><strong>minl0Function</strong> (<em>function</em>) – Function to calculate l0. cf <a class="reference internal" href="../index.html#xcell.generalMetric" title="xcell.generalMetric"><code class="xref py py-meth docutils literal notranslate"><span class="pre">xcell.generalMetric()</span></code></a>.</p></li>
-<li><p><strong>maxl0Function</strong> (<em>function</em><em>, </em><em>optional</em>) – DESCRIPTION. minl0Function used if None.</p></li>
+<li><p><strong>ref_pts</strong> (<em>float</em><em>[</em><em>:</em><em>,</em><em>3</em><em>]</em>) – DESCRIPTION.</p></li>
+<li><p><strong>max_depth</strong> (<em>int</em>) – Maximum recursion depth.</p></li>
+<li><p><strong>min_l0_function</strong> (<em>function</em>) – Function to calculate l0. cf <a class="reference internal" href="../index.html#xcell.general_metric" title="xcell.general_metric"><code class="xref py py-meth docutils literal notranslate"><span class="pre">xcell.general_metric()</span></code></a>.</p></li>
+<li><p><strong>max_l0_function</strong> (<em>function</em><em>, </em><em>optional</em>) – DESCRIPTION. min_l0_function used if None.</p></li>
 <li><p><strong>coefs</strong> (<em>float</em><em>[</em><em>:</em><em>]</em><em>, </em><em>optional</em>) – Coefficents passed to l0 function. The default is None.</p></li>
 <li><p><strong>coarsen</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to prune following splits. The default is True.</p></li>
 </ul>
@@ -181,14 +455,15 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.makeUniformGrid">
-<span class="sig-name descname"><span class="pre">makeUniformGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nX</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">np.array([1.0,</span> <span class="pre">1.0,</span> <span class="pre">1.0])</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.makeUniformGrid" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.make_uniform_grid">
+<span class="sig-name descname"><span class="pre">make_uniform_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nX</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">np.array([1.0,</span> <span class="pre">1.0,</span> <span class="pre">1.0])</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.make_uniform_grid" title="Link to this definition">#</a></dt>
 <dd><p>Fast utility to construct a uniformly spaced mesh of the domain.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>nX</strong> (<em>int</em>) – Number of elements along each axis (yielding nX**3 total elements).</p></li>
-<li><p><strong>sigma</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – Global conductivity. The default is np.array([1.,1.,1.]).</p></li>
+<li><p><strong>nX</strong> (<em>int</em>) – Number of elements along each axis
+(yielding nX**3 total elements).</p></li>
+<li><p><strong>sigma</strong> (<em>float</em><em> or </em><em>float</em><em>[</em><em>3</em><em>]</em><em>, </em><em>optional</em>) – Global conductivity. The default is np.array([1.,1.,1.]).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -198,12 +473,12 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.startTiming">
-<span class="sig-name descname"><span class="pre">startTiming</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stepName</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.startTiming" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.start_timing">
+<span class="sig-name descname"><span class="pre">start_timing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.start_timing" title="Link to this definition">#</a></dt>
 <dd><p>General call to start timing an execution step.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>stepName</strong> (<em>string</em>) – Label for the step</p>
+<dd class="field-odd"><p><strong>step_name</strong> (<em>string</em>) – Label for the step</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None.</p>
@@ -212,8 +487,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.logTime">
-<span class="sig-name descname"><span class="pre">logTime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.logTime" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.log_time">
+<span class="sig-name descname"><span class="pre">log_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.log_time" title="Link to this definition">#</a></dt>
 <dd><p>Signals completion of step.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -227,31 +502,30 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="xcell.xCell.Simulation.getMemUsage">
-<span class="sig-name descname"><span class="pre">getMemUsage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">printVal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.getMemUsage" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">getMemUsage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">print_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.getMemUsage" title="Link to this definition">#</a></dt>
 <dd><p>Get memory usage of simulation.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>mem</strong> – Platform-dependent, often kb used.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>print_value</strong> (<em>boolean</em><em>, </em><em>optional</em>) – Print current memory usage</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>int</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>mem</strong> – Platform-dependent, often kb used.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.getPower">
-<span class="sig-name descname"><span class="pre">getPower</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.getPower" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.print_total_time">
+<span class="sig-name descname"><span class="pre">print_total_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.print_total_time" title="Link to this definition">#</a></dt>
+<dd><p>Print total simulation time</p>
+</dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.printTotalTime">
-<span class="sig-name descname"><span class="pre">printTotalTime</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.printTotalTime" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.getEdgeCurrents">
-<span class="sig-name descname"><span class="pre">getEdgeCurrents</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.getEdgeCurrents" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.get_edge_currents">
+<span class="sig-name descname"><span class="pre">get_edge_currents</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.get_edge_currents" title="Link to this definition">#</a></dt>
 <dd><p>Get currents through each edge of the mesh.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -266,12 +540,11 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.intifyCoords">
-<span class="sig-name descname"><span class="pre">intifyCoords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.intifyCoords" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.intify_coords">
+<span class="sig-name descname"><span class="pre">intify_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.intify_coords" title="Link to this definition">#</a></dt>
 <dd><p>Expresses coordinates as triplet of positive integers.</p>
-<p>Prevents rounding
-errors when determining if two points correspond to the same
-mesh node</p>
+<p>Prevents rounding errors when determining if two points correspond
+to the same mesh node</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>coords</strong> (<em>float</em><em>[</em><em>:</em><em>,</em><em>:</em><em>]</em>) – Coordinates to rescale as integers, or mesh nodes if None.</p>
@@ -286,21 +559,23 @@ mesh node</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.makeTableHeader">
-<span class="sig-name descname"><span class="pre">makeTableHeader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.makeTableHeader" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation._make_table_header">
+<span class="sig-name descname"><span class="pre">_make_table_header</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation._make_table_header" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.logAsTableEntry">
-<span class="sig-name descname"><span class="pre">logAsTableEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">csvFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extraCols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extraVals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.logAsTableEntry" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.log_table_entry">
+<span class="sig-name descname"><span class="pre">log_table_entry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">csvFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extraCols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extraVals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.log_table_entry" title="Link to this definition">#</a></dt>
 <dd><p>Log key metrics of simulation as an additional line of a .csv file.</p>
-<p>Custom categories (column headers) and their values can be added to the line</p>
+<p>Custom categories (column headers) and their values can be added
+to the line.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>csvFile</strong> (<em>file path</em>) – File where data is written to.</p></li>
 <li><p><strong>extraCols</strong> (<em>string</em><em>[</em><em>:</em><em>]</em><em>, </em><em>optional</em>) – Additional categories (column headers). The default is None.</p></li>
-<li><p><strong>extraVals</strong> (<em>numeric</em><em>[</em><em>:</em><em>]</em><em>, </em><em>optional</em>) – Values corresponding to the additional categories. The default is None.</p></li>
+<li><p><strong>extraVals</strong> (<em>numeric</em><em>[</em><em>:</em><em>]</em><em>, </em><em>optional</em>) – Values corresponding to the additional categories.
+The default is None.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -310,21 +585,27 @@ mesh node</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.finalizeMesh">
-<span class="sig-name descname"><span class="pre">finalizeMesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">regularize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmaMesh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defaultSigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.finalizeMesh" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.finalize_mesh">
+<span class="sig-name descname"><span class="pre">finalize_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">regularize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_mesh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.finalize_mesh" title="Link to this definition">#</a></dt>
 <dd><p>Prepare mesh for simulation.</p>
 <p>Locks connectivity, sets global node numbering, gets list of
 edges and corresponding conductances from all elements.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>regularize</strong> (<em>bool</em><em>, </em><em>optional</em>) – Perform connectivity regularization, by default False
+Not currently implemented</p></li>
+<li><p><strong>sigma_mesh</strong> (<em>mesh</em><em>, </em><em>optional</em>) – Mesh defining conductivity values, by default None</p></li>
+<li><p><strong>default_sigma</strong> (<em>float</em><em>, </em><em>optional</em>) – Fallback conductivity for elements outside sigma_mesh,
+by default 1.0.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.applyTransforms">
-<span class="sig-name descname"><span class="pre">applyTransforms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.applyTransforms" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.apply_transforms">
+<span class="sig-name descname"><span class="pre">apply_transforms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.apply_transforms" title="Link to this definition">#</a></dt>
 <dd><p>Calculate implicitly defined node voltages from explicit ones.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -334,34 +615,67 @@ edges and corresponding conductances from all elements.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.addCurrentSource">
-<span class="sig-name descname"><span class="pre">addCurrentSource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.addCurrentSource" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.add_current_source">
+<span class="sig-name descname"><span class="pre">add_current_source</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.add_current_source" title="Link to this definition">#</a></dt>
+<dd><p>Add current source to setup.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (float or <a class="reference internal" href="../signals/index.html#xcell.signals.Signal" title="xcell.signals.Signal"><code class="xref py py-class docutils literal notranslate"><span class="pre">xcell.signals.Signal</span></code></a>) – Amplitude of source</p></li>
+<li><p><strong>geometry</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">xcell.geometry.Shape</span></code>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.addVoltageSource">
-<span class="sig-name descname"><span class="pre">addVoltageSource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.addVoltageSource" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.add_voltage_source">
+<span class="sig-name descname"><span class="pre">add_voltage_source</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.add_voltage_source" title="Link to this definition">#</a></dt>
+<dd><p>Add voltage source to setup.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (float or <a class="reference internal" href="../signals/index.html#xcell.signals.Signal" title="xcell.signals.Signal"><code class="xref py py-class docutils literal notranslate"><span class="pre">xcell.signals.Signal</span></code></a>) – Amplitude of source</p></li>
+<li><p><strong>geometry</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">xcell.geometry.Shape</span></code>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.insertSourcesInMesh">
-<span class="sig-name descname"><span class="pre">insertSourcesInMesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snaplength</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.insertSourcesInMesh" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.insert_sources_in_mesh">
+<span class="sig-name descname"><span class="pre">insert_sources_in_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snaplength</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.insert_sources_in_mesh" title="Link to this definition">#</a></dt>
+<dd><p>_summary_</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>snaplength</strong> (<em>float</em><em>, </em><em>optional</em>) – Maximum distance allowed between source and mesh node,
+by default 0.0.
+Value currently unused.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="xcell.xCell.Simulation.__nodesInSource">
-<span class="sig-name descname"><span class="pre">__nodesInSource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.__nodesInSource" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__nodesInSource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.__nodesInSource" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.setBoundaryNodes">
-<span class="sig-name descname"><span class="pre">setBoundaryNodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">boundaryFun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expand</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.setBoundaryNodes" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.set_boundary_nodes">
+<span class="sig-name descname"><span class="pre">set_boundary_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">boundary_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expand</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.set_boundary_nodes" title="Link to this definition">#</a></dt>
 <dd><p>Set potential of nodes at simulation boundary.</p>
 <p>Can pass user-defined function to calculate node potential from its
-Cartesian coordinates; otherwise, boundary is assumed to be grounded.</p>
+Cartesian coordinates; otherwise, boundary is grounded.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>boundaryFun</strong> (<em>function</em><em>, </em><em>optional</em>) – User-defined potential as function of coords. The default is None.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>boundary_function</strong> (<em>function</em><em>, </em><em>optional</em>) – User-defined potential as function of coords.
+The default is None.</p></li>
+<li><p><strong>expand</strong> (<em>bool</em><em>, </em><em>optional</em>) – Embed current domain as center of 3x3x3 grid of cubes before
+assigning boundaries.</p></li>
+<li><p><strong>sigma</strong> (<em>float</em><em>, </em><em>optional</em>) – Conductivity to assign the new elements if expand is True.
+Default is 1.0.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None.</p>
@@ -371,10 +685,10 @@ Cartesian coordinates; otherwise, boundary is assumed to be grounded.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="xcell.xCell.Simulation.solve">
-<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.solve" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterative</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v_guess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.solve" title="Link to this definition">#</a></dt>
 <dd><p>Directly solve for nodal voltages.</p>
 <p>Computational time grows significantly with simulation size;
-try iterativeSolve() for faster convergence</p>
+try solve() for faster convergence</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>voltages</strong> – Simulated nodal voltages.</p>
@@ -386,15 +700,15 @@ try iterativeSolve() for faster convergence</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#xcell.xCell.Simulation.iterativeSolve" title="xcell.xCell.Simulation.iterativeSolve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">iterativeSolve</span></code></a></dt><dd><p>conjugate gradient solver</p>
+<dt><a class="reference internal" href="#xcell.xCell.Simulation.solve" title="xcell.xCell.Simulation.solve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve</span></code></a></dt><dd><p>conjugate gradient solver</p>
 </dd>
 </dl>
 </div>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.getDoFs">
-<span class="sig-name descname"><span class="pre">getDoFs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.getDoFs" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.get_voltage_at_dof">
+<span class="sig-name descname"><span class="pre">get_voltage_at_dof</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.get_voltage_at_dof" title="Link to this definition">#</a></dt>
 <dd><p>Get the voltage of every degree of freedom.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -407,35 +721,13 @@ try iterativeSolve() for faster convergence</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.iterativeSolve">
-<span class="sig-name descname"><span class="pre">iterativeSolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vGuess</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-12</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.iterativeSolve" title="Permalink to this definition"></a></dt>
-<dd><p>Solve nodal voltages using conjgate gradient method.</p>
-<p>Likely to achieve similar accuracy to direct solution at much greater
-speed for element counts above a few thousand</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>vGuess</strong> (<em>float</em><em>[</em><em>:</em><em>]</em>) – Initial guess for nodal voltages. Default None.</p></li>
-<li><p><strong>tol</strong> (<em>float</em><em>, </em><em>optional</em>) – Maximum allowed norm of the residual. The default is 1e-9.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>voltages</strong> – Simulated nodal voltages.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float[:]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.__selByDoF">
-<span class="sig-name descname"><span class="pre">__selByDoF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dofNdx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.__selByDoF" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation._select_by_dof">
+<span class="sig-name descname"><span class="pre">_select_by_dof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dofNdx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation._select_by_dof" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.analyticalEstimate">
-<span class="sig-name descname"><span class="pre">analyticalEstimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rvec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.analyticalEstimate" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.calculate_analytical_voltage">
+<span class="sig-name descname"><span class="pre">calculate_analytical_voltage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rvec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.calculate_analytical_voltage" title="Link to this definition">#</a></dt>
 <dd><p>Analytical estimate of potential field.</p>
 <p>Calculates estimated potential from sum of piecewise functions</p>
 <blockquote>
@@ -461,8 +753,8 @@ speed for element counts above a few thousand</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.estimateVolumeError">
-<span class="sig-name descname"><span class="pre">estimateVolumeError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">basic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.estimateVolumeError" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.estimate_volume_error">
+<span class="sig-name descname"><span class="pre">estimate_volume_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">basic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.estimate_volume_error" title="Link to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>basic</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is False.</p>
@@ -480,19 +772,19 @@ speed for element counts above a few thousand</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.calculateErrors">
-<span class="sig-name descname"><span class="pre">calculateErrors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uInds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.calculateErrors" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.calculate_errors">
+<span class="sig-name descname"><span class="pre">calculate_errors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">universal_indices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.calculate_errors" title="Link to this definition">#</a></dt>
 <dd><p>Estimate error in solution.</p>
 <p>Estimates error between simulated solution assuming point/spherical
 sources in uniform conductivity.</p>
-<p>For the error metric to be applicable across a range of domain
-sizes and mesh densities, it must</p>
 <p>The normalized error metric approximates the area between the
 analytical solution i/(4*pi*sigma*r) and a linear interpolation
-between the simulated nodal voltages, evaluated across the simulation domain</p>
+between the simulated nodal voltages, evaluated across the
+simulation domain</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>rvec</strong> (<em>float</em><em>[</em><em>:</em><em>]</em><em>, </em><em>optional</em>) – Alternative points at which to evaluate the analytical solution. The default is None.</p>
+<dd class="field-odd"><p><strong>universal_indices</strong> (<em>int</em><em>[</em><em>:</em><em>]</em><em>, </em><em>optional</em>) – Alternative points at which to evaluate the analytical solution.
+The default is None.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
@@ -510,12 +802,12 @@ e.g. erSorted=err[sorter]</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="xcell.xCell.Simulation.__toDoF">
-<span class="sig-name descname"><span class="pre">__toDoF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">globalIndex</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.__toDoF" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__toDoF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">globalIndex</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.__toDoF" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.getNodeTypes">
-<span class="sig-name descname"><span class="pre">getNodeTypes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.getNodeTypes" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation._get_node_types">
+<span class="sig-name descname"><span class="pre">_get_node_types</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation._get_node_types" title="Link to this definition">#</a></dt>
 <dd><p>Get an integer per node indicating its role.</p>
 <dl class="simple">
 <dt>Type indices:</dt><dd><p>0: Unknown voltage
@@ -531,8 +823,8 @@ e.g. erSorted=err[sorter]</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.getEdgeMat">
-<span class="sig-name descname"><span class="pre">getEdgeMat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dedup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.getEdgeMat" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.get_edge_matrix">
+<span class="sig-name descname"><span class="pre">get_edge_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dedup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.get_edge_matrix" title="Link to this definition">#</a></dt>
 <dd><p>Return conductance matrix across all nodes in mesh.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -548,14 +840,14 @@ e.g. erSorted=err[sorter]</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.getNodeConnectivity">
-<span class="sig-name descname"><span class="pre">getNodeConnectivity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deduplicate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.getNodeConnectivity" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.count_node_connectivity">
+<span class="sig-name descname"><span class="pre">count_node_connectivity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deduplicate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.count_node_connectivity" title="Link to this definition">#</a></dt>
 <dd><p>Calculate how many conductances terminate in each node.</p>
 <p>A fully-connected hex node will have 24 edges prior to merging parallel
 conductances; less than this indicates the node is hanging (nonconforming).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>ValueError</strong> – DESCRIPTION.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>deduplicate</strong> (<em>boolean</em><em>, </em><em>optional</em>) – Combine parallel conductances before counting, default False</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>nConn</strong> – Number of edges that terminate in each node.</p>
@@ -567,9 +859,9 @@ conductances; less than this indicates the node is hanging (nonconforming).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.regularizeMesh">
-<span class="sig-name descname"><span class="pre">regularizeMesh</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.regularizeMesh" title="Permalink to this definition"></a></dt>
-<dd><p>Deprecated. Attempt to remove nonconforming nodes</p>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.regularize_mesh">
+<span class="sig-name descname"><span class="pre">regularize_mesh</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.regularize_mesh" title="Link to this definition">#</a></dt>
+<dd><p>Not recommended: attempt to remove nonconforming nodes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None.</p>
@@ -578,18 +870,18 @@ conductances; less than this indicates the node is hanging (nonconforming).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.__dedupEdges">
-<span class="sig-name descname"><span class="pre">__dedupEdges</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.__dedupEdges" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation._deduplicate_edges">
+<span class="sig-name descname"><span class="pre">_deduplicate_edges</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation._deduplicate_edges" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.__isMatchingEdge">
-<span class="sig-name descname"><span class="pre">__isMatchingEdge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">toMatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.__isMatchingEdge" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation._is_matching_edge">
+<span class="sig-name descname"><span class="pre">_is_matching_edge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">toMatch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation._is_matching_edge" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.getSystem">
-<span class="sig-name descname"><span class="pre">getSystem</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.getSystem" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation._construct_system">
+<span class="sig-name descname"><span class="pre">_construct_system</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation._construct_system" title="Link to this definition">#</a></dt>
 <dd><p>Construct system of equations GV=b.</p>
 <p>Rows represent each node without a voltage or current
 constraint, followed by an additional row per current
@@ -607,23 +899,83 @@ and contributions of fixed-voltage nodes.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.getCoords">
-<span class="sig-name descname"><span class="pre">getCoords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orderType</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mesh'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maskArray</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.getCoords" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.get_coordinates_in_order">
+<span class="sig-name descname"><span class="pre">get_coordinates_in_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mesh'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_array</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.get_coordinates_in_order" title="Link to this definition">#</a></dt>
+<dd><p>Get mesh node coordinates according to specified ordering scheme.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>order_type</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>‘mesh’       - Sorted by universal index (default)
+‘dof’        - Sorted by unknowns in system of equations</p>
+<blockquote>
+<div><p>(floating nodes by universal index, then
+current-source nodes in order of source)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>’electrical’ - Like mesh, but current-source nodes moved to</dt><dd><p>end and replaced by source center</p>
+</dd>
+</dl>
+</p></li>
+<li><p><strong>mask_array</strong> (<em>bool</em><em>[</em><em>:</em><em>] or </em><em>None</em><em>, </em><em>optional</em>) – Use only mesh nodes where index is True, or use all if None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>float[</strong> – Coordinates in specified ordering scheme, possibly masked.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>,3]</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.getEdges">
-<span class="sig-name descname"><span class="pre">getEdges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orderType</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mesh'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maskArray</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.getEdges" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.get_edges_in_order">
+<span class="sig-name descname"><span class="pre">get_edges_in_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mesh'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_array</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.get_edges_in_order" title="Link to this definition">#</a></dt>
+<dd><p>Get mesh edges with nodes ordered by specified scheme.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>order_type</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>‘mesh’       - Sorted by universal index (default)
+‘dof’        - Sorted by unknowns in system of equations</p>
+<blockquote>
+<div><p>(floating nodes by universal index, then
+current-source nodes in order of source)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>’electrical’ - Like mesh, but current-source nodes moved to</dt><dd><p>end and replaced by source center</p>
+</dd>
+</dl>
+</p></li>
+<li><p><strong>mask_array</strong> (<em>bool</em><em>[</em><em>:</em><em>] or </em><em>None</em><em>, </em><em>optional</em>) – Use only mesh nodes where index is True, or use all if None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>int[</strong> – Edges with indices from specified ordering</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>,2]</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.getMeshGeometry">
-<span class="sig-name descname"><span class="pre">getMeshGeometry</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.getMeshGeometry" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.get_mesh_geometry">
+<span class="sig-name descname"><span class="pre">get_mesh_geometry</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.get_mesh_geometry" title="Link to this definition">#</a></dt>
+<dd><p>Get node and edge topology from mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>coords</strong> (<em>float[:,3]</em>) – Cartesian coordinates of mesh nodes</p></li>
+<li><p><strong>edges</strong> (<em>uint64[:,2]</em>) – Indices of endpoints for each edge in mesh</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.interpolateAt">
-<span class="sig-name descname"><span class="pre">interpolateAt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.interpolateAt" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.interpolate_at_points">
+<span class="sig-name descname"><span class="pre">interpolate_at_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.interpolate_at_points" title="Link to this definition">#</a></dt>
 <dd><p>Interpolate values at specified coordinates.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -643,12 +995,12 @@ and contributions of fixed-voltage nodes.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.getOrdering">
-<span class="sig-name descname"><span class="pre">getOrdering</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orderType</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.getOrdering" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation._get_ordering">
+<span class="sig-name descname"><span class="pre">_get_ordering</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation._get_ordering" title="Link to this definition">#</a></dt>
 <dd><p>Get integer tag for each node according to the designated numbering scheme.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>orderType</strong> (<em>string</em>) – Whether to order by corresponding degree of freedom ‘dof’
+<dd class="field-odd"><p><strong>order_type</strong> (<em>string</em>) – Whether to order by corresponding degree of freedom ‘dof’
 or electrical .</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -662,14 +1014,14 @@ or electrical .</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.getElementsInPlane">
-<span class="sig-name descname"><span class="pre">getElementsInPlane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.getElementsInPlane" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.get_elements_in_plane">
+<span class="sig-name descname"><span class="pre">get_elements_in_plane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.get_elements_in_plane" title="Link to this definition">#</a></dt>
 <dd><p>Get all elements that intersect a plane orthogonal to the axes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>axis</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is 2.</p></li>
-<li><p><strong>point</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is 0..</p></li>
+<li><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is 2.</p></li>
+<li><p><strong>point</strong> (<em>float</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is 0..</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -685,12 +1037,12 @@ or electrical .</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="xcell.xCell.Simulation._getUniformPlane">
-<span class="sig-name descname"><span class="pre">_getUniformPlane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation._getUniformPlane" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">_getUniformPlane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation._getUniformPlane" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="xcell.xCell.Simulation.getValuesInPlane">
-<span class="sig-name descname"><span class="pre">getValuesInPlane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.getValuesInPlane" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">getValuesInPlane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.getValuesInPlane" title="Link to this definition">#</a></dt>
 <dd><p>Extract values in a plane.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -707,14 +1059,29 @@ or electrical .</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.Simulation.getUniversalPoints">
-<span class="sig-name descname"><span class="pre">getUniversalPoints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.getUniversalPoints" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="xcell.xCell.Simulation.get_universal_points">
+<span class="sig-name descname"><span class="pre">get_universal_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.get_universal_points" title="Link to this definition">#</a></dt>
+<dd><p>Get index and voltage at every universal point in the elements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>elements</strong> (list of <code class="xref py py-class docutils literal notranslate"><span class="pre">xcell.mesh.Element</span></code>, optional) – Elements to extract points from, or all elements in mesh if
+None (default)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>universal_indices</strong> (<em>uint64[:]</em>) – Universal indices of the elements</p></li>
+<li><p><strong>universal_voltages</strong> (<em>float[:]</em>) – Voltage at each universal point, interpolated if necessary</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="xcell.xCell.Simulation.getCurrentsInPlane">
-<span class="sig-name descname"><span class="pre">getCurrentsInPlane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.getCurrentsInPlane" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<span class="sig-name descname"><span class="pre">getCurrentsInPlane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Simulation.getCurrentsInPlane" title="Link to this definition">#</a></dt>
+<dd><p>Get currents through edges within plane.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>axis</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is 2.</p></li>
@@ -725,7 +1092,7 @@ or electrical .</p>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>currents</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
 <li><p><strong>currentPts</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
-<li><p><strong>mesh</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
+<li><p><strong>mesh</strong> (<em>float[:,:,2]</em>) – XY coordinates of mesh nodes in plane.</p></li>
 </ul>
 </p>
 </dd>
@@ -735,26 +1102,61 @@ or electrical .</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="xcell.xCell.SimStudy">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.xCell.</span></span><span class="sig-name descname"><span class="pre">SimStudy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">studyPath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundingBox</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.SimStudy" title="Permalink to this definition"></a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.SimStudy.newSimulation">
-<span class="sig-name descname"><span class="pre">newSimulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepMesh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.SimStudy.newSimulation" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="xcell.xCell.Study">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.xCell.</span></span><span class="sig-name descname"><span class="pre">Study</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">study_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounding_box</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Study" title="Link to this definition">#</a></dt>
+<dd><p>IO manager for multiple related simulations</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.xCell.Study.new_simulation">
+<span class="sig-name descname"><span class="pre">new_simulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepMesh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Study.new_simulation" title="Link to this definition">#</a></dt>
+<dd><p>Create new simulation in study.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>simName</strong> (<em>string</em><em>, </em><em>optional</em>) – Name of new simulation, or auto-increment ‘sim%d’ if None
+(default)</p></li>
+<li><p><strong>keepMesh</strong> (<em>bool</em><em>, </em><em>optional</em>) – Retain original mesh instead of regenerating, by default False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>New simulation</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#xcell.xCell.Simulation" title="xcell.xCell.Simulation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Simulation</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.SimStudy.saveMesh">
-<span class="sig-name descname"><span class="pre">saveMesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.SimStudy.saveMesh" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="xcell.xCell.Study.save_mesh">
+<span class="sig-name descname"><span class="pre">save_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Study.save_mesh" title="Link to this definition">#</a></dt>
+<dd><p>Save mesh to file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>simulation</strong> (<cite>.Simulation</cite>, optional) – Simulation to save, or self.current_sim if None (default)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.SimStudy.reloadMesh">
-<span class="sig-name descname"><span class="pre">reloadMesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meshnum</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.SimStudy.reloadMesh" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="xcell.xCell.Study.load_mesh">
+<span class="sig-name descname"><span class="pre">load_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meshnum</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Study.load_mesh" title="Link to this definition">#</a></dt>
+<dd><p>Reload mesh from file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>meshnum</strong> (<em>int</em>) – Index of simulation in study</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Reloaded mesh</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><cite>xcell.meshes.Mesh</cite></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.SimStudy.newLogEntry">
-<span class="sig-name descname"><span class="pre">newLogEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extraCols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extraVals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.SimStudy.newLogEntry" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Study.log_current_simulation">
+<span class="sig-name descname"><span class="pre">log_current_simulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extraCols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extraVals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Study.log_current_simulation" title="Link to this definition">#</a></dt>
 <dd><p>Log current simulation stats to csv file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -770,55 +1172,70 @@ or electrical .</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.SimStudy.makeStandardPlots">
-<span class="sig-name descname"><span class="pre">makeStandardPlots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">savePlots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepOpen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.SimStudy.makeStandardPlots" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.SimStudy.saveData">
-<span class="sig-name descname"><span class="pre">saveData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baseName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addedTags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.SimStudy.saveData" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.SimStudy.loadData">
-<span class="sig-name descname"><span class="pre">loadData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simName</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.SimStudy.loadData" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.SimStudy.save">
-<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.p'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.SimStudy.save" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.SimStudy.load">
-<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.p'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.SimStudy.load" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.SimStudy.getfile">
-<span class="sig-name descname"><span class="pre">getfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.p'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.SimStudy.getfile" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.SimStudy.savePlot">
-<span class="sig-name descname"><span class="pre">savePlot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.SimStudy.savePlot" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.SimStudy.__makepath">
-<span class="sig-name descname"><span class="pre">__makepath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.SimStudy.__makepath" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.SimStudy.saveAnimation">
-<span class="sig-name descname"><span class="pre">saveAnimation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">animator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.SimStudy.saveAnimation" title="Permalink to this definition"></a></dt>
-<dd><p>Save matplotlib-based animation.</p>
+<dt class="sig sig-object py" id="xcell.xCell.Study.save_simulation">
+<span class="sig-name descname"><span class="pre">save_simulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baseName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addedTags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Study.save_simulation" title="Link to this definition">#</a></dt>
+<dd><p>Save</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>animator</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
-<li><p><strong>filename</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
-<li><p><strong>**kwargs</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
+<li><p><strong>simulation</strong> (<em>_type_</em>) – _description_</p></li>
+<li><p><strong>baseName</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_, by default None</p></li>
+<li><p><strong>addedTags</strong> (<em>str</em><em>, </em><em>optional</em>) – _description_, by default ‘’</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.xCell.Study.load_simulation">
+<span class="sig-name descname"><span class="pre">load_simulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simName</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Study.load_simulation" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.xCell.Study.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.p'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Study.save" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.xCell.Study.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.p'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Study.load" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.xCell.Study._get_file_path">
+<span class="sig-name descname"><span class="pre">_get_file_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.p'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Study._get_file_path" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.xCell.Study.save_plot">
+<span class="sig-name descname"><span class="pre">save_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Study.save_plot" title="Link to this definition">#</a></dt>
+<dd><p>Save matplotlib plot in study folder</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fig</strong> (<a class="reference external" href="https://matplotlib.org/stable/api/figure_api.html#matplotlib.figure.Figure" title="(in Matplotlib v3.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.figure.Figure</span></code></a>) – Figure to save</p></li>
+<li><p><strong>file_name</strong> (<em>string</em>) – _description_</p></li>
+<li><p><strong>ext</strong> (<em>string</em><em>, </em><em>optional</em>) – File format to use, or save as .png, .svg, and .eps if None
+(default)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.xCell.Study.__makepath">
+<span class="sig-name descname"><span class="pre">__makepath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ext</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Study.__makepath" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.xCell.Study.save_animation">
+<span class="sig-name descname"><span class="pre">save_animation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">animator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Study.save_animation" title="Link to this definition">#</a></dt>
+<dd><p>Save matplotlib-based animation (not exported movie!) for reuse.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>animator</strong> (<a class="reference internal" href="../visualizers/index.html#xcell.visualizers.FigureAnimator" title="xcell.visualizers.FigureAnimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">xcell.visualizers.FigureAnimator</span></code></a>) – Animator to save.</p></li>
+<li><p><strong>filename</strong> (<em>string</em>) – Name of pickled file.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -828,8 +1245,8 @@ or electrical .</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.SimStudy.savePVimage">
-<span class="sig-name descname"><span class="pre">savePVimage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plotter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.SimStudy.savePVimage" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Study.save_pv_image">
+<span class="sig-name descname"><span class="pre">save_pv_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plotter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Study.save_pv_image" title="Link to this definition">#</a></dt>
 <dd><p>Save PyVista plot to image.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -847,8 +1264,8 @@ Saves as .pdf if not specified.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.SimStudy.makePVmovie">
-<span class="sig-name descname"><span class="pre">makePVmovie</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plotter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.SimStudy.makePVmovie" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Study.make_pv_movie">
+<span class="sig-name descname"><span class="pre">make_pv_movie</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plotter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Study.make_pv_movie" title="Link to this definition">#</a></dt>
 <dd><p>Open movie file for PyVista animation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -866,8 +1283,8 @@ Saves as .mp4 if not specified.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.SimStudy.loadLogfile">
-<span class="sig-name descname"><span class="pre">loadLogfile</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.SimStudy.loadLogfile" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.xCell.Study.load_logfile">
+<span class="sig-name descname"><span class="pre">load_logfile</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Study.load_logfile" title="Link to this definition">#</a></dt>
 <dd><p>Returns Pandas dataframe of logged runs</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -881,85 +1298,74 @@ Saves as .mp4 if not specified.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.SimStudy.plotTimes">
-<span class="sig-name descname"><span class="pre">plotTimes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xCat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Number</span> <span class="pre">of</span> <span class="pre">elements'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sortCat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.SimStudy.plotTimes" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.SimStudy.plotAccuracyCost">
-<span class="sig-name descname"><span class="pre">plotAccuracyCost</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.SimStudy.plotAccuracyCost" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.SimStudy.getSavedSims">
-<span class="sig-name descname"><span class="pre">getSavedSims</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filterCategories</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filterVals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sortCategory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.SimStudy.getSavedSims" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>filterCategories</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is None.</p></li>
-<li><p><strong>filterVals</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is None.</p></li>
-<li><p><strong>sortCategory</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is None.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>fnames</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
-<li><p><strong>categories</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
-</ul>
-</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="xcell.xCell.SimStudy.animatePlot">
-<span class="sig-name descname"><span class="pre">animatePlot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plotfun</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aniName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filterCategories</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filterVals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sortCategory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.SimStudy.animatePlot" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="xcell.xCell.makeBoundedLinearMetric">
-<span class="sig-prename descclassname"><span class="pre">xcell.xCell.</span></span><span class="sig-name descname"><span class="pre">makeBoundedLinearMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">l0min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l0max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domainX</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">np.zeros(3)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.makeBoundedLinearMetric" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="xcell.xCell.makeExplicitLinearMetric">
-<span class="sig-prename descclassname"><span class="pre">xcell.xCell.</span></span><span class="sig-name descname"><span class="pre">makeExplicitLinearMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maxdepth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meshdensity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">np.zeros(3)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.makeExplicitLinearMetric" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="xcell.xCell._analytic">
-<span class="sig-prename descclassname"><span class="pre">xcell.xCell.</span></span><span class="sig-name descname"><span class="pre">_analytic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rad</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell._analytic" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="xcell.xCell.makeScaledMetrics">
-<span class="sig-prename descclassname"><span class="pre">xcell.xCell.</span></span><span class="sig-name descname"><span class="pre">makeScaledMetrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maxdepth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.makeScaledMetrics" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="xcell.xCell.generalMetric">
-<span class="sig-prename descclassname"><span class="pre">xcell.xCell.</span></span><span class="sig-name descname"><span class="pre">generalMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elementBBox</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refCoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refCoefs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.generalMetric" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="xcell.xCell.getStandardMeshParams">
-<span class="sig-prename descclassname"><span class="pre">xcell.xCell.</span></span><span class="sig-name descname"><span class="pre">getStandardMeshParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sources</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meshDepth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.getStandardMeshParams" title="Permalink to this definition"></a></dt>
-<dd><p>#</p>
+<dt class="sig sig-object py" id="xcell.xCell.Study.get_saved_simulations">
+<span class="sig-name descname"><span class="pre">get_saved_simulations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_categories</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_category</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.Study.get_saved_simulations" title="Link to this definition">#</a></dt>
+<dd><p>Get all simulations in study, grouped and filtered as specified.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>sources</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
-<li><p><strong>meshDepth</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
-<li><p><strong>density</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is 0.2.</p></li>
+<li><p><strong>filter_categories</strong> (<em>list</em><em> of </em><em>strings</em><em>, </em><em>optional</em>) – Categories in dataset to filter by, or use all if None (default)</p></li>
+<li><p><strong>filter_values</strong> (<em>list</em><em> of </em><em>any</em><em>, </em><em>optional</em>) – Values to match for each filter category. The default is None,
+which matches all</p></li>
+<li><p><strong>group_category</strong> (<em>string</em><em>, </em><em>optional</em>) – Key to group simulations by, or no grouping if None (default)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
-<li><p><strong>srcCoords</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
-<li><p><strong>maxDepths</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
-<li><p><strong>coefs</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
+<li><p><strong>fnames</strong> (<em>list of lists of strings</em>) – Simulation filenames matching each filter and group value.</p></li>
+<li><p><strong>categories</strong> (<em>list of strings</em>) – Unique keys in group_category, or None if ungrouped</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.xCell._analytic">
+<span class="sig-prename descclassname"><span class="pre">xcell.xCell.</span></span><span class="sig-name descname"><span class="pre">_analytic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rad</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">I</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell._analytic" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.xCell.general_metric">
+<span class="sig-prename descclassname"><span class="pre">xcell.xCell.</span></span><span class="sig-name descname"><span class="pre">general_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_bbox</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_coefficents</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.general_metric" title="Link to this definition">#</a></dt>
+<dd><p>Standard linear size metric for element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>element_bbox</strong> (<em>float</em><em>[</em><em>6</em><em>]</em>) – Element bounding box in xcell order</p></li>
+<li><p><strong>reference_coords</strong> (<em>float</em><em>[</em><em>:</em><em>,</em><em>3</em><em>]</em>) – Cartesian coordinates of reference points</p></li>
+<li><p><strong>reference_coefficents</strong> (<em>float</em><em>[</em><em>:</em><em>]</em>) – Coefficents of distance for each reference point</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>l0s</strong> – Target size according to each reference/coefficent pair</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float[:]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.xCell.get_standard_mesh_params">
+<span class="sig-prename descclassname"><span class="pre">xcell.xCell.</span></span><span class="sig-name descname"><span class="pre">get_standard_mesh_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sources</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.xCell.get_standard_mesh_params" title="Link to this definition">#</a></dt>
+<dd><p>Generate default inputs to general metric for given parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sources</strong> (<em>list</em><em> of </em><em>xcell sources</em>) – Sources providing reference points.</p></li>
+<li><p><strong>mesh_depth</strong> (<em>int</em>) – Maximum splitting depth for mesh.</p></li>
+<li><p><strong>density</strong> (<em>float</em><em>, </em><em>optional</em>) – Density of mesh (0.0 = maximally sparse, 1.0 = maximally dense).
+The default is 0.2.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>source_coords</strong> (<em>float[:,3]</em>) – Coords of reference points.</p></li>
+<li><p><strong>max_depths</strong> (<em>int[:]</em>) – Maximum depth allowed per point.</p></li>
+<li><p><strong>coefs</strong> (<em>float[:]</em>) – Coefficents per point.</p></li>
 </ul>
 </p>
 </dd>
@@ -971,31 +1377,175 @@ Saves as .mp4 if not specified.</p></li>
 </section>
 
 
-           </div>
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#functions">Functions</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Source"><code class="docutils literal notranslate"><span class="pre">Source</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Source.get_value_at_time"><code class="docutils literal notranslate"><span class="pre">Source.get_value_at_time()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Source.__getstate__"><code class="docutils literal notranslate"><span class="pre">Source.__getstate__()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Source.__setstate__"><code class="docutils literal notranslate"><span class="pre">Source.__setstate__()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation"><code class="docutils literal notranslate"><span class="pre">Simulation</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.quick_adaptive_grid"><code class="docutils literal notranslate"><span class="pre">Simulation.quick_adaptive_grid()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.make_adaptive_grid"><code class="docutils literal notranslate"><span class="pre">Simulation.make_adaptive_grid()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.make_uniform_grid"><code class="docutils literal notranslate"><span class="pre">Simulation.make_uniform_grid()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.start_timing"><code class="docutils literal notranslate"><span class="pre">Simulation.start_timing()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.log_time"><code class="docutils literal notranslate"><span class="pre">Simulation.log_time()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.getMemUsage"><code class="docutils literal notranslate"><span class="pre">Simulation.getMemUsage()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.print_total_time"><code class="docutils literal notranslate"><span class="pre">Simulation.print_total_time()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.get_edge_currents"><code class="docutils literal notranslate"><span class="pre">Simulation.get_edge_currents()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.intify_coords"><code class="docutils literal notranslate"><span class="pre">Simulation.intify_coords()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation._make_table_header"><code class="docutils literal notranslate"><span class="pre">Simulation._make_table_header()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.log_table_entry"><code class="docutils literal notranslate"><span class="pre">Simulation.log_table_entry()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.finalize_mesh"><code class="docutils literal notranslate"><span class="pre">Simulation.finalize_mesh()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.apply_transforms"><code class="docutils literal notranslate"><span class="pre">Simulation.apply_transforms()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.add_current_source"><code class="docutils literal notranslate"><span class="pre">Simulation.add_current_source()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.add_voltage_source"><code class="docutils literal notranslate"><span class="pre">Simulation.add_voltage_source()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.insert_sources_in_mesh"><code class="docutils literal notranslate"><span class="pre">Simulation.insert_sources_in_mesh()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.__nodesInSource"><code class="docutils literal notranslate"><span class="pre">Simulation.__nodesInSource()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.set_boundary_nodes"><code class="docutils literal notranslate"><span class="pre">Simulation.set_boundary_nodes()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.solve"><code class="docutils literal notranslate"><span class="pre">Simulation.solve()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.get_voltage_at_dof"><code class="docutils literal notranslate"><span class="pre">Simulation.get_voltage_at_dof()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation._select_by_dof"><code class="docutils literal notranslate"><span class="pre">Simulation._select_by_dof()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.calculate_analytical_voltage"><code class="docutils literal notranslate"><span class="pre">Simulation.calculate_analytical_voltage()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.estimate_volume_error"><code class="docutils literal notranslate"><span class="pre">Simulation.estimate_volume_error()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.calculate_errors"><code class="docutils literal notranslate"><span class="pre">Simulation.calculate_errors()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.__toDoF"><code class="docutils literal notranslate"><span class="pre">Simulation.__toDoF()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation._get_node_types"><code class="docutils literal notranslate"><span class="pre">Simulation._get_node_types()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.get_edge_matrix"><code class="docutils literal notranslate"><span class="pre">Simulation.get_edge_matrix()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.count_node_connectivity"><code class="docutils literal notranslate"><span class="pre">Simulation.count_node_connectivity()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.regularize_mesh"><code class="docutils literal notranslate"><span class="pre">Simulation.regularize_mesh()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation._deduplicate_edges"><code class="docutils literal notranslate"><span class="pre">Simulation._deduplicate_edges()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation._is_matching_edge"><code class="docutils literal notranslate"><span class="pre">Simulation._is_matching_edge()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation._construct_system"><code class="docutils literal notranslate"><span class="pre">Simulation._construct_system()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.get_coordinates_in_order"><code class="docutils literal notranslate"><span class="pre">Simulation.get_coordinates_in_order()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.get_edges_in_order"><code class="docutils literal notranslate"><span class="pre">Simulation.get_edges_in_order()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.get_mesh_geometry"><code class="docutils literal notranslate"><span class="pre">Simulation.get_mesh_geometry()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.interpolate_at_points"><code class="docutils literal notranslate"><span class="pre">Simulation.interpolate_at_points()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation._get_ordering"><code class="docutils literal notranslate"><span class="pre">Simulation._get_ordering()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.get_elements_in_plane"><code class="docutils literal notranslate"><span class="pre">Simulation.get_elements_in_plane()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation._getUniformPlane"><code class="docutils literal notranslate"><span class="pre">Simulation._getUniformPlane()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.getValuesInPlane"><code class="docutils literal notranslate"><span class="pre">Simulation.getValuesInPlane()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.get_universal_points"><code class="docutils literal notranslate"><span class="pre">Simulation.get_universal_points()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Simulation.getCurrentsInPlane"><code class="docutils literal notranslate"><span class="pre">Simulation.getCurrentsInPlane()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Study"><code class="docutils literal notranslate"><span class="pre">Study</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Study.new_simulation"><code class="docutils literal notranslate"><span class="pre">Study.new_simulation()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Study.save_mesh"><code class="docutils literal notranslate"><span class="pre">Study.save_mesh()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Study.load_mesh"><code class="docutils literal notranslate"><span class="pre">Study.load_mesh()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Study.log_current_simulation"><code class="docutils literal notranslate"><span class="pre">Study.log_current_simulation()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Study.save_simulation"><code class="docutils literal notranslate"><span class="pre">Study.save_simulation()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Study.load_simulation"><code class="docutils literal notranslate"><span class="pre">Study.load_simulation()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Study.save"><code class="docutils literal notranslate"><span class="pre">Study.save()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Study.load"><code class="docutils literal notranslate"><span class="pre">Study.load()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Study._get_file_path"><code class="docutils literal notranslate"><span class="pre">Study._get_file_path()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Study.save_plot"><code class="docutils literal notranslate"><span class="pre">Study.save_plot()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Study.__makepath"><code class="docutils literal notranslate"><span class="pre">Study.__makepath()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Study.save_animation"><code class="docutils literal notranslate"><span class="pre">Study.save_animation()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Study.save_pv_image"><code class="docutils literal notranslate"><span class="pre">Study.save_pv_image()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Study.make_pv_movie"><code class="docutils literal notranslate"><span class="pre">Study.make_pv_movie()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Study.load_logfile"><code class="docutils literal notranslate"><span class="pre">Study.load_logfile()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.Study.get_saved_simulations"><code class="docutils literal notranslate"><span class="pre">Study.get_saved_simulations()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell._analytic"><code class="docutils literal notranslate"><span class="pre">_analytic()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.general_metric"><code class="docutils literal notranslate"><span class="pre">general_metric()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.xCell.get_standard_mesh_params"><code class="docutils literal notranslate"><span class="pre">get_standard_mesh_params()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../../../_sources/autoapi/xcell/xCell/index.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
           </div>
-          <footer>
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p>&#169; Copyright 2022, CBC Girard.</p>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
   </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2022, CBC Girard.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.5.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
 
-</footer>
-        </div>
-      </div>
-    </section>
-  </div>
-  <script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script> 
-
-</body>
+  </footer>
+  </body>
 </html>

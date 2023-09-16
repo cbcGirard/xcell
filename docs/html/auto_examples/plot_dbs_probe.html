@@ -1,105 +1,374 @@
-<!DOCTYPE html>
-<html class="writer-html5" lang="en" >
-<head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DBS Electrode &mdash; xcell  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/xcell.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+<!DOCTYPE html>
+
+
+<html lang="en" data-theme="auto">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>DBS Electrode &#8212; xcell  documentation</title>
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/js/theme.js"></script>
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "auto";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/xcell.css?v=bd5ed93c" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script src="../_static/documentation_options.js?v=8a448e45"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'auto_examples/plot_dbs_probe';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Depth sweep" href="plot_comparisons.html" />
-    <link rel="prev" title="Single timestep" href="plot_singleStep.html" /> 
-</head>
+    <link rel="prev" title="Single timestep" href="plot_singleStep.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="auto">
 
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search"  style="background: #990000" >
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
 
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../_static/logo.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+    <p class="title logo__title">xcell</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../intro.html">
+                        Introduction
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        Example applications
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../autoapi/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
           
-          
-          <a href="../index.html">
-            
-              <img src="../_static/logo.png" class="logo" alt="Logo"/>
-          </a>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../intro.html">Purpose</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../intro.html#installing">Installing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../intro.html#citation">Citation</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Example applications</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="plot_MeshAdaptation.html">Adaptation parameters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_singleStep.html">Single timestep</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">DBS Electrode</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_comparisons.html">Depth sweep</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_singularityEffect.html">Singularity</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_algorithmOverview.html">Simulation overview</a></li>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../intro.html">
+                        Introduction
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        Example applications
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../autoapi/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="plot_MeshAdaptation.html">Adaptation parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_singleStep.html">Single timestep</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">DBS Electrode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_comparisons.html">Depth sweep</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_singularityEffect.html">Singularity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_algorithmOverview.html">Simulation overview</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="Geometry/index.html">Geometry</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="Geometry/plot_xcellLogo.html">Logo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Geometry/plot_brainStyle.html">Stylized brain</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="index.html#geometry">Geometry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="NEURON/index.html">NEURON</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="NEURON/plot_LFP.html">LFP estimation with dynamic remeshing</a></li>
 </ul>
-
-        </div>
-      </div>
-    </nav>
-
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #990000" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">xcell</a>
-      </nav>
-
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="index.html">Example applications</a></li>
-      <li class="breadcrumb-item active">DBS Electrode</li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/auto_examples/plot_dbs_probe.rst.txt" rel="nofollow"> View page source</a>
-      </li>
-  </ul>
-  <hr/>
+</li>
+</ul>
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Example applications</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">DBS Electrode</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-auto-examples-plot-dbs-probe-py"><span class="std std-ref">Go to the end</span></a>
 to download the full example code</p>
 </div>
 <section class="sphx-glr-example-title" id="dbs-electrode">
-<span id="sphx-glr-auto-examples-plot-dbs-probe-py"></span><h1>DBS Electrode<a class="headerlink" href="#dbs-electrode" title="Permalink to this heading"></a></h1>
+<span id="sphx-glr-auto-examples-plot-dbs-probe-py"></span><h1>DBS Electrode<a class="headerlink" href="#dbs-electrode" title="Link to this heading">#</a></h1>
 <p>Programmatically generate micro-macro electrode array</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xcell</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xcell</span> <span class="k">as</span> <span class="nn">xc</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy.spatial.transform</span> <span class="kn">import</span> <span class="n">Rotation</span>
 <span class="kn">import</span> <span class="nn">pyvista</span> <span class="k">as</span> <span class="nn">pv</span>
@@ -107,14 +376,11 @@ to download the full example code</p>
 
 <span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">to_rgba_array</span>
 
-<span class="n">composite</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">MultiBlock</span><span class="p">()</span>
-<span class="n">regions</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">Regions</span><span class="p">()</span>
+<a href="https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.MultiBlock.html#pyvista.MultiBlock" title="pyvista.MultiBlock" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">composite</span></a> <span class="o">=</span> <a href="https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.MultiBlock.html#pyvista.MultiBlock" title="pyvista.MultiBlock" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-class"><span class="n">pv</span><span class="o">.</span><span class="n">MultiBlock</span></a><span class="p">()</span>
+<span class="n">regions</span> <span class="o">=</span> <a href="https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.MultiBlock.html#pyvista.MultiBlock" title="pyvista.MultiBlock" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-class"><span class="n">xc</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">Regions</span></a><span class="p">()</span>
 
 <span class="c1"># bodies, misc, oriens, and hilus</span>
-<span class="n">sigmas</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">6.429</span><span class="p">,</span>
-                     <span class="mf">3.215</span><span class="p">,</span>
-                     <span class="mf">2.879</span><span class="p">,</span>
-                     <span class="mf">2.605</span><span class="p">])</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sigmas</span></a> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><span class="mf">6.429</span><span class="p">,</span> <span class="mf">3.215</span><span class="p">,</span> <span class="mf">2.879</span><span class="p">,</span> <span class="mf">2.605</span><span class="p">])</span>
 
 <span class="c1"># latest from https://github.com/Head-Conductivity/Human-Head-Conductivity</span>
 <span class="n">sigma_0</span> <span class="o">=</span> <span class="mf">0.3841</span>
@@ -135,46 +401,46 @@ to download the full example code</p>
 <span class="n">microRows</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="n">microCols</span> <span class="o">=</span> <span class="mi">3</span>
 
-<span class="n">orientation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">orientation</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
 
-<span class="n">tipPt</span> <span class="o">=</span> <span class="mf">1e-3</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">5.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tipPt</span></a> <span class="o">=</span> <span class="mf">1e-3</span> <span class="o">*</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><span class="o">-</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
 <span class="n">bodyL</span> <span class="o">=</span> <span class="mf">0.05</span>
 
 <span class="n">tpulse</span> <span class="o">=</span> <span class="mf">1e-3</span>  <span class="c1"># per phase</span>
 <span class="n">ipulse</span> <span class="o">=</span> <span class="mf">150e-6</span>
-<span class="n">vpulse</span> <span class="o">=</span> <span class="mf">1.</span>
+<span class="n">vpulse</span> <span class="o">=</span> <span class="mf">1.0</span>
 
 
-<span class="n">hippo</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;./Geometry/slice77600_ext10000.vtk&#39;</span><span class="p">)</span>
-<span class="n">brainXform</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">hippo</span><span class="o">.</span><span class="n">center</span><span class="p">)</span>
-<span class="n">hippo</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">brainXform</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a href="https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.PolyData.html#pyvista.PolyData" title="pyvista.PolyData" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">hippo</span></a> <span class="o">=</span> <a href="https://docs.pyvista.org/version/stable/api/utilities/_autosummary/pyvista.read.html#pyvista.read" title="pyvista.read" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-function"><span class="n">pv</span><span class="o">.</span><span class="n">read</span></a><span class="p">(</span><span class="s2">&quot;./Geometry/slice77600_ext10000.vtk&quot;</span><span class="p">)</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">brainXform</span></a> <span class="o">=</span> <span class="o">-</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span><a href="https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.DataSet.center.html#pyvista.DataSet.center" title="pyvista.DataSet.center" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-property"><span class="n">hippo</span><span class="o">.</span><span class="n">center</span></a><span class="p">)</span>
+<a href="https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.DataSet.translate.html#pyvista.DataSet.translate" title="pyvista.DataSet.translate" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-method"><span class="n">hippo</span><span class="o">.</span><span class="n">translate</span></a><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">brainXform</span></a><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;bodies&#39;</span><span class="p">,</span> <span class="s1">&#39;misc&#39;</span><span class="p">,</span> <span class="s1">&#39;oriens&#39;</span><span class="p">,</span> <span class="s1">&#39;hilus&#39;</span><span class="p">]</span>
+<span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;bodies&quot;</span><span class="p">,</span> <span class="s2">&quot;misc&quot;</span><span class="p">,</span> <span class="s2">&quot;oriens&quot;</span><span class="p">,</span> <span class="s2">&quot;hilus&quot;</span><span class="p">]</span>
 
-<span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">sig</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">sigmas</span><span class="p">):</span>
-    <span class="n">region</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;Geometry/&#39;</span><span class="o">+</span><span class="n">f</span><span class="o">+</span><span class="s1">&#39;.stl&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">brainXform</span><span class="p">)</span>
-    <span class="n">region</span><span class="o">.</span><span class="n">cell_data</span><span class="p">[</span><span class="s1">&#39;sigma&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sig</span>
-    <span class="n">regions</span><span class="o">.</span><span class="n">addMesh</span><span class="p">(</span><span class="n">region</span><span class="p">,</span> <span class="s1">&#39;Conductors&#39;</span><span class="p">)</span>
-    <span class="n">composite</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">region</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">f</span><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">sig</span></a> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sigmas</span></a><span class="p">):</span>
+    <a href="https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.PolyData.html#pyvista.PolyData" title="pyvista.PolyData" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">region</span></a> <span class="o">=</span> <a href="https://docs.pyvista.org/version/stable/api/utilities/_autosummary/pyvista.read.html#pyvista.read" title="pyvista.read" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-function"><span class="n">pv</span><span class="o">.</span><span class="n">read</span></a><span class="p">(</span><span class="s2">&quot;Geometry/&quot;</span> <span class="o">+</span> <span class="n">f</span> <span class="o">+</span> <span class="s2">&quot;.stl&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">brainXform</span></a><span class="p">)</span>
+    <a href="https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.DataSet.cell_data.html#pyvista.DataSet.cell_data" title="pyvista.DataSet.cell_data" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-property"><span class="n">region</span><span class="o">.</span><span class="n">cell_data</span></a><span class="p">[</span><span class="s2">&quot;sigma&quot;</span><span class="p">]</span> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.float64" title="numpy.float64" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">sig</span></a>
+    <span class="n">regions</span><span class="o">.</span><span class="n">addMesh</span><span class="p">(</span><a href="https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.PolyData.html#pyvista.PolyData" title="pyvista.PolyData" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">region</span></a><span class="p">,</span> <span class="s2">&quot;Conductors&quot;</span><span class="p">)</span>
+    <a href="https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.MultiBlock.append.html#pyvista.MultiBlock.append" title="pyvista.MultiBlock.append" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-method"><span class="n">composite</span><span class="o">.</span><span class="n">append</span></a><span class="p">(</span><a href="https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.PolyData.html#pyvista.PolyData" title="pyvista.PolyData" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">region</span></a><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
 
 <span class="c1"># xdom = max(np.array(hippo.bounds[1::2])-np.array(hippo.bounds[::2]))</span>
-<span class="n">xdom</span> <span class="o">=</span> <span class="n">pitchMacro</span><span class="o">*</span><span class="p">(</span><span class="n">nmacro</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">xdom</span> <span class="o">=</span> <span class="n">pitchMacro</span> <span class="o">*</span> <span class="p">(</span><span class="n">nmacro</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
 
-<span class="n">bbox</span> <span class="o">=</span> <span class="n">xdom</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">)))</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">bbox</span></a> <span class="o">=</span> <span class="n">xdom</span> <span class="o">*</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.concatenate.html#numpy.concatenate" title="numpy.concatenate" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span></a><span class="p">((</span><span class="o">-</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ones.html#numpy.ones" title="numpy.ones" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">ones</span></a><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ones.html#numpy.ones" title="numpy.ones" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">ones</span></a><span class="p">(</span><span class="mi">3</span><span class="p">)))</span>
 
 <span class="c1"># set smallest element to microelectrode radius or smaller</span>
-<span class="n">maxdepth</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">xdom</span> <span class="o">/</span> <span class="n">dmicro</span><span class="p">))</span> <span class="o">+</span> <span class="mi">2</span>
+<span class="n">max_depth</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ufunc.html#numpy.ufunc" title="numpy.ufunc" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">np</span><span class="o">.</span><span class="n">log2</span></a><span class="p">(</span><span class="n">xdom</span> <span class="o">/</span> <span class="n">dmicro</span><span class="p">))</span> <span class="o">+</span> <span class="mi">2</span>
 
-<span class="n">sim</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="n">bbox</span><span class="p">)</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">xc</span><span class="o">.</span><span class="n">Simulation</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">bbox</span></a><span class="o">=</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">bbox</span></a><span class="p">)</span>
 
 
-<span class="n">body</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">Cylinder</span><span class="p">(</span>
-    <span class="n">tipPt</span><span class="o">+</span><span class="n">bodyL</span><span class="o">*</span><span class="n">orientation</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">dbody</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">bodyL</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">orientation</span><span class="p">)</span>
+<span class="n">body</span> <span class="o">=</span> <span class="n">xc</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">Cylinder</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tipPt</span></a> <span class="o">+</span> <span class="n">bodyL</span> <span class="o">*</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">orientation</span></a> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">dbody</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                             <span class="n">length</span><span class="o">=</span><span class="n">bodyL</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">orientation</span></a><span class="p">)</span>
 
 <span class="c1"># bugfix to force detection of points inside cylindrical body</span>
-<span class="n">bodyMesh</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">toPV</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
-<span class="n">regions</span><span class="o">.</span><span class="n">addMesh</span><span class="p">(</span><span class="n">bodyMesh</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="s1">&#39;Insulators&#39;</span><span class="p">)</span>
+<a href="https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.PolyData.html#pyvista.PolyData" title="pyvista.PolyData" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">bodyMesh</span></a> <span class="o">=</span> <span class="n">xc</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+<span class="n">regions</span><span class="o">.</span><span class="n">addMesh</span><span class="p">(</span><a href="https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.PolyData.html#pyvista.PolyData" title="pyvista.PolyData" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">bodyMesh</span></a><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="s2">&quot;Insulators&quot;</span><span class="p">)</span>
 
 <span class="c1"># bodyMesh = pv.Cylinder(center=body.center,</span>
 <span class="c1"># direction=body.axis,</span>
@@ -185,90 +451,85 @@ to download the full example code</p>
 <span class="n">microElectrodes</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="n">elecMeshes</span> <span class="o">=</span> <span class="p">[]</span>
 
-<span class="n">refPts</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">ref_pts</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="n">refSizes</span> <span class="o">=</span> <span class="p">[]</span>
 
 <span class="c1"># Generate macroelectrodes (bands)</span>
 <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nmacro</span><span class="p">):</span>
-    <span class="n">pt</span> <span class="o">=</span> <span class="n">tipPt</span><span class="o">+</span><span class="p">(</span><span class="n">ii</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">pitchMacro</span><span class="o">*</span><span class="n">orientation</span>
+    <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pt</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tipPt</span></a> <span class="o">+</span> <span class="p">(</span><span class="n">ii</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">pitchMacro</span> <span class="o">*</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">orientation</span></a>
 
-    <span class="n">geo</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">Cylinder</span><span class="p">(</span><span class="n">pt</span><span class="p">,</span> <span class="n">dbody</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">wmacro</span><span class="p">,</span> <span class="n">orientation</span><span class="p">)</span>
+    <span class="n">geo</span> <span class="o">=</span> <span class="n">xc</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">Cylinder</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pt</span></a><span class="p">,</span> <span class="n">dbody</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">wmacro</span><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">orientation</span></a><span class="p">)</span>
 
-    <span class="n">sim</span><span class="o">.</span><span class="n">addCurrentSource</span><span class="p">(</span><span class="n">xcell</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
-                         <span class="n">coords</span><span class="o">=</span><span class="n">pt</span><span class="p">,</span>
-                         <span class="n">geometry</span><span class="o">=</span><span class="n">geo</span><span class="p">)</span>
+    <span class="n">sim</span><span class="o">.</span><span class="n">add_current_source</span><span class="p">(</span><span class="n">xc</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">geometry</span><span class="o">=</span><span class="n">geo</span><span class="p">)</span>
 
     <span class="n">macroElectrodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geo</span><span class="p">)</span>
 
-    <span class="n">refPts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geo</span><span class="o">.</span><span class="n">center</span><span class="p">)</span>
+    <span class="n">ref_pts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geo</span><span class="o">.</span><span class="n">center</span><span class="p">)</span>
 
-    <span class="n">regions</span><span class="o">.</span><span class="n">addMesh</span><span class="p">(</span><span class="n">xcell</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">toPV</span><span class="p">(</span><span class="n">geo</span><span class="p">),</span> <span class="n">category</span><span class="o">=</span><span class="s1">&#39;Electrodes&#39;</span><span class="p">)</span>
+    <span class="n">regions</span><span class="o">.</span><span class="n">addMesh</span><span class="p">(</span><span class="n">xc</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(</span><span class="n">geo</span><span class="p">),</span> <span class="n">category</span><span class="o">=</span><span class="s2">&quot;Electrodes&quot;</span><span class="p">)</span>
 
 
 <span class="c1"># Generate microelectrodes</span>
 <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">microRows</span><span class="p">):</span>
-    <span class="n">rowpt</span> <span class="o">=</span> <span class="n">tipPt</span><span class="o">+</span><span class="p">(</span><span class="n">ii</span><span class="o">+</span><span class="mf">.5</span><span class="p">)</span><span class="o">*</span><span class="n">pitchMacro</span><span class="o">*</span><span class="n">orientation</span>
+    <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">rowpt</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tipPt</span></a> <span class="o">+</span> <span class="p">(</span><span class="n">ii</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">pitchMacro</span> <span class="o">*</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">orientation</span></a>
 
     <span class="k">for</span> <span class="n">jj</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">microCols</span><span class="p">):</span>
-        <span class="n">rot</span> <span class="o">=</span> <span class="n">Rotation</span><span class="o">.</span><span class="n">from_rotvec</span><span class="p">(</span><span class="n">orientation</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">jj</span><span class="o">/</span><span class="n">microCols</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+        <span class="n">rot</span> <span class="o">=</span> <span class="n">Rotation</span><span class="o">.</span><span class="n">from_rotvec</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">orientation</span></a> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">jj</span> <span class="o">/</span> <span class="n">microCols</span> <span class="o">*</span> <a href="https://numpy.org/doc/stable/reference/constants.html#numpy.pi" title="numpy.pi" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-data"><span class="n">np</span><span class="o">.</span><span class="n">pi</span></a><span class="p">)</span>
 
-        <span class="n">microOrientation</span> <span class="o">=</span> <span class="n">rot</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">dbody</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]))</span>
+        <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">microOrientation</span></a> <span class="o">=</span> <span class="n">rot</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">dbody</span> <span class="o">*</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]))</span>
 
-        <span class="n">geo</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">Disk</span><span class="p">(</span>
-            <span class="n">center</span><span class="o">=</span><span class="n">rowpt</span><span class="o">+</span><span class="n">microOrientation</span><span class="p">,</span>
-            <span class="n">radius</span><span class="o">=</span><span class="n">dmicro</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">microOrientation</span><span class="p">,</span>
-            <span class="n">tol</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">geo</span> <span class="o">=</span> <span class="n">xc</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">Disk</span><span class="p">(</span><span class="n">center</span><span class="o">=</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">rowpt</span></a> <span class="o">+</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">microOrientation</span></a><span class="p">,</span>
+                               <span class="n">radius</span><span class="o">=</span><span class="n">dmicro</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">microOrientation</span></a><span class="p">,</span>
+                               <span class="n">tol</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 
-        <span class="n">sim</span><span class="o">.</span><span class="n">addCurrentSource</span><span class="p">(</span><span class="n">xcell</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">coords</span><span class="o">=</span><span class="n">geo</span><span class="o">.</span><span class="n">center</span><span class="p">,</span>
-                             <span class="n">geometry</span><span class="o">=</span><span class="n">geo</span><span class="p">)</span>
+        <span class="n">sim</span><span class="o">.</span><span class="n">add_current_source</span><span class="p">(</span><span class="n">xc</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">geometry</span><span class="o">=</span><span class="n">geo</span><span class="p">)</span>
 
         <span class="n">microElectrodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geo</span><span class="p">)</span>
 
-        <span class="n">refPts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geo</span><span class="o">.</span><span class="n">center</span><span class="p">)</span>
-        <span class="n">regions</span><span class="o">.</span><span class="n">addMesh</span><span class="p">(</span><span class="n">xcell</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">toPV</span><span class="p">(</span><span class="n">geo</span><span class="p">),</span> <span class="n">category</span><span class="o">=</span><span class="s1">&#39;Electrodes&#39;</span><span class="p">)</span>
+        <span class="n">ref_pts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geo</span><span class="o">.</span><span class="n">center</span><span class="p">)</span>
+        <span class="n">regions</span><span class="o">.</span><span class="n">addMesh</span><span class="p">(</span><span class="n">xc</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(</span><span class="n">geo</span><span class="p">),</span> <span class="n">category</span><span class="o">=</span><span class="s2">&quot;Electrodes&quot;</span><span class="p">)</span>
 
-<span class="n">p</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">visualizers</span><span class="o">.</span><span class="n">PVScene</span><span class="p">()</span>
+<span class="n">p</span> <span class="o">=</span> <a href="https://docs.pyvista.org/version/stable/api/plotting/_autosummary/pyvista.Plotter.html#pyvista.Plotter" title="pyvista.Plotter" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-class"><span class="n">xc</span><span class="o">.</span><span class="n">visualizers</span><span class="o">.</span><span class="n">PVScene</span></a><span class="p">()</span>
 <span class="n">p</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">regions</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
-<span class="n">p</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<a href="https://docs.pyvista.org/version/stable/api/plotting/_autosummary/pyvista.Plotter.show.html#pyvista.Plotter.show" title="pyvista.Plotter.show" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-method"><span class="n">p</span><span class="o">.</span><span class="n">show</span></a><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../_images/sphx_glr_plot_dbs_probe_001.png" srcset="../_images/sphx_glr_plot_dbs_probe_001.png" alt="plot dbs probe" class = "sphx-glr-single-img"/><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sim</span><span class="o">.</span><span class="n">quickAdaptiveGrid</span><span class="p">(</span><span class="n">maxdepth</span><span class="p">)</span>
+<img src="../_images/sphx_glr_plot_dbs_probe_001.png" srcset="../_images/sphx_glr_plot_dbs_probe_001.png" alt="plot dbs probe" class = "sphx-glr-single-img"/><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sim</span><span class="o">.</span><span class="n">quick_adaptive_grid</span><span class="p">(</span><span class="n">max_depth</span><span class="p">)</span>
 
-<span class="n">vmesh</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">toVTK</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">mesh</span><span class="p">)</span>
-<span class="n">vmesh</span><span class="o">.</span><span class="n">cell_data</span><span class="p">[</span><span class="s1">&#39;sigma&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigma_0</span>
+<a href="https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.UnstructuredGrid.html#pyvista.UnstructuredGrid" title="pyvista.UnstructuredGrid" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">vmesh</span></a> <span class="o">=</span> <span class="n">xc</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">to_vtk</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">mesh</span><span class="p">)</span>
+<a href="https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.DataSet.cell_data.html#pyvista.DataSet.cell_data" title="pyvista.DataSet.cell_data" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-property"><span class="n">vmesh</span><span class="o">.</span><span class="n">cell_data</span></a><span class="p">[</span><span class="s2">&quot;sigma&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigma_0</span>
 
-<span class="n">regions</span><span class="o">.</span><span class="n">assignSigma</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">mesh</span><span class="p">,</span> <span class="n">defaultSigma</span><span class="o">=</span><span class="n">sigma_0</span><span class="p">)</span>
+<span class="n">regions</span><span class="o">.</span><span class="n">assign_sigma</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">mesh</span><span class="p">,</span> <span class="n">default_sigma</span><span class="o">=</span><span class="n">sigma_0</span><span class="p">)</span>
 
-<span class="n">sim</span><span class="o">.</span><span class="n">currentSources</span><span class="p">[</span><span class="n">nmacro</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="mf">150e-6</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">current_sources</span><span class="p">[</span><span class="n">nmacro</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="mf">150e-6</span>
 
 
-<span class="n">sim</span><span class="o">.</span><span class="n">setBoundaryNodes</span><span class="p">()</span>
-<span class="n">v</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">iterativeSolve</span><span class="p">()</span>
-<span class="n">vmesh</span><span class="o">.</span><span class="n">point_data</span><span class="p">[</span><span class="s1">&#39;voltage&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">set_boundary_nodes</span><span class="p">()</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">v</span></a> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+<a href="https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.DataSet.point_data.html#pyvista.DataSet.point_data" title="pyvista.DataSet.point_data" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-property"><span class="n">vmesh</span><span class="o">.</span><span class="n">point_data</span></a><span class="p">[</span><span class="s2">&quot;voltage&quot;</span><span class="p">]</span> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">v</span></a>
 
-<span class="n">vmesh</span><span class="o">.</span><span class="n">set_active_scalars</span><span class="p">(</span><span class="s1">&#39;voltage&#39;</span><span class="p">)</span>
+<a href="https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.DataSet.set_active_scalars.html#pyvista.DataSet.set_active_scalars" title="pyvista.DataSet.set_active_scalars" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-method"><span class="n">vmesh</span><span class="o">.</span><span class="n">set_active_scalars</span></a><span class="p">(</span><span class="s2">&quot;voltage&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;FieldAssociation.POINT: 0&gt;, pyvista_ndarray([0., 0., 0., ..., 0., 0., 0.]))
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">p</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">visualizers</span><span class="o">.</span><span class="n">PVScene</span><span class="p">()</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">p</span> <span class="o">=</span> <a href="https://docs.pyvista.org/version/stable/api/plotting/_autosummary/pyvista.Plotter.html#pyvista.Plotter" title="pyvista.Plotter" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-class"><span class="n">xc</span><span class="o">.</span><span class="n">visualizers</span><span class="o">.</span><span class="n">PVScene</span></a><span class="p">()</span>
 <span class="n">p</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">regions</span><span class="p">)</span>  <span class="c1"># , mesh=vmesh, simData=&#39;voltage&#39;)</span>
 <span class="c1"># p.camera.tight(padding=0.1)</span>
-<span class="n">p</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">vmesh</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">normal</span><span class="o">=</span><span class="s1">&#39;z&#39;</span><span class="p">),</span> <span class="n">show_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-           <span class="n">cmap</span><span class="o">=</span><span class="n">xcell</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">CM_BIPOLAR</span><span class="p">)</span>
-<span class="n">cambox</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">hippo</span><span class="o">.</span><span class="n">bounds</span><span class="p">)</span>
-<span class="n">cambox</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span> <span class="o">=</span> <span class="mf">0.</span>
+<a href="https://docs.pyvista.org/version/stable/api/plotting/_autosummary/pyvista.Plotter.add_mesh.html#pyvista.Plotter.add_mesh" title="pyvista.Plotter.add_mesh" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-method"><span class="n">p</span><span class="o">.</span><span class="n">add_mesh</span></a><span class="p">(</span><a href="https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.DataSetFilters.slice.html#pyvista.DataSetFilters.slice" title="pyvista.DataSetFilters.slice" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-method"><span class="n">vmesh</span><span class="o">.</span><span class="n">slice</span></a><span class="p">(</span><span class="n">normal</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">),</span> <span class="n">show_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.LinearSegmentedColormap.html#matplotlib.colors.LinearSegmentedColormap" title="matplotlib.colors.LinearSegmentedColormap" class="sphx-glr-backref-module-matplotlib-colors sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">xc</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">CM_BIPOLAR</span></a><span class="p">)</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">cambox</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span><a href="https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.DataSet.bounds.html#pyvista.DataSet.bounds" title="pyvista.DataSet.bounds" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-property"><span class="n">hippo</span><span class="o">.</span><span class="n">bounds</span></a><span class="p">)</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">cambox</span></a><span class="p">[</span><span class="mi">4</span><span class="p">:]</span> <span class="o">=</span> <span class="mf">0.0</span>
 <span class="c1"># p.reset_camera(bounds=cambox)</span>
-<span class="n">p</span><span class="o">.</span><span class="n">view_xy</span><span class="p">()</span>
-<span class="n">p</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<a href="https://docs.pyvista.org/version/stable/api/plotting/_autosummary/pyvista.Plotter.view_xy.html#pyvista.Plotter.view_xy" title="pyvista.Plotter.view_xy" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-method"><span class="n">p</span><span class="o">.</span><span class="n">view_xy</span></a><span class="p">()</span>
+<a href="https://docs.pyvista.org/version/stable/api/plotting/_autosummary/pyvista.Plotter.show.html#pyvista.Plotter.show" title="pyvista.Plotter.show" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-method"><span class="n">p</span><span class="o">.</span><span class="n">show</span></a><span class="p">()</span>
 <span class="c1"># sphinx_gallery_thumbnail_number = 3</span>
 
 <span class="c1"># Save outputs</span>
-<span class="n">regions</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">&#39;Geometry/composite.vtm&#39;</span><span class="p">)</span>
+<a href="https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.DataObject.save.html#pyvista.DataObject.save" title="pyvista.DataObject.save" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-method"><span class="n">regions</span><span class="o">.</span><span class="n">save</span></a><span class="p">(</span><span class="s2">&quot;Geometry/composite.vtm&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../_images/sphx_glr_plot_dbs_probe_002.png" srcset="../_images/sphx_glr_plot_dbs_probe_002.png" alt="plot dbs probe" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 2 minutes  41.202 seconds)</p>
+<img src="../_images/sphx_glr_plot_dbs_probe_002.png" srcset="../_images/sphx_glr_plot_dbs_probe_002.png" alt="plot dbs probe" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 51.256 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-dbs-probe-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/10e61232e3403684b4390fac84be5f77/plot_dbs_probe.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_dbs_probe.py</span></code></a></p>
@@ -281,34 +542,104 @@ to download the full example code</p>
 </section>
 
 
-           </div>
-          </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="plot_singleStep.html" class="btn btn-neutral float-left" title="Single timestep" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="plot_comparisons.html" class="btn btn-neutral float-right" title="Depth sweep" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p>&#169; Copyright 2022, CBC Girard.</p>
-  </div>
-
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
-
-</footer>
-        </div>
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="plot_singleStep.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Single timestep</p>
       </div>
-    </section>
-  </div>
-  <script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script> 
+    </a>
+    <a class="right-next"
+       href="plot_comparisons.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Depth sweep</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
 
-</body>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../_sources/auto_examples/plot_dbs_probe.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2022, CBC Girard.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.5.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
 </html>

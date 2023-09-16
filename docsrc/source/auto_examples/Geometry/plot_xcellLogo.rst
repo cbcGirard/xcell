@@ -20,7 +20,7 @@
 
 Logo
 =============
-Generates the xcell logo from point cloud
+Generates the xc logo from point cloud
 
 Original text layout in Inkscape, text bounds resampled using Roughen path effect with all displacements=0, then exported with Path to Gcode extension.
 
@@ -30,11 +30,11 @@ Original canvas bounds are ((0,32), (0,32))
 
 .. code-block:: default
 
-
-    import xcell
+    import xcell as xc
     import pandas
     import numpy as np
     import matplotlib.pyplot as plt
+    from matplotlib.animation import ArtistAnimation
     import re
     import pickle
     import time
@@ -42,12 +42,12 @@ Original canvas bounds are ((0,32), (0,32))
     csv = 'pts.csv'
     ptsFile = 'logo.xpts'
 
-    convertGcode=False
-    showOriginalPoints=False
+    convertGcode = False
+    showOriginalPoints = False
 
     bbox = np.array([0, 0, -32, 32, 32, 32])
 
-    xcell.colors.useDarkStyle()
+    xc.colors.use_dark_style()
     color = 'base'
     logoFPS = 6
 
@@ -64,14 +64,14 @@ Convert gcode to array of points
 ---------------------------------------
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 38-57
+.. GENERATED FROM PYTHON SOURCE LINES 38-56
 
 .. code-block:: default
 
 
     if convertGcode:
 
-        f = open('xcelldense.ngc', 'r')
+        f = open('xcdense.ngc', 'r')
         txt = f.read()
         f.close()
 
@@ -82,9 +82,8 @@ Convert gcode to array of points
         ctext.write(extract.replace('Y', '').replace('X', '').replace(' ', ','))
         ctext.close()
 
-
         pts = pandas.read_csv(csv).to_numpy()
-        okPts = ~np.any(np.isnan(pts),axis=1)
+        okPts = ~np.any(np.isnan(pts), axis=1)
         pickle.dump(pts[okPts], open(ptsFile, 'wb'))
 
 
@@ -94,43 +93,43 @@ Convert gcode to array of points
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 58-61
+.. GENERATED FROM PYTHON SOURCE LINES 57-60
 
 Generate meshes from points
 ---------------------------------
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 61-91
+.. GENERATED FROM PYTHON SOURCE LINES 60-90
 
 .. code-block:: default
 
 
     pts = pickle.load(open(ptsFile, 'rb'))
 
-    tstart=time.monotonic()
-    setup = xcell.Simulation('', bbox)
+    tstart = time.monotonic()
+    setup = xc.Simulation('', bbox)
 
 
     meshPts = []
     artists = []
 
-    npts=pts.shape[0]
+    npts = pts.shape[0]
     for d in range(0, 12):
 
-        depths=d*np.ones(npts,dtype=int)
-        co=np.ones(npts)
+        depths = d*np.ones(npts, dtype=int)
+        co = np.ones(npts)
 
-        setup.makeAdaptiveGrid(refPts=pts,
-                               maxdepth=depths,
+        setup.make_adaptive_grid(ref_pts=pts,
+                               max_depth=depths,
                                coefs=co,
-                               minl0Function=xcell.generalMetric,
+                               min_l0_function=xc.general_metric,
                                coarsen=False)
-        setup.finalizeMesh()
+        setup.finalize_mesh()
 
-        _, _, elPts = setup.getElementsInPlane()
+        _, _, elPts = setup.get_elements_in_plane()
         meshPts.append(elPts)
 
-    t_tot=time.monotonic()-tstart
+    t_tot = time.monotonic()-tstart
 
     pickle.dump(meshPts, open('logoMesh.p', 'wb'))
 
@@ -141,52 +140,53 @@ Generate meshes from points
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 92-95
+.. GENERATED FROM PYTHON SOURCE LINES 91-94
 
 Make logo image and animation
 -------------------------------
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 95-131
+.. GENERATED FROM PYTHON SOURCE LINES 94-131
 
 .. code-block:: default
 
 
-    dpi=100
+    dpi = 100
 
-    with plt.rc_context({'figure.figsize':[19.2, 10.8],
-                         'figure.dpi':dpi,
-                         'toolbar':'None',
+    with plt.rc_context({'figure.figsize': [19.2, 10.8],
+                         'figure.dpi': dpi,
+                         'toolbar': 'None',
                          }):
 
         fig, ax = plt.subplots()
-        ax.set_xlim(1.,31.)
+        ax.set_xlim(1., 31.)
         ax.set_ylim(1., 23.)
         ax.axis('Off')
         ax.margins(0)
 
-        col = xcell.colors.BASE
-        artists = [[xcell.visualizers.showEdges2d(
-            ax, p, edgeColors=col, alpha=0.2, linewidth=1.5)] for p in meshPts[:13]]
+        col = xc.colors.BASE
+        artists = [[xc.visualizers.show_2d_edges(
+            ax, p, edge_colors=col, alpha=0.2, linewidth=1.5)] for p in meshPts[:13]]
 
-        #pad ending frame
+        # pad ending frame
         artists.append(artists[-1])
         artists.append(artists[-1])
 
-        ani = xcell.visualizers.ArtistAnimation(fig, artists, interval=1000//logoFPS)
+        ani = ArtistAnimation(
+            fig, artists, interval=1000//logoFPS)
 
         outFile = 'logo'
 
         ani.save(outFile+'.mp4', fps=logoFPS, dpi=dpi)
         fig.savefig(outFile+'.svg', dpi=dpi)
 
-        tlogo=len(artists)/logoFPS
-        print('%.2f second logo made in %.0f seconds'%(tlogo, t_tot))
+        tlogo = len(artists)/logoFPS
+        print('%.2f second logo made in %.0f seconds' % (tlogo, t_tot))
 
         if showOriginalPoints:
             # Optionally visualize guide points
-            x,y,_=np.hsplit(pts,3)
-            plt.scatter(x,y)
+            x, y, _ = np.hsplit(pts, 3)
+            plt.scatter(x, y)
 
 
 
@@ -379,42 +379,42 @@ Make logo image and animation
      </style>
 
      <div class="animation">
-       <img id="_anim_imgf7e7af8315bd4d21847736588c612438">
+       <img class="dark-light" id="_anim_imgb60b840154b845e1ba6facea59de6271">
        <div class="anim-controls">
-         <input id="_anim_sliderf7e7af8315bd4d21847736588c612438" type="range" class="anim-slider"
+         <input id="_anim_sliderb60b840154b845e1ba6facea59de6271" type="range" class="anim-slider"
                 name="points" min="0" max="1" step="1" value="0"
-                oninput="animf7e7af8315bd4d21847736588c612438.set_frame(parseInt(this.value));">
+                oninput="animb60b840154b845e1ba6facea59de6271.set_frame(parseInt(this.value));">
          <div class="anim-buttons">
-           <button title="Decrease speed" aria-label="Decrease speed" onclick="animf7e7af8315bd4d21847736588c612438.slower()">
+           <button title="Decrease speed" aria-label="Decrease speed" onclick="animb60b840154b845e1ba6facea59de6271.slower()">
                <i class="fa fa-minus"></i></button>
-           <button title="First frame" aria-label="First frame" onclick="animf7e7af8315bd4d21847736588c612438.first_frame()">
+           <button title="First frame" aria-label="First frame" onclick="animb60b840154b845e1ba6facea59de6271.first_frame()">
              <i class="fa fa-fast-backward"></i></button>
-           <button title="Previous frame" aria-label="Previous frame" onclick="animf7e7af8315bd4d21847736588c612438.previous_frame()">
+           <button title="Previous frame" aria-label="Previous frame" onclick="animb60b840154b845e1ba6facea59de6271.previous_frame()">
                <i class="fa fa-step-backward"></i></button>
-           <button title="Play backwards" aria-label="Play backwards" onclick="animf7e7af8315bd4d21847736588c612438.reverse_animation()">
+           <button title="Play backwards" aria-label="Play backwards" onclick="animb60b840154b845e1ba6facea59de6271.reverse_animation()">
                <i class="fa fa-play fa-flip-horizontal"></i></button>
-           <button title="Pause" aria-label="Pause" onclick="animf7e7af8315bd4d21847736588c612438.pause_animation()">
+           <button title="Pause" aria-label="Pause" onclick="animb60b840154b845e1ba6facea59de6271.pause_animation()">
                <i class="fa fa-pause"></i></button>
-           <button title="Play" aria-label="Play" onclick="animf7e7af8315bd4d21847736588c612438.play_animation()">
+           <button title="Play" aria-label="Play" onclick="animb60b840154b845e1ba6facea59de6271.play_animation()">
                <i class="fa fa-play"></i></button>
-           <button title="Next frame" aria-label="Next frame" onclick="animf7e7af8315bd4d21847736588c612438.next_frame()">
+           <button title="Next frame" aria-label="Next frame" onclick="animb60b840154b845e1ba6facea59de6271.next_frame()">
                <i class="fa fa-step-forward"></i></button>
-           <button title="Last frame" aria-label="Last frame" onclick="animf7e7af8315bd4d21847736588c612438.last_frame()">
+           <button title="Last frame" aria-label="Last frame" onclick="animb60b840154b845e1ba6facea59de6271.last_frame()">
                <i class="fa fa-fast-forward"></i></button>
-           <button title="Increase speed" aria-label="Increase speed" onclick="animf7e7af8315bd4d21847736588c612438.faster()">
+           <button title="Increase speed" aria-label="Increase speed" onclick="animb60b840154b845e1ba6facea59de6271.faster()">
                <i class="fa fa-plus"></i></button>
          </div>
-         <form title="Repetition mode" aria-label="Repetition mode" action="#n" name="_anim_loop_selectf7e7af8315bd4d21847736588c612438"
+         <form title="Repetition mode" aria-label="Repetition mode" action="#n" name="_anim_loop_selectb60b840154b845e1ba6facea59de6271"
                class="anim-state">
-           <input type="radio" name="state" value="once" id="_anim_radio1_f7e7af8315bd4d21847736588c612438"
+           <input type="radio" name="state" value="once" id="_anim_radio1_b60b840154b845e1ba6facea59de6271"
                   >
-           <label for="_anim_radio1_f7e7af8315bd4d21847736588c612438">Once</label>
-           <input type="radio" name="state" value="loop" id="_anim_radio2_f7e7af8315bd4d21847736588c612438"
+           <label for="_anim_radio1_b60b840154b845e1ba6facea59de6271">Once</label>
+           <input type="radio" name="state" value="loop" id="_anim_radio2_b60b840154b845e1ba6facea59de6271"
                   checked>
-           <label for="_anim_radio2_f7e7af8315bd4d21847736588c612438">Loop</label>
-           <input type="radio" name="state" value="reflect" id="_anim_radio3_f7e7af8315bd4d21847736588c612438"
+           <label for="_anim_radio2_b60b840154b845e1ba6facea59de6271">Loop</label>
+           <input type="radio" name="state" value="reflect" id="_anim_radio3_b60b840154b845e1ba6facea59de6271"
                   >
-           <label for="_anim_radio3_f7e7af8315bd4d21847736588c612438">Reflect</label>
+           <label for="_anim_radio3_b60b840154b845e1ba6facea59de6271">Reflect</label>
          </form>
        </div>
      </div>
@@ -424,9 +424,9 @@ Make logo image and animation
        /* Instantiate the Animation class. */
        /* The IDs given should match those used in the template above. */
        (function() {
-         var img_id = "_anim_imgf7e7af8315bd4d21847736588c612438";
-         var slider_id = "_anim_sliderf7e7af8315bd4d21847736588c612438";
-         var loop_select_id = "_anim_loop_selectf7e7af8315bd4d21847736588c612438";
+         var img_id = "_anim_imgb60b840154b845e1ba6facea59de6271";
+         var slider_id = "_anim_sliderb60b840154b845e1ba6facea59de6271";
+         var loop_select_id = "_anim_loop_selectb60b840154b845e1ba6facea59de6271";
          var frames = new Array(14);
     
        frames[0] = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAB3oAAAQ0CAYAAACYfx1oAAAAOXRFWHRTb2Z0d2FyZQBNYXRwbG90\
@@ -6826,7 +6826,7 @@ Make logo image and animation
          /* set a timeout to make sure all the above elements are created before
             the object is initialized. */
          setTimeout(function() {
-             animf7e7af8315bd4d21847736588c612438 = new Animation(frames, img_id, slider_id, 165.0,
+             animb60b840154b845e1ba6facea59de6271 = new Animation(frames, img_id, slider_id, 165.0,
                                       loop_select_id);
          }, 0);
        })()
@@ -6838,7 +6838,7 @@ Make logo image and animation
 
  .. code-block:: none
 
-    2.33 second logo made in 28 seconds
+    2.33 second logo made in 40 seconds
 
 
 
@@ -6846,7 +6846,7 @@ Make logo image and animation
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  36.185 seconds)
+   **Total running time of the script:** (0 minutes 44.740 seconds)
 
 
 .. _sphx_glr_download_auto_examples_Geometry_plot_xcellLogo.py:

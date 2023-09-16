@@ -10,7 +10,7 @@
     .. note::
         :class: sphx-glr-download-link-note
 
-        Click :ref:`here <sphx_glr_download_auto_examples_Geometry_plot_brainStyle.py>`
+        :ref:`Go to the end <sphx_glr_download_auto_examples_Geometry_plot_brainStyle.py>`
         to download the full example code
 
 .. rst-class:: sphx-glr-example-title
@@ -24,7 +24,7 @@ Multiresolution meshing from an existing surface mesh.
 
 Original mesh, generated from MRI data, is available at `<https://3dprint.nih.gov/discover/3DPX-000320>`_
 
-.. GENERATED FROM PYTHON SOURCE LINES 11-44
+.. GENERATED FROM PYTHON SOURCE LINES 11-47
 
 .. code-block:: default
 
@@ -35,31 +35,34 @@ Original mesh, generated from MRI data, is available at `<https://3dprint.nih.go
     import tqdm
     from vtk import VTK_QUAD
 
-    stl = pv.read('full_oriented_simpler.stl')
+    stl = pv.read("full_oriented_simpler.stl")
 
     # pv.set_jupyter_backend(None)
 
     pts = stl.points
     ax = 2
 
-    bbox = np.hstack((np.min(pts, axis=0),
-                      np.max(pts, axis=0)))
-    xmax = np.max(np.abs(bbox))*1.5
+    bbox = np.hstack((np.min(pts, axis=0), np.max(pts, axis=0)))
+    xmax = np.max(np.abs(bbox)) * 1.5
 
     mindepth = 2
-    maxdepth = 10
+    max_depth = 6
 
-    setup = xcell.Simulation('brain', xmax*np.sign(bbox), True)
+    setup = xcell.Simulation("brain", xmax * np.sign(bbox), True)
 
     # interpolate by bounds
-    idealDepth = mindepth+(maxdepth-mindepth)*(pts[:, 2]-bbox[2])/(bbox[5]-bbox[2])
-    metfun = xcell.generalMetric
+    idealDepth = mindepth + (max_depth - mindepth) * (pts[:, 2] - bbox[2]) / (bbox[5] - bbox[2])
+    metfun = xcell.general_metric
 
-    setup.makeAdaptiveGrid(refPts=pts, maxdepth=idealDepth.astype(
-        int), minl0Function=metfun, coefs=0.2*np.ones_like(idealDepth),
-        coarsen=False)
+    setup.make_adaptive_grid(
+        ref_pts=pts,
+        max_depth=idealDepth.astype(int),
+        min_l0_function=metfun,
+        coefs=0.2 * np.ones_like(idealDepth),
+        coarsen=False,
+    )
 
-    setup.finalizeMesh()
+    setup.finalize_mesh()
 
 
 
@@ -70,27 +73,27 @@ Original mesh, generated from MRI data, is available at `<https://3dprint.nih.go
  .. code-block:: none
 
     Make elements starting
-    Make elements: 147.527s [CPU], 147.546s [wall]
+    Make elements: 34.2734s [CPU], 34.2656s [wall]
     Finalize mesh starting
-    Finalize mesh: 5.7055s [CPU], 5.70583s [wall]
+    Finalize mesh: 64.389 ms [CPU], 64.2962 ms [wall]
     Calculate conductances starting
-    Calculate conductances: 13.0718s [CPU], 13.0729s [wall]
+    Calculate conductances: 116.174 ms [CPU], 116.174 ms [wall]
     Renumber nodes starting
-    Renumber nodes: 9.81224s [CPU], 3.09812s [wall]
+    Renumber nodes: 321.12 ms [CPU], 244.579 ms [wall]
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 45-52
+.. GENERATED FROM PYTHON SOURCE LINES 48-55
 
 .. code-block:: default
 
-    adj = setup.mesh.getElementAdjacencies()
+    adj = setup.mesh.get_element_adjacencies()
     # reg = xcell.io.Regions()
     # stl.cell_data['sigma'] = 1.
     # reg['Conductors'].append(stl)
 
-    # reg.assignSigma(setup.mesh, defaultSigma=0)
+    # reg.assign_sigma(setup.mesh, default_sigma=0)
 
 
 
@@ -100,24 +103,24 @@ Original mesh, generated from MRI data, is available at `<https://3dprint.nih.go
 
  .. code-block:: none
 
-    Calculating adjacency:   0%|          | 0/1551649 [00:00<?, ?it/s]    Calculating adjacency:   0%|          | 1/1551649 [00:00<175:36:34,  2.45it/s]    Calculating adjacency:   0%|          | 4626/1551649 [00:00<02:08, 12007.97it/s]    Calculating adjacency:   1%|          | 9172/1551649 [00:00<01:13, 21057.24it/s]    Calculating adjacency:   1%|          | 13527/1551649 [00:00<00:56, 27325.70it/s]    Calculating adjacency:   1%|1         | 18068/1551649 [00:00<00:47, 32475.46it/s]    Calculating adjacency:   1%|1         | 22595/1551649 [00:00<00:42, 36174.20it/s]    Calculating adjacency:   2%|1         | 27153/1551649 [00:01<00:39, 38918.46it/s]    Calculating adjacency:   2%|2         | 31693/1551649 [00:01<00:37, 40825.42it/s]    Calculating adjacency:   2%|2         | 36105/1551649 [00:01<00:36, 41473.47it/s]    Calculating adjacency:   3%|2         | 40481/1551649 [00:01<00:36, 41627.70it/s]    Calculating adjacency:   3%|2         | 44817/1551649 [00:01<00:35, 42136.12it/s]    Calculating adjacency:   3%|3         | 49143/1551649 [00:01<00:35, 41814.29it/s]    Calculating adjacency:   3%|3         | 53403/1551649 [00:01<00:36, 41540.69it/s]    Calculating adjacency:   4%|3         | 57612/1551649 [00:01<00:36, 40837.28it/s]    Calculating adjacency:   4%|3         | 61843/1551649 [00:01<00:36, 41264.56it/s]    Calculating adjacency:   4%|4         | 65999/1551649 [00:01<00:35, 41319.03it/s]    Calculating adjacency:   5%|4         | 70189/1551649 [00:02<00:35, 41488.06it/s]    Calculating adjacency:   5%|4         | 74353/1551649 [00:02<00:35, 41402.94it/s]    Calculating adjacency:   5%|5         | 78504/1551649 [00:02<00:35, 41372.52it/s]    Calculating adjacency:   5%|5         | 82649/1551649 [00:02<00:35, 41279.41it/s]    Calculating adjacency:   6%|5         | 86782/1551649 [00:02<00:35, 41231.15it/s]    Calculating adjacency:   6%|5         | 90909/1551649 [00:02<00:35, 40974.03it/s]    Calculating adjacency:   6%|6         | 95010/1551649 [00:02<00:35, 40848.13it/s]    Calculating adjacency:   6%|6         | 99097/1551649 [00:02<00:35, 40716.39it/s]    Calculating adjacency:   7%|6         | 103170/1551649 [00:02<00:35, 40506.34it/s]    Calculating adjacency:   7%|6         | 107222/1551649 [00:02<00:35, 40191.99it/s]    Calculating adjacency:   7%|7         | 111243/1551649 [00:03<00:36, 39949.92it/s]    Calculating adjacency:   7%|7         | 115239/1551649 [00:03<00:36, 39648.85it/s]    Calculating adjacency:   8%|7         | 119205/1551649 [00:03<00:36, 39413.48it/s]    Calculating adjacency:   8%|7         | 123147/1551649 [00:03<00:36, 39294.99it/s]    Calculating adjacency:   8%|8         | 127077/1551649 [00:03<00:36, 39118.74it/s]    Calculating adjacency:   8%|8         | 130990/1551649 [00:03<00:36, 39011.64it/s]    Calculating adjacency:   9%|8         | 134892/1551649 [00:03<00:36, 38787.70it/s]    Calculating adjacency:   9%|8         | 138793/1551649 [00:03<00:36, 38851.87it/s]    Calculating adjacency:   9%|9         | 142679/1551649 [00:03<00:36, 38517.21it/s]    Calculating adjacency:   9%|9         | 146532/1551649 [00:07<06:33, 3571.77it/s]     Calculating adjacency:  10%|9         | 150422/1551649 [00:07<04:45, 4906.86it/s]    Calculating adjacency:  10%|9         | 154502/1551649 [00:07<03:27, 6745.37it/s]    Calculating adjacency:  10%|#         | 158586/1551649 [00:07<02:33, 9069.98it/s]    Calculating adjacency:  10%|#         | 162539/1551649 [00:07<01:57, 11773.40it/s]    Calculating adjacency:  11%|#         | 166484/1551649 [00:07<01:33, 14887.69it/s]    Calculating adjacency:  11%|#         | 170430/1551649 [00:07<01:15, 18290.54it/s]    Calculating adjacency:  11%|#1        | 174346/1551649 [00:07<01:03, 21736.62it/s]    Calculating adjacency:  11%|#1        | 178198/1551649 [00:08<00:55, 24929.65it/s]    Calculating adjacency:  12%|#1        | 182144/1551649 [00:08<00:48, 28040.72it/s]    Calculating adjacency:  12%|#1        | 186040/1551649 [00:08<00:44, 30597.73it/s]    Calculating adjacency:  12%|#2        | 190016/1551649 [00:08<00:41, 32894.59it/s]    Calculating adjacency:  13%|#2        | 193983/1551649 [00:08<00:39, 34679.98it/s]    Calculating adjacency:  13%|#2        | 197946/1551649 [00:08<00:37, 36033.58it/s]    Calculating adjacency:  13%|#3        | 201885/1551649 [00:08<00:36, 36804.45it/s]    Calculating adjacency:  13%|#3        | 205841/1551649 [00:08<00:35, 37590.91it/s]    Calculating adjacency:  14%|#3        | 209804/1551649 [00:08<00:35, 38180.77it/s]    Calculating adjacency:  14%|#3        | 213744/1551649 [00:08<00:34, 38536.12it/s]    Calculating adjacency:  14%|#4        | 217684/1551649 [00:09<00:34, 38790.06it/s]    Calculating adjacency:  14%|#4        | 221624/1551649 [00:09<00:34, 38881.01it/s]    Calculating adjacency:  15%|#4        | 225653/1551649 [00:09<00:33, 39297.98it/s]    Calculating adjacency:  15%|#4        | 229630/1551649 [00:09<00:33, 39438.06it/s]    Calculating adjacency:  15%|#5        | 233596/1551649 [00:09<00:33, 39348.12it/s]    Calculating adjacency:  15%|#5        | 237546/1551649 [00:09<00:33, 39391.87it/s]    Calculating adjacency:  16%|#5        | 241496/1551649 [00:09<00:33, 39232.33it/s]    Calculating adjacency:  16%|#5        | 245427/1551649 [00:09<00:33, 39181.74it/s]    Calculating adjacency:  16%|#6        | 249365/1551649 [00:09<00:33, 39239.90it/s]    Calculating adjacency:  16%|#6        | 253328/1551649 [00:09<00:32, 39354.33it/s]    Calculating adjacency:  17%|#6        | 257267/1551649 [00:10<00:33, 39166.55it/s]    Calculating adjacency:  17%|#6        | 261186/1551649 [00:10<00:33, 39060.01it/s]    Calculating adjacency:  17%|#7        | 265128/1551649 [00:10<00:32, 39164.68it/s]    Calculating adjacency:  17%|#7        | 269059/1551649 [00:10<00:32, 39205.25it/s]    Calculating adjacency:  18%|#7        | 273013/1551649 [00:10<00:32, 39303.23it/s]    Calculating adjacency:  18%|#7        | 276944/1551649 [00:10<00:32, 39267.77it/s]    Calculating adjacency:  18%|#8        | 280872/1551649 [00:10<00:32, 39097.04it/s]    Calculating adjacency:  18%|#8        | 284794/1551649 [00:10<00:32, 39132.82it/s]    Calculating adjacency:  19%|#8        | 288744/1551649 [00:10<00:32, 39242.21it/s]    Calculating adjacency:  19%|#8        | 292699/1551649 [00:10<00:32, 39332.16it/s]    Calculating adjacency:  19%|#9        | 296633/1551649 [00:11<00:31, 39322.58it/s]    Calculating adjacency:  19%|#9        | 300566/1551649 [00:11<00:31, 39210.91it/s]    Calculating adjacency:  20%|#9        | 304488/1551649 [00:11<00:31, 39168.81it/s]    Calculating adjacency:  20%|#9        | 308405/1551649 [00:11<00:31, 39162.56it/s]    Calculating adjacency:  20%|##        | 312348/1551649 [00:11<00:31, 39242.10it/s]    Calculating adjacency:  20%|##        | 316367/1551649 [00:11<00:31, 39524.19it/s]    Calculating adjacency:  21%|##        | 320538/1551649 [00:11<00:30, 40177.28it/s]    Calculating adjacency:  21%|##        | 324556/1551649 [00:11<00:30, 40068.63it/s]    Calculating adjacency:  21%|##1       | 328564/1551649 [00:11<00:30, 39828.34it/s]    Calculating adjacency:  21%|##1       | 332548/1551649 [00:11<00:30, 39687.30it/s]    Calculating adjacency:  22%|##1       | 336518/1551649 [00:12<00:30, 39570.38it/s]    Calculating adjacency:  22%|##1       | 340476/1551649 [00:12<00:30, 39480.99it/s]    Calculating adjacency:  22%|##2       | 344425/1551649 [00:12<00:30, 39354.62it/s]    Calculating adjacency:  22%|##2       | 348361/1551649 [00:12<00:30, 39293.42it/s]    Calculating adjacency:  23%|##2       | 352733/1551649 [00:12<00:29, 40611.09it/s]    Calculating adjacency:  23%|##3       | 357045/1551649 [00:12<00:28, 41359.75it/s]    Calculating adjacency:  23%|##3       | 361192/1551649 [00:12<00:28, 41389.38it/s]    Calculating adjacency:  24%|##3       | 365530/1551649 [00:12<00:28, 41982.26it/s]    Calculating adjacency:  24%|##3       | 369729/1551649 [00:12<00:28, 41888.14it/s]    Calculating adjacency:  24%|##4       | 373979/1551649 [00:12<00:27, 42069.81it/s]    Calculating adjacency:  24%|##4       | 378211/1551649 [00:13<00:27, 42141.91it/s]    Calculating adjacency:  25%|##4       | 382426/1551649 [00:13<00:27, 42025.27it/s]    Calculating adjacency:  25%|##4       | 386629/1551649 [00:13<00:27, 41793.41it/s]    Calculating adjacency:  25%|##5       | 390809/1551649 [00:13<00:27, 41529.70it/s]    Calculating adjacency:  25%|##5       | 394963/1551649 [00:13<00:28, 41070.88it/s]    Calculating adjacency:  26%|##5       | 399072/1551649 [00:13<00:28, 40544.81it/s]    Calculating adjacency:  26%|##5       | 403129/1551649 [00:13<00:28, 40057.11it/s]    Calculating adjacency:  26%|##6       | 407137/1551649 [00:13<00:28, 39880.75it/s]    Calculating adjacency:  26%|##6       | 411127/1551649 [00:13<00:28, 39823.72it/s]    Calculating adjacency:  27%|##6       | 415110/1551649 [00:14<00:28, 39582.20it/s]    Calculating adjacency:  27%|##7       | 419069/1551649 [00:14<00:28, 39484.04it/s]    Calculating adjacency:  27%|##7       | 423018/1551649 [00:14<00:28, 39347.17it/s]    Calculating adjacency:  28%|##7       | 426954/1551649 [00:14<00:28, 39350.40it/s]    Calculating adjacency:  28%|##7       | 430909/1551649 [00:14<00:28, 39409.20it/s]    Calculating adjacency:  28%|##8       | 434851/1551649 [00:14<00:28, 39402.06it/s]    Calculating adjacency:  28%|##8       | 438803/1551649 [00:14<00:28, 39435.21it/s]    Calculating adjacency:  29%|##8       | 442747/1551649 [00:14<00:28, 39229.42it/s]    Calculating adjacency:  29%|##8       | 446676/1551649 [00:14<00:28, 39246.05it/s]    Calculating adjacency:  29%|##9       | 450601/1551649 [00:14<00:28, 39204.26it/s]    Calculating adjacency:  29%|##9       | 454573/1551649 [00:15<00:27, 39355.53it/s]    Calculating adjacency:  30%|##9       | 458595/1551649 [00:15<00:27, 39611.71it/s]    Calculating adjacency:  30%|##9       | 462745/1551649 [00:15<00:27, 40174.77it/s]    Calculating adjacency:  30%|###       | 466806/1551649 [00:15<00:26, 40303.88it/s]    Calculating adjacency:  30%|###       | 470872/1551649 [00:15<00:26, 40410.02it/s]    Calculating adjacency:  31%|###       | 474931/1551649 [00:15<00:26, 40461.68it/s]    Calculating adjacency:  31%|###       | 478978/1551649 [00:15<00:26, 40015.46it/s]    Calculating adjacency:  31%|###1      | 482981/1551649 [00:15<00:26, 39812.74it/s]    Calculating adjacency:  31%|###1      | 486964/1551649 [00:15<00:26, 39602.12it/s]    Calculating adjacency:  32%|###1      | 490925/1551649 [00:15<00:27, 39252.78it/s]    Calculating adjacency:  32%|###1      | 494852/1551649 [00:16<00:26, 39172.40it/s]    Calculating adjacency:  32%|###2      | 498800/1551649 [00:16<00:26, 39262.93it/s]    Calculating adjacency:  32%|###2      | 502727/1551649 [00:16<00:26, 39043.08it/s]    Calculating adjacency:  33%|###2      | 506632/1551649 [00:16<00:26, 38942.84it/s]    Calculating adjacency:  33%|###2      | 510527/1551649 [00:16<00:26, 38815.40it/s]    Calculating adjacency:  33%|###3      | 514409/1551649 [00:16<00:26, 38673.43it/s]    Calculating adjacency:  33%|###3      | 518322/1551649 [00:16<00:26, 38808.36it/s]    Calculating adjacency:  34%|###3      | 522300/1551649 [00:16<00:26, 39097.60it/s]    Calculating adjacency:  34%|###3      | 526268/1551649 [00:16<00:26, 39270.74it/s]    Calculating adjacency:  34%|###4      | 530254/1551649 [00:16<00:25, 39446.17it/s]    Calculating adjacency:  34%|###4      | 534207/1551649 [00:17<00:25, 39469.62it/s]    Calculating adjacency:  35%|###4      | 538172/1551649 [00:17<00:25, 39521.26it/s]    Calculating adjacency:  35%|###4      | 542146/1551649 [00:17<00:25, 39586.23it/s]    Calculating adjacency:  35%|###5      | 546116/1551649 [00:17<00:25, 39617.57it/s]    Calculating adjacency:  35%|###5      | 550078/1551649 [00:17<00:25, 39589.11it/s]    Calculating adjacency:  36%|###5      | 554037/1551649 [00:17<00:25, 39583.08it/s]    Calculating adjacency:  36%|###5      | 558003/1551649 [00:17<00:25, 39603.40it/s]    Calculating adjacency:  36%|###6      | 562035/1551649 [00:17<00:24, 39815.71it/s]    Calculating adjacency:  36%|###6      | 566093/1551649 [00:17<00:24, 40042.61it/s]    Calculating adjacency:  37%|###6      | 570134/1551649 [00:17<00:24, 40149.73it/s]    Calculating adjacency:  37%|###7      | 574149/1551649 [00:18<00:24, 39866.84it/s]    Calculating adjacency:  37%|###7      | 578141/1551649 [00:18<00:24, 39880.62it/s]    Calculating adjacency:  38%|###7      | 582130/1551649 [00:18<00:24, 39694.44it/s]    Calculating adjacency:  38%|###7      | 586100/1551649 [00:18<00:24, 39689.48it/s]    Calculating adjacency:  38%|###8      | 590070/1551649 [00:18<00:24, 39673.95it/s]    Calculating adjacency:  38%|###8      | 594038/1551649 [00:18<00:24, 39662.82it/s]    Calculating adjacency:  39%|###8      | 598009/1551649 [00:18<00:24, 39676.07it/s]    Calculating adjacency:  39%|###8      | 601977/1551649 [00:18<00:23, 39646.38it/s]    Calculating adjacency:  39%|###9      | 605992/1551649 [00:18<00:23, 39794.53it/s]    Calculating adjacency:  39%|###9      | 609972/1551649 [00:18<00:23, 39644.85it/s]    Calculating adjacency:  40%|###9      | 613937/1551649 [00:19<00:23, 39543.22it/s]    Calculating adjacency:  40%|###9      | 617892/1551649 [00:19<00:23, 39469.67it/s]    Calculating adjacency:  40%|####      | 621852/1551649 [00:19<00:23, 39507.85it/s]    Calculating adjacency:  40%|####      | 625850/1551649 [00:19<00:23, 39646.73it/s]    Calculating adjacency:  41%|####      | 629815/1551649 [00:19<00:23, 39637.42it/s]    Calculating adjacency:  41%|####      | 633789/1551649 [00:19<00:23, 39666.25it/s]    Calculating adjacency:  41%|####1     | 637763/1551649 [00:19<00:23, 39687.97it/s]    Calculating adjacency:  41%|####1     | 641732/1551649 [00:19<00:22, 39637.66it/s]    Calculating adjacency:  42%|####1     | 645696/1551649 [00:19<00:22, 39637.92it/s]    Calculating adjacency:  42%|####1     | 649681/1551649 [00:19<00:22, 39698.71it/s]    Calculating adjacency:  42%|####2     | 653651/1551649 [00:20<00:22, 39596.49it/s]    Calculating adjacency:  42%|####2     | 657611/1551649 [00:20<00:22, 39590.63it/s]    Calculating adjacency:  43%|####2     | 661781/1551649 [00:20<00:22, 40220.83it/s]    Calculating adjacency:  43%|####2     | 666122/1551649 [00:20<00:21, 41174.29it/s]    Calculating adjacency:  43%|####3     | 670370/1551649 [00:20<00:21, 41564.82it/s]    Calculating adjacency:  43%|####3     | 674569/1551649 [00:20<00:21, 41689.74it/s]    Calculating adjacency:  44%|####3     | 678745/1551649 [00:20<00:20, 41708.37it/s]    Calculating adjacency:  44%|####4     | 682916/1551649 [00:20<00:20, 41694.59it/s]    Calculating adjacency:  44%|####4     | 687121/1551649 [00:20<00:20, 41799.08it/s]    Calculating adjacency:  45%|####4     | 691301/1551649 [00:20<00:20, 41062.01it/s]    Calculating adjacency:  45%|####4     | 695411/1551649 [00:21<00:20, 40872.07it/s]    Calculating adjacency:  45%|####5     | 699501/1551649 [00:21<00:21, 40456.97it/s]    Calculating adjacency:  45%|####5     | 703549/1551649 [00:21<00:21, 40116.29it/s]    Calculating adjacency:  46%|####5     | 707563/1551649 [00:21<00:21, 39831.39it/s]    Calculating adjacency:  46%|####5     | 711548/1551649 [00:21<00:21, 39742.37it/s]    Calculating adjacency:  46%|####6     | 715523/1551649 [00:21<00:21, 39696.45it/s]    Calculating adjacency:  46%|####6     | 719494/1551649 [00:21<00:21, 39555.32it/s]    Calculating adjacency:  47%|####6     | 723450/1551649 [00:21<00:21, 39419.10it/s]    Calculating adjacency:  47%|####6     | 727393/1551649 [00:21<00:20, 39395.05it/s]    Calculating adjacency:  47%|####7     | 731342/1551649 [00:21<00:20, 39422.20it/s]    Calculating adjacency:  47%|####7     | 735306/1551649 [00:22<00:20, 39483.38it/s]    Calculating adjacency:  48%|####7     | 739255/1551649 [00:22<00:20, 39360.59it/s]    Calculating adjacency:  48%|####7     | 743192/1551649 [00:22<00:20, 39357.19it/s]    Calculating adjacency:  48%|####8     | 747171/1551649 [00:22<00:20, 39485.53it/s]    Calculating adjacency:  48%|####8     | 751200/1551649 [00:22<00:20, 39724.55it/s]    Calculating adjacency:  49%|####8     | 755240/1551649 [00:22<00:19, 39926.47it/s]    Calculating adjacency:  49%|####8     | 759233/1551649 [00:22<00:19, 39847.32it/s]    Calculating adjacency:  49%|####9     | 763218/1551649 [00:26<04:14, 3094.16it/s]     Calculating adjacency:  49%|####9     | 767515/1551649 [00:26<02:59, 4375.62it/s]    Calculating adjacency:  50%|####9     | 771909/1551649 [00:26<02:07, 6112.23it/s]    Calculating adjacency:  50%|#####     | 776088/1551649 [00:27<01:34, 8217.30it/s]    Calculating adjacency:  50%|#####     | 780374/1551649 [00:27<01:10, 10910.29it/s]    Calculating adjacency:  51%|#####     | 784581/1551649 [00:27<00:54, 14021.89it/s]    Calculating adjacency:  51%|#####     | 788765/1551649 [00:27<00:43, 17496.80it/s]    Calculating adjacency:  51%|#####1    | 793094/1551649 [00:27<00:35, 21402.42it/s]    Calculating adjacency:  51%|#####1    | 797291/1551649 [00:27<00:30, 25059.70it/s]    Calculating adjacency:  52%|#####1    | 801608/1551649 [00:27<00:26, 28728.65it/s]    Calculating adjacency:  52%|#####1    | 805820/1551649 [00:27<00:23, 31733.40it/s]    Calculating adjacency:  52%|#####2    | 810146/1551649 [00:27<00:21, 34531.16it/s]    Calculating adjacency:  52%|#####2    | 814389/1551649 [00:27<00:20, 36434.57it/s]    Calculating adjacency:  53%|#####2    | 818615/1551649 [00:28<00:19, 37567.72it/s]    Calculating adjacency:  53%|#####3    | 822789/1551649 [00:28<00:18, 38476.10it/s]    Calculating adjacency:  53%|#####3    | 826936/1551649 [00:28<00:18, 39098.00it/s]    Calculating adjacency:  54%|#####3    | 831155/1551649 [00:28<00:18, 39979.17it/s]    Calculating adjacency:  54%|#####3    | 835307/1551649 [00:28<00:17, 40002.28it/s]    Calculating adjacency:  54%|#####4    | 839415/1551649 [00:28<00:17, 39966.42it/s]    Calculating adjacency:  54%|#####4    | 843487/1551649 [00:28<00:17, 39694.60it/s]    Calculating adjacency:  55%|#####4    | 847510/1551649 [00:28<00:17, 39629.33it/s]    Calculating adjacency:  55%|#####4    | 851527/1551649 [00:28<00:17, 39785.81it/s]    Calculating adjacency:  55%|#####5    | 855532/1551649 [00:28<00:17, 39798.64it/s]    Calculating adjacency:  55%|#####5    | 859531/1551649 [00:29<00:17, 39646.52it/s]    Calculating adjacency:  56%|#####5    | 863509/1551649 [00:29<00:17, 39596.46it/s]    Calculating adjacency:  56%|#####5    | 867494/1551649 [00:29<00:17, 39670.94it/s]    Calculating adjacency:  56%|#####6    | 871468/1551649 [00:29<00:17, 39675.48it/s]    Calculating adjacency:  56%|#####6    | 875476/1551649 [00:29<00:16, 39795.47it/s]    Calculating adjacency:  57%|#####6    | 879568/1551649 [00:29<00:16, 40129.07it/s]    Calculating adjacency:  57%|#####6    | 883584/1551649 [00:29<00:16, 40114.64it/s]    Calculating adjacency:  57%|#####7    | 887598/1551649 [00:29<00:16, 39663.23it/s]    Calculating adjacency:  57%|#####7    | 891567/1551649 [00:29<00:16, 39620.20it/s]    Calculating adjacency:  58%|#####7    | 895531/1551649 [00:29<00:16, 39523.44it/s]    Calculating adjacency:  58%|#####7    | 899502/1551649 [00:30<00:16, 39576.48it/s]    Calculating adjacency:  58%|#####8    | 903461/1551649 [00:30<00:16, 39352.97it/s]    Calculating adjacency:  58%|#####8    | 907429/1551649 [00:30<00:16, 39449.98it/s]    Calculating adjacency:  59%|#####8    | 911375/1551649 [00:30<00:16, 39416.64it/s]    Calculating adjacency:  59%|#####8    | 915330/1551649 [00:30<00:16, 39454.97it/s]    Calculating adjacency:  59%|#####9    | 919299/1551649 [00:30<00:15, 39524.20it/s]    Calculating adjacency:  60%|#####9    | 923252/1551649 [00:30<00:15, 39376.94it/s]    Calculating adjacency:  60%|#####9    | 927210/1551649 [00:30<00:15, 39436.69it/s]    Calculating adjacency:  60%|######    | 931180/1551649 [00:30<00:15, 39514.05it/s]    Calculating adjacency:  60%|######    | 935140/1551649 [00:30<00:15, 39539.60it/s]    Calculating adjacency:  61%|######    | 939095/1551649 [00:31<00:15, 39514.73it/s]    Calculating adjacency:  61%|######    | 943047/1551649 [00:31<00:15, 39340.02it/s]    Calculating adjacency:  61%|######1   | 946986/1551649 [00:31<00:15, 39354.68it/s]    Calculating adjacency:  61%|######1   | 950925/1551649 [00:31<00:15, 39362.37it/s]    Calculating adjacency:  62%|######1   | 954862/1551649 [00:31<00:15, 39290.35it/s]    Calculating adjacency:  62%|######1   | 958830/1551649 [00:31<00:15, 39405.02it/s]    Calculating adjacency:  62%|######2   | 962771/1551649 [00:31<00:15, 39123.03it/s]    Calculating adjacency:  62%|######2   | 966777/1551649 [00:31<00:14, 39401.43it/s]    Calculating adjacency:  63%|######2   | 970776/1551649 [00:31<00:14, 39575.80it/s]    Calculating adjacency:  63%|######2   | 974864/1551649 [00:31<00:14, 39964.62it/s]    Calculating adjacency:  63%|######3   | 979061/1551649 [00:32<00:14, 40563.84it/s]    Calculating adjacency:  63%|######3   | 983186/1551649 [00:32<00:13, 40768.27it/s]    Calculating adjacency:  64%|######3   | 987264/1551649 [00:32<00:13, 40730.76it/s]    Calculating adjacency:  64%|######3   | 991338/1551649 [00:32<00:13, 40697.62it/s]    Calculating adjacency:  64%|######4   | 995469/1551649 [00:32<00:13, 40880.25it/s]    Calculating adjacency:  64%|######4   | 999598/1551649 [00:32<00:13, 41002.54it/s]    Calculating adjacency:  65%|######4   | 1003699/1551649 [00:32<00:13, 40320.62it/s]    Calculating adjacency:  65%|######4   | 1007734/1551649 [00:32<00:13, 40105.46it/s]    Calculating adjacency:  65%|######5   | 1011747/1551649 [00:32<00:13, 39838.31it/s]    Calculating adjacency:  65%|######5   | 1015733/1551649 [00:32<00:13, 39662.51it/s]    Calculating adjacency:  66%|######5   | 1019701/1551649 [00:33<00:13, 39555.92it/s]    Calculating adjacency:  66%|######5   | 1023658/1551649 [00:33<00:13, 39557.45it/s]    Calculating adjacency:  66%|######6   | 1027615/1551649 [00:33<00:13, 39489.28it/s]    Calculating adjacency:  66%|######6   | 1031570/1551649 [00:33<00:13, 39506.82it/s]    Calculating adjacency:  67%|######6   | 1035541/1551649 [00:33<00:13, 39564.99it/s]    Calculating adjacency:  67%|######6   | 1039503/1551649 [00:33<00:12, 39581.06it/s]    Calculating adjacency:  67%|######7   | 1043462/1551649 [00:33<00:12, 39323.18it/s]    Calculating adjacency:  68%|######7   | 1047440/1551649 [00:33<00:12, 39457.28it/s]    Calculating adjacency:  68%|######7   | 1051642/1551649 [00:33<00:12, 40221.04it/s]    Calculating adjacency:  68%|######8   | 1056045/1551649 [00:33<00:11, 41359.28it/s]    Calculating adjacency:  68%|######8   | 1060182/1551649 [00:34<00:12, 40641.16it/s]    Calculating adjacency:  69%|######8   | 1064250/1551649 [00:34<00:12, 40165.74it/s]    Calculating adjacency:  69%|######8   | 1068270/1551649 [00:34<00:12, 39799.30it/s]    Calculating adjacency:  69%|######9   | 1072253/1551649 [00:34<00:12, 39630.84it/s]    Calculating adjacency:  69%|######9   | 1076218/1551649 [00:34<00:12, 39587.41it/s]    Calculating adjacency:  70%|######9   | 1080178/1551649 [00:34<00:11, 39455.81it/s]    Calculating adjacency:  70%|######9   | 1084125/1551649 [00:34<00:11, 39149.02it/s]    Calculating adjacency:  70%|#######   | 1088219/1551649 [00:34<00:11, 39678.82it/s]    Calculating adjacency:  70%|#######   | 1092627/1551649 [00:34<00:11, 40986.38it/s]    Calculating adjacency:  71%|#######   | 1096938/1551649 [00:34<00:10, 41616.84it/s]    Calculating adjacency:  71%|#######   | 1101132/1551649 [00:35<00:10, 41712.16it/s]    Calculating adjacency:  71%|#######1  | 1105383/1551649 [00:35<00:10, 41949.12it/s]    Calculating adjacency:  72%|#######1  | 1109579/1551649 [00:35<00:10, 41869.06it/s]    Calculating adjacency:  72%|#######1  | 1113767/1551649 [00:35<00:10, 41805.27it/s]    Calculating adjacency:  72%|#######2  | 1117949/1551649 [00:35<00:10, 41630.36it/s]    Calculating adjacency:  72%|#######2  | 1122113/1551649 [00:35<00:10, 40742.40it/s]    Calculating adjacency:  73%|#######2  | 1126192/1551649 [00:35<00:10, 40072.07it/s]    Calculating adjacency:  73%|#######2  | 1130204/1551649 [00:35<00:10, 39942.16it/s]    Calculating adjacency:  73%|#######3  | 1134201/1551649 [00:35<00:10, 39721.28it/s]    Calculating adjacency:  73%|#######3  | 1138175/1551649 [00:36<00:10, 39646.03it/s]    Calculating adjacency:  74%|#######3  | 1142141/1551649 [00:36<00:10, 39492.78it/s]    Calculating adjacency:  74%|#######3  | 1146092/1551649 [00:36<00:10, 39393.99it/s]    Calculating adjacency:  74%|#######4  | 1150032/1551649 [00:36<00:10, 39369.02it/s]    Calculating adjacency:  74%|#######4  | 1153970/1551649 [00:36<00:10, 39316.73it/s]    Calculating adjacency:  75%|#######4  | 1157916/1551649 [00:36<00:10, 39358.96it/s]    Calculating adjacency:  75%|#######4  | 1161886/1551649 [00:36<00:09, 39458.70it/s]    Calculating adjacency:  75%|#######5  | 1165833/1551649 [00:36<00:09, 39365.78it/s]    Calculating adjacency:  75%|#######5  | 1169770/1551649 [00:36<00:09, 39229.72it/s]    Calculating adjacency:  76%|#######5  | 1173732/1551649 [00:36<00:09, 39343.71it/s]    Calculating adjacency:  76%|#######5  | 1177687/1551649 [00:37<00:09, 39402.43it/s]    Calculating adjacency:  76%|#######6  | 1181651/1551649 [00:37<00:09, 39471.02it/s]    Calculating adjacency:  76%|#######6  | 1185687/1551649 [00:37<00:09, 39735.28it/s]    Calculating adjacency:  77%|#######6  | 1189799/1551649 [00:37<00:09, 40149.42it/s]    Calculating adjacency:  77%|#######6  | 1193815/1551649 [00:37<00:08, 39978.26it/s]    Calculating adjacency:  77%|#######7  | 1197814/1551649 [00:37<00:08, 39586.24it/s]    Calculating adjacency:  77%|#######7  | 1201774/1551649 [00:37<00:08, 39510.37it/s]    Calculating adjacency:  78%|#######7  | 1205726/1551649 [00:37<00:08, 39408.26it/s]    Calculating adjacency:  78%|#######7  | 1209684/1551649 [00:37<00:08, 39459.18it/s]    Calculating adjacency:  78%|#######8  | 1213652/1551649 [00:37<00:08, 39523.43it/s]    Calculating adjacency:  78%|#######8  | 1217605/1551649 [00:38<00:08, 39470.33it/s]    Calculating adjacency:  79%|#######8  | 1221553/1551649 [00:38<00:08, 39444.62it/s]    Calculating adjacency:  79%|#######8  | 1225525/1551649 [00:38<00:08, 39525.47it/s]    Calculating adjacency:  79%|#######9  | 1229496/1551649 [00:38<00:08, 39580.47it/s]    Calculating adjacency:  79%|#######9  | 1233455/1551649 [00:38<00:08, 39501.80it/s]    Calculating adjacency:  80%|#######9  | 1237406/1551649 [00:38<00:07, 39382.77it/s]    Calculating adjacency:  80%|########  | 1241345/1551649 [00:38<00:07, 39200.58it/s]    Calculating adjacency:  80%|########  | 1245266/1551649 [00:38<00:07, 39032.49it/s]    Calculating adjacency:  81%|########  | 1249218/1551649 [00:38<00:07, 39174.85it/s]    Calculating adjacency:  81%|########  | 1253172/1551649 [00:38<00:07, 39281.13it/s]    Calculating adjacency:  81%|########1 | 1257136/1551649 [00:39<00:07, 39387.62it/s]    Calculating adjacency:  81%|########1 | 1261107/1551649 [00:39<00:07, 39481.20it/s]    Calculating adjacency:  82%|########1 | 1265056/1551649 [00:39<00:07, 39477.84it/s]    Calculating adjacency:  82%|########1 | 1269004/1551649 [00:39<00:07, 39416.53it/s]    Calculating adjacency:  82%|########2 | 1272951/1551649 [00:39<00:07, 39430.78it/s]    Calculating adjacency:  82%|########2 | 1276895/1551649 [00:39<00:06, 39285.75it/s]    Calculating adjacency:  83%|########2 | 1280824/1551649 [00:39<00:06, 39249.88it/s]    Calculating adjacency:  83%|########2 | 1284750/1551649 [00:39<00:06, 39179.57it/s]    Calculating adjacency:  83%|########3 | 1288755/1551649 [00:39<00:06, 39439.27it/s]    Calculating adjacency:  83%|########3 | 1292854/1551649 [00:39<00:06, 39900.88it/s]    Calculating adjacency:  84%|########3 | 1296884/1551649 [00:40<00:06, 40018.47it/s]    Calculating adjacency:  84%|########3 | 1300954/1551649 [00:40<00:06, 40221.38it/s]    Calculating adjacency:  84%|########4 | 1304977/1551649 [00:40<00:06, 39849.86it/s]    Calculating adjacency:  84%|########4 | 1308963/1551649 [00:40<00:06, 39663.89it/s]    Calculating adjacency:  85%|########4 | 1312931/1551649 [00:40<00:06, 39527.11it/s]    Calculating adjacency:  85%|########4 | 1316885/1551649 [00:40<00:05, 39448.36it/s]    Calculating adjacency:  85%|########5 | 1320831/1551649 [00:40<00:05, 39227.43it/s]    Calculating adjacency:  85%|########5 | 1324783/1551649 [00:40<00:05, 39312.60it/s]    Calculating adjacency:  86%|########5 | 1328719/1551649 [00:40<00:05, 39325.57it/s]    Calculating adjacency:  86%|########5 | 1332652/1551649 [00:40<00:05, 39262.55it/s]    Calculating adjacency:  86%|########6 | 1336617/1551649 [00:41<00:05, 39328.05it/s]    Calculating adjacency:  86%|########6 | 1340596/1551649 [00:41<00:05, 39464.11it/s]    Calculating adjacency:  87%|########6 | 1344576/1551649 [00:41<00:05, 39562.35it/s]    Calculating adjacency:  87%|########6 | 1348555/1551649 [00:41<00:05, 39627.75it/s]    Calculating adjacency:  87%|########7 | 1352518/1551649 [00:41<00:05, 39558.53it/s]    Calculating adjacency:  87%|########7 | 1356474/1551649 [00:41<00:04, 39445.26it/s]    Calculating adjacency:  88%|########7 | 1360467/1551649 [00:41<00:04, 39589.52it/s]    Calculating adjacency:  88%|########7 | 1364427/1551649 [00:41<00:04, 38297.64it/s]    Calculating adjacency:  88%|########8 | 1368266/1551649 [00:41<00:04, 37900.16it/s]    Calculating adjacency:  88%|########8 | 1372109/1551649 [00:41<00:04, 38054.00it/s]    Calculating adjacency:  89%|########8 | 1375920/1551649 [00:42<00:04, 37876.22it/s]    Calculating adjacency:  89%|########8 | 1379711/1551649 [00:42<00:04, 36972.05it/s]    Calculating adjacency:  89%|########9 | 1383415/1551649 [00:42<00:04, 36472.78it/s]    Calculating adjacency:  89%|########9 | 1387067/1551649 [00:42<00:04, 35915.42it/s]    Calculating adjacency:  90%|########9 | 1390662/1551649 [00:42<00:04, 35530.84it/s]    Calculating adjacency:  90%|########9 | 1394218/1551649 [00:42<00:04, 35230.61it/s]    Calculating adjacency:  90%|######### | 1397795/1551649 [00:42<00:04, 35385.29it/s]    Calculating adjacency:  90%|######### | 1401574/1551649 [00:42<00:04, 36090.42it/s]    Calculating adjacency:  91%|######### | 1405350/1551649 [00:42<00:03, 36582.10it/s]    Calculating adjacency:  91%|######### | 1409150/1551649 [00:42<00:03, 37001.65it/s]    Calculating adjacency:  91%|#########1| 1412853/1551649 [00:43<00:03, 36160.27it/s]    Calculating adjacency:  91%|#########1| 1416475/1551649 [00:43<00:03, 36020.02it/s]    Calculating adjacency:  92%|#########1| 1420180/1551649 [00:43<00:03, 36319.68it/s]    Calculating adjacency:  92%|#########1| 1423942/1551649 [00:43<00:03, 36704.05it/s]    Calculating adjacency:  92%|#########2| 1427927/1551649 [00:43<00:03, 37639.18it/s]    Calculating adjacency:  92%|#########2| 1432083/1551649 [00:43<00:03, 38805.83it/s]    Calculating adjacency:  93%|#########2| 1436307/1551649 [00:43<00:02, 39829.09it/s]    Calculating adjacency:  93%|#########2| 1440602/1551649 [00:43<00:02, 40760.41it/s]    Calculating adjacency:  93%|#########3| 1444821/1551649 [00:43<00:02, 41172.86it/s]    Calculating adjacency:  93%|#########3| 1449156/1551649 [00:44<00:02, 41822.77it/s]    Calculating adjacency:  94%|#########3| 1453340/1551649 [00:44<00:02, 41400.52it/s]    Calculating adjacency:  94%|#########3| 1457482/1551649 [00:44<00:02, 40247.73it/s]    Calculating adjacency:  94%|#########4| 1461515/1551649 [00:44<00:02, 39484.00it/s]    Calculating adjacency:  94%|#########4| 1465471/1551649 [00:44<00:02, 39228.62it/s]    Calculating adjacency:  95%|#########4| 1469399/1551649 [00:44<00:02, 39154.59it/s]    Calculating adjacency:  95%|#########4| 1473326/1551649 [00:44<00:01, 39186.78it/s]    Calculating adjacency:  95%|#########5| 1477247/1551649 [00:44<00:01, 38962.65it/s]    Calculating adjacency:  95%|#########5| 1481197/1551649 [00:44<00:01, 39120.45it/s]    Calculating adjacency:  96%|#########5| 1485136/1551649 [00:44<00:01, 39197.76it/s]    Calculating adjacency:  96%|#########5| 1489057/1551649 [00:45<00:01, 39127.12it/s]    Calculating adjacency:  96%|#########6| 1492971/1551649 [00:49<00:21, 2669.73it/s]     Calculating adjacency:  96%|#########6| 1496914/1551649 [00:49<00:14, 3707.59it/s]    Calculating adjacency:  97%|#########6| 1500851/1551649 [00:49<00:09, 5090.19it/s]    Calculating adjacency:  97%|#########6| 1504795/1551649 [00:50<00:06, 6892.77it/s]    Calculating adjacency:  97%|#########7| 1508783/1551649 [00:50<00:04, 9193.18it/s]    Calculating adjacency:  97%|#########7| 1512723/1551649 [00:50<00:03, 11929.79it/s]    Calculating adjacency:  98%|#########7| 1516639/1551649 [00:50<00:02, 15049.90it/s]    Calculating adjacency:  98%|#########8| 1520659/1551649 [00:50<00:01, 18587.69it/s]    Calculating adjacency:  98%|#########8| 1524622/1551649 [00:50<00:01, 22107.92it/s]    Calculating adjacency:  99%|#########8| 1528549/1551649 [00:50<00:00, 25418.35it/s]    Calculating adjacency:  99%|#########8| 1532454/1551649 [00:50<00:00, 28258.72it/s]    Calculating adjacency:  99%|#########9| 1536370/1551649 [00:50<00:00, 30821.49it/s]    Calculating adjacency:  99%|#########9| 1540365/1551649 [00:50<00:00, 33116.74it/s]    Calculating adjacency: 100%|#########9| 1544295/1551649 [00:51<00:00, 34748.52it/s]    Calculating adjacency: 100%|#########9| 1548358/1551649 [00:51<00:00, 36359.91it/s]    Calculating adjacency: 100%|##########| 1551649/1551649 [00:51<00:00, 30316.59it/s]
+    Calculating adjacency:   0%|          | 0/22905 [00:00<?, ?it/s]    Calculating adjacency:  28%|██▊       | 6332/22905 [00:00<00:00, 63313.12it/s]    Calculating adjacency:  56%|█████▌    | 12718/22905 [00:00<00:00, 63632.60it/s]    Calculating adjacency:  83%|████████▎ | 19082/22905 [00:00<00:00, 63241.25it/s]    Calculating adjacency: 100%|██████████| 22905/22905 [00:00<00:00, 63372.19it/s]
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 53-63
+.. GENERATED FROM PYTHON SOURCE LINES 56-66
 
 .. code-block:: default
 
 
-    xmesh = xcell.io.toVTK(setup.mesh)
+    xmesh = xcell.io.to_vtk(setup.mesh)
 
 
-    xmesh.save('xmesh%d%d.vtk' % (mindepth, maxdepth))
+    xmesh.save("xmesh%d%d.vtk" % (mindepth, max_depth))
     inside = xmesh.cell_centers().select_enclosed_points(stl, tolerance=1e-9)
 
 
-    for el, s in zip(setup.mesh.elements, inside['SelectedPoints']):
+    for el, s in zip(setup.mesh.elements, inside["SelectedPoints"]):
         el.sigma = s
 
 
@@ -126,20 +129,15 @@ Original mesh, generated from MRI data, is available at `<https://3dprint.nih.go
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 64-117
+.. GENERATED FROM PYTHON SOURCE LINES 67-112
 
 .. code-block:: default
 
     okfaces = []
 
-    quadorders = np.array([[0, 4, 6, 2],
-                           [1, 3, 7, 5],
-                           [0, 1, 5, 4],
-                           [2, 6, 7, 3],
-                           [0, 2, 3, 1],
-                           [4, 5, 7, 6]])
+    quadorders = np.array([[0, 4, 6, 2], [1, 3, 7, 5], [0, 1, 5, 4], [2, 6, 7, 3], [0, 2, 3, 1], [4, 5, 7, 6]])
 
-    for ii in tqdm.trange(len(setup.mesh.elements), desc='Checking faces'):
+    for ii in tqdm.trange(len(setup.mesh.elements), desc="Checking faces"):
         el = setup.mesh.elements[ii]
         if el.sigma > 0:
             neighbors = adj[ii]
@@ -150,13 +148,12 @@ Original mesh, generated from MRI data, is available at `<https://3dprint.nih.go
                 for nei in neighbor:
                     if nei.sigma == 0:
                         if nei.depth > el.depth:
-
-                            otherFaceInd = jj+(-1)**jj
+                            otherFaceInd = jj + (-1) ** jj
                             inds = np.flip(nei.vertices[quadorders[otherFaceInd]])
                         else:
                             inds = el.vertices[quadorders[jj]]
 
-                        globalind = [setup.mesh.inverseIdxMap[idx] for idx in inds]
+                        globalind = [setup.mesh.inverse_index_map[idx] for idx in inds]
                         okfaces.append(globalind)
 
 
@@ -167,20 +164,18 @@ Original mesh, generated from MRI data, is available at `<https://3dprint.nih.go
     for ii, n in enumerate(usedNodes):
         revNodes[n] = ii
 
-    newpts = setup.mesh.nodeCoords[usedNodes]
+    newpts = setup.mesh.node_coords[usedNodes]
 
-    newFaces = np.array([revNodes[n]
-                        for n in fc.ravel()]).reshape((fc.shape[0], 4))
+    newFaces = np.array([revNodes[n] for n in fc.ravel()]).reshape((fc.shape[0], 4))
 
-    cells = np.hstack(
-        (4*np.ones((newFaces.shape[0], 1), dtype=np.uint64), newFaces.astype(np.uint64))).ravel()
-    cellTypes = [VTK_QUAD]*newFaces.shape[0]
+    cells = np.hstack((4 * np.ones((newFaces.shape[0], 1), dtype=np.uint64), newFaces.astype(np.uint64))).ravel()
+    cellTypes = [VTK_QUAD] * newFaces.shape[0]
 
     qmesh = pv.UnstructuredGrid(cells, cellTypes, newpts)
-    qmesh.save('quad.vtk')
+    qmesh.save("quad.vtk")
 
     qg = qmesh.compute_cell_sizes(length=False, volume=False)
-    qg.set_active_scalars('Area')
+    qg.set_active_scalars("Area")
     # qg.plot(style='wireframe')
 
 
@@ -191,66 +186,92 @@ Original mesh, generated from MRI data, is available at `<https://3dprint.nih.go
 
  .. code-block:: none
 
-    Checking faces:   0%|          | 0/1551649 [00:00<?, ?it/s]    Checking faces:   1%|1         | 19477/1551649 [00:00<00:07, 194759.97it/s]    Checking faces:   3%|2         | 46099/1551649 [00:00<00:06, 236789.87it/s]    Checking faces:   4%|4         | 69779/1551649 [00:00<00:07, 206953.12it/s]    Checking faces:   6%|5         | 90864/1551649 [00:00<00:08, 177290.15it/s]    Checking faces:   7%|7         | 109239/1551649 [00:00<00:09, 159820.61it/s]    Checking faces:   9%|8         | 132313/1551649 [00:00<00:07, 179715.74it/s]    Checking faces:  10%|9         | 151042/1551649 [00:00<00:08, 172391.66it/s]    Checking faces:  11%|#         | 168783/1551649 [00:01<00:09, 142697.84it/s]    Checking faces:  12%|#2        | 192441/1551649 [00:01<00:08, 165854.11it/s]    Checking faces:  14%|#3        | 210329/1551649 [00:01<00:08, 154167.54it/s]    Checking faces:  15%|#4        | 226927/1551649 [00:01<00:08, 157156.66it/s]    Checking faces:  16%|#5        | 243374/1551649 [00:01<00:09, 144158.48it/s]    Checking faces:  17%|#6        | 258417/1551649 [00:01<00:08, 143820.79it/s]    Checking faces:  18%|#7        | 273232/1551649 [00:01<00:09, 137104.33it/s]    Checking faces:  19%|#8        | 287251/1551649 [00:01<00:09, 128468.88it/s]    Checking faces:  19%|#9        | 302076/1551649 [00:01<00:09, 133604.33it/s]    Checking faces:  20%|##        | 315693/1551649 [00:02<00:10, 122616.07it/s]    Checking faces:  23%|##3       | 363216/1551649 [00:02<00:05, 214610.12it/s]    Checking faces:  25%|##4       | 386275/1551649 [00:02<00:06, 168540.53it/s]    Checking faces:  26%|##6       | 405704/1551649 [00:02<00:06, 168423.56it/s]    Checking faces:  27%|##7       | 424347/1551649 [00:02<00:07, 160358.16it/s]    Checking faces:  28%|##8       | 441629/1551649 [00:02<00:07, 152182.47it/s]    Checking faces:  30%|##9       | 460836/1551649 [00:02<00:06, 161896.94it/s]    Checking faces:  31%|###       | 478400/1551649 [00:02<00:06, 165441.53it/s]    Checking faces:  32%|###2      | 497238/1551649 [00:03<00:06, 171617.76it/s]    Checking faces:  33%|###3      | 514914/1551649 [00:03<00:07, 138764.52it/s]    Checking faces:  34%|###4      | 530095/1551649 [00:03<00:07, 128348.30it/s]    Checking faces:  35%|###5      | 543889/1551649 [00:03<00:08, 118459.29it/s]    Checking faces:  36%|###5      | 556435/1551649 [00:03<00:08, 111935.24it/s]    Checking faces:  37%|###6      | 568090/1551649 [00:03<00:09, 106943.72it/s]    Checking faces:  37%|###7      | 579072/1551649 [00:03<00:09, 104563.13it/s]    Checking faces:  38%|###8      | 593407/1551649 [00:04<00:08, 114368.67it/s]    Checking faces:  40%|###9      | 613962/1551649 [00:04<00:06, 138562.97it/s]    Checking faces:  40%|####      | 628345/1551649 [00:04<00:06, 132690.19it/s]    Checking faces:  41%|####1     | 643459/1551649 [00:04<00:06, 137692.25it/s]    Checking faces:  43%|####2     | 664355/1551649 [00:04<00:05, 157589.85it/s]    Checking faces:  45%|####4     | 695958/1551649 [00:04<00:04, 202769.92it/s]    Checking faces:  47%|####7     | 730930/1551649 [00:04<00:03, 245302.31it/s]    Checking faces:  49%|####9     | 766805/1551649 [00:04<00:02, 278486.34it/s]    Checking faces:  51%|#####1    | 795091/1551649 [00:04<00:02, 256176.73it/s]    Checking faces:  53%|#####2    | 821357/1551649 [00:05<00:03, 204433.28it/s]    Checking faces:  54%|#####4    | 843802/1551649 [00:05<00:03, 189428.01it/s]    Checking faces:  56%|#####6    | 869188/1551649 [00:05<00:03, 204667.28it/s]    Checking faces:  57%|#####7    | 891083/1551649 [00:05<00:03, 168283.26it/s]    Checking faces:  59%|#####8    | 909794/1551649 [00:05<00:03, 168850.97it/s]    Checking faces:  60%|#####9    | 928011/1551649 [00:05<00:04, 146530.21it/s]    Checking faces:  61%|######    | 943929/1551649 [00:05<00:04, 149231.78it/s]    Checking faces:  62%|######1   | 959825/1551649 [00:06<00:04, 143313.77it/s]    Checking faces:  63%|######2   | 974807/1551649 [00:06<00:04, 139186.39it/s]    Checking faces:  64%|######3   | 990636/1551649 [00:06<00:03, 144031.01it/s]    Checking faces:  65%|######5   | 1009548/1551649 [00:06<00:03, 156022.18it/s]    Checking faces:  66%|######6   | 1028554/1551649 [00:06<00:03, 165390.88it/s]    Checking faces:  68%|######8   | 1061138/1551649 [00:06<00:02, 210681.45it/s]    Checking faces:  70%|#######   | 1092618/1551649 [00:06<00:01, 240596.07it/s]    Checking faces:  72%|#######2  | 1117194/1551649 [00:06<00:02, 174967.15it/s]    Checking faces:  73%|#######3  | 1137577/1551649 [00:07<00:02, 144169.71it/s]    Checking faces:  74%|#######4  | 1154724/1551649 [00:07<00:03, 128807.20it/s]    Checking faces:  75%|#######5  | 1169606/1551649 [00:07<00:03, 120158.06it/s]    Checking faces:  76%|#######6  | 1182959/1551649 [00:07<00:03, 115786.55it/s]    Checking faces:  77%|#######7  | 1195395/1551649 [00:07<00:03, 110993.90it/s]    Checking faces:  78%|#######7  | 1207027/1551649 [00:07<00:03, 109556.93it/s]    Checking faces:  79%|#######8  | 1218891/1551649 [00:07<00:02, 111743.41it/s]    Checking faces:  80%|#######9  | 1239397/1551649 [00:07<00:02, 135634.03it/s]    Checking faces:  81%|########  | 1253575/1551649 [00:08<00:02, 126353.71it/s]    Checking faces:  82%|########1 | 1269498/1551649 [00:08<00:02, 134912.92it/s]    Checking faces:  83%|########3 | 1291228/1551649 [00:08<00:01, 157250.11it/s]    Checking faces:  84%|########4 | 1307529/1551649 [00:08<00:01, 152923.43it/s]    Checking faces:  86%|########5 | 1327318/1551649 [00:08<00:01, 165397.37it/s]    Checking faces:  87%|########6 | 1344248/1551649 [00:08<00:01, 159559.33it/s]    Checking faces:  88%|########7 | 1364542/1551649 [00:08<00:01, 171694.80it/s]    Checking faces:  89%|########9 | 1382008/1551649 [00:08<00:01, 164243.86it/s]    Checking faces:  91%|######### | 1409022/1551649 [00:08<00:00, 193864.73it/s]    Checking faces:  93%|#########2| 1442550/1551649 [00:09<00:00, 234237.90it/s]    Checking faces:  95%|#########4| 1466540/1551649 [00:09<00:00, 235871.80it/s]    Checking faces:  96%|#########6| 1491550/1551649 [00:09<00:00, 240032.16it/s]    Checking faces:  98%|#########8| 1525777/1551649 [00:09<00:00, 270175.00it/s]    Checking faces: 100%|##########| 1551649/1551649 [00:09<00:00, 165301.70it/s]
+    Checking faces:   0%|          | 0/22905 [00:00<?, ?it/s]    Checking faces: 100%|██████████| 22905/22905 [00:00<00:00, 562401.41it/s]
 
-    (<FieldAssociation.CELL: 1>, pyvista_ndarray([3.65619235, 3.65619509, 3.656196  , ..., 0.05712822,
-                     0.05712822, 0.05712799]))
+    (<FieldAssociation.CELL: 1>, pyvista_ndarray([14.62477487, 14.6247767 , 14.62477852, ...,  3.65619691,
+                      3.65619691,  3.65619509]))
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 118-121
+.. GENERATED FROM PYTHON SOURCE LINES 113-116
 
 Segment mesh and visualize
 -------------------------------
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 121-161
+.. GENERATED FROM PYTHON SOURCE LINES 116-127
 
 .. code-block:: default
 
 
-    fstem = 'xcell%d-%d' % (mindepth, maxdepth)
+    fstem = "xcell%d-%d" % (mindepth, max_depth)
 
-    result = inside.threshold(
-        value=0.5, scalars='SelectedPoints').extract_largest()
-    result.save(fstem+'.vtk')
+    result = inside.threshold(value=0.5, scalars="SelectedPoints").extract_largest()
+    result.save(fstem + ".vtk")
 
     # obj = result.extract_surface()
     # pv.save_meshio(fstem+'.obj', obj)
-    pv.save_meshio('quads.obj', qmesh)
+    pv.save_meshio("quads.obj", qmesh)
 
 
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 128-131
+
+Generate animation
+------------------------------
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 131-158
+
+.. code-block:: default
+
+
+    # to generate from premeshed file
     # result = pv.read('xcell2-9.vtk')
 
-    # thm = pv.themes.DarkTheme()
-    # thm.background = pv.Color(xcell.colors.DARK, opacity=0)
-    # offwhite = pv.Color(xcell.colors.OFFWHITE, opacity=1.)
+    thm = pv.themes.DarkTheme()
+    thm.background = pv.Color(xcell.colors.DARK, opacity=0)
+    offwhite = pv.Color(xcell.colors.OFFWHITE, opacity=1.0)
 
 
-    # pv.set_plot_theme(thm)
+    pv.set_plot_theme(thm)
 
-    # p = pv.Plotter(off_screen=True)
-    # p.add_mesh(stl, color='blue', opacity=0.75)
+    p = pv.Plotter(off_screen=True)
+    p.add_mesh(stl, color="blue", opacity=0.75)
 
-    # viewup = [0.2, -1., 0.]
+    viewup = [0.2, -1.0, 0.0]
 
-    # p.add_mesh(result, show_edges=False, color=offwhite)
+    p.add_mesh(result, show_edges=False, color=offwhite)
 
-    # p.enable_eye_dome_lighting()
+    p.enable_eye_dome_lighting()
 
-    # p.show(auto_close=False)
+    p.show(auto_close=False)
 
-    # # path = p.generate_orbital_path(factor=1.5, n_points=144, viewup=viewup, shift=-0.2)
-    # path = p.generate_orbital_path(
-    #     factor=1.5, n_points=32, viewup=viewup, shift=-0.2)
+    path = p.generate_orbital_path(factor=1.5, n_points=32, viewup=viewup, shift=-0.2)
 
-    # p.open_movie("orbit.mp4")
+    p.open_movie("orbit.mp4")
 
-    # p.orbit_on_path(path, write_frames=True, viewup=viewup,
-    #                 step=0.1, progress_bar=True)
+    p.orbit_on_path(path, write_frames=True, viewup=viewup, step=0.1, progress_bar=True)
 
 
 
+.. image-sg:: /auto_examples/Geometry/images/sphx_glr_plot_brainStyle_001.png
+   :alt: plot brainStyle
+   :srcset: /auto_examples/Geometry/images/sphx_glr_plot_brainStyle_001.png
+   :class: sphx-glr-single-img
+
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+      0%|          | 0/32 [00:00<?, ?it/s]      3%|▎         | 1/32 [00:00<00:04,  7.03it/s]     41%|████      | 13/32 [00:00<00:00, 61.94it/s]     78%|███████▊  | 25/32 [00:00<00:00, 83.70it/s]    100%|██████████| 32/32 [00:00<00:00, 78.71it/s]
 
 
 
@@ -258,7 +279,7 @@ Segment mesh and visualize
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 4 minutes  14.605 seconds)
+   **Total running time of the script:** (0 minutes 36.324 seconds)
 
 
 .. _sphx_glr_download_auto_examples_Geometry_plot_brainStyle.py:
@@ -266,6 +287,8 @@ Segment mesh and visualize
 .. only:: html
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
+
+
 
 
     .. container:: sphx-glr-download sphx-glr-download-python

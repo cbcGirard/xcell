@@ -1,128 +1,401 @@
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
-<head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>xcell.misc &mdash; xcell  documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/xcell.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/sg_gallery.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/sg_gallery-binder.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/sg_gallery-dataframe.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/sg_gallery-rendered-html.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+
+<html lang="en" data-theme="auto">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>xcell.misc &#8212; xcell  documentation</title>
   
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
-    <script src="../../../_static/js/theme.js"></script>
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "auto";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/xcell.css?v=bd5ed93c" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script src="../../../_static/documentation_options.js?v=8a448e45"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'autoapi/xcell/misc/index';</script>
     <link rel="index" title="Index" href="../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../search.html" /> 
-</head>
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="auto">
 
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search"  style="background: #990000" >
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
 
-          
-          
-          <a href="../../../index.html">
-            
-              <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
-          </a>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Purpose</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../intro.html#installing">Installing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../intro.html#citation">Citation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../auto_examples/index.html">Example applications</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../auto_examples/index.html#geometry">Geometry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../index.html">API Reference</a></li>
-</ul>
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/logo.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../../../_static/logo.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+    <p class="title logo__title">xcell</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../intro.html">
+                        Introduction
+                      </a>
+                    </li>
+                
 
-        </div>
-      </div>
-    </nav>
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../auto_examples/index.html">
+                        Example applications
+                      </a>
+                    </li>
+                
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #990000" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">xcell</a>
-      </nav>
-
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.misc</span></code></li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="../../../_sources/autoapi/xcell/misc/index.rst.txt" rel="nofollow"> View page source</a>
-      </li>
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
   </ul>
-  <hr/>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../intro.html">
+                        Introduction
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../auto_examples/index.html">
+                        Example applications
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../AAnimation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.AAnimation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_version/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell._version</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../colors/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.colors</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dummy/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.dummy</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.elements</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fem/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.fem</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../geometry/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.geometry</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../io/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.io</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../meshes/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.meshes</span></code></a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.misc</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nrnutil/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.nrnutil</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../signals/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.signals</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../util/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.util</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../visualizers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.visualizers</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../xCell/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.xCell</span></code></a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.misc</span></code></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
   <section id="module-xcell.misc">
-<span id="xcell-misc"></span><h1><a class="reference internal" href="#module-xcell.misc" title="xcell.misc"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.misc</span></code></a><a class="headerlink" href="#module-xcell.misc" title="Permalink to this heading"></a></h1>
+<span id="xcell-misc"></span><h1><a class="reference internal" href="#module-xcell.misc" title="xcell.misc"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.misc</span></code></a><a class="headerlink" href="#module-xcell.misc" title="Link to this heading">#</a></h1>
 <p>Convenience functions.</p>
 <section id="module-contents">
-<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading"></a></h2>
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">#</a></h2>
 <section id="functions">
-<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this heading"></a></h3>
-<table class="autosummary longtable docutils align-default">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading">#</a></h3>
+<table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.misc.iSourcePower" title="xcell.misc.iSourcePower"><code class="xref py py-obj docutils literal notranslate"><span class="pre">iSourcePower</span></code></a>(isrc, radius, sigma)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.misc.current_source_power" title="xcell.misc.current_source_power"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_source_power</span></code></a>(current, radius, sigma)</p></td>
 <td><p>Get an analytic estimate of the power dissipated by a spherical current source.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#xcell.misc.vSourceIntegral" title="xcell.misc.vSourceIntegral"><code class="xref py py-obj docutils literal notranslate"><span class="pre">vSourceIntegral</span></code></a>(vsrc, radius, rmax)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.misc.voltage_source_integral" title="xcell.misc.voltage_source_integral"><code class="xref py py-obj docutils literal notranslate"><span class="pre">voltage_source_integral</span></code></a>(voltage, radius, r_max)</p></td>
 <td><p>Calculate exact integral of V for a spherical voltage source</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.misc.iSourceIntegral" title="xcell.misc.iSourceIntegral"><code class="xref py py-obj docutils literal notranslate"><span class="pre">iSourceIntegral</span></code></a>(isrc, radius, rmax, sigma)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.misc.current_source_integral" title="xcell.misc.current_source_integral"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_source_integral</span></code></a>(current, radius, r_max, sigma)</p></td>
 <td><p>Calculate exact integral of V for a spherical current source</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#xcell.misc.estimatePower" title="xcell.misc.estimatePower"><code class="xref py py-obj docutils literal notranslate"><span class="pre">estimatePower</span></code></a>(voltages, edges, conductances)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.misc.estimate_power" title="xcell.misc.estimate_power"><code class="xref py py-obj docutils literal notranslate"><span class="pre">estimate_power</span></code></a>(voltages, edges, conductances)</p></td>
 <td><p>Estimate power dissipated in the equivalent netowrk of the mesh.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.misc.getErrorEstimates" title="xcell.misc.getErrorEstimates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getErrorEstimates</span></code></a>(simulation)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.misc.get_error_estimates" title="xcell.misc.get_error_estimates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_error_estimates</span></code></a>(simulation)</p></td>
 <td><p>Get error-related metrics for a simulation of point/sphere sources.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#xcell.misc.getSquares" title="xcell.misc.getSquares"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getSquares</span></code></a>(err, vAna)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.misc.get_statistical_squares" title="xcell.misc.get_statistical_squares"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_statistical_squares</span></code></a>(err, vAna)</p></td>
 <td><p>Get sums-of-squares for statistical operations</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.misc.transposeDicts" title="xcell.misc.transposeDicts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transposeDicts</span></code></a>(dictList)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.misc.transpose_dicts" title="xcell.misc.transpose_dicts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transpose_dicts</span></code></a>(dict_list)</p></td>
 <td><p>Convert list of dicts (from timesteps) to dict of lists (for plotting).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#xcell.misc.FVU" title="xcell.misc.FVU"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FVU</span></code></a>(analyticVals, err)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.misc.calculate_fvu" title="xcell.misc.calculate_fvu"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_fvu</span></code></a>(analytic_values, err)</p></td>
 <td><p>Calculate fraction of variance unexplained (FVU)</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py function">
-<dt class="sig sig-object py" id="xcell.misc.iSourcePower">
-<span class="sig-prename descclassname"><span class="pre">xcell.misc.</span></span><span class="sig-name descname"><span class="pre">iSourcePower</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">isrc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.misc.iSourcePower" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.misc.current_source_power">
+<span class="sig-prename descclassname"><span class="pre">xcell.misc.</span></span><span class="sig-name descname"><span class="pre">current_source_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.misc.current_source_power" title="Link to this definition">#</a></dt>
 <dd><p>Get an analytic estimate of the power dissipated by a spherical current source.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>isrc</strong> (<em>float</em>) – Amplitude of source in amps.</p></li>
+<li><p><strong>current</strong> (<em>float</em>) – Amplitude of source in amps.</p></li>
 <li><p><strong>radius</strong> (<em>float</em>) – Radius of source in meters.</p></li>
 <li><p><strong>sigma</strong> (<em>float</em><em> or </em><em>float</em><em>[</em><em>:</em><em>]</em>) – Conductivity of surroundings in S/m.</p></li>
 </ul>
@@ -137,20 +410,20 @@
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="xcell.misc.vSourceIntegral">
-<span class="sig-prename descclassname"><span class="pre">xcell.misc.</span></span><span class="sig-name descname"><span class="pre">vSourceIntegral</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vsrc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rmax</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.misc.vSourceIntegral" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.misc.voltage_source_integral">
+<span class="sig-prename descclassname"><span class="pre">xcell.misc.</span></span><span class="sig-name descname"><span class="pre">voltage_source_integral</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">voltage</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_max</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.misc.voltage_source_integral" title="Link to this definition">#</a></dt>
 <dd><p>Calculate exact integral of V for a spherical voltage source
-from the center to a distance of rmax.</p>
+from the center to a distance of r_max.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>vsrc</strong> (<em>float</em>) – Amplitude of source in volts.</p></li>
+<li><p><strong>voltage</strong> (<em>float</em>) – Amplitude of source in volts.</p></li>
 <li><p><strong>radius</strong> (<em>float</em>) – Radius of source in meters.</p></li>
-<li><p><strong>rmax</strong> (<em>float</em>) – Furthest distance of domain.</p></li>
+<li><p><strong>r_max</strong> (<em>float</em>) – Furthest distance of domain.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Integral of V from center to rmax.</p>
+<dd class="field-even"><p>Integral of V from center to r_max.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
@@ -159,21 +432,21 @@ from the center to a distance of rmax.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="xcell.misc.iSourceIntegral">
-<span class="sig-prename descclassname"><span class="pre">xcell.misc.</span></span><span class="sig-name descname"><span class="pre">iSourceIntegral</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">isrc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.misc.iSourceIntegral" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.misc.current_source_integral">
+<span class="sig-prename descclassname"><span class="pre">xcell.misc.</span></span><span class="sig-name descname"><span class="pre">current_source_integral</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.misc.current_source_integral" title="Link to this definition">#</a></dt>
 <dd><p>Calculate exact integral of V for a spherical current source
-from the center to a distance of rmax.</p>
+from the center to a distance of r_max.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>vsrc</strong> (<em>float</em>) – Amplitude of source in volts.</p></li>
+<li><p><strong>current</strong> (<em>float</em>) – Amplitude of source in amperes.</p></li>
 <li><p><strong>radius</strong> (<em>float</em>) – Radius of source in meters.</p></li>
-<li><p><strong>rmax</strong> (<em>float</em>) – Furthest distance of domain.</p></li>
+<li><p><strong>r_max</strong> (<em>float</em>) – Furthest distance of domain.</p></li>
 <li><p><strong>sigma</strong> (<em>float</em><em> or </em><em>float</em><em>[</em><em>:</em><em>]</em>) – Conductivity of region in S/m</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Integral of V from center to rmax.</p>
+<dd class="field-even"><p>Integral of V from center to r_max.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
@@ -182,8 +455,8 @@ from the center to a distance of rmax.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="xcell.misc.estimatePower">
-<span class="sig-prename descclassname"><span class="pre">xcell.misc.</span></span><span class="sig-name descname"><span class="pre">estimatePower</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">voltages</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conductances</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.misc.estimatePower" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.misc.estimate_power">
+<span class="sig-prename descclassname"><span class="pre">xcell.misc.</span></span><span class="sig-name descname"><span class="pre">estimate_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">voltages</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conductances</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.misc.estimate_power" title="Link to this definition">#</a></dt>
 <dd><p>Estimate power dissipated in the equivalent netowrk of the mesh.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -203,8 +476,8 @@ from the center to a distance of rmax.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="xcell.misc.getErrorEstimates">
-<span class="sig-prename descclassname"><span class="pre">xcell.misc.</span></span><span class="sig-name descname"><span class="pre">getErrorEstimates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.misc.getErrorEstimates" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.misc.get_error_estimates">
+<span class="sig-prename descclassname"><span class="pre">xcell.misc.</span></span><span class="sig-name descname"><span class="pre">get_error_estimates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.misc.get_error_estimates" title="Link to this definition">#</a></dt>
 <dd><p>Get error-related metrics for a simulation of point/sphere sources.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -220,8 +493,8 @@ from the center to a distance of rmax.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="xcell.misc.getSquares">
-<span class="sig-prename descclassname"><span class="pre">xcell.misc.</span></span><span class="sig-name descname"><span class="pre">getSquares</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">err</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vAna</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.misc.getSquares" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.misc.get_statistical_squares">
+<span class="sig-prename descclassname"><span class="pre">xcell.misc.</span></span><span class="sig-name descname"><span class="pre">get_statistical_squares</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">err</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vAna</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.misc.get_statistical_squares" title="Link to this definition">#</a></dt>
 <dd><p>Get sums-of-squares for statistical operations</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -241,15 +514,15 @@ from the center to a distance of rmax.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="xcell.misc.transposeDicts">
-<span class="sig-prename descclassname"><span class="pre">xcell.misc.</span></span><span class="sig-name descname"><span class="pre">transposeDicts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dictList</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.misc.transposeDicts" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.misc.transpose_dicts">
+<span class="sig-prename descclassname"><span class="pre">xcell.misc.</span></span><span class="sig-name descname"><span class="pre">transpose_dicts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.misc.transpose_dicts" title="Link to this definition">#</a></dt>
 <dd><p>Convert list of dicts (from timesteps) to dict of lists (for plotting).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>dictList</strong> (<em>[</em><em>{}</em><em>]</em>) – List of data from each timestep.</p>
+<dd class="field-odd"><p><strong>dict_list</strong> (<em>[</em><em>{}</em><em>]</em>) – List of data from each timestep.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>arrayDict</strong> – Dict of variables, as lists of values at each timestep.</p>
+<dd class="field-even"><p><strong>list_dict</strong> – Dict of variables, as lists of values at each timestep.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>{[]}</p>
@@ -258,13 +531,13 @@ from the center to a distance of rmax.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="xcell.misc.FVU">
-<span class="sig-prename descclassname"><span class="pre">xcell.misc.</span></span><span class="sig-name descname"><span class="pre">FVU</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analyticVals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">err</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.misc.FVU" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="xcell.misc.calculate_fvu">
+<span class="sig-prename descclassname"><span class="pre">xcell.misc.</span></span><span class="sig-name descname"><span class="pre">calculate_fvu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analytic_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">err</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.misc.calculate_fvu" title="Link to this definition">#</a></dt>
 <dd><p>Calculate fraction of variance unexplained (FVU)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>analyticVals</strong> (<em>float</em><em>[</em><em>:</em><em>]</em>) – Analytic voltage at each node.</p></li>
+<li><p><strong>analytic_values</strong> (<em>float</em><em>[</em><em>:</em><em>]</em>) – Analytic voltage at each node.</p></li>
 <li><p><strong>err</strong> (<em>float</em><em>[</em><em>:</em><em>]</em>) – Difference between simulated and analytic voltage at each node.</p></li>
 </ul>
 </dd>
@@ -282,31 +555,109 @@ from the center to a distance of rmax.</p>
 </section>
 
 
-           </div>
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#functions">Functions</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.misc.current_source_power"><code class="docutils literal notranslate"><span class="pre">current_source_power()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.misc.voltage_source_integral"><code class="docutils literal notranslate"><span class="pre">voltage_source_integral()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.misc.current_source_integral"><code class="docutils literal notranslate"><span class="pre">current_source_integral()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.misc.estimate_power"><code class="docutils literal notranslate"><span class="pre">estimate_power()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.misc.get_error_estimates"><code class="docutils literal notranslate"><span class="pre">get_error_estimates()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.misc.get_statistical_squares"><code class="docutils literal notranslate"><span class="pre">get_statistical_squares()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.misc.transpose_dicts"><code class="docutils literal notranslate"><span class="pre">transpose_dicts()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.misc.calculate_fvu"><code class="docutils literal notranslate"><span class="pre">calculate_fvu()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../../../_sources/autoapi/xcell/misc/index.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
           </div>
-          <footer>
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p>&#169; Copyright 2022, CBC Girard.</p>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
   </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2022, CBC Girard.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.5.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
 
-</footer>
-        </div>
-      </div>
-    </section>
-  </div>
-  <script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script> 
-
-</body>
+  </footer>
+  </body>
 </html>

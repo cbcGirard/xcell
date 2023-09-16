@@ -8,75 +8,65 @@ Illustrates how adaptation parameters affect the generated mesh
 
 """
 
-import Common
+import Common_nongallery
 import numpy as np
-import xcell
+import xcell as xc
 import matplotlib.pyplot as plt
 
-# swept='density'
-# swept = 'depth'
 dmin = 2
 dmax = 6
 
-study, setup = Common.makeSynthStudy('adaptationDemos')
-plotprefs={'colorbar':False,
-           'barRatio':[7,1],
-           'labelAxes':False}
+# keep animations in list so they show up in Sphix gallery
+animations = []
 
-sweepval = 1-abs(np.linspace(-1, 1, 20))
+study, setup = Common_nongallery.makeSynthStudy("adaptationDemos")
+plotprefs = {"colorbar": False, "barRatio": [7, 1], "labelAxes": False}
+mpl_context = {"figure.figsize": [4.5, 3.75], "font.size": 10, 
+                         "figure.dpi": 144}
 
-for swept in ['density','depth']:
 
-    if swept == 'density':
-        vrange = 0.5*sweepval
-    elif swept == 'depth':
+sweepval = 1 - abs(np.linspace(-1, 1, 20))
+
+for swept in ["density", "depth"]:
+    if swept == "density":
+        vrange = 0.5 * sweepval
+    elif swept == "depth":
         # vrange=dmin+np.array((dmax-dmin)*sweepval,dtype=int)
-        vrange = np.concatenate(
-            (np.arange(dmin, dmax+1), np.arange(dmax-1, dmin-1, -1)))
+        vrange = np.concatenate((np.arange(dmin, dmax + 1), 
+                                 np.arange(dmax - 1, dmin - 1, -1)))
     tvec = np.linspace(0, 1, vrange.shape[0])
 
-    tdata = {
-        'x': tvec,
-        'y': vrange,
-        'ylabel': swept,
-        'unit': '',
-        'style': 'dot'
-    }
+    tdata = {"x": tvec, "y": vrange, "ylabel": swept, 
+             "unit": "", "style": "dot"}
 
-    with plt.rc_context({
-            'figure.figsize':[4.5,3.75],
-            'font.size':10,
-            'figure.dpi':144
-            }):
-
-        img = xcell.visualizers.SingleSlice(None, study, timevec=tvec, tdata=tdata, prefs=plotprefs)
-        # aa=img.axes[0]
-        # aa.set_xticks([])
-        # aa.set_yticks([])
+    with plt.rc_context(mpl_context):
+        img = xc.visualizers.SingleSlice(None, study, timevec=tvec, 
+                                         tdata=tdata, prefs=plotprefs)
         img.axes[2].set_xticks([])
-
-        # data={
-        #       'mesh':[],
-        #       'depth':[],
-        #       'density':[]}
 
         lastdepth = -1
         for val in vrange:
-
-            if swept == 'density':
+            if swept == "density":
                 density = val
-                maxdepth = dmax
-            elif swept == 'depth':
-                maxdepth = val
-                density = .2
+                max_depth = dmax
+            elif swept == "depth":
+                max_depth = val
+                density = 0.2
 
-            metric = xcell.generalMetric
+            metric = xc.general_metric
 
-            setup.makeAdaptiveGrid(np.zeros((1, 3)),  maxdepth=np.array(maxdepth,ndmin=1), minl0Function=metric,  coefs=np.ones(1)*2**(-maxdepth*density))
-            setup.finalizeMesh()
+            setup.make_adaptive_grid(
+                np.zeros((1, 3)),
+                max_depth=np.array(max_depth, ndmin=1),
+                min_l0_function=metric,
+                coefs=np.ones(1) * 2 ** (-max_depth * density),
+            )
+            setup.finalize_mesh()
 
-            img.addSimulationData(setup, append=True)
+            img.add_simulation_data(setup, append=True)
+
+        animations.append(img.animate_study(fname=swept, fps=5.0))
 
 
-        ani = img.animateStudy(fname=swept, fps=5.)
+denstiy_ani, depth_ani = animations
 # sphinx_gallery_thumbnail_number = 2

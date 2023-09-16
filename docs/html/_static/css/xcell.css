@@ -4,7 +4,7 @@
 /* @import 'theme.css';       for the Read the Docs theme */
 @import 'palette.css';
 
-/* html[data-theme="light"] {
+html[data-theme="light"] {
     --pst-color-primary: var(--chapmanRed);
     --pst-color-secondary: var(--chapmanRed);
     --pst-color-background: #eaeaea;
@@ -16,4 +16,10 @@ html[data-theme="dark"] {
     --pst-color-secondary: var(--scCardinal);
     --pst-color-background: var(--bgDark);
     --pst-color-text-base: var(--cream);
-} */
+
+}
+
+/* Override darkening for dark mode */
+img {
+    filter:unset;
+}

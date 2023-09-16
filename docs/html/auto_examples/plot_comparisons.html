@@ -1,115 +1,382 @@
-<!DOCTYPE html>
-<html class="writer-html5" lang="en" >
-<head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Depth sweep &mdash; xcell  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/xcell.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+<!DOCTYPE html>
+
+
+<html lang="en" data-theme="auto">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Depth sweep &#8212; xcell  documentation</title>
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/js/theme.js"></script>
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "auto";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/xcell.css?v=bd5ed93c" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script src="../_static/documentation_options.js?v=8a448e45"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'auto_examples/plot_comparisons';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Singularity" href="plot_singularityEffect.html" />
-    <link rel="prev" title="DBS Electrode" href="plot_dbs_probe.html" /> 
-</head>
+    <link rel="prev" title="DBS Electrode" href="plot_dbs_probe.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="auto">
 
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search"  style="background: #990000" >
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
 
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../_static/logo.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+    <p class="title logo__title">xcell</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../intro.html">
+                        Introduction
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        Example applications
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../autoapi/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
           
-          
-          <a href="../index.html">
-            
-              <img src="../_static/logo.png" class="logo" alt="Logo"/>
-          </a>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../intro.html">Purpose</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../intro.html#installing">Installing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../intro.html#citation">Citation</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Example applications</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="plot_MeshAdaptation.html">Adaptation parameters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_singleStep.html">Single timestep</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_dbs_probe.html">DBS Electrode</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Depth sweep</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_singularityEffect.html">Singularity</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plot_algorithmOverview.html">Simulation overview</a></li>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../intro.html">
+                        Introduction
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        Example applications
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../autoapi/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="plot_MeshAdaptation.html">Adaptation parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_singleStep.html">Single timestep</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_dbs_probe.html">DBS Electrode</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Depth sweep</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_singularityEffect.html">Singularity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_algorithmOverview.html">Simulation overview</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="Geometry/index.html">Geometry</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="Geometry/plot_xcellLogo.html">Logo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Geometry/plot_brainStyle.html">Stylized brain</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="index.html#geometry">Geometry</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="NEURON/index.html">NEURON</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="NEURON/plot_LFP.html">LFP estimation with dynamic remeshing</a></li>
 </ul>
-
-        </div>
-      </div>
-    </nav>
-
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #990000" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">xcell</a>
-      </nav>
-
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="index.html">Example applications</a></li>
-      <li class="breadcrumb-item active">Depth sweep</li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/auto_examples/plot_comparisons.rst.txt" rel="nofollow"> View page source</a>
-      </li>
-  </ul>
-  <hr/>
+</li>
+</ul>
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Example applications</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">Depth sweep</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
-<p>Click <a class="reference internal" href="#sphx-glr-download-auto-examples-plot-comparisons-py"><span class="std std-ref">here</span></a>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-plot-comparisons-py"><span class="std std-ref">Go to the end</span></a>
 to download the full example code</p>
 </div>
 <section class="sphx-glr-example-title" id="depth-sweep">
-<span id="sphx-glr-auto-examples-plot-comparisons-py"></span><h1>Depth sweep<a class="headerlink" href="#depth-sweep" title="Permalink to this heading"></a></h1>
+<span id="sphx-glr-auto-examples-plot-comparisons-py"></span><h1>Depth sweep<a class="headerlink" href="#depth-sweep" title="Link to this heading">#</a></h1>
 <p>Compare performance as mesh resolution increases. Generates ch3-4 data.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xcell</span>
-<span class="kn">import</span> <span class="nn">Common</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">xcell</span> <span class="k">as</span> <span class="nn">xc</span>
+<span class="kn">import</span> <span class="nn">Common_nongallery</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="n">cli</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
-<span class="n">cli</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--comparison&#39;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;bounds&#39;</span><span class="p">,</span> <span class="s1">&#39;mesh&#39;</span><span class="p">,</span>
-                 <span class="s1">&#39;formula&#39;</span><span class="p">,</span> <span class="s1">&#39;bigPOC&#39;</span><span class="p">,</span> <span class="s1">&#39;fixedDisc&#39;</span><span class="p">],</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;fixedDisc&#39;</span><span class="p">)</span>
-<span class="n">cli</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-p&#39;</span><span class="p">,</span> <span class="s1">&#39;--plot-only&#39;</span><span class="p">,</span>
-                 <span class="n">help</span><span class="o">=</span><span class="s1">&#39;skip simulation and use existing data&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">)</span>
+<span class="n">cli</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--comparison&quot;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;bounds&quot;</span><span class="p">,</span> <span class="s2">&quot;mesh&quot;</span><span class="p">,</span> <span class="s2">&quot;formula&quot;</span><span class="p">,</span> <span class="s2">&quot;bigPOC&quot;</span><span class="p">,</span> <span class="s2">&quot;fixedDisc&quot;</span><span class="p">],</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;fixedDisc&quot;</span><span class="p">)</span>
+<span class="n">cli</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-p&quot;</span><span class="p">,</span> <span class="s2">&quot;--plot-only&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;skip simulation and use existing data&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">)</span>
 <span class="c1"># cli.add_argument(&#39;-a&#39;,&#39;--animate&#39;,help=&#39;skip simulation and use existing data&#39;, action = &#39;store_true&#39;)</span>
 <span class="c1"># cli.add_argument(&#39;-p&#39;,&#39;--plot-only&#39;,help=&#39;skip simulation and use existing data&#39;, action = &#39;store_true&#39;)</span>
 
@@ -121,52 +388,52 @@ to download the full example code</p>
 <span class="c1"># plot performance info</span>
 <span class="n">staticPlots</span> <span class="o">=</span> <span class="kc">True</span>
 
-<span class="n">depths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">depths</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
 
 <span class="n">xtraParams</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="n">xmax</span> <span class="o">=</span> <span class="mf">1e-4</span>
-<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">comparison</span> <span class="o">==</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">or</span> <span class="n">args</span><span class="o">.</span><span class="n">comparison</span> <span class="o">==</span> <span class="s1">&#39;bigPOC&#39;</span><span class="p">:</span>
-    <span class="n">foldername</span> <span class="o">=</span> <span class="s1">&#39;Quals/PoC&#39;</span>
+<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">comparison</span> <span class="o">==</span> <span class="s2">&quot;mesh&quot;</span> <span class="ow">or</span> <span class="n">args</span><span class="o">.</span><span class="n">comparison</span> <span class="o">==</span> <span class="s2">&quot;bigPOC&quot;</span><span class="p">:</span>
+    <span class="n">foldername</span> <span class="o">=</span> <span class="s2">&quot;Comparison/PoC&quot;</span>
     <span class="n">tstVals</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;adaptive&quot;</span><span class="p">,</span> <span class="s2">&quot;uniform&quot;</span><span class="p">]</span>
     <span class="c1"># tstVals=[&#39;adaptive&#39;,&#39;equal elements&#39;,r&#39;equal $l_0$&#39;]</span>
-    <span class="n">tstCat</span> <span class="o">=</span> <span class="s1">&#39;Mesh type&#39;</span>
-<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">comparison</span> <span class="o">==</span> <span class="s1">&#39;formula&#39;</span> <span class="ow">or</span> <span class="n">args</span><span class="o">.</span><span class="n">comparison</span> <span class="o">==</span> <span class="s1">&#39;fixedDisc&#39;</span><span class="p">:</span>
-    <span class="n">foldername</span> <span class="o">=</span> <span class="s1">&#39;Quals/formulations&#39;</span>
-    <span class="n">tstVals</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Admittance&#39;</span><span class="p">,</span> <span class="s1">&#39;FEM&#39;</span><span class="p">,</span> <span class="s1">&#39;Face&#39;</span><span class="p">]</span>
-    <span class="n">tstCat</span> <span class="o">=</span> <span class="s1">&#39;Element type&#39;</span>
-<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">comparison</span> <span class="o">==</span> <span class="s1">&#39;bounds&#39;</span><span class="p">:</span>
-    <span class="n">foldername</span> <span class="o">=</span> <span class="s1">&#39;Quals/boundaries&#39;</span>
-    <span class="n">tstVals</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Analytic&#39;</span><span class="p">,</span> <span class="s1">&#39;Ground&#39;</span><span class="p">,</span> <span class="s1">&#39;Rubik0&#39;</span><span class="p">]</span>
-    <span class="n">tstCat</span> <span class="o">=</span> <span class="s1">&#39;Boundary&#39;</span>
-<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">comparison</span> <span class="o">==</span> <span class="s1">&#39;testing&#39;</span><span class="p">:</span>
-    <span class="n">foldername</span> <span class="o">=</span> <span class="s1">&#39;Quals/miniset&#39;</span>
-    <span class="n">tstVals</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;adaptive&#39;</span><span class="p">,</span> <span class="s1">&#39;uniform&#39;</span><span class="p">]</span>
-    <span class="n">tstCat</span> <span class="o">=</span> <span class="s1">&#39;Mesh type&#39;</span>
+    <span class="n">tstCat</span> <span class="o">=</span> <span class="s2">&quot;Mesh type&quot;</span>
+<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">comparison</span> <span class="o">==</span> <span class="s2">&quot;formula&quot;</span> <span class="ow">or</span> <span class="n">args</span><span class="o">.</span><span class="n">comparison</span> <span class="o">==</span> <span class="s2">&quot;fixedDisc&quot;</span><span class="p">:</span>
+    <span class="n">foldername</span> <span class="o">=</span> <span class="s2">&quot;Comparison/formulations&quot;</span>
+    <span class="n">tstVals</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Admittance&quot;</span><span class="p">,</span> <span class="s2">&quot;FEM&quot;</span><span class="p">,</span> <span class="s2">&quot;Face&quot;</span><span class="p">]</span>
+    <span class="n">tstCat</span> <span class="o">=</span> <span class="s2">&quot;Element type&quot;</span>
+<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">comparison</span> <span class="o">==</span> <span class="s2">&quot;bounds&quot;</span><span class="p">:</span>
+    <span class="n">foldername</span> <span class="o">=</span> <span class="s2">&quot;Comparison/boundaries&quot;</span>
+    <span class="n">tstVals</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Analytic&quot;</span><span class="p">,</span> <span class="s2">&quot;Ground&quot;</span><span class="p">,</span> <span class="s2">&quot;Rubik0&quot;</span><span class="p">]</span>
+    <span class="n">tstCat</span> <span class="o">=</span> <span class="s2">&quot;Boundary&quot;</span>
+<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">comparison</span> <span class="o">==</span> <span class="s2">&quot;testing&quot;</span><span class="p">:</span>
+    <span class="n">foldername</span> <span class="o">=</span> <span class="s2">&quot;Comparison/miniset&quot;</span>
+    <span class="n">tstVals</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;adaptive&quot;</span><span class="p">,</span> <span class="s2">&quot;uniform&quot;</span><span class="p">]</span>
+    <span class="n">tstCat</span> <span class="o">=</span> <span class="s2">&quot;Mesh type&quot;</span>
     <span class="n">generate</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">staticPlots</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">depths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+    <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">depths</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
 
-<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">comparison</span> <span class="o">==</span> <span class="s1">&#39;bigPOC&#39;</span><span class="p">:</span>
-    <span class="n">foldername</span> <span class="o">=</span> <span class="s1">&#39;Quals/bigPOC&#39;</span>
+<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">comparison</span> <span class="o">==</span> <span class="s2">&quot;bigPOC&quot;</span><span class="p">:</span>
+    <span class="n">foldername</span> <span class="o">=</span> <span class="s2">&quot;Comparison/bigPOC&quot;</span>
     <span class="n">xmax</span> <span class="o">=</span> <span class="mf">1e-2</span>
 
-<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">comparison</span> <span class="o">==</span> <span class="s1">&#39;fixedDisc&#39;</span><span class="p">:</span>
-    <span class="n">foldername</span> <span class="o">=</span> <span class="s1">&#39;Quals/fixedDisc&#39;</span>
-    <span class="n">xtraParams</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;BoundaryFunction&#39;</span><span class="p">:</span> <span class="s1">&#39;Analytic&#39;</span><span class="p">}</span>
+<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">comparison</span> <span class="o">==</span> <span class="s2">&quot;fixedDisc&quot;</span><span class="p">:</span>
+    <span class="n">foldername</span> <span class="o">=</span> <span class="s2">&quot;Comparison/fixedDisc&quot;</span>
+    <span class="n">xtraParams</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;boundary_functionction&quot;</span><span class="p">:</span> <span class="s2">&quot;Analytic&quot;</span><span class="p">}</span>
 
 
 <span class="c1"># if args.comparison==&#39;voltage&#39;:</span>
-    <span class="c1"># tstVals=[False, True]</span>
-    <span class="c1"># tstCat=&#39;Vsrc?&#39;</span>
+<span class="c1"># tstVals=[False, True]</span>
+<span class="c1"># tstCat=&#39;Vsrc?&#39;</span>
 
 
 <span class="c1"># generate animation(s)</span>
 <span class="n">plotters</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="n">xcell</span><span class="o">.</span><span class="n">visualizers</span><span class="o">.</span><span class="n">ErrorGraph</span><span class="p">,</span>
-    <span class="c1"># xcell.visualizers.ErrorGraph,</span>
-    <span class="c1"># xcell.visualizers.SliceSet,</span>
-    <span class="c1"># xcell.visualizers.LogError,</span>
-    <span class="c1"># xcell.visualizers.CurrentPlot,</span>
+    <span class="n">xc</span><span class="o">.</span><span class="n">visualizers</span><span class="o">.</span><span class="n">ErrorGraph</span><span class="p">,</span>
+    <span class="c1"># xc.visualizers.ErrorGraph,</span>
+    <span class="c1"># xc.visualizers.SliceSet,</span>
+    <span class="c1"># xc.visualizers.LogError,</span>
+    <span class="c1"># xc.visualizers.CurrentPlot,</span>
 <span class="p">]</span>
 
 <span class="n">plotPrefs</span> <span class="o">=</span> <span class="p">[</span>
@@ -177,130 +444,135 @@ to download the full example code</p>
 <span class="p">]</span>
 
 
-<span class="n">study</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">Common</span><span class="o">.</span><span class="n">makeSynthStudy</span><span class="p">(</span><span class="n">foldername</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="n">xmax</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>NEURON mechanisms not found in estimsurvey/.
+<span class="n">study</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">Common_nongallery</span><span class="o">.</span><span class="n">makeSynthStudy</span><span class="p">(</span><span class="n">foldername</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="n">xmax</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">generate</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">plot_only</span><span class="p">:</span>
-    <span class="n">Common</span><span class="o">.</span><span class="n">pairedDepthSweep</span><span class="p">(</span><span class="n">study</span><span class="p">,</span>
-                            <span class="n">depthRange</span><span class="o">=</span><span class="n">depths</span><span class="p">,</span>
-                            <span class="n">testCat</span><span class="o">=</span><span class="n">tstCat</span><span class="p">,</span>
-                            <span class="n">testVals</span><span class="o">=</span><span class="n">tstVals</span><span class="p">,</span>
-                            <span class="n">overrides</span><span class="o">=</span><span class="n">xtraParams</span><span class="p">)</span>
+    <span class="n">Common_nongallery</span><span class="o">.</span><span class="n">pairedDepthSweep</span><span class="p">(</span>
+        <span class="n">study</span><span class="p">,</span> <span class="n">depthRange</span><span class="o">=</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">depths</span></a><span class="p">,</span> <span class="n">testCat</span><span class="o">=</span><span class="n">tstCat</span><span class="p">,</span> <span class="n">testVals</span><span class="o">=</span><span class="n">tstVals</span><span class="p">,</span> <span class="n">overrides</span><span class="o">=</span><span class="n">xtraParams</span>
+    <span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>120 elem
-1.3226 Gb used
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2.58777 Gb used
 error: 1.39509
-120 elem
-1.32341 Gb used
+2.58777 Gb used
 error: 1.38292
-120 elem
-1.32442 Gb used
-error: 1.46565
-512 elem
-1.32461 Gb used
+
+Calculating adjacency:   0%|          | 0/120 [00:00&lt;?, ?it/s]
+Calculating adjacency:   1%|          | 1/120 [00:00&lt;00:29,  3.99it/s]
+Calculating adjacency: 100%|██████████| 120/120 [00:00&lt;00:00, 475.24it/s]
+/Users/cgirard/mambaforge/envs/xcell/lib/python3.9/site-packages/scipy/sparse/linalg/_dsolve/linsolve.py:206: MatrixRankWarning: Matrix is exactly singular
+  warn(&quot;Matrix is exactly singular&quot;, MatrixRankWarning)
+2.5873 Gb used
+error: nan
+2.58787 Gb used
 error: 0.711183
-512 elem
-1.32461 Gb used
+2.58792 Gb used
 error: 0.626179
-512 elem
-1.32461 Gb used
-error: 0.766867
-736 elem
-1.32461 Gb used
+
+Calculating adjacency:   0%|          | 0/512 [00:00&lt;?, ?it/s]
+Calculating adjacency: 100%|██████████| 512/512 [00:00&lt;00:00, 67291.81it/s]
+/Users/cgirard/mambaforge/envs/xcell/lib/python3.9/site-packages/scipy/sparse/linalg/_dsolve/linsolve.py:206: MatrixRankWarning: Matrix is exactly singular
+  warn(&quot;Matrix is exactly singular&quot;, MatrixRankWarning)
+2.58792 Gb used
+error: nan
+2.58795 Gb used
 error: 0.358631
-736 elem
-1.32479 Gb used
+2.58805 Gb used
 error: 0.350071
-736 elem
-1.32479 Gb used
-error: 0.469607
-1632 elem
-1.32479 Gb used
+
+Calculating adjacency:   0%|          | 0/736 [00:00&lt;?, ?it/s]
+Calculating adjacency: 100%|██████████| 736/736 [00:00&lt;00:00, 65509.58it/s]
+2.58807 Gb used
+error: nan
+2.58807 Gb used
 error: 0.203653
-1632 elem
-1.32479 Gb used
+2.58816 Gb used
 error: 0.504739
-1632 elem
-1.32479 Gb used
-error: 0.346672
-2976 elem
-1.32479 Gb used
+
+Calculating adjacency:   0%|          | 0/1632 [00:00&lt;?, ?it/s]
+Calculating adjacency: 100%|██████████| 1632/1632 [00:00&lt;00:00, 64656.97it/s]
+2.58818 Gb used
+error: nan
+2.58818 Gb used
 error: 0.298805
-2976 elem
-1.32524 Gb used
+2.5882 Gb used
 error: 0.596175
-2976 elem
-1.32524 Gb used
-error: 0.440742
-5272 elem
-1.32524 Gb used
+
+Calculating adjacency:   0%|          | 0/2976 [00:00&lt;?, ?it/s]
+Calculating adjacency: 100%|██████████| 2976/2976 [00:00&lt;00:00, 60473.96it/s]
+2.58839 Gb used
+error: nan
+2.58944 Gb used
 error: 0.248566
-5272 elem
-1.32875 Gb used
+2.60198 Gb used
 error: 0.429459
-5272 elem
-1.32875 Gb used
-error: 0.234026
-7232 elem
-1.32929 Gb used
+
+Calculating adjacency:   0%|          | 0/5272 [00:00&lt;?, ?it/s]
+Calculating adjacency:  80%|███████▉  | 4211/5272 [00:00&lt;00:00, 12583.86it/s]
+Calculating adjacency: 100%|██████████| 5272/5272 [00:00&lt;00:00, 14963.84it/s]
+2.60207 Gb used
+error: nan
+2.60207 Gb used
 error: 0.239598
-7232 elem
-1.3329 Gb used
+2.63931 Gb used
 error: 0.415435
-7232 elem
-1.3329 Gb used
-error: 0.215875
-14232 elem
-1.3329 Gb used
+
+Calculating adjacency:   0%|          | 0/7232 [00:00&lt;?, ?it/s]
+Calculating adjacency:  79%|███████▉  | 5721/7232 [00:00&lt;00:00, 57198.46it/s]
+Calculating adjacency: 100%|██████████| 7232/7232 [00:00&lt;00:00, 57282.29it/s]
+2.64092 Gb used
+error: nan
+2.64135 Gb used
 error: 0.233044
-14232 elem
-1.33356 Gb used
+2.67048 Gb used
 error: 0.368771
-14232 elem
-1.33338 Gb used
-error: 0.218464
-24536 elem
-1.33365 Gb used
+
+Calculating adjacency:   0%|          | 0/14232 [00:00&lt;?, ?it/s]
+Calculating adjacency:  38%|███▊      | 5341/14232 [00:00&lt;00:00, 53404.58it/s]
+Calculating adjacency:  75%|███████▌  | 10698/14232 [00:00&lt;00:00, 53498.46it/s]
+Calculating adjacency: 100%|██████████| 14232/14232 [00:00&lt;00:00, 53738.71it/s]
+2.77851 Gb used
+error: nan
+2.79457 Gb used
 error: 0.226043
-24536 elem
-1.33784 Gb used
+3.29538 Gb used
 error: 0.334305
-24536 elem
-1.33732 Gb used
-error: 0.21718
+
+Calculating adjacency:   0%|          | 0/24536 [00:00&lt;?, ?it/s]
+Calculating adjacency:  21%|██▏       | 5227/24536 [00:00&lt;00:00, 52268.43it/s]
+Calculating adjacency:  43%|████▎     | 10454/24536 [00:00&lt;00:00, 52060.13it/s]
+Calculating adjacency:  64%|██████▍   | 15704/24536 [00:00&lt;00:00, 52256.48it/s]
+Calculating adjacency:  85%|████████▌ | 20930/24536 [00:00&lt;00:00, 51626.94it/s]
+Calculating adjacency: 100%|██████████| 24536/24536 [00:00&lt;00:00, 52150.34it/s]
+3.46415 Gb used
+error: nan
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">costcat</span> <span class="o">=</span> <span class="s1">&#39;Error&#39;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">costcat</span> <span class="o">=</span> <span class="s2">&quot;Error&quot;</span>
 <span class="c1"># costcat=&#39;FVU&#39;</span>
-<span class="c1"># xcat=&#39;l0min&#39;</span>
+<span class="c1"># x_category=&#39;l0min&#39;</span>
 
-<span class="n">xvalues</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Number of elements&#39;</span><span class="p">,</span> <span class="s1">&#39;l0min&#39;</span><span class="p">,</span> <span class="s1">&#39;Total time [Wall]&#39;</span><span class="p">]</span>
-<span class="n">xtags</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;numel&#39;</span><span class="p">,</span> <span class="s1">&#39;l0&#39;</span><span class="p">,</span> <span class="s1">&#39;totTime&#39;</span><span class="p">]</span>
+<span class="n">xvalues</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Number of elements&quot;</span><span class="p">,</span> <span class="s2">&quot;min_l0&quot;</span><span class="p">,</span> <span class="s2">&quot;Total time [Wall]&quot;</span><span class="p">]</span>
+<span class="n">xtags</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;numel&quot;</span><span class="p">,</span> <span class="s2">&quot;l0&quot;</span><span class="p">,</span> <span class="s2">&quot;totTime&quot;</span><span class="p">]</span>
 <span class="k">if</span> <span class="n">staticPlots</span><span class="p">:</span>
-    <span class="k">for</span> <span class="n">xcat</span><span class="p">,</span> <span class="n">xtag</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xvalues</span><span class="p">,</span> <span class="n">xtags</span><span class="p">):</span>
-
-        <span class="n">xcell</span><span class="o">.</span><span class="n">visualizers</span><span class="o">.</span><span class="n">groupedScatter</span><span class="p">(</span><span class="n">study</span><span class="o">.</span><span class="n">studyPath</span><span class="o">+</span><span class="s1">&#39;/log.csv&#39;</span><span class="p">,</span>
-                                         <span class="n">xcat</span><span class="o">=</span><span class="n">xcat</span><span class="p">,</span>
-                                         <span class="n">ycat</span><span class="o">=</span><span class="n">costcat</span><span class="p">,</span>
-                                         <span class="n">groupcat</span><span class="o">=</span><span class="n">tstCat</span><span class="p">)</span>
-        <span class="n">fname</span> <span class="o">=</span> <span class="n">tstCat</span><span class="o">+</span><span class="s2">&quot;_&quot;</span><span class="o">+</span><span class="n">costcat</span><span class="o">+</span><span class="s1">&#39;-vs-&#39;</span><span class="o">+</span><span class="n">xtag</span>
-        <span class="n">fname</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>
-        <span class="n">nufig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span>
-        <span class="n">study</span><span class="o">.</span><span class="n">savePlot</span><span class="p">(</span><span class="n">nufig</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">x_category</span><span class="p">,</span> <span class="n">xtag</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xvalues</span><span class="p">,</span> <span class="n">xtags</span><span class="p">):</span>
+        <span class="n">xc</span><span class="o">.</span><span class="n">visualizers</span><span class="o">.</span><span class="n">grouped_scatter</span><span class="p">(</span>
+            <span class="n">study</span><span class="o">.</span><span class="n">study_path</span> <span class="o">+</span> <span class="s2">&quot;/log.csv&quot;</span><span class="p">,</span> <span class="n">x_category</span><span class="o">=</span><span class="n">x_category</span><span class="p">,</span> <span class="n">y_category</span><span class="o">=</span><span class="n">costcat</span><span class="p">,</span> <span class="n">group_category</span><span class="o">=</span><span class="n">tstCat</span>
+        <span class="p">)</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">tstCat</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">costcat</span> <span class="o">+</span> <span class="s2">&quot;-vs-&quot;</span> <span class="o">+</span> <span class="n">xtag</span>
+        <span class="n">fname</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+        <a href="https://matplotlib.org/stable/api/figure_api.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nufig</span></a> <span class="o">=</span> <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.gcf.html#matplotlib.pyplot.gcf" title="matplotlib.pyplot.gcf" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">gcf</span></a><span class="p">()</span>
+        <span class="n">study</span><span class="o">.</span><span class="n">save_plot</span><span class="p">(</span><a href="https://matplotlib.org/stable/api/figure_api.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nufig</span></a><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">fv</span> <span class="ow">in</span> <span class="n">tstVals</span><span class="p">:</span>
+            <a href="https://matplotlib.org/stable/api/figure_api.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fstack</span></a><span class="p">,</span> <a href="https://matplotlib.org/stable/api/figure_api.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fratio</span></a> <span class="o">=</span> <span class="n">xc</span><span class="o">.</span><span class="n">visualizers</span><span class="o">.</span><span class="n">plot_study_performance</span><span class="p">(</span>
+                <span class="n">study</span><span class="p">,</span> <span class="n">plot_ratios</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">only_category</span><span class="o">=</span><span class="n">tstCat</span><span class="p">,</span> <span class="n">only_value</span><span class="o">=</span><span class="n">fv</span>
+            <span class="p">)</span>
+            <span class="n">fstem</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">tstCat</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fv</span><span class="p">)</span>
 
-            <span class="n">fstack</span><span class="p">,</span> <span class="n">fratio</span> <span class="o">=</span> <span class="n">xcell</span><span class="o">.</span><span class="n">visualizers</span><span class="o">.</span><span class="n">plotStudyPerformance</span><span class="p">(</span><span class="n">study</span><span class="p">,</span>
-                                                                    <span class="n">onlyCat</span><span class="o">=</span><span class="n">tstCat</span><span class="p">,</span>
-                                                                    <span class="n">onlyVal</span><span class="o">=</span><span class="n">fv</span><span class="p">)</span>
-            <span class="n">fstem</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="n">tstCat</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">fv</span><span class="p">)</span>
+            <span class="n">study</span><span class="o">.</span><span class="n">save_plot</span><span class="p">(</span><a href="https://matplotlib.org/stable/api/figure_api.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fstack</span></a><span class="p">,</span> <span class="s2">&quot;Performance&quot;</span> <span class="o">+</span> <span class="n">fstem</span><span class="p">)</span>
 
-            <span class="n">study</span><span class="o">.</span><span class="n">savePlot</span><span class="p">(</span><span class="n">fstack</span><span class="p">,</span> <span class="s1">&#39;Performance&#39;</span><span class="o">+</span><span class="n">fstem</span><span class="p">)</span>
-
-            <span class="n">study</span><span class="o">.</span><span class="n">savePlot</span><span class="p">(</span><span class="n">fratio</span><span class="p">,</span> <span class="s1">&#39;Ratio&#39;</span><span class="o">+</span><span class="n">fstem</span><span class="p">)</span>
+            <span class="n">study</span><span class="o">.</span><span class="n">save_plot</span><span class="p">(</span><a href="https://matplotlib.org/stable/api/figure_api.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fratio</span></a><span class="p">,</span> <span class="s2">&quot;Ratio&quot;</span> <span class="o">+</span> <span class="n">fstem</span><span class="p">)</span>
 </pre></div>
 </div>
 <ul class="sphx-glr-horizontal">
@@ -326,39 +598,37 @@ error: 0.21718
 <li><img src="../_images/sphx_glr_plot_comparisons_020.png" srcset="../_images/sphx_glr_plot_comparisons_020.png" alt="plot comparisons" class = "sphx-glr-multi-img"/></li>
 <li><img src="../_images/sphx_glr_plot_comparisons_021.png" srcset="../_images/sphx_glr_plot_comparisons_021.png" alt="plot comparisons" class = "sphx-glr-multi-img"/></li>
 </ul>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/benoit/repos/xcell/xcell/visualizers.py:638: RuntimeWarning: More than 20 figures have been opened. Figures created through the pyplot interface (`matplotlib.pyplot.figure`) are retained until explicitly closed and may consume too much memory. (To control this warning, see the rcParam `figure.max_open_warning`).
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/cgirard/repos/xcell/xcell/visualizers.py:437: RuntimeWarning: More than 20 figures have been opened. Figures created through the pyplot interface (`matplotlib.pyplot.figure`) are retained until explicitly closed and may consume too much memory. (To control this warning, see the rcParam `figure.max_open_warning`).
   fig = plt.figure()
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">plotters</span><span class="p">):</span>
-
     <span class="n">plots</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">ranges</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">for</span> <span class="n">fv</span> <span class="ow">in</span> <span class="n">tstVals</span><span class="p">:</span>
-        <span class="n">fname</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="vm">__name__</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">fv</span><span class="p">)</span>
-        <span class="n">fname</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>
-        <span class="n">plotr</span> <span class="o">=</span> <span class="n">p</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(),</span> <span class="n">study</span><span class="p">,</span> <span class="n">prefs</span><span class="o">=</span><span class="n">plotPrefs</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span>
-        <span class="k">if</span> <span class="s1">&#39;universalPts&#39;</span> <span class="ow">in</span> <span class="n">plotr</span><span class="o">.</span><span class="n">prefs</span><span class="p">:</span>
-            <span class="n">plotr</span><span class="o">.</span><span class="n">prefs</span><span class="p">[</span><span class="s1">&#39;universalPts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">if</span> <span class="s1">&#39;onlyDoF&#39;</span> <span class="ow">in</span> <span class="n">plotr</span><span class="o">.</span><span class="n">prefs</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">plotr</span><span class="o">.</span><span class="n">prefs</span><span class="p">[</span><span class="s1">&#39;onlyDoF&#39;</span><span class="p">]:</span>
-                <span class="n">fname</span> <span class="o">+=</span> <span class="s1">&#39;-detail&#39;</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fv</span><span class="p">)</span>
+        <span class="n">fname</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+        <span class="n">plotr</span> <span class="o">=</span> <span class="n">p</span><span class="p">(</span><a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.figure.html#matplotlib.pyplot.figure" title="matplotlib.pyplot.figure" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">(),</span> <span class="n">study</span><span class="p">,</span> <span class="n">prefs</span><span class="o">=</span><span class="n">plotPrefs</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span>
+        <span class="k">if</span> <span class="s2">&quot;universalPts&quot;</span> <span class="ow">in</span> <span class="n">plotr</span><span class="o">.</span><span class="n">prefs</span><span class="p">:</span>
+            <span class="n">plotr</span><span class="o">.</span><span class="n">prefs</span><span class="p">[</span><span class="s2">&quot;universalPts&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="s2">&quot;onlyDoF&quot;</span> <span class="ow">in</span> <span class="n">plotr</span><span class="o">.</span><span class="n">prefs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">plotr</span><span class="o">.</span><span class="n">prefs</span><span class="p">[</span><span class="s2">&quot;onlyDoF&quot;</span><span class="p">]:</span>
+                <span class="n">fname</span> <span class="o">+=</span> <span class="s2">&quot;-detail&quot;</span>
 
-        <span class="n">plotr</span><span class="o">.</span><span class="n">getStudyData</span><span class="p">(</span><span class="n">filterCategories</span><span class="o">=</span><span class="p">[</span><span class="n">tstCat</span><span class="p">],</span>
-                           <span class="n">filterVals</span><span class="o">=</span><span class="p">[</span><span class="n">fv</span><span class="p">])</span>
+        <span class="n">plotr</span><span class="o">.</span><span class="n">get_study_data</span><span class="p">(</span><span class="n">filter_categories</span><span class="o">=</span><span class="p">[</span><span class="n">tstCat</span><span class="p">],</span> <span class="n">filter_values</span><span class="o">=</span><span class="p">[</span><span class="n">fv</span><span class="p">])</span>
 
         <span class="n">plots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plotr</span><span class="p">)</span>
         <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">ranges</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">plotr</span><span class="o">.</span><span class="n">unifyScales</span><span class="p">(</span><span class="n">ranges</span><span class="p">)</span>
-        <span class="n">ranges</span> <span class="o">=</span> <span class="n">plotr</span><span class="o">.</span><span class="n">dataScales</span>
+            <span class="n">plotr</span><span class="o">.</span><span class="n">unify_scales</span><span class="p">(</span><span class="n">ranges</span><span class="p">)</span>
+        <span class="n">ranges</span> <span class="o">=</span> <span class="n">plotr</span><span class="o">.</span><span class="n">data_scales</span>
 
     <span class="k">for</span> <span class="n">plot</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">plots</span><span class="p">,</span> <span class="n">names</span><span class="p">):</span>
-        <span class="n">plot</span><span class="o">.</span><span class="n">dataScales</span> <span class="o">=</span> <span class="n">ranges</span>
+        <span class="n">plot</span><span class="o">.</span><span class="n">data_scales</span> <span class="o">=</span> <span class="n">ranges</span>
 
-        <span class="n">plot</span><span class="o">.</span><span class="n">animateStudy</span><span class="p">(</span><span class="n">fname</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">plot</span><span class="o">.</span><span class="n">animate_study</span><span class="p">(</span><span class="n">fname</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
 </pre></div>
 </div>
 <ul class="sphx-glr-horizontal">
@@ -366,7 +636,7 @@ error: 0.21718
 <li><img src="../_images/sphx_glr_plot_comparisons_023.png" srcset="../_images/sphx_glr_plot_comparisons_023.png" alt="plot comparisons" class = "sphx-glr-multi-img"/></li>
 <li><img src="../_images/sphx_glr_plot_comparisons_024.png" srcset="../_images/sphx_glr_plot_comparisons_024.png" alt="plot comparisons" class = "sphx-glr-multi-img"/></li>
 </ul>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 35 minutes  59.522 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (3 minutes 4.150 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-comparisons-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../_downloads/d919733cd6be56c19a989fdcef6ff494/plot_comparisons.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_comparisons.py</span></code></a></p>
@@ -379,34 +649,104 @@ error: 0.21718
 </section>
 
 
-           </div>
-          </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="plot_dbs_probe.html" class="btn btn-neutral float-left" title="DBS Electrode" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="plot_singularityEffect.html" class="btn btn-neutral float-right" title="Singularity" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p>&#169; Copyright 2022, CBC Girard.</p>
-  </div>
-
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
-
-</footer>
-        </div>
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="plot_dbs_probe.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">DBS Electrode</p>
       </div>
-    </section>
-  </div>
-  <script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script> 
+    </a>
+    <a class="right-next"
+       href="plot_singularityEffect.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Singularity</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
 
-</body>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../_sources/auto_examples/plot_comparisons.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2022, CBC Girard.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.5.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
 </html>

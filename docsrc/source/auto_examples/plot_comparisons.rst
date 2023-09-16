@@ -10,7 +10,7 @@
     .. note::
         :class: sphx-glr-download-link-note
 
-        Click :ref:`here <sphx_glr_download_auto_examples_plot_comparisons.py>`
+        :ref:`Go to the end <sphx_glr_download_auto_examples_plot_comparisons.py>`
         to download the full example code
 
 .. rst-class:: sphx-glr-example-title
@@ -23,22 +23,20 @@ Depth sweep
 
 Compare performance as mesh resolution increases. Generates ch3-4 data.
 
-.. GENERATED FROM PYTHON SOURCE LINES 9-89
+.. GENERATED FROM PYTHON SOURCE LINES 9-87
 
 .. code-block:: default
 
 
-    import xcell
-    import Common
+    import xcell as xc
+    import Common_nongallery
     import matplotlib.pyplot as plt
     import argparse
     import numpy as np
 
     cli = argparse.ArgumentParser()
-    cli.add_argument('--comparison', choices=['bounds', 'mesh',
-                     'formula', 'bigPOC', 'fixedDisc'], default='fixedDisc')
-    cli.add_argument('-p', '--plot-only',
-                     help='skip simulation and use existing data', action='store_true')
+    cli.add_argument("--comparison", choices=["bounds", "mesh", "formula", "bigPOC", "fixedDisc"], default="fixedDisc")
+    cli.add_argument("-p", "--plot-only", help="skip simulation and use existing data", action="store_true")
     # cli.add_argument('-a','--animate',help='skip simulation and use existing data', action = 'store_true')
     # cli.add_argument('-p','--plot-only',help='skip simulation and use existing data', action = 'store_true')
 
@@ -54,48 +52,48 @@ Compare performance as mesh resolution increases. Generates ch3-4 data.
 
     xtraParams = None
     xmax = 1e-4
-    if args.comparison == 'mesh' or args.comparison == 'bigPOC':
-        foldername = 'Quals/PoC'
+    if args.comparison == "mesh" or args.comparison == "bigPOC":
+        foldername = "Comparison/PoC"
         tstVals = ["adaptive", "uniform"]
         # tstVals=['adaptive','equal elements',r'equal $l_0$']
-        tstCat = 'Mesh type'
-    if args.comparison == 'formula' or args.comparison == 'fixedDisc':
-        foldername = 'Quals/formulations'
-        tstVals = ['Admittance', 'FEM', 'Face']
-        tstCat = 'Element type'
-    if args.comparison == 'bounds':
-        foldername = 'Quals/boundaries'
-        tstVals = ['Analytic', 'Ground', 'Rubik0']
-        tstCat = 'Boundary'
-    if args.comparison == 'testing':
-        foldername = 'Quals/miniset'
-        tstVals = ['adaptive', 'uniform']
-        tstCat = 'Mesh type'
+        tstCat = "Mesh type"
+    if args.comparison == "formula" or args.comparison == "fixedDisc":
+        foldername = "Comparison/formulations"
+        tstVals = ["Admittance", "FEM", "Face"]
+        tstCat = "Element type"
+    if args.comparison == "bounds":
+        foldername = "Comparison/boundaries"
+        tstVals = ["Analytic", "Ground", "Rubik0"]
+        tstCat = "Boundary"
+    if args.comparison == "testing":
+        foldername = "Comparison/miniset"
+        tstVals = ["adaptive", "uniform"]
+        tstCat = "Mesh type"
         generate = False
         staticPlots = False
         depths = np.arange(3, 8)
 
-    if args.comparison == 'bigPOC':
-        foldername = 'Quals/bigPOC'
+    if args.comparison == "bigPOC":
+        foldername = "Comparison/bigPOC"
         xmax = 1e-2
 
-    if args.comparison == 'fixedDisc':
-        foldername = 'Quals/fixedDisc'
-        xtraParams = {'BoundaryFunction': 'Analytic'}
+    if args.comparison == "fixedDisc":
+        foldername = "Comparison/fixedDisc"
+        xtraParams = {"boundary_functionction": "Analytic"}
 
 
     # if args.comparison=='voltage':
-        # tstVals=[False, True]
-        # tstCat='Vsrc?'
+    # tstVals=[False, True]
+    # tstCat='Vsrc?'
 
 
     # generate animation(s)
     plotters = [
-        xcell.visualizers.ErrorGraph,
-        # xcell.visualizers.ErrorGraph,
-        # xcell.visualizers.SliceSet,
-        # xcell.visualizers.LogError,
-        # xcell.visualizers.CurrentPlot,
+        xc.visualizers.ErrorGraph,
+        # xc.visualizers.ErrorGraph,
+        # xc.visualizers.SliceSet,
+        # xc.visualizers.LogError,
+        # xc.visualizers.CurrentPlot,
     ]
 
     plotPrefs = [
@@ -106,31 +104,23 @@ Compare performance as mesh resolution increases. Generates ch3-4 data.
     ]
 
 
-    study, _ = Common.makeSynthStudy(foldername, xmax=xmax)
+    study, _ = Common_nongallery.makeSynthStudy(foldername, xmax=xmax)
 
 
 
 
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    NEURON mechanisms not found in estimsurvey/.
 
 
 
-
-.. GENERATED FROM PYTHON SOURCE LINES 90-98
+.. GENERATED FROM PYTHON SOURCE LINES 88-94
 
 .. code-block:: default
 
 
     if generate and not args.plot_only:
-        Common.pairedDepthSweep(study,
-                                depthRange=depths,
-                                testCat=tstCat,
-                                testVals=tstVals,
-                                overrides=xtraParams)
+        Common_nongallery.pairedDepthSweep(
+            study, depthRange=depths, testCat=tstCat, testVals=tstVals, overrides=xtraParams
+        )
 
 
 
@@ -140,123 +130,106 @@ Compare performance as mesh resolution increases. Generates ch3-4 data.
 
  .. code-block:: none
 
-    120 elem
-    1.3226 Gb used
+    2.58777 Gb used
     error: 1.39509
-    120 elem
-    1.32341 Gb used
+    2.58777 Gb used
     error: 1.38292
-    120 elem
-    1.32442 Gb used
-    error: 1.46565
-    512 elem
-    1.32461 Gb used
+    Calculating adjacency:   0%|          | 0/120 [00:00<?, ?it/s]    Calculating adjacency:   1%|          | 1/120 [00:00<00:29,  3.99it/s]    Calculating adjacency: 100%|██████████| 120/120 [00:00<00:00, 475.24it/s]
+    /Users/cgirard/mambaforge/envs/xcell/lib/python3.9/site-packages/scipy/sparse/linalg/_dsolve/linsolve.py:206: MatrixRankWarning: Matrix is exactly singular
+      warn("Matrix is exactly singular", MatrixRankWarning)
+    2.5873 Gb used
+    error: nan
+    2.58787 Gb used
     error: 0.711183
-    512 elem
-    1.32461 Gb used
+    2.58792 Gb used
     error: 0.626179
-    512 elem
-    1.32461 Gb used
-    error: 0.766867
-    736 elem
-    1.32461 Gb used
+    Calculating adjacency:   0%|          | 0/512 [00:00<?, ?it/s]    Calculating adjacency: 100%|██████████| 512/512 [00:00<00:00, 67291.81it/s]
+    /Users/cgirard/mambaforge/envs/xcell/lib/python3.9/site-packages/scipy/sparse/linalg/_dsolve/linsolve.py:206: MatrixRankWarning: Matrix is exactly singular
+      warn("Matrix is exactly singular", MatrixRankWarning)
+    2.58792 Gb used
+    error: nan
+    2.58795 Gb used
     error: 0.358631
-    736 elem
-    1.32479 Gb used
+    2.58805 Gb used
     error: 0.350071
-    736 elem
-    1.32479 Gb used
-    error: 0.469607
-    1632 elem
-    1.32479 Gb used
+    Calculating adjacency:   0%|          | 0/736 [00:00<?, ?it/s]    Calculating adjacency: 100%|██████████| 736/736 [00:00<00:00, 65509.58it/s]
+    2.58807 Gb used
+    error: nan
+    2.58807 Gb used
     error: 0.203653
-    1632 elem
-    1.32479 Gb used
+    2.58816 Gb used
     error: 0.504739
-    1632 elem
-    1.32479 Gb used
-    error: 0.346672
-    2976 elem
-    1.32479 Gb used
+    Calculating adjacency:   0%|          | 0/1632 [00:00<?, ?it/s]    Calculating adjacency: 100%|██████████| 1632/1632 [00:00<00:00, 64656.97it/s]
+    2.58818 Gb used
+    error: nan
+    2.58818 Gb used
     error: 0.298805
-    2976 elem
-    1.32524 Gb used
+    2.5882 Gb used
     error: 0.596175
-    2976 elem
-    1.32524 Gb used
-    error: 0.440742
-    5272 elem
-    1.32524 Gb used
+    Calculating adjacency:   0%|          | 0/2976 [00:00<?, ?it/s]    Calculating adjacency: 100%|██████████| 2976/2976 [00:00<00:00, 60473.96it/s]
+    2.58839 Gb used
+    error: nan
+    2.58944 Gb used
     error: 0.248566
-    5272 elem
-    1.32875 Gb used
+    2.60198 Gb used
     error: 0.429459
-    5272 elem
-    1.32875 Gb used
-    error: 0.234026
-    7232 elem
-    1.32929 Gb used
+    Calculating adjacency:   0%|          | 0/5272 [00:00<?, ?it/s]    Calculating adjacency:  80%|███████▉  | 4211/5272 [00:00<00:00, 12583.86it/s]    Calculating adjacency: 100%|██████████| 5272/5272 [00:00<00:00, 14963.84it/s]
+    2.60207 Gb used
+    error: nan
+    2.60207 Gb used
     error: 0.239598
-    7232 elem
-    1.3329 Gb used
+    2.63931 Gb used
     error: 0.415435
-    7232 elem
-    1.3329 Gb used
-    error: 0.215875
-    14232 elem
-    1.3329 Gb used
+    Calculating adjacency:   0%|          | 0/7232 [00:00<?, ?it/s]    Calculating adjacency:  79%|███████▉  | 5721/7232 [00:00<00:00, 57198.46it/s]    Calculating adjacency: 100%|██████████| 7232/7232 [00:00<00:00, 57282.29it/s]
+    2.64092 Gb used
+    error: nan
+    2.64135 Gb used
     error: 0.233044
-    14232 elem
-    1.33356 Gb used
+    2.67048 Gb used
     error: 0.368771
-    14232 elem
-    1.33338 Gb used
-    error: 0.218464
-    24536 elem
-    1.33365 Gb used
+    Calculating adjacency:   0%|          | 0/14232 [00:00<?, ?it/s]    Calculating adjacency:  38%|███▊      | 5341/14232 [00:00<00:00, 53404.58it/s]    Calculating adjacency:  75%|███████▌  | 10698/14232 [00:00<00:00, 53498.46it/s]    Calculating adjacency: 100%|██████████| 14232/14232 [00:00<00:00, 53738.71it/s]
+    2.77851 Gb used
+    error: nan
+    2.79457 Gb used
     error: 0.226043
-    24536 elem
-    1.33784 Gb used
+    3.29538 Gb used
     error: 0.334305
-    24536 elem
-    1.33732 Gb used
-    error: 0.21718
+    Calculating adjacency:   0%|          | 0/24536 [00:00<?, ?it/s]    Calculating adjacency:  21%|██▏       | 5227/24536 [00:00<00:00, 52268.43it/s]    Calculating adjacency:  43%|████▎     | 10454/24536 [00:00<00:00, 52060.13it/s]    Calculating adjacency:  64%|██████▍   | 15704/24536 [00:00<00:00, 52256.48it/s]    Calculating adjacency:  85%|████████▌ | 20930/24536 [00:00<00:00, 51626.94it/s]    Calculating adjacency: 100%|██████████| 24536/24536 [00:00<00:00, 52150.34it/s]
+    3.46415 Gb used
+    error: nan
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 99-129
+.. GENERATED FROM PYTHON SOURCE LINES 95-122
 
 .. code-block:: default
 
 
-    costcat = 'Error'
+    costcat = "Error"
     # costcat='FVU'
-    # xcat='l0min'
+    # x_category='l0min'
 
-    xvalues = ['Number of elements', 'l0min', 'Total time [Wall]']
-    xtags = ['numel', 'l0', 'totTime']
+    xvalues = ["Number of elements", "min_l0", "Total time [Wall]"]
+    xtags = ["numel", "l0", "totTime"]
     if staticPlots:
-        for xcat, xtag in zip(xvalues, xtags):
-
-            xcell.visualizers.groupedScatter(study.studyPath+'/log.csv',
-                                             xcat=xcat,
-                                             ycat=costcat,
-                                             groupcat=tstCat)
-            fname = tstCat+"_"+costcat+'-vs-'+xtag
-            fname.replace(' ', '_')
+        for x_category, xtag in zip(xvalues, xtags):
+            xc.visualizers.grouped_scatter(
+                study.study_path + "/log.csv", x_category=x_category, y_category=costcat, group_category=tstCat
+            )
+            fname = tstCat + "_" + costcat + "-vs-" + xtag
+            fname.replace(" ", "_")
             nufig = plt.gcf()
-            study.savePlot(nufig, fname)
+            study.save_plot(nufig, fname)
             for fv in tstVals:
+                fstack, fratio = xc.visualizers.plot_study_performance(
+                    study, plot_ratios=True, only_category=tstCat, only_value=fv
+                )
+                fstem = "_" + tstCat + str(fv)
 
-                fstack, fratio = xcell.visualizers.plotStudyPerformance(study,
-                                                                        onlyCat=tstCat,
-                                                                        onlyVal=fv)
-                fstem = '_'+tstCat+str(fv)
+                study.save_plot(fstack, "Performance" + fstem)
 
-                study.savePlot(fstack, 'Performance'+fstem)
-
-                study.savePlot(fratio, 'Ratio'+fstem)
+                study.save_plot(fratio, "Ratio" + fstem)
 
 
 
@@ -417,47 +390,45 @@ Compare performance as mesh resolution increases. Generates ch3-4 data.
 
  .. code-block:: none
 
-    /home/benoit/repos/xcell/xcell/visualizers.py:638: RuntimeWarning: More than 20 figures have been opened. Figures created through the pyplot interface (`matplotlib.pyplot.figure`) are retained until explicitly closed and may consume too much memory. (To control this warning, see the rcParam `figure.max_open_warning`).
+    /Users/cgirard/repos/xcell/xcell/visualizers.py:437: RuntimeWarning: More than 20 figures have been opened. Figures created through the pyplot interface (`matplotlib.pyplot.figure`) are retained until explicitly closed and may consume too much memory. (To control this warning, see the rcParam `figure.max_open_warning`).
       fig = plt.figure()
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 130-161
+.. GENERATED FROM PYTHON SOURCE LINES 123-152
 
 .. code-block:: default
 
 
 
     for ii, p in enumerate(plotters):
-
         plots = []
         names = []
         ranges = None
         for fv in tstVals:
-            fname = p.__name__+'_'+str(fv)
-            fname.replace(' ', '_')
+            fname = p.__name__ + "_" + str(fv)
+            fname.replace(" ", "_")
             plotr = p(plt.figure(), study, prefs=plotPrefs[ii])
-            if 'universalPts' in plotr.prefs:
-                plotr.prefs['universalPts'] = True
-            if 'onlyDoF' in plotr.prefs:
-                if plotr.prefs['onlyDoF']:
-                    fname += '-detail'
+            if "universalPts" in plotr.prefs:
+                plotr.prefs["universalPts"] = True
+            if "onlyDoF" in plotr.prefs:
+                if plotr.prefs["onlyDoF"]:
+                    fname += "-detail"
 
-            plotr.getStudyData(filterCategories=[tstCat],
-                               filterVals=[fv])
+            plotr.get_study_data(filter_categories=[tstCat], filter_values=[fv])
 
             plots.append(plotr)
             names.append(fname)
 
             if ranges is not None:
-                plotr.unifyScales(ranges)
-            ranges = plotr.dataScales
+                plotr.unify_scales(ranges)
+            ranges = plotr.data_scales
 
         for plot, name in zip(plots, names):
-            plot.dataScales = ranges
+            plot.data_scales = ranges
 
-            plot.animateStudy(fname=name, fps=1.0)
+            plot.animate_study(fname=name, fps=1.0)
 
 
 
@@ -492,7 +463,7 @@ Compare performance as mesh resolution increases. Generates ch3-4 data.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 35 minutes  59.522 seconds)
+   **Total running time of the script:** (3 minutes 4.150 seconds)
 
 
 .. _sphx_glr_download_auto_examples_plot_comparisons.py:
@@ -500,6 +471,8 @@ Compare performance as mesh resolution increases. Generates ch3-4 data.
 .. only:: html
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
+
+
 
 
     .. container:: sphx-glr-download sphx-glr-download-python
