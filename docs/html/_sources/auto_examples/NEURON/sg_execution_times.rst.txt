@@ -1,0 +1,13 @@
+
+:orphan:
+
+.. _sphx_glr_auto_examples_NEURON_sg_execution_times:
+
+
+Computation times
+=================
+**04:46.879** total execution time for **auto_examples_NEURON** files:
+
++--------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_auto_examples_NEURON_plot_LFP.py` (``plot_LFP.py``) | 04:46.879 | 0.0 MB |
++--------------------------------------------------------------------+-----------+--------+

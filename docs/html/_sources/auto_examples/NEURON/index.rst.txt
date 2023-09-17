@@ -1,0 +1,41 @@
+
+
+.. _sphx_glr_auto_examples_NEURON:
+
+NEURON
+========
+Interfacing with compartmental models.
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Plot LFP from toy neurons">
+
+.. only:: html
+
+  .. image:: /auto_examples/NEURON/images/thumb/sphx_glr_plot_LFP_thumb.gif
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_NEURON_plot_LFP.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">LFP estimation with dynamic remeshing</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/NEURON/plot_LFP
+

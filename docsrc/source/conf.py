@@ -40,7 +40,7 @@ extensions = [
   'sphinx.ext.autodoc',
   'sphinx.ext.inheritance_diagram',
   'sphinx_copybutton',
-#   'sphinx.ext.autosummary',
+  'sphinx.ext.githubpages',
 #   'sphinx_codeautolink',
   'sphinx_gallery.gen_gallery',
   'sphinx.ext.intersphinx',
