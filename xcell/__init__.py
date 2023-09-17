@@ -6,6 +6,7 @@ description needed?
 """
 
 import os
+from pathlib import Path
 
 from . import util
 from . import misc
@@ -19,5 +20,21 @@ from . import colors
 from . import signals
 from .xCell import *
 
-if os.name!='nt':
+
+_folderstem = os.path.join(Path.home(),'Documents')
+
+if os.path.exists(_folderstem):
+    _folder = os.path.join(_folderstem,'xcell')
+else:
+    _folder = os.path.join(Path.home(),'xcell')
+
+#: Root directory where all generated data is stored
+DATA_DIR = _folder
+
+#TODO: better handling of cross-platform NEURON dependencies
+try:
     from . import nrnutil
+except:
+    import dummy as nrnutil
+from . import _version
+__version__ = _version.get_versions()['version']

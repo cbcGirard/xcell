@@ -94,9 +94,9 @@ def makeDBSElectrode(dbody=1.3e-3, bodyL=0.05,
 
 
 def insertInRegion(regions, body, microElectrodes, macroElectrodes):
-    regions['Insulators'].append(xcell.geometry.toPV(body))
+    regions['Insulators'].append(xcell.geometry.to_pyvista(body))
     for geo in chain(microElectrodes, macroElectrodes):
-        regions['Electrodes'].append(xcell.geometry.toPV(geo))
+        regions['Electrodes'].append(xcell.geometry.to_pyvista(geo))
 
 
 def addStandardStim(simulation, microElectrodes, macroElectrodes):
@@ -104,17 +104,14 @@ def addStandardStim(simulation, microElectrodes, macroElectrodes):
     channels = getSignals(nmicro)
 
     for geo, ch in zip(microElectrodes, channels):
-        simulation.addCurrentSource(ch, coords=geo.center,
-                                    geometry=geo)
+        simulation.add_current_source(ch, geometry=geo)
 
     for geo in macroElectrodes:
-        simulation.addCurrentSource(xcell.signals.Signal(0),
-                                    coords=geo.center,
+        simulation.add_current_source(xcell.signals.Signal(0),
                                     geometry=geo)
 
 
 def addUnityStim(simulation, microElectrodes, macroElectrodes, whichActive, amplitude=1e-6):
     for ii, geo in enumerate(chain(microElectrodes, macroElectrodes)):
         srcVal = xcell.signals.Signal(amplitude*float(ii == whichActive))
-        simulation.addCurrentSource(srcVal, coords=geo.center,
-                                    geometry=geo)
+        simulation.add_current_source(srcVal, geometry=geo)

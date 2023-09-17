@@ -1,0 +1,143 @@
+:py:mod:`xcell.misc`
+====================
+
+.. py:module:: xcell.misc
+
+.. autoapi-nested-parse::
+
+   Convenience functions.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   xcell.misc.current_source_power
+   xcell.misc.voltage_source_integral
+   xcell.misc.current_source_integral
+   xcell.misc.estimate_power
+   xcell.misc.get_error_estimates
+   xcell.misc.get_statistical_squares
+   xcell.misc.transpose_dicts
+   xcell.misc.calculate_fvu
+
+
+
+.. py:function:: current_source_power(current, radius, sigma)
+
+   Get an analytic estimate of the power dissipated by a spherical current source.
+
+   :param current: Amplitude of source in amps.
+   :type current: float
+   :param radius: Radius of source in meters.
+   :type radius: float
+   :param sigma: Conductivity of surroundings in S/m.
+   :type sigma: float or float[:]
+
+   :returns: **power** -- Estimated power dissipation in watts.
+   :rtype: float
+
+
+.. py:function:: voltage_source_integral(voltage, radius, r_max)
+
+   Calculate exact integral of V for a spherical voltage source
+   from the center to a distance of r_max.
+
+   :param voltage: Amplitude of source in volts.
+   :type voltage: float
+   :param radius: Radius of source in meters.
+   :type radius: float
+   :param r_max: Furthest distance of domain.
+   :type r_max: float
+
+   :returns: Integral of V from center to r_max.
+   :rtype: float
+
+
+.. py:function:: current_source_integral(current, radius, r_max, sigma)
+
+   Calculate exact integral of V for a spherical current source
+   from the center to a distance of r_max.
+
+   :param current: Amplitude of source in amperes.
+   :type current: float
+   :param radius: Radius of source in meters.
+   :type radius: float
+   :param r_max: Furthest distance of domain.
+   :type r_max: float
+   :param sigma: Conductivity of region in S/m
+   :type sigma: float or float[:]
+
+   :returns: Integral of V from center to r_max.
+   :rtype: float
+
+
+.. py:function:: estimate_power(voltages, edges, conductances)
+
+   Estimate power dissipated in the equivalent netowrk of the mesh.
+
+   :param voltages: Voltage at each node.
+   :type voltages: float[:]
+   :param edges: i-th lists indices of the endpoints for the i-th conductance.
+   :type edges: int[:,2]
+   :param conductances: Value of conductances in S.
+   :type conductances: float[:]
+
+   :returns: Total power dissipated in watts.
+   :rtype: float
+
+
+.. py:function:: get_error_estimates(simulation)
+
+   Get error-related metrics for a simulation of point/sphere sources.
+
+   :param simulation: Simulation object.
+   :type simulation: `~xcell.Simulation`
+
+   :returns: **data** -- Error-related quantitites.
+   :rtype: dict
+
+
+.. py:function:: get_statistical_squares(err, vAna)
+
+   Get sums-of-squares for statistical operations
+
+   :param err: Difference between simulated and analytic voltage at each node.
+   :type err: float[:]
+   :param vAna: Analytic voltage at each node.
+   :type vAna: float[:]
+
+   :returns: * **SSE** (*float*) -- Sum of squared errors.
+             * **SSTot** (*float*) -- Total sum of squares.
+
+
+.. py:function:: transpose_dicts(dict_list)
+
+   Convert list of dicts (from timesteps) to dict of lists (for plotting).
+
+   :param dict_list: List of data from each timestep.
+   :type dict_list: [{}]
+
+   :returns: **list_dict** -- Dict of variables, as lists of values at each timestep.
+   :rtype: {[]}
+
+
+.. py:function:: calculate_fvu(analytic_values, err)
+
+   Calculate fraction of variance unexplained (FVU)
+
+   :param analytic_values: Analytic voltage at each node.
+   :type analytic_values: float[:]
+   :param err: Difference between simulated and analytic voltage at each node.
+   :type err: float[:]
+
+   :returns: **FVU** -- Fraction of variance unexplained.
+   :rtype: float
+
+

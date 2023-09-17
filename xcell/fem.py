@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Tue Jan 11 10:37:11 2022
-
-@author: benoit
+Mathematics for discrete conductivities within elements.
 """
 
 import numpy as np
@@ -12,7 +10,7 @@ from . import util
 
 
 @nb.njit()
-def getHexConductances(span, sigma):
+def get_hex_conductances(span, sigma):
     """
     Calculate the conductances of a trilinear FEM hexahedron.
 
@@ -25,45 +23,45 @@ def getHexConductances(span, sigma):
 
     Returns
     -------
-    float[28]
-        
+    g : float[28]
+        Conductances of element between each nodal pair in :py:const:`HEX_EDGES`
+
     """
     if sigma.shape[0] == 1:
-        sigma = sigma*np.ones(3)
+        sigma = sigma * np.ones(3)
     else:
         sigma = sigma
 
-    # k=self.span/(36*np.roll(self.span,1)*np.roll(self.span,2))
-    k = np.roll(span, 1)*np.roll(span, 2)/(36*span)
-    K = sigma*k
+    k = np.roll(span, 1) * np.roll(span, 2) / (36 * span)
+    K = sigma * k
 
     g = np.empty(28, dtype=np.float64)
     nn = 0
     weights = np.empty(3, dtype=np.float64)
     for ii in range(8):
-        for jj in range(ii+1, 8):
+        for jj in range(ii + 1, 8):
             dif = np.bitwise_xor(ii, jj)
 
             mask = np.array([(dif >> i) & 1 for i in range(3)])
             numDif = np.sum(mask)
 
             if numDif == 1:
-                coef = 2*(mask ^ 1)-4*mask
+                coef = 2 * (mask ^ 1) - 4 * mask
             elif numDif == 2:
-                coef = (mask ^ 1)-2*mask
+                coef = (mask ^ 1) - 2 * mask
             else:
                 coef = -mask
 
             weights = -coef.astype(np.float64)
             g0 = np.dot(K, weights)
             g[nn] = g0
-            nn = nn+1
+            nn = nn + 1
 
     return g
 
 
 @nb.njit()
-def getHexIndices():
+def _gen_hex_indices():
     """Generate indices of conductance nodes for trilinear FEM hexahedron.
 
     Returns
@@ -74,7 +72,7 @@ def getHexIndices():
     edges = np.empty((28, 2), dtype=np.int64)
     nn = 0
     for ii in range(8):
-        for jj in range(ii+1, 8):
+        for jj in range(ii + 1, 8):
             edges[nn, :] = np.array([ii, jj])
             nn += 1
 
@@ -82,7 +80,7 @@ def getHexIndices():
 
 
 @nb.njit()
-def getFaceConductances(span, sigma):
+def get_face_conductances(span, sigma):
     """
     Calculate the conductances of a mesh-dual (face-oriented) hexahedron.
 
@@ -96,34 +94,27 @@ def getFaceConductances(span, sigma):
     Returns
     -------
     float[6]
-        Conductances, in order -x, +x, -y, +y, ...
-        
+        Conductances, in order of :py:const:`FACE_EDGES`{-x, +x, -y, +y, ...}.
+
     """
     if sigma.shape[0] == 1:
-        sigma = sigma*np.ones(3)
+        sigma = sigma * np.ones(3)
     else:
         sigma = sigma
 
-    k = np.roll(span, 1)*np.roll(span, 2)/span
-    g = sigma*k*2
+    k = np.roll(span, 1) * np.roll(span, 2) / span
+    g = sigma * k * 2
     return g.repeat(2)
 
 
 @nb.njit()
-def _getFaceIndices():
-    subsets = np.array([
-        [0, 6],
-        [1, 6],
-        [2, 6],
-        [3, 6],
-        [4, 6],
-        [5, 6]
-    ], dtype=np.int64)
+def _gen_face_indices():
+    subsets = np.array([[0, 6], [1, 6], [2, 6], [3, 6], [4, 6], [5, 6]], dtype=np.int64)
     return subsets
 
 
 @nb.njit()
-def getTetConductance(pts):
+def get_tet_conductance(pts):
     """
     Calculate conductances between nodes of tetrahedron.
 
@@ -135,53 +126,41 @@ def getTetConductance(pts):
     Returns
     -------
     float[4]
-        Conductances between vertices
+        Conductances between vertices in order of :py:const:`TET_EDGES`
     """
     g = np.empty(6, dtype=np.float64)
-    pairs = getTetIndices()
     for ii in range(6):
-
-        edge = pairs[ii]
-        # others=~np.isin(np.arange(4),edge)
-        others = pairs[5-ii]
+        edge = TET_EDGES[ii]
+        others = TET_EDGES[5 - ii]
         otherPts = pts[others]
-        # othr=others(edge,pts)
 
-    #     M=others(edge[1],pts)-pts[edge[1]]
-        M = np.vstack((otherPts[1], pts[edge[0]], pts[edge[1]]))-otherPts[0]
-        # [A,B,C]=vectorize(np.transpose(M))
+        M = np.vstack((otherPts[1], pts[edge[0]], pts[edge[1]])) - otherPts[0]
         A = M[0, :]
         B = M[1, :]
         C = M[2, :]
-    #     [A,B,C]=vectorize(M)
 
-        num = np.dot(A, B)*np.dot(A, C)-np.dot(A, A)*np.dot(B, C)
-        den = np.abs(6*np.linalg.det(M))
-        g[ii] = -num/den
+        num = np.dot(A, B) * np.dot(A, C) - np.dot(A, A) * np.dot(B, C)
+        den = np.abs(6 * np.linalg.det(M))
+        g[ii] = -num / den
 
     return g
 
 
 @nb.njit()
-def getTetIndices():
-    edges = np.array([[0, 1],
-                      [0, 2],
-                      [0, 3],
-                      [1, 2],
-                      [1, 3],
-                      [2, 3]], dtype=np.int64)
+def _gen_tet_indices():
+    edges = np.array([[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]], dtype=np.int64)
     return edges
 
 
 @nb.njit()
-def getAdmittanceConductances(span, sigma):
+def _get_admittance_conductances(span, sigma):
     if sigma.shape[0] == 1:
-        sigma = sigma*np.ones(3)
+        sigma = sigma * np.ones(3)
     else:
         sigma = sigma
 
-    k = np.roll(span, 1)*np.roll(span, 2)/span
-    K = sigma*k/4
+    k = np.roll(span, 1) * np.roll(span, 2) / span
+    K = sigma * k / 4
 
     g = np.array([K[ii] for ii in range(3) for jj in range(4)])
 
@@ -189,24 +168,44 @@ def getAdmittanceConductances(span, sigma):
 
 
 @nb.njit()
-def getAdmittanceIndices():
+def _gen_admittance_indices():
     nodesA = np.array([0, 2, 4, 6, 0, 1, 4, 5, 0, 1, 2, 3], dtype=np.int64)
-    offsets = np.array([2**np.floor(ii/4) for ii in range(12)], dtype=np.int64)
+    offsets = np.array([2 ** np.floor(ii / 4) for ii in range(12)], dtype=np.int64)
 
-    edges = np.vstack((nodesA, nodesA+offsets)).transpose()
+    edges = np.vstack((nodesA, nodesA + offsets)).transpose()
     return edges
 
+
 #: Indices of conductances within admittance element
-ADMITTANCE_EDGES = getAdmittanceIndices()
+ADMITTANCE_EDGES = _gen_admittance_indices()
 #: Indices of conductances within tetrahedral element
-TET_EDGES = getTetIndices()
-#: Indices of conductances within mesh-dual element
-FACE_EDGES = _getFaceIndices()
+TET_EDGES = _gen_tet_indices()
+#: Indices of nodes connected by edge mesh-dual element
+FACE_EDGES = _gen_face_indices()
+#: Indices of nodes connected by edge in hex element
+HEX_EDGES = _gen_hex_indices()
+
 
 @nb.njit()
-def interpolateFromFace(faceValues, localCoords):
-    # coef=TRIP_INVERSE_MATRIX @ faceValues
-    coef = np.dot(TRIP_INVERSE_MATRIX, faceValues)
+def interpolate_from_face(faceValues, localCoords):
+    """
+    Interpolate within the cuboid from values on the faces.
+
+    Parameters
+    ----------
+    faceValues : float[:]
+        Known values at each face.
+    localCoords : float[:,3]
+        Cartesian coordinates at which to interpolate.
+
+    Returns
+    -------
+    float[:]
+        Interpolated values.
+    """
+
+    # coef=_TRIPOLAR_INVERSE_MATRIX @ faceValues
+    coef = np.dot(_TRIPOLAR_INVERSE_MATRIX, faceValues)
     cvals = __toFaceCoefOrder(localCoords)
 
     interpv = np.dot(cvals, coef)
@@ -214,21 +213,51 @@ def interpolateFromFace(faceValues, localCoords):
 
 
 @nb.njit()
-def interpolateFromVerts(vertexValues, localCoords):
-    # coef=TRIL_INVERSE_MATRIX @ vertexValues
-    coef = np.dot(TRIL_INVERSE_MATRIX, vertexValues)
-    cvals = __toTrilinCoefOrder(localCoords)
+def interpolate_from_verts(vertexValues, localCoords):
+    """
+    Interpolate within the element from values on the vertices (i.e. trilinear interpolation).
+
+    Parameters
+    ----------
+    vertexValues : float[:]
+        Known values at each vertex.
+    localCoords : float[:,3]
+        Cartesian coordinates at which to interpolate.
+
+    Returns
+    -------
+    float[:]
+        Interpolated values.
+    """
+    # coef=_TRILIN_INVERSE_MATRIX @ vertexValues
+    coef = np.dot(_TRILIN_INVERSE_MATRIX, vertexValues)
+    cvals = _to_trilinear_coefficent_order(localCoords)
 
     interpV = np.dot(cvals, coef)
     return interpV
 
 
 @nb.njit()
-def integrateFromVerts(vertexValues, span):
-    vals = np.dot(TRIL_INVERSE_MATRIX, vertexValues)
+def integrate_from_verts(vertexValues, span):
+    """
+    Integrate values on the cube assuming trilinear interpolation.
+
+    Parameters
+    ----------
+    vertexValues : float[:]
+        Values at vertices
+    span : float[3]
+        Length of cube in x,y,z directions
+
+    Returns
+    -------
+    float
+        Integral of input values over the cube's volume.
+    """
+
+    vals = np.dot(_TRILIN_INVERSE_MATRIX, vertexValues)
     xyz = np.prod(span)
-    coef = __toTrilinCoefOrder(np.array(span, ndmin=2)) * \
-        xyz/np.array([1, 2, 2, 2, 4, 4, 4, 8])
+    coef = _to_trilinear_coefficent_order(np.array(span, ndmin=2)) * xyz / np.array([1, 2, 2, 2, 4, 4, 4, 8])
 
     integral = np.dot(coef, vals)
 
@@ -244,38 +273,46 @@ def integrateFromVerts(vertexValues, span):
 # V110 x y (1 - z) +
 # V111 x y z
 
-@nb.njit()
-def toLocalCoords(globalCoords, center, span):
-    localCoords = np.empty_like(globalCoords)
 
-    for ii in nb.prange(globalCoords.shape[0]):
-        localCoords[ii] = 2*(globalCoords[ii]-center)/span
+@nb.njit()
+def to_local_coords(global_coords, center, span):
+    """
+    Transform global Cartesian coordinates to an element's local coordinate system (-1,1,-1...).
+
+    Parameters
+    ----------
+    global_coords : float[:,3]
+        Global cartesian coordinates
+    center : float[3]
+        Center of cube in global coordinates.
+    span : float[3]
+        Length of cube in x,y,z.
+
+    Returns
+    -------
+    float[:,3]
+        Points denoted in the element's local coordinate system.
+    """
+    localCoords = np.empty_like(global_coords)
+
+    for ii in nb.prange(global_coords.shape[0]):
+        localCoords[ii] = 2 * (global_coords[ii] - center) / span
 
     return localCoords
 
 
 @nb.njit()
-def __toTrilinCoefOrder(coords):
+def _to_trilinear_coefficent_order(coords):
     npts = coords.shape[0]
     ordered = np.empty((npts, 8), dtype=np.float64)
     for ii in nb.prange(npts):
         c = coords[ii, :]
         ordered[ii, 0] = 1
         ordered[ii, 1:4] = c
-        ordered[ii, 4] = c[0]*c[1]
-        ordered[ii, 5] = c[0]*c[2]
-        ordered[ii, 6] = c[1]*c[2]
+        ordered[ii, 4] = c[0] * c[1]
+        ordered[ii, 5] = c[0] * c[2]
+        ordered[ii, 6] = c[1] * c[2]
         ordered[ii, 7] = np.prod(c)
-
-    # ordered=np.array([[1,
-    #           c[0],
-    #           c[1],
-    #           c[2],
-    #           c[0]*c[1],
-    #           c[0]*c[2],
-    #           c[1]*c[2],
-    #           c[0]*c[1]*c[2]]
-    #          for c in coords], dtype=np.float64)
 
     return ordered
 
@@ -286,36 +323,26 @@ def __toFaceCoefOrder(coords):
     ordered = np.empty((npts, 7))
     for ii in nb.prange(npts):
         ordered[ii, :3] = coords[ii]
-        ordered[ii, 3:6] = coords[ii]**2
+        ordered[ii, 3:6] = coords[ii] ** 2
 
     ordered[:, 6] = 1
     return ordered
 
+
 #: Local coordinates of vertices for interpolation
-HEX_VERTEX_COORDS = np.array([[-1, -1, -1],
-                              [1, -1, -1],
-                              [-1, 1, -1],
-                              [1, 1, -1],
-                              [-1, -1, 1],
-                              [1, -1, 1],
-                              [-1, 1, 1],
-                              [1, 1, 1]
-                              ], dtype=np.float64)
+HEX_VERTEX_COORDS = np.array(
+    [[-1, -1, -1], [1, -1, -1], [-1, 1, -1], [1, 1, -1], [-1, -1, 1], [1, -1, 1], [-1, 1, 1], [1, 1, 1]],
+    dtype=np.float64,
+)
 
 #: Local coordinates of faces for interpolation
-HEX_FACE_COORDS = np.array([[-1, 0, 0],
-                            [1, 0, 0],
-                            [0, -1, 0],
-                            [0, 1, 0],
-                            [0, 0, -1],
-                            [0, 0, 1],
-                            [0, 0, 0]
-                            ], dtype=np.float64)
+HEX_FACE_COORDS = np.array(
+    [[-1, 0, 0], [1, 0, 0], [0, -1, 0], [0, 1, 0], [0, 0, -1], [0, 0, 1], [0, 0, 0]], dtype=np.float64
+)
 
-#: Universal points within 
-HEX_POINT_INDICES = np.vstack(
-    (1+HEX_VERTEX_COORDS, 1+HEX_FACE_COORDS)).astype(np.int32)
+#: Universal points within the cubic element
+HEX_POINT_INDICES = np.vstack((1 + HEX_VERTEX_COORDS, 1 + HEX_FACE_COORDS)).astype(np.int32)
 
-TRIL_INVERSE_MATRIX = np.linalg.inv(__toTrilinCoefOrder(HEX_VERTEX_COORDS))
+_TRILIN_INVERSE_MATRIX = np.linalg.inv(_to_trilinear_coefficent_order(HEX_VERTEX_COORDS))
 
-TRIP_INVERSE_MATRIX = np.linalg.inv(__toFaceCoefOrder(HEX_FACE_COORDS))
+_TRIPOLAR_INVERSE_MATRIX = np.linalg.inv(__toFaceCoefOrder(HEX_FACE_COORDS))

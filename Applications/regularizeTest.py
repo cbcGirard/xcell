@@ -9,80 +9,82 @@ Regularization tests
 
 import numpy as np
 import numba as nb
-import xCell
+import xcell as xc
 import matplotlib.pyplot as plt
 
 
-meshtype='adaptive'
-# studyPath='Results/studyTst/miniCur/'#+meshtype
-studyPath='Results/studyTst/regularization/'
+meshtype = "adaptive"
+# study_path='Results/studyTst/miniCur/'#+meshtype
+study_path = "Results/studyTst/regularization/"
 
-xmax=1e-4
-sigma=np.ones(3)
-
-
-vMode=False
-showGraphs=False
-generate=False
-saveGraphs=False
-
-vsrc=1.
-isrc=vsrc*4*np.pi*sigma*1e-6
-
-bbox=np.append(-xmax*np.ones(3),xmax*np.ones(3))
+xmax = 1e-4
+sigma = np.ones(3)
 
 
-study=xCell.SimStudy(studyPath,bbox)
+vMode = False
+showGraphs = False
+generate = False
+saveGraphs = False
 
-l0Min=1e-6
-rElec=1e-6
+vsrc = 1.0
+isrc = vsrc * 4 * np.pi * sigma * 1e-6
 
-lastNumEl=0
-meshTypes=["adaptive","uniform"]
+bbox = np.append(-xmax * np.ones(3), xmax * np.ones(3))
+
+
+study = xc.Study(study_path, bbox)
+
+min_l0 = 1e-6
+rElec = 1e-6
+
+lastNumEl = 0
+meshTypes = ["adaptive", "uniform"]
 
 
 if generate:
-
-    for maxdepth in range(2,20):
+    for max_depth in range(2, 20):
         for regularize in range(2):
-        # for maxdepth in range(2,10):
+            # for max_depth in range(2,10):
             # if meshtype=='uniform':
-            #     maxdepth=var
+            #     max_depth=var
             # else:
-            l0Param=2**(-maxdepth*0.2)
+            l0Param = 2 ** (-max_depth * 0.2)
             # l0Param=0.2
 
-            setup=study.newSimulation()
-            setup.mesh.elementType='Admittance'
-            setup.meshtype=meshtype
-            setup.mesh.minl0=2*xmax/(2**maxdepth)
-            setup.ptPerAxis=1+2**maxdepth
+            setup = study.new_simulation()
+            setup.mesh.element_type = "Admittance"
+            setup.meshtype = meshtype
+            setup.mesh.minl0 = 2 * xmax / (2**max_depth)
+            setup.ptPerAxis = 1 + 2**max_depth
+
+            geo = xc.geometry.Sphere(np.zeros, rElec)
 
             if vMode:
-                setup.addVoltageSource(1,np.zeros(3),rElec)
-                srcMag=1.
-                srcType='Voltage'
+                srcMag = 1.0
+                srcType = "Voltage"
+                setup.add_voltage_source(xc.signals.Signal(1.0), geo)
             else:
-                srcMag=4*np.pi*sigma[0]*rElec
-                setup.addCurrentSource(srcMag,np.zeros(3),rElec)
-                srcType='Current'
+                srcMag = 4 * np.pi * sigma[0] * rElec
+                setup.add_current_source(xc.signals.Signal(1.0), geo)
+                srcType = "Current"
 
-            if meshtype=='uniform':
-                newNx=int(np.ceil(lastNumEl**(1/3)))
-                nX=newNx+newNx%2
-                setup.makeUniformGrid(newNx+newNx%2)
-                print('uniform, %d per axis'%nX)
+            if meshtype == "uniform":
+                newNx = int(np.ceil(lastNumEl ** (1 / 3)))
+                nX = newNx + newNx % 2
+                setup.make_uniform_grid(newNx + newNx % 2)
+                print("uniform, %d per axis" % nX)
             else:
-                def metric(coord,l0Param=l0Param):
-                    r=np.linalg.norm(coord)
-                    val=l0Param*r #1/r dependence
+
+                def metric(coord, l0Param=l0Param):
+                    r = np.linalg.norm(coord)
+                    val = l0Param * r  # 1/r dependence
                     # val=(l0Param*r**2)**(1/3) #current continuity
                     # val=(l0Param*r**4)**(1/3) #dirichlet energy continutity
                     # if val<rElec:
                     #     val=rElec
 
-                    if (r+val)<rElec:
-                        val=rElec/2
+                    if (r + val) < rElec:
+                        val = rElec / 2
                     return val
 
                 # def metric(coord):
@@ -97,109 +99,93 @@ if generate:
                 #         val=rElec/2
                 #     return val
 
-                setup.makeAdaptiveGrid(metric,maxdepth)
+                setup.make_adaptive_grid(metric, max_depth)
 
+            def boundary_function(coord):
+                r = np.linalg.norm(coord)
+                return rElec / (r * np.pi * 4)
 
+            setup.finalize_mesh(regularize)
 
-
-            def boundaryFun(coord):
-                r=np.linalg.norm(coord)
-                return rElec/(r*np.pi*4)
-
-
-
-            setup.finalizeMesh(regularize)
-
-
-            setup.setBoundaryNodes(boundaryFun)
+            setup.set_boundary_nodes(boundary_function)
 
             # v=setup.solve()
-            v=setup.iterativeSolve(None,1e-9)
+            v = setup.solve(None, 1e-9)
 
             setup.getMemUsage(True)
-            setup.printTotalTime()
+            setup.print_total_time()
 
-            setup.startTiming('Estimate error')
-            errEst,_,_,_=setup.calculateErrors()#srcMag,srcType,showPlots=showGraphs)
-            print('error: %g'%errEst)
-            setup.logTime()
+            setup.start_timing("Estimate error")
+            errEst, _, _, _ = setup.calculate_errors()  # srcMag,srcType,showPlots=showGraphs)
+            print("error: %g" % errEst)
+            setup.log_time()
 
+            study.log_current_simulation(
+                ["Error", "k", "Depth", "Rregularized?"], [errEst, l0Param, max_depth, str(bool(regularize))]
+            )
+            study.save_simulation(setup)
+            lastNumEl = len(setup.mesh.elements)
 
-            study.newLogEntry(['Error','k','Depth','Rregularized?'],
-                              [errEst,l0Param,maxdepth,str(bool(regularize))])
-            study.saveData(setup)
-            lastNumEl=len(setup.mesh.elements)
-
-
-            # ax=xCell.new3dPlot( bbox)
-            # xCell.showEdges(ax, coords, setup.mesh.edges)
+            # ax=xc.new3dPlot( bbox)
+            # xc.show_3d_edges(ax, coords, setup.mesh.edges)
             # break
 
             # fig=plt.figure()
-            # xCell.centerSlice(fig, setup)
+            # xc.centerSlice(fig, setup)
 
             # if saveGraphs:
             #     study.makeStandardPlots()
 
 
-# aniGraph=study.animatePlot(xCell.error2d,'err2d')
-# aniGraph=study.animatePlot(xCell.ErrorGraph,'err2d_adaptive',["Mesh type"],['adaptive'])
-# aniGraph2=study.animatePlot(xCell.error2d,'err2d_uniform',['Mesh type'],['uniform'])
-# aniImg=study.animatePlot(xCell.centerSlice,'img_mesh')
-# aniImg=study.animatePlot(xCell.SliceSet,'img_adaptive',["Mesh type"],['adaptive'])
-# aniImg2=study.animatePlot(xCell.centerSlice,'img_uniform',['Mesh type'],['uniform'])
+# aniGraph=study.animatePlot(xc.error2d,'err2d')
+# aniGraph=study.animatePlot(xc.ErrorGraph,'err2d_adaptive',["Mesh type"],['adaptive'])
+# aniGraph2=study.animatePlot(xc.error2d,'err2d_uniform',['Mesh type'],['uniform'])
+# aniImg=study.animatePlot(xc.centerSlice,'img_mesh')
+# aniImg=study.animatePlot(xc.SliceSet,'img_adaptive',["Mesh type"],['adaptive'])
+# aniImg2=study.animatePlot(xc.centerSlice,'img_uniform',['Mesh type'],['uniform'])
 
 
-
-fig=plt.figure()
-plotters=[xCell.ErrorGraph,
-          xCell.SliceSet,
-          xCell.CurrentPlot,
-          xCell.CurrentPlot]
-ptype=['ErrorGraph',
-        'SliceSet',
-        'CurrentShort',
-        'CurrentLong']
-regNames=['Initial','Regularized']
+fig = plt.figure()
+plotters = [xc.ErrorGraph, xc.SliceSet, xc.CurrentPlot, xc.CurrentPlot]
+ptype = ["ErrorGraph", "SliceSet", "CurrentShort", "CurrentLong"]
+regNames = ["Initial", "Regularized"]
 
 for mt in range(2):
-    for ii,p in enumerate(plotters):
+    for ii, p in enumerate(plotters):
         plt.clf()
-        if ii==3:
-            plotr=p(fig,study,fullarrow=True)
+        if ii == 3:
+            plotr = p(fig, study, fullarrow=True)
         else:
-            plotr=p(fig,study)
+            plotr = p(fig, study)
 
-        isreg=bool(mt)
-        plotr.getStudyData(filterCategories=["Regularized?"],
-                          filterVals=[isreg])
+        isreg = bool(mt)
+        plotr.get_study_data(filter_categories=["Regularized?"], filter_values=[isreg])
 
-        name=ptype[ii]+'_'+regNames[mt]
+        name = ptype[ii] + "_" + regNames[mt]
 
-        ani=plotr.animateStudy(name)
-
+        ani = plotr.animate_study(name)
 
 
+# plotE=xc.ErrorGraph(plt.figure(),study)#,{'showRelativeError':True})
+# plotE.get_study_data()
+# aniE=plotE.animate_study()
 
 
-# plotE=xCell.ErrorGraph(plt.figure(),study)#,{'showRelativeError':True})
-# plotE.getStudyData()
-# aniE=plotE.animateStudy()
+# plotS=xc.SliceSet(plt.figure(),study)
+# plotS.get_study_data()
+# aniS=plotS.animate_study()
 
 
-# plotS=xCell.SliceSet(plt.figure(),study)
-# plotS.getStudyData()
-# aniS=plotS.animateStudy()
+# plotC=xc.CurrentPlot(plt.figure(),study)
+# plotC.get_study_data()
+# aniC=plotC.animate_study()
 
-
-# plotC=xCell.CurrentPlot(plt.figure(),study)
-# plotC.getStudyData()
-# aniC=plotC.animateStudy()
-
-xCell.groupedScatter(study.studyPath+'log.csv',
-                     xcat='Number of elements',
-    ycat='Error',
-    groupcat='Regularized?')
-nufig=plt.gcf()
-study.savePlot(nufig, 'AccuracyCost', '.eps')
-study.savePlot(nufig, 'AccuracyCost', '.png')
+xc.grouped_scatter(
+    study.study_path + "log.csv",
+    x_category="Number of elements",
+    y_category="Error",
+    group_category="Regularized?",
+)
+nufig = plt.gcf()
+study.save_plot(nufig, "AccuracyCost", ".eps")
+study.save_plot(nufig, "AccuracyCost", ".png")

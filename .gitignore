@@ -8,8 +8,8 @@ xCell/__pycache__
 xCell/Results
 xCell/examples
 */x86_64/
-docs/build
-
+docs
+docsrc/source/auto_examples
 
 #misc spyder cruft
 *.Result

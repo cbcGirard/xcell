@@ -36,7 +36,7 @@ if not singles:
         [t for s in signals for t, v in zip(s.times, s.values) if v > 0])
 
 
-xcell.colors.useLightStyle()
+xcell.colors.use_light_style()
 
 # needed for remote execution
 if not preview:
@@ -63,9 +63,9 @@ for activeElec in elecSelector:
 
         fstem = os.path.join('sweep', '%s-%d' % (elecGeom, activeElec))
 
-        study = xcell.SimStudy(os.path.join(os.getcwd(), fstem), bbox)
+        study = xcell.Study(os.path.join(os.getcwd(), fstem), bbox)
 
-        sim = study.newSimulation()
+        sim = study.new_simulation()
 
         body, microElectrodes, macroElectrodes = electrode.makeDBSElectrode(
             microStyle=elecGeom)
@@ -76,16 +76,16 @@ for activeElec in elecSelector:
         if singles:
             electrode.addUnityStim(sim, microElectrodes,
                                    macroElectrodes, activeElec, amplitude=150e-6)
-            theSrc = sim.currentSources[activeElec]
+            theSrc = sim.current_sources[activeElec]
             refpt = np.array(theSrc.geometry.center, ndmin=2)
 
         else:
             electrode.addStandardStim(sim, microElectrodes, macroElectrodes)
             t = tvals[activeElec]
-            sim.currentTime = t
+            sim.current_time = t
 
             activeSrces = [
-                src for src in sim.currentSources if src.value.getValueAtTime(t) > 0]
+                src for src in sim.current_sources if src.get_value_at_time(t) > 0]
 
             refpt = np.array(
                 [src.geometry.center for src in activeSrces], ndmin=2)
@@ -98,7 +98,7 @@ for activeElec in elecSelector:
         #     p.setup(regions, opacity=0.5)
         #     p.planeview(ROI)
         #     p.add_mesh(
-        #         pv.Cube(bounds=bbox[xcell.io.PV_BOUND_ORDER]), style='wireframe')
+        #         pv.Cube(bounds=bbox[xcell.io.TO_PV_BBOX_ORDER]), style='wireframe')
         #     p.add_mesh(pv.wrap(theSrc.geometry.center))
         #     p.show()
 
@@ -112,27 +112,27 @@ for activeElec in elecSelector:
             depthvec = np.array([d]*refpt.shape[0])
             coefs = 2**(-Coef*depthvec)
 
-            sim.makeAdaptiveGrid(refPts=refpt, maxdepth=depthvec,
-                                 minl0Function=xcell.generalMetric,
+            sim.make_adaptive_grid(ref_pts=refpt, max_depth=depthvec,
+                                 min_l0_function=xcell.general_metric,
                                  coefs=coefs,
                                  coarsen=False)
-            sim.finalizeMesh()
+            sim.finalize_mesh()
 
-            sim.setBoundaryNodes()
+            sim.set_boundary_nodes()
 
-            sim.startTiming('Assign sigma')
-            regions.assignSigma(sim.mesh, defaultSigma=sigma_0)
-            sim.logTime()
-            v = sim.iterativeSolve()
+            sim.start_timing('Assign sigma')
+            regions.assign_sigma(sim.mesh, default_sigma=sigma_0)
+            sim.log_time()
+            v = sim.solve()
 
             velec = v[np.argmax(np.abs(v))]
 
             if singles:
                 nsrc = xcell.util.fastcount(
-                    theSrc.geometry.isInside(sim.mesh.nodeCoords))
+                    theSrc.geometry.is_inside(sim.mesh.node_coords))
             else:
-                nsrc = np.mean([xcell.util.fastcount(src.geometry .isInside(
-                    sim.mesh.nodeCoords)) for src in activeSrces])
+                nsrc = np.mean([xcell.util.fastcount(src.geometry .is_inside(
+                    sim.mesh.node_coords)) for src in activeSrces])
 
             delta = (velec-vsrc)/velec
             vElectrodes.append(velec)

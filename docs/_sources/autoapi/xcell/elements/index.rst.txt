@@ -1,0 +1,50 @@
+:py:mod:`xcell.elements`
+========================
+
+.. py:module:: xcell.elements
+
+.. autoapi-nested-parse::
+
+   Created on Tue Jan  4 14:39:59 2022
+   Element type routines
+   @author: benoit
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   xcell.elements.Element
+
+
+
+
+.. py:class:: Element(origin, span, sigma)
+
+   Base class for cuboid elements.
+
+   .. py:method:: get_coords_recursively()
+
+      Calculate the global coordinates of the element's vertices.
+
+      :returns: **coords** -- Cartesian coordinates of element vertices
+      :rtype: float[:,3]
+
+
+   .. py:method:: get_char_length()
+
+      Get the characteristic length of the element.
+
+      :returns: **l0** -- Characteristic length [in meters]
+      :rtype: float
+
+
+   .. py:method:: setglobal_indices(indices)
+
+
+

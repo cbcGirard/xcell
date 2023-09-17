@@ -20,16 +20,16 @@ else:
 
 def getTimes(foldername):
 
-    study = xc.SimStudy(os.path.join(os.getcwd(), foldername),
-                        boundingBox=np.ones(6))
+    study = xc.Study(os.path.join(os.getcwd(), foldername),
+                        bounding_box=np.ones(6))
 
-    df, cats = study.loadLogfile()
+    df, cats = study.load_logfile()
     order = np.argsort(df['Number of elements'])
 
     plotcats = [s for s in cats if s.find('Wall') > 0]
     plotcats.pop()  # skip total time category
 
-    errthresh = 1e2  # redact bad values
+    errthreshold = 1e2  # redact bad values
 
     labels = []
     data = []
@@ -37,13 +37,13 @@ def getTimes(foldername):
         strim, _ = s.split(' [')
         labels.append(strim)
         vals = df[s][order]
-        vals[vals > errthresh] = 0
+        vals[vals > errthreshold] = 0
         data.append(vals)
 
     return df['Number of elements'][order], np.array(data), labels
 
 
-xc.colors.useLightStyle()
+xc.colors.use_light_style()
 
 with plt.rc_context({
         'figure.figsize': figsize}):
@@ -73,6 +73,6 @@ with plt.rc_context({
     # plt.legend()
 
     if ii == 1:
-        study = xc.SimStudy(os.path.join(os.getcwd(), f),
-                            boundingBox=np.ones(6))
-        study.savePlot(fig, 'stepBreakdown'+widthtag)
+        study = xc.Study(os.path.join(os.getcwd(), f),
+                            bounding_box=np.ones(6))
+        study.save_plot(fig, 'stepBreakdown'+widthtag)

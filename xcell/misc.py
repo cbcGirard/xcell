@@ -5,13 +5,13 @@
 import numpy as np
 
 
-def iSourcePower(isrc, radius, sigma):
+def current_source_power(current, radius, sigma):
     """
     Get an analytic estimate of the power dissipated by a spherical current source.
 
     Parameters
     ----------
-    isrc : float
+    current : float
         Amplitude of source in amps.
     radius : float
         Radius of source in meters.
@@ -27,46 +27,46 @@ def iSourcePower(isrc, radius, sigma):
     if type(sigma) == np.ndarray:
         sigma = np.linalg.norm(sigma)
 
-    rInf = 1/(4*np.pi*sigma*radius)
-    power = rInf*isrc**2
+    rInf = 1 / (4 * np.pi * sigma * radius)
+    power = rInf * current**2
     return power
 
 
-def vSourceIntegral(vsrc, radius, rmax):
+def voltage_source_integral(voltage, radius, r_max):
     """
     Calculate exact integral of V for a spherical voltage source
-    from the center to a distance of rmax.
+    from the center to a distance of r_max.
 
     Parameters
     ----------
-    vsrc : float
+    voltage : float
         Amplitude of source in volts.
     radius : float
         Radius of source in meters.
-    rmax : float
+    r_max : float
         Furthest distance of domain.
 
     Returns
     -------
     float
-        Integral of V from center to rmax.
+        Integral of V from center to r_max.
 
     """
-    return radius*vsrc*(1+np.log(rmax/radius))
+    return radius * voltage * (1 + np.log(r_max / radius))
 
 
-def iSourceIntegral(isrc, radius, rmax, sigma):
+def current_source_integral(current, radius, r_max, sigma):
     """
     Calculate exact integral of V for a spherical current source
-    from the center to a distance of rmax.
+    from the center to a distance of r_max.
 
     Parameters
     ----------
-    vsrc : float
-        Amplitude of source in volts.
+    current : float
+        Amplitude of source in amperes.
     radius : float
         Radius of source in meters.
-    rmax : float
+    r_max : float
         Furthest distance of domain.
     sigma : float or float[:]
         Conductivity of region in S/m
@@ -74,14 +74,14 @@ def iSourceIntegral(isrc, radius, rmax, sigma):
     Returns
     -------
     float
-        Integral of V from center to rmax.
+        Integral of V from center to r_max.
 
     """
-    vsrc = isrc/(4*np.pi*sigma)
-    return vSourceIntegral(vsrc, radius, rmax)
+    voltage = current / (4 * np.pi * sigma)
+    return voltage_source_integral(voltage, radius, r_max)
 
 
-def estimatePower(voltages, edges, conductances):
+def estimate_power(voltages, edges, conductances):
     """
     Estimate power dissipated in the equivalent netowrk of the mesh.
 
@@ -101,11 +101,12 @@ def estimatePower(voltages, edges, conductances):
 
     """
     dv = voltages[edges]
-    v2 = np.diff(dv, axis=1)**2
+    v2 = np.diff(dv, axis=1) ** 2
     return np.dot(v2.squeeze(), conductances)
 
 
-def getErrorEstimates(simulation):
+# TODO: document dict contents
+def get_error_estimates(simulation):
     """
     Get error-related metrics for a simulation of point/sphere sources.
 
@@ -120,54 +121,41 @@ def getErrorEstimates(simulation):
         Error-related quantitites.
 
     """
-    errSummary, err, vAna, sorter, r = simulation.calculateErrors()
+    errSummary, err, vAna, sorter, r = simulation.calculate_errors()
     intErr = np.trapz(err[sorter], r[sorter])
 
-    v = vAna-err
+    v = vAna - err
 
     sse = np.sum(err**2)
-    sstot = np.sum((vAna-np.mean(vAna))**2)
-    FVU = sse/sstot
+    sstot = np.sum((vAna - np.mean(vAna)) ** 2)
+    FVU = sse / sstot
 
-    elV, elAna, elErr, _ = simulation.estimateVolumeError(basic=True)
+    elV, elAna, elErr, _ = simulation.estimate_volume_error(basic=True)
 
     volErr = sum(np.abs(elErr))
     volAna = sum(np.abs(elAna))
-    vol = volErr/volAna
-
-    # powerSim = estimatePower(simulation.nodeVoltages,
-    #                          simulation.edges,
-    #                          simulation.conductances)
-
-    # powerTrue = iSourcePower(simulation.currentSources[0].value,
-    #                          simulation.currentSources[0].radius,
-    #                          simulation.mesh.tree.sigma)
-
-    # powerErr = abs(powerTrue-powerSim)/powerTrue
+    vol = volErr / volAna
 
     absErr = abs(err)
     data = {
-        'max': max(absErr),
-        'min': min(absErr),
-        'avg': np.mean(absErr),
-        'int1': errSummary,
-        'int3': vol,
-        'volErr': volErr,
-        'volAna': volAna,
-        'intErr': intErr,
-        'intAna': intErr/errSummary,
-        'SSE': sse,
-        'SSTot': sstot,
-        'FVU': FVU,
-        # 'powerSim': powerSim,
-        # 'powerTrue': powerTrue,
-        # 'powerError': powerErr,
+        "max": max(absErr),
+        "min": min(absErr),
+        "avg": np.mean(absErr),
+        "int1": errSummary,
+        "int3": vol,
+        "volErr": volErr,
+        "volAna": volAna,
+        "intErr": intErr,
+        "intAna": intErr / errSummary,
+        "SSE": sse,
+        "SSTot": sstot,
+        "FVU": FVU,
     }
 
     return data
 
 
-def getSquares(err, vAna):
+def get_statistical_squares(err, vAna):
     """
     Get sums-of-squares for statistical operations
 
@@ -186,47 +174,47 @@ def getSquares(err, vAna):
         Total sum of squares.
 
     """
-    SSE = np.sum((err)**2)
-    SSTot = np.sum((vAna-np.mean(vAna))**2)
+    SSE = np.sum((err) ** 2)
+    SSTot = np.sum((vAna - np.mean(vAna)) ** 2)
 
     return SSE, SSTot
 
 
-def transposeDicts(dictList):
+def transpose_dicts(dict_list):
     """
     Convert list of dicts (from timesteps) to dict of lists (for plotting).
 
     Parameters
     ----------
-    dictList : [{}]
+    dict_list : [{}]
         List of data from each timestep.
 
     Returns
     -------
-    arrayDict : {[]}
+    list_dict : {[]}
         Dict of variables, as lists of values at each timestep.
 
     """
-    arrayDict = {}
+    list_dict = {}
 
-    for d in dictList:
-        emptyDict = len(arrayDict.keys()) == 0
+    for d in dict_list:
+        emptyDict = len(list_dict.keys()) == 0
         for k, v in zip(d.keys(), d.values()):
             if emptyDict:
-                arrayDict[k] = [v]
+                list_dict[k] = [v]
             else:
-                arrayDict[k].append(v)
+                list_dict[k].append(v)
 
-    return arrayDict
+    return list_dict
 
 
-def FVU(analyticVals, err):
+def calculate_fvu(analytic_values, err):
     """
     Calculate fraction of variance unexplained (FVU)
 
     Parameters
     ----------
-    analyticVals : float[:]
+    analytic_values : float[:]
         Analytic voltage at each node.
     err : float[:]
         Difference between simulated and analytic voltage at each node.
@@ -237,11 +225,8 @@ def FVU(analyticVals, err):
         Fraction of variance unexplained.
 
     """
-    # err=simVals-analyticVals
+    SSE, SSTot = get_statistical_squares(err, analytic_values)
 
-    SSE = np.sum(err**2)
-    SSTot = np.sum((analyticVals-np.mean(analyticVals))**2)
-
-    FVU = SSE/SSTot
+    FVU = SSE / SSTot
 
     return FVU

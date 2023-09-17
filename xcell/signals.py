@@ -1,50 +1,111 @@
 """
 Handlers for dynamic signals
 """
+from unicodedata import numeric
 import numpy as np
 
+from xcell.util import is_scalar
 
+
+# TODO: implement __getitem__
 class Signal:
-    def __init__(self, value):
-        self.value = value
+    """
+    Base class for time-dependent values.
 
-    def getValueAtTime(self, t):
-        return self.value
+    Attributes
+    ----------
+    value : float
+        Constant value of signal.
+
+    """
+
+    def __init__(self, value):
+        self._value = value
+
+    @property
+    def value(self):
+        """Current value of signal"""
+        return self._value
+    
+    @value.setter
+    def value(self,val):
+        self._value = val
+
+    def get_value_at_time(self, t):
+        """
+        Get value of signal at time t.
+
+        Parameters
+        ----------
+        t : float
+            Time to query signal.
+
+        Returns
+        -------
+        float
+            Value at time.
+        """
+        return self._value
 
     def reset(self):
         pass
 
 
 class PiecewiseSignal(Signal):
-    def __init__(self, t0=0, y0=0):
-        self.times = [t0]
-        self.values = [y0]
+    """
+    Piecewise signal from time, value pairs.
+    """
 
-        self._currentIdx = 0
+    def __init__(self, t=0, y=0):
 
-    def getValueAtTime(self, t):
-        isBefore = np.less_equal(self.times, t)
-        lastIdx = np.max(np.argwhere(isBefore))
-        return self.values[lastIdx]
+        if is_scalar(t):
+            self.times = [t]
+        else:
+            self.times = t
+        if is_scalar(y):
+            self.values = [y]
+        else:
+            self.values = y
+        self._current_index = 0
 
-        # if self._currentIdx < (len(self.times)-1):
-        #     nextTime = self.times[self._currentIdx+1]
-        #     if t >= nextTime:
-        #         self._currentIdx += 1
+    @property
+    def value(self):
+        return self.values[self._current_index]
+    
+    @value.setter
+    def value(self,val):
+        self.values[self._current_index] = val
 
-        # return self.values[self._currentIdx]
+    def get_value_at_time(self, t):
+        is_before = np.less_equal(self.times, t)
+        last_index = np.max(np.argwhere(is_before))
+        return self.values[last_index]
 
     def reset(self):
-        self._currentIdx = 0
+        self._current_index = 0
 
 
 class BiphasicSignal(PiecewiseSignal):
     def __init__(self, t0=0, y0=0):
         super().__init__(t0, y0)
 
-    def addPulse(self, tstart, pulseDur, pulseAmp):
-        times = [tstart, tstart+pulseDur, tstart+2*pulseDur]
-        vals = [pulseAmp, -pulseAmp, 0]
+    def add_pulse(self, t_start, pulse_duration, pulse_amplitude, interphase=0.0):
+        """
+        Add a biphasic pulse to the signal.
+
+        Parameters
+        ----------
+        t_start : float
+            Time of pulse initiation
+        pulse_duration : float
+            Duration of a pulse phase in seconds.
+        pulse_amplitude : float
+            Amplitude of pulse. Use a negative value to place the negative phase first.
+        interphase : float
+            Time between phases of the pulse (default 0.) Not yet implemented.
+        """
+        times = [t_start, t_start + pulse_duration, t_start + 2 * pulse_duration]
+        vals = [pulse_amplitude, -pulse_amplitude, 0]
 
         self.times.extend(times)
         self.values.extend(vals)

@@ -1,0 +1,143 @@
+:py:mod:`xcell.geometry`
+========================
+
+.. py:module:: xcell.geometry
+
+.. autoapi-nested-parse::
+
+   Geometric primitives.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   xcell.geometry.Sphere
+   xcell.geometry.Disk
+   xcell.geometry.Cylinder
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   xcell.geometry.is_in_bbox
+   xcell.geometry._avg_points
+   xcell.geometry._calc_tri_normals
+   xcell.geometry.fix_tri_normals
+   xcell.geometry.to_pyvista
+   xcell.geometry._get_geometry_shape
+
+
+
+.. py:class:: Sphere(center, radius)
+
+   .. py:method:: is_inside(coords)
+
+      Determine which points are inside the region.
+
+      :param coords: Cartesian coordinates of points to test.
+      :type coords: float[:,3]
+
+      :returns: **bool[** -- Boolean array of points inside region.
+      :rtype: ]
+
+
+   .. py:method:: get_signed_distance(coords)
+
+
+
+.. py:class:: Disk(center, radius, axis, tol=0.01)
+
+   .. py:method:: is_inside(coords)
+
+      Determine which points are inside the region.
+
+      :param coords: Cartesian coordinates of points to test.
+      :type coords: float[:,3]
+
+      :returns: **bool[** -- Boolean array of points inside region.
+      :rtype: ]
+
+
+   .. py:method:: get_signed_distance(coords)
+
+
+
+.. py:class:: Cylinder(center, radius, length, axis)
+
+   .. py:method:: is_inside(coords)
+
+      Determine which points are inside the region.
+
+      :param coords: Cartesian coordinates of points to test.
+      :type coords: float[:,3]
+
+      :returns: **bool[** -- Boolean array of points inside region.
+      :rtype: ]
+
+
+
+.. py:function:: is_in_bbox(bbox, point)
+
+   Determine whether point is within bounding box.
+
+   :param bbox: Bounding box in order (-x, -y, -z, x, y, z)
+   :type bbox: float[:]
+   :param point: Cartesian coordinate of point to check
+   :type point: float[3]
+
+   :returns: Whether point is contained in bounding box
+   :rtype: bool
+
+
+.. py:function:: _avg_points(pts)
+
+   Get point at average of x,y,z from each supplied point.
+
+   :param pts: Cartesian coordinates
+   :type pts: float[:,3]
+
+   :returns: **float[** -- Center of points.
+   :rtype: ,3]
+
+
+.. py:function:: _calc_tri_normals(pts, surf)
+
+
+.. py:function:: fix_tri_normals(pts, surf)
+
+   Experimental: try to orient all surface triangles outward.
+
+   :param pts: List of all vertices in surface mesh.
+   :type pts: float[:,3]
+   :param surf: Indices of triangles' vertices
+   :type surf: int[:,3]
+
+   :returns: **int[** -- Indices of triangles' vertices, flipped as needed to orient outward.
+   :rtype: ,3]
+
+
+.. py:function:: to_pyvista(geometry, **kwargs)
+
+   Hackishly convert xcell geometry to PyVista representation.
+
+   :param geometry: Geometry to convert.
+   :type geometry: xcell Disk, Sphere, or Cylinder
+   :param \*\*kwargs: Parameters for PyVista mesh generation.
+   :type \*\*kwargs: PyVista arguments
+
+   :returns: **mesh** -- Geometry as a PyVista mesh for visualization.
+   :rtype: PyVista PolyData
+
+
+.. py:function:: _get_geometry_shape(geometry)
+
+
