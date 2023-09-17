@@ -1,0 +1,768 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-theme="auto">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>xcell.colors &#8212; xcell  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "auto";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/xcell.css?v=bd5ed93c" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script src="../../../_static/documentation_options.js?v=8a448e45"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'autoapi/xcell/colors/index';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="auto">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/logo.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../../../_static/logo.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+    <p class="title logo__title">xcell</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../intro.html">
+                        Introduction
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../auto_examples/index.html">
+                        Example applications
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../intro.html">
+                        Introduction
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../auto_examples/index.html">
+                        Example applications
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../AAnimation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.AAnimation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_version/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell._version</span></code></a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.colors</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dummy/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.dummy</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.elements</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fem/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.fem</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../geometry/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.geometry</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../io/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.io</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../meshes/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.meshes</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../misc/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.misc</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nrnutil/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.nrnutil</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../signals/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.signals</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../util/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.util</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../visualizers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.visualizers</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../xCell/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.xCell</span></code></a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.colors</span></code></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="module-xcell.colors">
+<span id="xcell-colors"></span><h1><a class="reference internal" href="#module-xcell.colors" title="xcell.colors"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.colors</span></code></a><a class="headerlink" href="#module-xcell.colors" title="Link to this heading">#</a></h1>
+<p>Color schemes for xcell.</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">#</a></h2>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading">#</a></h3>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.colors.scoop_cmap" title="xcell.colors.scoop_cmap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scoop_cmap</span></code></a>(baseCmap[, fraction])</p></td>
+<td><p>Fades colormap transparency as values approach 0.0.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.colors.make_style_dict" title="xcell.colors.make_style_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_style_dict</span></code></a>(fgColor, bgColor)</p></td>
+<td><p>Generate dictionary of plotting preferences.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.colors.use_dark_style" title="xcell.colors.use_dark_style"><code class="xref py py-obj docutils literal notranslate"><span class="pre">use_dark_style</span></code></a>()</p></td>
+<td><p>Switch to dark-mode visualizations (suitable for screen).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.colors.use_light_style" title="xcell.colors.use_light_style"><code class="xref py py-obj docutils literal notranslate"><span class="pre">use_light_style</span></code></a>()</p></td>
+<td><p>Switch to light-mode visualizations (suitable for print).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.colors.setup_pv_theme" title="xcell.colors.setup_pv_theme"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setup_pv_theme</span></code></a>(theme)</p></td>
+<td><p>Set PyVista to match current xcell theme.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.colors.recolor_svg" title="xcell.colors.recolor_svg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">recolor_svg</span></code></a>(fname[, toLight])</p></td>
+<td><p>Post-process SVG to change color scheme.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">#</a></h3>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.colors.MESH_ALPHA" title="xcell.colors.MESH_ALPHA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MESH_ALPHA</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.colors.FAINT" title="xcell.colors.FAINT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FAINT</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.colors.CM_BIPOLAR" title="xcell.colors.CM_BIPOLAR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CM_BIPOLAR</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.colors.DARK" title="xcell.colors.DARK"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DARK</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.colors.HILITE" title="xcell.colors.HILITE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HILITE</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.colors.OFFWHITE" title="xcell.colors.OFFWHITE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OFFWHITE</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.colors.NULL" title="xcell.colors.NULL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NULL</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.colors.WHITE" title="xcell.colors.WHITE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WHITE</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.colors.ACCENT_DARK" title="xcell.colors.ACCENT_DARK"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ACCENT_DARK</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.colors.ACCENT_LIGHT" title="xcell.colors.ACCENT_LIGHT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ACCENT_LIGHT</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.colors.BASE" title="xcell.colors.BASE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BASE</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.colors.BG" title="xcell.colors.BG"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BG</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.colors.plx" title="xcell.colors.plx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plx</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.colors.lint" title="xcell.colors.lint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lint</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.colors.CM_MONO" title="xcell.colors.CM_MONO"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CM_MONO</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.colors.scopeColors" title="xcell.colors.scopeColors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scopeColors</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.colors.scopeColorsLite" title="xcell.colors.scopeColorsLite"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scopeColorsLite</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.colors.styleScope" title="xcell.colors.styleScope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">styleScope</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.colors.styleScope2" title="xcell.colors.styleScope2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">styleScope2</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.MESH_ALPHA">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">MESH_ALPHA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.25</span></em><a class="headerlink" href="#xcell.colors.MESH_ALPHA" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.FAINT">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">FAINT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">()</span></em><a class="headerlink" href="#xcell.colors.FAINT" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.colors.scoop_cmap">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">scoop_cmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">baseCmap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.colors.scoop_cmap" title="Link to this definition">#</a></dt>
+<dd><p>Fades colormap transparency as values approach 0.0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>baseCmap</strong> (<em>colormap</em>) – Colormap to modify.</p></li>
+<li><p><strong>fraction</strong> (<em>float</em><em>, </em><em>optional</em>) – Fraction of colormap range to apply alpha fade. The default is 0.1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>newCmap</strong> – Modified colormap.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>colormap</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.CM_BIPOLAR">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">CM_BIPOLAR</span></span><a class="headerlink" href="#xcell.colors.CM_BIPOLAR" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.DARK">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">DARK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'#19232d'</span></em><a class="headerlink" href="#xcell.colors.DARK" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.HILITE">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">HILITE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'#afcfff'</span></em><a class="headerlink" href="#xcell.colors.HILITE" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.OFFWHITE">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">OFFWHITE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'#dcd4c7'</span></em><a class="headerlink" href="#xcell.colors.OFFWHITE" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.NULL">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">NULL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'#00000000'</span></em><a class="headerlink" href="#xcell.colors.NULL" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.WHITE">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">WHITE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'#FFFFFF00'</span></em><a class="headerlink" href="#xcell.colors.WHITE" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.ACCENT_DARK">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">ACCENT_DARK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'#990000'</span></em><a class="headerlink" href="#xcell.colors.ACCENT_DARK" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.ACCENT_LIGHT">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">ACCENT_LIGHT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'#FFCC00'</span></em><a class="headerlink" href="#xcell.colors.ACCENT_LIGHT" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.BASE">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">BASE</span></span><a class="headerlink" href="#xcell.colors.BASE" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.BG">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">BG</span></span><a class="headerlink" href="#xcell.colors.BG" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.plx">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">plx</span></span><a class="headerlink" href="#xcell.colors.plx" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.lint">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">lint</span></span><a class="headerlink" href="#xcell.colors.lint" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.CM_MONO">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">CM_MONO</span></span><a class="headerlink" href="#xcell.colors.CM_MONO" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.scopeColors">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">scopeColors</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['#ffff00',</span> <span class="pre">'#00ffff',</span> <span class="pre">'#990000',</span> <span class="pre">'#00ff00',</span> <span class="pre">'#ff0000',</span> <span class="pre">'#0000ff',</span> <span class="pre">'#ff8000',</span> <span class="pre">'#8000ff',...</span></em><a class="headerlink" href="#xcell.colors.scopeColors" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.scopeColorsLite">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">scopeColorsLite</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['#ffcc00',</span> <span class="pre">'#17becf',</span> <span class="pre">'#990000',</span> <span class="pre">'#2ca02c',</span> <span class="pre">'#1c2a99',</span> <span class="pre">'#d62728',</span> <span class="pre">'#ff7f0e',</span> <span class="pre">'#9467bd',...</span></em><a class="headerlink" href="#xcell.colors.scopeColorsLite" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.styleScope">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">styleScope</span></span><a class="headerlink" href="#xcell.colors.styleScope" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.colors.styleScope2">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">styleScope2</span></span><a class="headerlink" href="#xcell.colors.styleScope2" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.colors.make_style_dict">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">make_style_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fgColor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bgColor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.colors.make_style_dict" title="Link to this definition">#</a></dt>
+<dd><p>Generate dictionary of plotting preferences.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fgColor</strong> (<em>color</em>) – Color for gridlines, text, etc..</p></li>
+<li><p><strong>bgColor</strong> (<em>color</em>) – Color for image background.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>styleDict</strong> – Dict of matplotlib preferences (pass to mpl.style.use()).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.colors.use_dark_style">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">use_dark_style</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.colors.use_dark_style" title="Link to this definition">#</a></dt>
+<dd><p>Switch to dark-mode visualizations (suitable for screen).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.colors.use_light_style">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">use_light_style</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.colors.use_light_style" title="Link to this definition">#</a></dt>
+<dd><p>Switch to light-mode visualizations (suitable for print).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.colors.setup_pv_theme">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">setup_pv_theme</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theme</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.colors.setup_pv_theme" title="Link to this definition">#</a></dt>
+<dd><p>Set PyVista to match current xcell theme.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>theme</strong> (<em>PyVista theme</em>) – Built-in theme to use as a starting point</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>theme</strong> – Customized theme</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>PyVista theme</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.colors.recolor_svg">
+<span class="sig-prename descclassname"><span class="pre">xcell.colors.</span></span><span class="sig-name descname"><span class="pre">recolor_svg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">toLight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.colors.recolor_svg" title="Link to this definition">#</a></dt>
+<dd><p>Post-process SVG to change color scheme.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname</strong> (<em>str</em>) – File name.</p></li>
+<li><p><strong>toLight</strong> (<em>bool</em><em>, </em><em>optional</em>) – Set conversion direction from dark to light. The default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#functions">Functions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#attributes">Attributes</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.colors.MESH_ALPHA"><code class="docutils literal notranslate"><span class="pre">MESH_ALPHA</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.colors.FAINT"><code class="docutils literal notranslate"><span class="pre">FAINT</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.colors.scoop_cmap"><code class="docutils literal notranslate"><span class="pre">scoop_cmap()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.colors.CM_BIPOLAR"><code class="docutils literal notranslate"><span class="pre">CM_BIPOLAR</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.colors.DARK"><code class="docutils literal notranslate"><span class="pre">DARK</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.colors.HILITE"><code class="docutils literal notranslate"><span class="pre">HILITE</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.colors.OFFWHITE"><code class="docutils literal notranslate"><span class="pre">OFFWHITE</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.colors.NULL"><code class="docutils literal notranslate"><span class="pre">NULL</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.colors.WHITE"><code class="docutils literal notranslate"><span class="pre">WHITE</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.colors.ACCENT_DARK"><code class="docutils literal notranslate"><span class="pre">ACCENT_DARK</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.colors.ACCENT_LIGHT"><code class="docutils literal notranslate"><span class="pre">ACCENT_LIGHT</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.colors.BASE"><code class="docutils literal notranslate"><span class="pre">BASE</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.colors.BG"><code class="docutils literal notranslate"><span class="pre">BG</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.colors.plx"><code class="docutils literal notranslate"><span class="pre">plx</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.colors.lint"><code class="docutils literal notranslate"><span class="pre">lint</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.colors.CM_MONO"><code class="docutils literal notranslate"><span class="pre">CM_MONO</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.colors.scopeColors"><code class="docutils literal notranslate"><span class="pre">scopeColors</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.colors.scopeColorsLite"><code class="docutils literal notranslate"><span class="pre">scopeColorsLite</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.colors.styleScope"><code class="docutils literal notranslate"><span class="pre">styleScope</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.colors.styleScope2"><code class="docutils literal notranslate"><span class="pre">styleScope2</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.colors.make_style_dict"><code class="docutils literal notranslate"><span class="pre">make_style_dict()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.colors.use_dark_style"><code class="docutils literal notranslate"><span class="pre">use_dark_style()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.colors.use_light_style"><code class="docutils literal notranslate"><span class="pre">use_light_style()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.colors.setup_pv_theme"><code class="docutils literal notranslate"><span class="pre">setup_pv_theme()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.colors.recolor_svg"><code class="docutils literal notranslate"><span class="pre">recolor_svg()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../../../_sources/autoapi/xcell/colors/index.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2022, CBC Girard.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.5.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

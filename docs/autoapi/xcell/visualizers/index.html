@@ -1,0 +1,1947 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-theme="auto">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>xcell.visualizers &#8212; xcell  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "auto";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/xcell.css?v=bd5ed93c" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script src="../../../_static/documentation_options.js?v=8a448e45"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'autoapi/xcell/visualizers/index';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="auto">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/logo.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../../../_static/logo.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+    <p class="title logo__title">xcell</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../intro.html">
+                        Introduction
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../auto_examples/index.html">
+                        Example applications
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../intro.html">
+                        Introduction
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../auto_examples/index.html">
+                        Example applications
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../AAnimation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.AAnimation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_version/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell._version</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../colors/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.colors</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dummy/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.dummy</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.elements</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fem/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.fem</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../geometry/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.geometry</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../io/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.io</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../meshes/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.meshes</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../misc/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.misc</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nrnutil/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.nrnutil</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../signals/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.signals</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../util/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.util</span></code></a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.visualizers</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../xCell/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.xCell</span></code></a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.visualizers</span></code></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="module-xcell.visualizers">
+<span id="xcell-visualizers"></span><h1><a class="reference internal" href="#module-xcell.visualizers" title="xcell.visualizers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.visualizers</span></code></a><a class="headerlink" href="#module-xcell.visualizers" title="Link to this heading">#</a></h1>
+<p>Visualization routines for meshes.</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">#</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading">#</a></h3>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.visualizers.TimingBar" title="xcell.visualizers.TimingBar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimingBar</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.visualizers.FigureAnimator" title="xcell.visualizers.FigureAnimator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FigureAnimator</span></code></a></p></td>
+<td><p>Base class for matplotlib animations.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.visualizers.SliceSet" title="xcell.visualizers.SliceSet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SliceSet</span></code></a></p></td>
+<td><p>Base class for matplotlib animations.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.visualizers.ErrorGraph" title="xcell.visualizers.ErrorGraph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ErrorGraph</span></code></a></p></td>
+<td><p>Base class for matplotlib animations.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.visualizers.CurrentPlot" title="xcell.visualizers.CurrentPlot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CurrentPlot</span></code></a></p></td>
+<td><p>Base class for matplotlib animations.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.visualizers.ScaleRange" title="xcell.visualizers.ScaleRange"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ScaleRange</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.visualizers.SingleSlice" title="xcell.visualizers.SingleSlice"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SingleSlice</span></code></a></p></td>
+<td><p>Base class for matplotlib animations.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.visualizers.LogError" title="xcell.visualizers.LogError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LogError</span></code></a></p></td>
+<td><p>Base class for matplotlib animations.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.visualizers.PVScene" title="xcell.visualizers.PVScene"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PVScene</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.visualizers.Symlogizer" title="xcell.visualizers.Symlogizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Symlogizer</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading">#</a></h3>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.visualizers.engineering_ticks" title="xcell.visualizers.engineering_ticks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">engineering_ticks</span></code></a>(axis[, xunit, yunit])</p></td>
+<td><p>Set axis to use engineering (SI) notation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.visualizers.make_discrete_colors" title="xcell.visualizers.make_discrete_colors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_discrete_colors</span></code></a>(values[, legend_stem])</p></td>
+<td><p>Generate colors for discrete (categorical) data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.visualizers.discrete_legend" title="xcell.visualizers.discrete_legend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">discrete_legend</span></code></a>(axis, data[, legend_stem])</p></td>
+<td><p>Color-code data and generate corresponding legend.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.visualizers.format_xy_axis" title="xcell.visualizers.format_xy_axis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">format_xy_axis</span></code></a>(axis[, bounds, symlog, lindist, ...])</p></td>
+<td><p>Set up axis for planar slices of 3d space.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.visualizers.undraw_axis" title="xcell.visualizers.undraw_axis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">undraw_axis</span></code></a>(axis)</p></td>
+<td><p>Remove contents from axis, preserving scale/labels/ticks.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.visualizers.grouped_scatter" title="xcell.visualizers.grouped_scatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grouped_scatter</span></code></a>(fname, x_category, y_category, ...[, ...])</p></td>
+<td><p>Plot study summary data from logfile, grouped by category key.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.visualizers.import_logfile" title="xcell.visualizers.import_logfile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">import_logfile</span></code></a>(fname)</p></td>
+<td><p>Import .csv logfile to pandas dataframe</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.visualizers.plot_study_performance" title="xcell.visualizers.plot_study_performance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_study_performance</span></code></a>(study[, plot_ratios])</p></td>
+<td><p>Plot breakdown of computational time.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.visualizers.import_and_plot_times" title="xcell.visualizers.import_and_plot_times"><code class="xref py py-obj docutils literal notranslate"><span class="pre">import_and_plot_times</span></code></a>(fname[, time_type, ax, ...])</p></td>
+<td><p>Generate plots of step duration from study logfile.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.visualizers._stacked_time_plot" title="xcell.visualizers._stacked_time_plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_stacked_time_plot</span></code></a>(axis, xvals, stepTimes, step_names, ...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.visualizers.outsideLegend" title="xcell.visualizers.outsideLegend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">outsideLegend</span></code></a>([axis, reverse_order, where])</p></td>
+<td><p>Create legend outside of axes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.visualizers.show_3d_edges" title="xcell.visualizers.show_3d_edges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_3d_edges</span></code></a>(axis, coords, edge_indices[, ...])</p></td>
+<td><p>Plot 3d view of mesh edges.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.visualizers.show_3d_nodes" title="xcell.visualizers.show_3d_nodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_3d_nodes</span></code></a>(axis, coords, node_values[, colormap, ...])</p></td>
+<td><p>Show mesh nodes in 3d.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.visualizers.get_cmap" title="xcell.visualizers.get_cmap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_cmap</span></code></a>(vals[, forceBipolar, logscale])</p></td>
+<td><p>Get appropriate colormap for given continuous data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.visualizers.new3dPlot" title="xcell.visualizers.new3dPlot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">new3dPlot</span></code></a>([bounding_box, fig])</p></td>
+<td><p>Create 3d axes with equal scaling in x, y, and z.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.visualizers.animated_title" title="xcell.visualizers.animated_title"><code class="xref py py-obj docutils literal notranslate"><span class="pre">animated_title</span></code></a>(figure, text[, axis])</p></td>
+<td><p>Create animation-ready title.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.visualizers.resample_plane" title="xcell.visualizers.resample_plane"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resample_plane</span></code></a>(axis, sim[, move_to_center, elements, data])</p></td>
+<td><p>Resample simulation data with a uniform planar grid.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.visualizers.show_current_vectors" title="xcell.visualizers.show_current_vectors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_current_vectors</span></code></a>(axis, pts, vecs)</p></td>
+<td><p>Plot current vectors in 3d.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.visualizers.show_2d_edges" title="xcell.visualizers.show_2d_edges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_2d_edges</span></code></a>(axis, edge_points[, edge_colors])</p></td>
+<td><p>Show mesh edges in a 2d plot.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.visualizers.paired_bars" title="xcell.visualizers.paired_bars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">paired_bars</span></code></a>(data1, data2, labels[, categories, axis, ...])</p></td>
+<td><p>Plot paired bars.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.visualizers.show_source_boundary" title="xcell.visualizers.show_source_boundary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_source_boundary</span></code></a>(axes, radius[, source_center])</p></td>
+<td><p>Plot faint ring representing source's boundary.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.visualizers._add_inset" title="xcell.visualizers._add_inset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_add_inset</span></code></a>(baseAxis, rInset, xmax[, relativeLoc])</p></td>
+<td><p>Create sub-axis for plotting a zoomed-in view of the main axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.visualizers.patchwork_image" title="xcell.visualizers.patchwork_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">patchwork_image</span></code></a>(axis, masked_arrays, colormap, ...)</p></td>
+<td><p>Produce composite image from discrete rectangular regions.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.visualizers.show_mesh" title="xcell.visualizers.show_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_mesh</span></code></a>(setup[, axis])</p></td>
+<td><p>Visualize simulation mesh.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.visualizers.get_planar_edge_points" title="xcell.visualizers.get_planar_edge_points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_planar_edge_points</span></code></a>(coords, edges[, normal_axis, ...])</p></td>
+<td><p>Get edges that lie in the specified plane.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.visualizers.hideBorders" title="xcell.visualizers.hideBorders"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hideBorders</span></code></a>(axis[, hidex])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.visualizers.makeSoloColorbar" title="xcell.visualizers.makeSoloColorbar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">makeSoloColorbar</span></code></a>(data[, cmap, norm, unit])</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">#</a></h3>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.visualizers.MAX_LOG_SPAN" title="xcell.visualizers.MAX_LOG_SPAN"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MAX_LOG_SPAN</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py data">
+<dt class="sig sig-object py" id="xcell.visualizers.MAX_LOG_SPAN">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">MAX_LOG_SPAN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#xcell.visualizers.MAX_LOG_SPAN" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers.engineering_ticks">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">engineering_ticks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xunit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yunit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.engineering_ticks" title="Link to this definition">#</a></dt>
+<dd><p>Set axis to use engineering (SI) notation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a>) – Axes to format</p></li>
+<li><p><strong>xunit</strong> (<em>str</em><em>, </em><em>optional</em>) – Displayed unit for x axis, by default None</p></li>
+<li><p><strong>yunit</strong> (<em>str</em><em>, </em><em>optional</em>) – Displayed unit for y axis, by default None</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="xcell.visualizers.TimingBar">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">TimingBar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.TimingBar" title="Link to this definition">#</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.TimingBar.get_artists">
+<span class="sig-name descname"><span class="pre">get_artists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.TimingBar.get_artists" title="Link to this definition">#</a></dt>
+<dd><p>Get artists for timing bar at given time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time</strong> (<em>float</em>) – Time in seconds to generate bar</p></li>
+<li><p><strong>step</strong> (<em>int</em><em>, </em><em>optional</em>) – Index of timestep stored in .data, by default None
+(use value of time)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of artists</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of artists</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers.make_discrete_colors">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">make_discrete_colors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_stem</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'n='</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.make_discrete_colors" title="Link to this definition">#</a></dt>
+<dd><p>Generate colors for discrete (categorical) data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> (<em>array</em><em> of </em><em>numeric</em>) – Non-unique values to be color-coded.</p></li>
+<li><p><strong>legend_stem</strong> (<em>string</em><em>, </em><em>optional</em>) – Text preceding category values in legend. The default is ‘n=’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>colors</strong> (<em>2d array</em>) – Colors assigned to each input value.</p></li>
+<li><p><strong>handles</strong> (<a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.Patch.html#matplotlib.patches.Patch" title="(in Matplotlib v3.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.patches.Patch</span></code></a>) – Dummy objects to generate color legend
+[with legend(handles=legEntry)].</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers.discrete_legend">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">discrete_legend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_stem</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'n='</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.discrete_legend" title="Link to this definition">#</a></dt>
+<dd><p>Color-code data and generate corresponding legend.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a>) – Axes to place legend in.</p></li>
+<li><p><strong>data</strong> (<em>numeric</em>) – Data to be color-coded.</p></li>
+<li><p><strong>legend_stem</strong> (<em>string</em><em>, </em><em>optional</em>) – Legend text preceding values. The default is ‘n=’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>colors</strong> – Color corresponding to value of each data point.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of colors</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers.format_xy_axis">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">format_xy_axis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symlog</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lindist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axlabels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'X</span> <span class="pre">[m]'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Y</span> <span class="pre">[m]'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.format_xy_axis" title="Link to this definition">#</a></dt>
+<dd><p>Set up axis for planar slices of 3d space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a>) – Axes to format.</p></li>
+<li><p><strong>bounds</strong> (<em>float</em><em>[</em><em>4</em><em>]</em><em>, </em><em>optional</em>) – Explicit limits for axes, [xmin, xmax, ymin, ymax]. The default is
+None.</p></li>
+<li><p><strong>symlog</strong> (<em>bool</em><em>, </em><em>optional</em>) – Use symmetric log scales, or linear if None. The default is None.</p></li>
+<li><p><strong>lindist</strong> (<em>float</em><em>, </em><em>optional</em>) – Forces linear scale on (-lindist, lindist)</p></li>
+<li><p><strong>xlabel</strong> (<em>string</em><em>, </em><em>optional</em>) – Horizontal axis label. The default is ‘X [m]’.</p></li>
+<li><p><strong>ylabel</strong> (<em>string</em><em>, </em><em>optional</em>) – Vertical axis label. The default is ‘Y [m]’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers.undraw_axis">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">undraw_axis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.undraw_axis" title="Link to this definition">#</a></dt>
+<dd><p>Remove contents from axis, preserving scale/labels/ticks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>axis</strong> (<a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a>) – Axes to clear.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers.grouped_scatter">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">grouped_scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_category</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_category</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_category</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.grouped_scatter" title="Link to this definition">#</a></dt>
+<dd><p>Plot study summary data from logfile, grouped by category key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname</strong> (<em>string</em>) – Filename to read from</p></li>
+<li><p><strong>x_category</strong> (<em>string</em>) – Key for x-axis quantity</p></li>
+<li><p><strong>y_category</strong> (<em>string</em>) – Key for y-axis quantity</p></li>
+<li><p><strong>group_category</strong> (<em>string</em>) – Key to group simulations by</p></li>
+<li><p><strong>df</strong> (<em>pandas dataframe</em><em>, </em><em>optional</em>) – Dataset to query, replaced by contents of fname if None (default)</p></li>
+<li><p><strong>ax</strong> (<a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a>, optional) – Axes to plot on, or create new figure if None (default)</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – Arguments to pass to <a href="#id1"><span class="problematic" id="id2">:py:function:`matplotlib.pyplot.plot`</span></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers.import_logfile">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">import_logfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.import_logfile" title="Link to this definition">#</a></dt>
+<dd><p>Import .csv logfile to pandas dataframe</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fname</strong> (<em>string</em>) – Name of file to read</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>df</strong> (<em>pandas dataframe</em>) – Imported data</p></li>
+<li><p><strong>cats</strong> (<em>strings</em>) – Category labels</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers.plot_study_performance">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">plot_study_performance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">study</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_ratios</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.plot_study_performance" title="Link to this definition">#</a></dt>
+<dd><p>Plot breakdown of computational time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>study</strong> (<cite>.Study</cite>) – Study to analyize</p></li>
+<li><p><strong>plot_ratios</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to plot the ratios of CPU to wall time, by default False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>figs</strong> – Output figures</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of <code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.figures.Figure</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers.import_and_plot_times">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">import_and_plot_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Wall'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_category</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_category</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Number</span> <span class="pre">of</span> <span class="pre">elements'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.import_and_plot_times" title="Link to this definition">#</a></dt>
+<dd><p>Generate plots of step duration from study logfile.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname</strong> (<em>string</em>) – Name of logfile to import from</p></li>
+<li><p><strong>time_type</strong> (<em>string</em><em>, </em><em>optional</em>) – Plot ‘Wall’ (default) or ‘CPU’ time</p></li>
+<li><p><strong>ax</strong> (<a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a>, optional) – Axes to plot in, or create new figure if None (default)</p></li>
+<li><p><strong>only_category</strong> (<em>string</em><em>, </em><em>optional</em>) – Category in dataset to filter by, or use all if None (default)</p></li>
+<li><p><strong>only_value</strong> (<em>any</em><em>, </em><em>optional</em>) – Plot only simulations whose only_category matches this value, or
+use all if None (default)</p></li>
+<li><p><strong>x_category</strong> (<em>string</em><em>, </em><em>optional</em>) – Category to use for x-axis values, by default ‘Number of elements’</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – Arguments passed to <a href="#id3"><span class="problematic" id="id4">:py:function:`matplotlib.pyplot.plot`</span></a></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Figure and axes objects of plot</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(fig, ax)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers._stacked_time_plot">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">_stacked_time_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xvals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepTimes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_names</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers._stacked_time_plot" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers.outsideLegend">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">outsideLegend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">where</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'right'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.outsideLegend" title="Link to this definition">#</a></dt>
+<dd><p>Create legend outside of axes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a>, optional) – Axes to generate legend, or current axes if None (default)</p></li>
+<li><p><strong>reverse_order</strong> (<em>bool</em><em>, </em><em>optional</em>) – Invert order of legend entries, by default False</p></li>
+<li><p><strong>where</strong> (<em>str</em><em>, </em><em>optional</em>) – Placement of legend, either ‘right’ (default) or at bottom</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers.show_3d_edges">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">show_3d_edges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.show_3d_edges" title="Link to this definition">#</a></dt>
+<dd><p>Plot 3d view of mesh edges.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a>) – Axes to plot within.</p></li>
+<li><p><strong>coords</strong> (<em>float</em><em>[</em><em>:</em><em>,</em><em>3</em><em>]</em>) – Cartesian coordinates of mesh nodes</p></li>
+<li><p><strong>edge_indices</strong> (<em>int</em><em>[</em><em>:</em><em>,</em><em>2</em><em>]</em>) – Array-like where each row contains the two indices of the
+edge’s endpoints.</p></li>
+<li><p><strong>edge_values</strong> (<em>any</em><em>, </em><em>optional</em>) – Value assigned to each edge for coloration, e.g.
+conductances or current; by default None</p></li>
+<li><p><strong>colorbar</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to generate a colorbar for the edge data,
+by default True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Artist collection for 3d lines</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/mpl_toolkits.mplot3d.art3d.Line3DCollection.html#mpl_toolkits.mplot3d.art3d.Line3DCollection" title="(in Matplotlib v3.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">mpl_toolkits.mplot3d.art3d.Line3DCollection</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers.show_3d_nodes">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">show_3d_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.show_3d_nodes" title="Link to this definition">#</a></dt>
+<dd><p>Show mesh nodes in 3d.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>maplotlib Axes</em>) – Axes to plot on.</p></li>
+<li><p><strong>coords</strong> (<em>float</em><em>[</em><em>:</em><em>,</em><em>3</em><em>]</em>) – Cartesian coordinates of points to plot.</p></li>
+<li><p><strong>node_values</strong> (<em>numeric array</em>) – Values to set node coloring.</p></li>
+<li><p><strong>colormap</strong> (<em>colormap</em><em>, </em><em>optional</em>) – Colormap to use for node coloring.
+The default is None, which uses <a href="#id5"><span class="problematic" id="id6">:py:function:`.get_cmap`</span></a>.</p></li>
+<li><p><strong>color_norm</strong> (<em>matplotlib Norm</em><em>, </em><em>optional</em>) – Norm to use for node coloring.
+The default is None, which uses <a href="#id7"><span class="problematic" id="id8">:py:function:`.get_cmap`</span></a>.</p></li>
+<li><p><strong>colors</strong> (<em>color-like array</em><em>, </em><em>optional</em>) – Color to use at each point, overriding colormap.
+The default is None, which sets colors by colormap and norm.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>artists</strong> – Collection of point artists.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://matplotlib.org/stable/api/collections_api.html#matplotlib.collections.PathCollection" title="(in Matplotlib v3.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.collections.PathCollection</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers.get_cmap">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">get_cmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forceBipolar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.get_cmap" title="Link to this definition">#</a></dt>
+<dd><p>Get appropriate colormap for given continuous data.</p>
+<p>By default, uses plasma if data is mostly all positive
+or negative; otherwise, seismic is used and scaled around
+zero.</p>
+<p>Linear scaling will be used unless logscale=True, in
+which case log/symlog is automatically</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vals</strong> (<em>numeric</em>) – Data to be colored.</p></li>
+<li><p><strong>forceBipolar</strong> (<em>bool</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is False.</p></li>
+<li><p><strong>logscale</strong> (<em>bool</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>colormap</strong> (<em>colormap</em>) – Selected colormap.</p></li>
+<li><p><strong>color_norm</strong> (<em>matplotlib Norm</em>) – Norm function to map data to (0,1) range of colormap.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers.new3dPlot">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">new3dPlot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounding_box</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.new3dPlot" title="Link to this definition">#</a></dt>
+<dd><p>Create 3d axes with equal scaling in x, y, and z.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bounding_box</strong> (<em>float</em><em>[</em><em>6</em><em>]</em><em>, </em><em>optional</em>) – Bounding box in xcell ordering (-x,-y,-z,+x,…).
+If None, scale to (-1,+1) (default)</p></li>
+<li><p><strong>fig</strong> (<em>_type_</em><em>, </em><em>optional</em>) – Figure to create axes in, or make new figure if None (default)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Newly created 3d axes</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a></p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Based on <a class="reference external" href="https://stackoverflow.com/a/13701747">https://stackoverflow.com/a/13701747</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers.animated_title">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">animated_title</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.animated_title" title="Link to this definition">#</a></dt>
+<dd><p>Create animation-ready title.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>figure</strong> (<em>_type_</em>) – Figure to place title in (or assign to axis if None)</p></li>
+<li><p><strong>text</strong> (<em>string</em>) – Text of title</p></li>
+<li><p><strong>axis</strong> (<em>_type_</em><em>, </em><em>optional</em>) – Axes to title if figure is None, by default None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Title artist</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://matplotlib.org/stable/api/text_api.html#matplotlib.text.Text" title="(in Matplotlib v3.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.text.Text</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers.resample_plane">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">resample_plane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">move_to_center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.resample_plane" title="Link to this definition">#</a></dt>
+<dd><p>Resample simulation data with a uniform planar grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes.Axes</span></code></a>) – Axes to plot within.</p></li>
+<li><p><strong>sim</strong> (<a class="reference internal" href="../index.html#xcell.Simulation" title="xcell.Simulation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Simulation</span></code></a>) – Simulation to sample data from.</p></li>
+<li><p><strong>move_to_center</strong> (<em>bool</em><em>, </em><em>default True</em>) – Whether to sample at center of gridpoints instead of gridpoints
+proper. Default true.</p></li>
+<li><p><strong>elements</strong> (list of <a class="reference internal" href="../elements/index.html#xcell.elements.Element" title="xcell.elements.Element"><code class="xref py py-class docutils literal notranslate"><span class="pre">xcell.elements.Element</span></code></a>, default None) – Elements to sample from, or use entire mesh if None (default).</p></li>
+<li><p><strong>data</strong> (<em>numeric array-like</em><em>, </em><em>default None</em>) – Value at each mesh point to interpolate from, or use nodal
+voltages if None (default)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>float[</strong> – 2d array of interpolated data for visualization.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>,:]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers.show_current_vectors">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">show_current_vectors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vecs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.show_current_vectors" title="Link to this definition">#</a></dt>
+<dd><p>Plot current vectors in 3d.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>axis</em>) – Axis to plot on.</p></li>
+<li><p><strong>pts</strong> (<em>float</em><em>[</em><em>:</em><em>,</em><em>3</em><em>]</em>) – Coordinates of vector tails.</p></li>
+<li><p><strong>vecs</strong> (<em>float</em><em>[</em><em>:</em><em>,</em><em>3</em><em>]</em>) – Current density vectors.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>art</strong> – DESCRIPTION.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Quiver</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers.show_2d_edges">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">show_2d_edges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_colors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.show_2d_edges" title="Link to this definition">#</a></dt>
+<dd><p>Show mesh edges in a 2d plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>matplotlib axis</em>) – 2d axis to plot in.</p></li>
+<li><p><strong>edge_points</strong> (<em>List</em><em> of </em><em>pairs</em><em> of </em><em>xy coords</em>) – List of endpoints of each edge.</p></li>
+<li><p><strong>edge_colors</strong> (<em>array-like</em><em> of </em><em>color-like</em><em>, </em><em>optional</em>) – List of colors for each edge. The default is None, which uses
+<a href="#id9"><span class="problematic" id="id10">:py:constant:`xcell.colors.FAINT`</span></a>.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – Args passed to <a class="reference external" href="https://matplotlib.org/stable/api/collections_api.html#matplotlib.collections.LineCollection" title="(in Matplotlib v3.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.collections.LineCollection</span></code></a></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>edgeCol</strong> – Artist for displaying the edges.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://matplotlib.org/stable/api/collections_api.html#matplotlib.collections.LineCollection" title="(in Matplotlib v3.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.collections.LineCollection</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers.paired_bars">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">paired_bars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">categories</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aright</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.paired_bars" title="Link to this definition">#</a></dt>
+<dd><p>Plot paired bars.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data1</strong> (<em>float</em><em>[</em><em>:</em><em>]</em>) – First list of data points</p></li>
+<li><p><strong>data2</strong> (<em>float</em><em>[</em><em>:</em><em>]</em>) – Other data set</p></li>
+<li><p><strong>labels</strong> (<em>str</em><em>[</em><em>:</em><em>]</em>) – Legend labels for the two data sets</p></li>
+<li><p><strong>categories</strong> (<em>str</em><em>[</em><em>:</em><em>]</em><em>, </em><em>optional</em>) – X-axis labels, or simply numbered if None (default)</p></li>
+<li><p><strong>axis</strong> (<em>Axis</em>) – Axes to plot on, or current if None</p></li>
+<li><p><strong>aright</strong> (<em>Axis</em>) – Paired axis for plotting data2 on right-hand scale.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers.show_source_boundary">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">show_source_boundary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">np.zeros(2)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.show_source_boundary" title="Link to this definition">#</a></dt>
+<dd><p>Plot faint ring representing source’s boundary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axes</strong> (<em>[</em><em>axis</em><em>]</em>) – Axes to plot within</p></li>
+<li><p><strong>radius</strong> (<em>float</em>) – Source radius.</p></li>
+<li><p><strong>source_center</strong> (<em>float</em><em>[</em><em>:</em><em>]</em><em>, </em><em>optional</em>) – Center of source. The default is np.zeros(2).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers._add_inset">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">_add_inset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">baseAxis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rInset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relativeLoc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.5,</span> <span class="pre">-0.65)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers._add_inset" title="Link to this definition">#</a></dt>
+<dd><p>Create sub-axis for plotting a zoomed-in view of the main axis.</p>
+<p>Plot commands executed in the main axis DO NOT automatically appear
+in inset; to keep them synchronized, use a pattern like</p>
+<p>axes=[mainAx,inset]
+for ax in axes:</p>
+<blockquote>
+<div><p>ax.plot_command(…)</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>baseAxis</strong> (<em>axis</em>) – Parent axis.</p></li>
+<li><p><strong>rInset</strong> (<em>float</em>) – <dl class="simple">
+<dt>Size of inset bounds (such that bounding box is</dt><dd><p>rInset*[-1,1,-1,1])</p>
+</dd>
+</dl>
+</p></li>
+<li><p><strong>xmax</strong> (<em>float</em>) – Size of parent axis’ bounds.</p></li>
+<li><p><strong>relativeLoc</strong> (<em>TYPE</em><em>, </em><em>optional</em>) – Placement of inset’s center, relative to parent axis.
+The default is (.5, -.8), which plots
+directly beneath the main plot.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>inset</strong> – Inset axis.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>axis</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers.patchwork_image">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">patchwork_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">masked_arrays</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_norm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extent</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.patchwork_image" title="Link to this definition">#</a></dt>
+<dd><p>Produce composite image from discrete rectangular regions.</p>
+<p>Shows the actual interpolation structure of adaptive (non-conforming)
+grid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>axis</em>) – Axis to plot on.</p></li>
+<li><p><strong>quadBbox</strong> (<em>float</em><em>[</em><em>:</em><em>,</em><em>:</em><em>]</em>) – List of [xmin, xmax, ymin, ymax] for each discrete
+rectangle.</p></li>
+<li><p><strong>quadVal</strong> (<em>float</em><em>[</em><em>:</em><em>,</em><em>:</em><em>]</em>) – DESCRIPTION.</p></li>
+<li><p><strong>colormap</strong> (<em>colormap</em>) – Desired colormap for image.</p></li>
+<li><p><strong>color_norm</strong> (<em>norm</em>) – Desired norm for image.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>imlist</strong> – Artists required to tile region.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of artists</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers.show_mesh">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">show_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">setup</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.show_mesh" title="Link to this definition">#</a></dt>
+<dd><p>Visualize simulation mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>setup</strong> (<a class="reference internal" href="../index.html#xcell.Simulation" title="xcell.Simulation"><code class="xref py py-class docutils literal notranslate"><span class="pre">xcell.Simulation</span></code></a>) – Simulation data to plot.</p></li>
+<li><p><strong>axis</strong> (<em>_type_</em><em>, </em><em>optional</em>) – 3d axes to plot within, or create new if None (default)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>3d axes</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_type_</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers.get_planar_edge_points">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">get_planar_edge_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal_axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_coordinate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.get_planar_edge_points" title="Link to this definition">#</a></dt>
+<dd><p>Get edges that lie in the specified plane.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coords</strong> (<em>float</em><em>[</em><em>:</em><em>,</em><em>3</em><em>]</em>) – Cartesian coordinates of mesh nodes</p></li>
+<li><p><strong>edges</strong> (<em>int</em><em>[</em><em>:</em><em>,</em><em>2</em><em>]</em>) – List of indices of endpoints for each edge</p></li>
+<li><p><strong>normal_axis</strong> (<em>int</em><em>, </em><em>optional</em>) – Axis out of (x,y,z) parallel plane normal, by default 2 (z)</p></li>
+<li><p><strong>axis_coordinate</strong> (<em>int</em><em>, </em><em>optional</em>) – Coordinate of plane along normal, by default 0.0</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Edge points, suitable for
+<a class="reference external" href="https://matplotlib.org/stable/api/collections_api.html#matplotlib.collections.LineCollection" title="(in Matplotlib v3.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.collections.LineCollection</span></code></a></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of pairs of float[2]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="xcell.visualizers.FigureAnimator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">FigureAnimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">study</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.FigureAnimator" title="Link to this definition">#</a></dt>
+<dd><p>Base class for matplotlib animations.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="xcell.visualizers.FigureAnimator.datasets">
+<span class="sig-name descname"><span class="pre">datasets</span></span><a class="headerlink" href="#xcell.visualizers.FigureAnimator.datasets" title="Link to this definition">#</a></dt>
+<dd><p>Array of dicts containing plot data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="xcell.visualizers.FigureAnimator.data_category">
+<span class="sig-name descname"><span class="pre">data_category</span></span><a class="headerlink" href="#xcell.visualizers.FigureAnimator.data_category" title="Link to this definition">#</a></dt>
+<dd><p>Key for which type of data to use for plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="xcell.visualizers.FigureAnimator.data_scales">
+<span class="sig-name descname"><span class="pre">data_scales</span></span><a class="headerlink" href="#xcell.visualizers.FigureAnimator.data_scales" title="Link to this definition">#</a></dt>
+<dd><p>Scaling information for each data type</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict of <cite>.ScaleRange</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.FigureAnimator.__getstate__">
+<span class="sig-name descname"><span class="pre">__getstate__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.FigureAnimator.__getstate__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.FigureAnimator.__setstate__">
+<span class="sig-name descname"><span class="pre">__setstate__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.FigureAnimator.__setstate__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.FigureAnimator.setup_figure">
+<span class="sig-name descname"><span class="pre">setup_figure</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.FigureAnimator.setup_figure" title="Link to this definition">#</a></dt>
+<dd><p>Format figure.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.FigureAnimator.add_simulation_data">
+<span class="sig-name descname"><span class="pre">add_simulation_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">append</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.FigureAnimator.add_simulation_data" title="Link to this definition">#</a></dt>
+<dd><p>Extract plottable data from simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sim</strong> (<em>_type_</em>) – Simulation to add data from</p></li>
+<li><p><strong>append</strong> (<em>bool</em><em>, </em><em>optional</em>) – Append to internal animation data, by default False</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.FigureAnimator.animate_study">
+<span class="sig-name descname"><span class="pre">animate_study</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">artists</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_artists</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vector_frames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.FigureAnimator.animate_study" title="Link to this definition">#</a></dt>
+<dd><p>_summary_</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname</strong> (<em>string</em><em>, </em><em>optional</em>) – Name for saved file, or use class name if None (default)</p></li>
+<li><p><strong>artists</strong> (<em>list</em><em> of </em><em>list</em><em> of </em><em>artists</em><em>, </em><em>optional</em>) – List of artists at each frame, or generate artists from
+self.datasets if None (default)</p></li>
+<li><p><strong>extra_artists</strong> (<em>list</em><em> of </em><em>list</em><em> of </em><em>artists</em><em>, </em><em>optional</em>) – Artists for additional frames of animation, by default None</p></li>
+<li><p><strong>fps</strong> (<em>float</em><em>, </em><em>optional</em>) – Framerate of animation, by default 1.0</p></li>
+<li><p><strong>vector_frames</strong> (<em>list</em><em>, </em><em>optional</em>) – Indices of frames to save snapshots, by default []</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Animated figure</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.animation.ArtistAnimation.html#matplotlib.animation.ArtistAnimation" title="(in Matplotlib v3.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.animation.ArtistAnimation</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.FigureAnimator.get_study_data">
+<span class="sig-name descname"><span class="pre">get_study_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.FigureAnimator.get_study_data" title="Link to this definition">#</a></dt>
+<dd><p>Load all data in study.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>**kwargs</strong> – Arguments passed to <a href="#id11"><span class="problematic" id="id12">:py:method:`xcell.Study.get_saved_simulations`</span></a></p></li>
+<li><p><strong>optional</strong> – Arguments passed to <a href="#id13"><span class="problematic" id="id14">:py:method:`xcell.Study.get_saved_simulations`</span></a></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.FigureAnimator.get_artists">
+<span class="sig-name descname"><span class="pre">get_artists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">setnumberber</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.FigureAnimator.get_artists" title="Link to this definition">#</a></dt>
+<dd><p>Get artists corresponding to given data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>setnumberber</strong> (<em>int</em><em>, </em><em>optional</em>) – Frame from self.datasets to use as data, by default 0</p></li>
+<li><p><strong>data</strong> (<em>dict</em><em>, </em><em>optional</em>) – Data to use instead of self.datasets, by default None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Artists for given data</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of Artists</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.FigureAnimator.reset_figure">
+<span class="sig-name descname"><span class="pre">reset_figure</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.FigureAnimator.reset_figure" title="Link to this definition">#</a></dt>
+<dd><p>Clear all artists from figure.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.FigureAnimator.unify_scales">
+<span class="sig-name descname"><span class="pre">unify_scales</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other_scales</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.FigureAnimator.unify_scales" title="Link to this definition">#</a></dt>
+<dd><p>Update internal data scales with new scales.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other_scales</strong> (<a class="reference internal" href="#xcell.visualizers.ScaleRange" title="xcell.visualizers.ScaleRange"><code class="xref py py-class docutils literal notranslate"><span class="pre">ScaleRange</span></code></a>) – New data scales to incorporate</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.FigureAnimator.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_figure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">override_prefs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.FigureAnimator.copy" title="Link to this definition">#</a></dt>
+<dd><p>Create fresh copy of animator with updated preferences.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>new_figure</strong> (<em>_type_</em><em>, </em><em>optional</em>) – Figure for new animator, or create new figure if None (default)</p></li>
+<li><p><strong>override_prefs</strong> (<em>dict</em><em>, </em><em>optional</em>) – Preferences to override in copy, by default {}</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>_description_</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_type_</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="xcell.visualizers.SliceSet">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">SliceSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">study</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.SliceSet" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#xcell.visualizers.FigureAnimator" title="xcell.visualizers.FigureAnimator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FigureAnimator</span></code></a></p>
+<p>Base class for matplotlib animations.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="xcell.visualizers.SliceSet.datasets">
+<span class="sig-name descname"><span class="pre">datasets</span></span><a class="headerlink" href="#xcell.visualizers.SliceSet.datasets" title="Link to this definition">#</a></dt>
+<dd><p>Array of dicts containing plot data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="xcell.visualizers.SliceSet.data_category">
+<span class="sig-name descname"><span class="pre">data_category</span></span><a class="headerlink" href="#xcell.visualizers.SliceSet.data_category" title="Link to this definition">#</a></dt>
+<dd><p>Key for which type of data to use for plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="xcell.visualizers.SliceSet.data_scales">
+<span class="sig-name descname"><span class="pre">data_scales</span></span><a class="headerlink" href="#xcell.visualizers.SliceSet.data_scales" title="Link to this definition">#</a></dt>
+<dd><p>Scaling information for each data type</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict of <cite>.ScaleRange</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.SliceSet.__getstate__">
+<span class="sig-name descname"><span class="pre">__getstate__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.SliceSet.__getstate__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.SliceSet.setup_figure">
+<span class="sig-name descname"><span class="pre">setup_figure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resetBounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.SliceSet.setup_figure" title="Link to this definition">#</a></dt>
+<dd><p>Format figure.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.SliceSet.add_simulation_data">
+<span class="sig-name descname"><span class="pre">add_simulation_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">append</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.SliceSet.add_simulation_data" title="Link to this definition">#</a></dt>
+<dd><p>Extract plottable data from simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sim</strong> (<em>_type_</em>) – Simulation to add data from</p></li>
+<li><p><strong>append</strong> (<em>bool</em><em>, </em><em>optional</em>) – Append to internal animation data, by default False</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.SliceSet.get_artists">
+<span class="sig-name descname"><span class="pre">get_artists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">setnumber</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.SliceSet.get_artists" title="Link to this definition">#</a></dt>
+<dd><p>Get artists corresponding to given data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>setnumberber</strong> (<em>int</em><em>, </em><em>optional</em>) – Frame from self.datasets to use as data, by default 0</p></li>
+<li><p><strong>data</strong> (<em>dict</em><em>, </em><em>optional</em>) – Data to use instead of self.datasets, by default None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Artists for given data</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of Artists</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="xcell.visualizers.ErrorGraph">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">ErrorGraph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">study</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.ErrorGraph" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#xcell.visualizers.FigureAnimator" title="xcell.visualizers.FigureAnimator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FigureAnimator</span></code></a></p>
+<p>Base class for matplotlib animations.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="xcell.visualizers.ErrorGraph.datasets">
+<span class="sig-name descname"><span class="pre">datasets</span></span><a class="headerlink" href="#xcell.visualizers.ErrorGraph.datasets" title="Link to this definition">#</a></dt>
+<dd><p>Array of dicts containing plot data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="xcell.visualizers.ErrorGraph.data_category">
+<span class="sig-name descname"><span class="pre">data_category</span></span><a class="headerlink" href="#xcell.visualizers.ErrorGraph.data_category" title="Link to this definition">#</a></dt>
+<dd><p>Key for which type of data to use for plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="xcell.visualizers.ErrorGraph.data_scales">
+<span class="sig-name descname"><span class="pre">data_scales</span></span><a class="headerlink" href="#xcell.visualizers.ErrorGraph.data_scales" title="Link to this definition">#</a></dt>
+<dd><p>Scaling information for each data type</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict of <cite>.ScaleRange</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.ErrorGraph.setup_figure">
+<span class="sig-name descname"><span class="pre">setup_figure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labelX</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labelY</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newAxes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.ErrorGraph.setup_figure" title="Link to this definition">#</a></dt>
+<dd><p>Format figure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>labelX</strong> (<em>bool</em><em>, </em><em>optional</em>) – Show x label, by default True</p></li>
+<li><p><strong>labelY</strong> (<em>bool</em><em>, </em><em>optional</em>) – Show y label, by default True</p></li>
+<li><p><strong>newAxes</strong> (<em>bool</em><em>, </em><em>optional</em>) – Generate new axes, by default True (use self.axes otherwise)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.ErrorGraph.add_simulation_data">
+<span class="sig-name descname"><span class="pre">add_simulation_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">append</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.ErrorGraph.add_simulation_data" title="Link to this definition">#</a></dt>
+<dd><p>Extract plottable data from simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sim</strong> (<em>_type_</em>) – Simulation to add data from</p></li>
+<li><p><strong>append</strong> (<em>bool</em><em>, </em><em>optional</em>) – Append to internal animation data, by default False</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.ErrorGraph.get_artists">
+<span class="sig-name descname"><span class="pre">get_artists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">setnumber</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.ErrorGraph.get_artists" title="Link to this definition">#</a></dt>
+<dd><p>Get artists corresponding to given data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>setnumberber</strong> (<em>int</em><em>, </em><em>optional</em>) – Frame from self.datasets to use as data, by default 0</p></li>
+<li><p><strong>data</strong> (<em>dict</em><em>, </em><em>optional</em>) – Data to use instead of self.datasets, by default None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Artists for given data</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of Artists</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="xcell.visualizers.CurrentPlot">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">CurrentPlot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">study</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fullarrow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showInset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showAll</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal_axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalCoord</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.CurrentPlot" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#xcell.visualizers.FigureAnimator" title="xcell.visualizers.FigureAnimator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FigureAnimator</span></code></a></p>
+<p>Base class for matplotlib animations.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="xcell.visualizers.CurrentPlot.datasets">
+<span class="sig-name descname"><span class="pre">datasets</span></span><a class="headerlink" href="#xcell.visualizers.CurrentPlot.datasets" title="Link to this definition">#</a></dt>
+<dd><p>Array of dicts containing plot data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="xcell.visualizers.CurrentPlot.data_category">
+<span class="sig-name descname"><span class="pre">data_category</span></span><a class="headerlink" href="#xcell.visualizers.CurrentPlot.data_category" title="Link to this definition">#</a></dt>
+<dd><p>Key for which type of data to use for plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="xcell.visualizers.CurrentPlot.data_scales">
+<span class="sig-name descname"><span class="pre">data_scales</span></span><a class="headerlink" href="#xcell.visualizers.CurrentPlot.data_scales" title="Link to this definition">#</a></dt>
+<dd><p>Scaling information for each data type</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict of <cite>.ScaleRange</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.CurrentPlot.add_simulation_data">
+<span class="sig-name descname"><span class="pre">add_simulation_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">append</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.CurrentPlot.add_simulation_data" title="Link to this definition">#</a></dt>
+<dd><p>Extract plottable data from simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sim</strong> (<em>_type_</em>) – Simulation to add data from</p></li>
+<li><p><strong>append</strong> (<em>bool</em><em>, </em><em>optional</em>) – Append to internal animation data, by default False</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.CurrentPlot.get_artists">
+<span class="sig-name descname"><span class="pre">get_artists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">setnumber</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.CurrentPlot.get_artists" title="Link to this definition">#</a></dt>
+<dd><p>Get artists corresponding to given data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>setnumberber</strong> (<em>int</em><em>, </em><em>optional</em>) – Frame from self.datasets to use as data, by default 0</p></li>
+<li><p><strong>data</strong> (<em>dict</em><em>, </em><em>optional</em>) – Data to use instead of self.datasets, by default None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Artists for given data</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of Artists</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="xcell.visualizers.ScaleRange">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">ScaleRange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.ScaleRange" title="Link to this definition">#</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.ScaleRange.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">newVals</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.ScaleRange.update" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.ScaleRange.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">forceBipolar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forceSymmetric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.ScaleRange.get" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers.hideBorders">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">hideBorders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.hideBorders" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="xcell.visualizers.SingleSlice">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">SingleSlice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">study</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timevec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tdata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datasrc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'spaceV'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.SingleSlice" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#xcell.visualizers.FigureAnimator" title="xcell.visualizers.FigureAnimator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FigureAnimator</span></code></a></p>
+<p>Base class for matplotlib animations.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="xcell.visualizers.SingleSlice.datasets">
+<span class="sig-name descname"><span class="pre">datasets</span></span><a class="headerlink" href="#xcell.visualizers.SingleSlice.datasets" title="Link to this definition">#</a></dt>
+<dd><p>Array of dicts containing plot data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="xcell.visualizers.SingleSlice.data_category">
+<span class="sig-name descname"><span class="pre">data_category</span></span><a class="headerlink" href="#xcell.visualizers.SingleSlice.data_category" title="Link to this definition">#</a></dt>
+<dd><p>Key for which type of data to use for plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="xcell.visualizers.SingleSlice.data_scales">
+<span class="sig-name descname"><span class="pre">data_scales</span></span><a class="headerlink" href="#xcell.visualizers.SingleSlice.data_scales" title="Link to this definition">#</a></dt>
+<dd><p>Scaling information for each data type</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict of <cite>.ScaleRange</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.SingleSlice.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">newPrefs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.SingleSlice.copy" title="Link to this definition">#</a></dt>
+<dd><p>Create fresh copy of animator with updated preferences.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>new_figure</strong> (<em>_type_</em><em>, </em><em>optional</em>) – Figure for new animator, or create new figure if None (default)</p></li>
+<li><p><strong>override_prefs</strong> (<em>dict</em><em>, </em><em>optional</em>) – Preferences to override in copy, by default {}</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>_description_</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_type_</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.SingleSlice.setup_figure">
+<span class="sig-name descname"><span class="pre">setup_figure</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.SingleSlice.setup_figure" title="Link to this definition">#</a></dt>
+<dd><p>Format figure.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.SingleSlice.get_artists">
+<span class="sig-name descname"><span class="pre">get_artists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">setnumber</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.SingleSlice.get_artists" title="Link to this definition">#</a></dt>
+<dd><p>Get artists corresponding to given data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>setnumberber</strong> (<em>int</em><em>, </em><em>optional</em>) – Frame from self.datasets to use as data, by default 0</p></li>
+<li><p><strong>data</strong> (<em>dict</em><em>, </em><em>optional</em>) – Data to use instead of self.datasets, by default None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Artists for given data</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of Artists</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.SingleSlice.add_simulation_data">
+<span class="sig-name descname"><span class="pre">add_simulation_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">append</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.SingleSlice.add_simulation_data" title="Link to this definition">#</a></dt>
+<dd><p>Extract plottable data from simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sim</strong> (<em>_type_</em>) – Simulation to add data from</p></li>
+<li><p><strong>append</strong> (<em>bool</em><em>, </em><em>optional</em>) – Append to internal animation data, by default False</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.SingleSlice.animate_study">
+<span class="sig-name descname"><span class="pre">animate_study</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">artists</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vector_frames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unitStr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.SingleSlice.animate_study" title="Link to this definition">#</a></dt>
+<dd><p>_summary_</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname</strong> (<em>string</em><em>, </em><em>optional</em>) – Name for saved file, or use class name if None (default)</p></li>
+<li><p><strong>artists</strong> (<em>list</em><em> of </em><em>list</em><em> of </em><em>artists</em><em>, </em><em>optional</em>) – List of artists at each frame, or generate artists from
+self.datasets if None (default)</p></li>
+<li><p><strong>extra_artists</strong> (<em>list</em><em> of </em><em>list</em><em> of </em><em>artists</em><em>, </em><em>optional</em>) – Artists for additional frames of animation, by default None</p></li>
+<li><p><strong>fps</strong> (<em>float</em><em>, </em><em>optional</em>) – Framerate of animation, by default 1.0</p></li>
+<li><p><strong>vector_frames</strong> (<em>list</em><em>, </em><em>optional</em>) – Indices of frames to save snapshots, by default []</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Animated figure</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.animation.ArtistAnimation.html#matplotlib.animation.ArtistAnimation" title="(in Matplotlib v3.8.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.animation.ArtistAnimation</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.SingleSlice.solobar">
+<span class="sig-name descname"><span class="pre">solobar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.SingleSlice.solobar" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="xcell.visualizers.makeSoloColorbar">
+<span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">makeSoloColorbar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.makeSoloColorbar" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="xcell.visualizers.LogError">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">LogError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">study</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.LogError" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#xcell.visualizers.FigureAnimator" title="xcell.visualizers.FigureAnimator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FigureAnimator</span></code></a></p>
+<p>Base class for matplotlib animations.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="xcell.visualizers.LogError.datasets">
+<span class="sig-name descname"><span class="pre">datasets</span></span><a class="headerlink" href="#xcell.visualizers.LogError.datasets" title="Link to this definition">#</a></dt>
+<dd><p>Array of dicts containing plot data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="xcell.visualizers.LogError.data_category">
+<span class="sig-name descname"><span class="pre">data_category</span></span><a class="headerlink" href="#xcell.visualizers.LogError.data_category" title="Link to this definition">#</a></dt>
+<dd><p>Key for which type of data to use for plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="xcell.visualizers.LogError.data_scales">
+<span class="sig-name descname"><span class="pre">data_scales</span></span><a class="headerlink" href="#xcell.visualizers.LogError.data_scales" title="Link to this definition">#</a></dt>
+<dd><p>Scaling information for each data type</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict of <cite>.ScaleRange</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.LogError.add_simulation_data">
+<span class="sig-name descname"><span class="pre">add_simulation_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">append</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.LogError.add_simulation_data" title="Link to this definition">#</a></dt>
+<dd><p>Extract plottable data from simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sim</strong> (<em>_type_</em>) – Simulation to add data from</p></li>
+<li><p><strong>append</strong> (<em>bool</em><em>, </em><em>optional</em>) – Append to internal animation data, by default False</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.LogError.get_artists">
+<span class="sig-name descname"><span class="pre">get_artists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">setnumber</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.LogError.get_artists" title="Link to this definition">#</a></dt>
+<dd><p>Get artists corresponding to given data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>setnumberber</strong> (<em>int</em><em>, </em><em>optional</em>) – Frame from self.datasets to use as data, by default 0</p></li>
+<li><p><strong>data</strong> (<em>dict</em><em>, </em><em>optional</em>) – Data to use instead of self.datasets, by default None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Artists for given data</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of Artists</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="xcell.visualizers.PVScene">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">PVScene</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">study</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.PVScene" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.pyvista.org/version/stable/api/plotting/_autosummary/pyvista.Plotter.html#pyvista.Plotter" title="(in PyVista v0.42.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pyvista.Plotter</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.PVScene.setTime">
+<span class="sig-name descname"><span class="pre">setTime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.PVScene.setTime" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.PVScene.setup">
+<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">regions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simData</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">meshkwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.PVScene.setup" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.PVScene.planeview">
+<span class="sig-name descname"><span class="pre">planeview</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">planeBox</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'z'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.PVScene.planeview" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.PVScene.clear">
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.PVScene.clear" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.PVScene.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.PVScene.close" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.PVScene.add_symlog">
+<span class="sig-name descname"><span class="pre">add_symlog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.PVScene.add_symlog" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.PVScene.show_edges">
+<span class="sig-name descname"><span class="pre">show_edges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.PVScene.show_edges" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.PVScene.add_mesh">
+<span class="sig-name descname"><span class="pre">add_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.PVScene.add_mesh" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.PVScene.save_graphic">
+<span class="sig-name descname"><span class="pre">save_graphic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.PVScene.save_graphic" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="xcell.visualizers.Symlogizer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.visualizers.</span></span><span class="sig-name descname"><span class="pre">Symlogizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">valRange</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linrange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.Symlogizer" title="Link to this definition">#</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="xcell.visualizers.Symlogizer.change_data">
+<span class="sig-name descname"><span class="pre">change_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">newData</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.visualizers.Symlogizer.change_data" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#functions">Functions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#attributes">Attributes</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.MAX_LOG_SPAN"><code class="docutils literal notranslate"><span class="pre">MAX_LOG_SPAN</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.engineering_ticks"><code class="docutils literal notranslate"><span class="pre">engineering_ticks()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.TimingBar"><code class="docutils literal notranslate"><span class="pre">TimingBar</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.TimingBar.get_artists"><code class="docutils literal notranslate"><span class="pre">TimingBar.get_artists()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.make_discrete_colors"><code class="docutils literal notranslate"><span class="pre">make_discrete_colors()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.discrete_legend"><code class="docutils literal notranslate"><span class="pre">discrete_legend()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.format_xy_axis"><code class="docutils literal notranslate"><span class="pre">format_xy_axis()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.undraw_axis"><code class="docutils literal notranslate"><span class="pre">undraw_axis()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.grouped_scatter"><code class="docutils literal notranslate"><span class="pre">grouped_scatter()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.import_logfile"><code class="docutils literal notranslate"><span class="pre">import_logfile()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.plot_study_performance"><code class="docutils literal notranslate"><span class="pre">plot_study_performance()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.import_and_plot_times"><code class="docutils literal notranslate"><span class="pre">import_and_plot_times()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers._stacked_time_plot"><code class="docutils literal notranslate"><span class="pre">_stacked_time_plot()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.outsideLegend"><code class="docutils literal notranslate"><span class="pre">outsideLegend()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.show_3d_edges"><code class="docutils literal notranslate"><span class="pre">show_3d_edges()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.show_3d_nodes"><code class="docutils literal notranslate"><span class="pre">show_3d_nodes()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.get_cmap"><code class="docutils literal notranslate"><span class="pre">get_cmap()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.new3dPlot"><code class="docutils literal notranslate"><span class="pre">new3dPlot()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.animated_title"><code class="docutils literal notranslate"><span class="pre">animated_title()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.resample_plane"><code class="docutils literal notranslate"><span class="pre">resample_plane()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.show_current_vectors"><code class="docutils literal notranslate"><span class="pre">show_current_vectors()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.show_2d_edges"><code class="docutils literal notranslate"><span class="pre">show_2d_edges()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.paired_bars"><code class="docutils literal notranslate"><span class="pre">paired_bars()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.show_source_boundary"><code class="docutils literal notranslate"><span class="pre">show_source_boundary()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers._add_inset"><code class="docutils literal notranslate"><span class="pre">_add_inset()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.patchwork_image"><code class="docutils literal notranslate"><span class="pre">patchwork_image()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.show_mesh"><code class="docutils literal notranslate"><span class="pre">show_mesh()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.get_planar_edge_points"><code class="docutils literal notranslate"><span class="pre">get_planar_edge_points()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.FigureAnimator"><code class="docutils literal notranslate"><span class="pre">FigureAnimator</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.FigureAnimator.datasets"><code class="docutils literal notranslate"><span class="pre">FigureAnimator.datasets</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.FigureAnimator.data_category"><code class="docutils literal notranslate"><span class="pre">FigureAnimator.data_category</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.FigureAnimator.data_scales"><code class="docutils literal notranslate"><span class="pre">FigureAnimator.data_scales</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.FigureAnimator.__getstate__"><code class="docutils literal notranslate"><span class="pre">FigureAnimator.__getstate__()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.FigureAnimator.__setstate__"><code class="docutils literal notranslate"><span class="pre">FigureAnimator.__setstate__()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.FigureAnimator.setup_figure"><code class="docutils literal notranslate"><span class="pre">FigureAnimator.setup_figure()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.FigureAnimator.add_simulation_data"><code class="docutils literal notranslate"><span class="pre">FigureAnimator.add_simulation_data()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.FigureAnimator.animate_study"><code class="docutils literal notranslate"><span class="pre">FigureAnimator.animate_study()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.FigureAnimator.get_study_data"><code class="docutils literal notranslate"><span class="pre">FigureAnimator.get_study_data()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.FigureAnimator.get_artists"><code class="docutils literal notranslate"><span class="pre">FigureAnimator.get_artists()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.FigureAnimator.reset_figure"><code class="docutils literal notranslate"><span class="pre">FigureAnimator.reset_figure()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.FigureAnimator.unify_scales"><code class="docutils literal notranslate"><span class="pre">FigureAnimator.unify_scales()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.FigureAnimator.copy"><code class="docutils literal notranslate"><span class="pre">FigureAnimator.copy()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.SliceSet"><code class="docutils literal notranslate"><span class="pre">SliceSet</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.SliceSet.datasets"><code class="docutils literal notranslate"><span class="pre">SliceSet.datasets</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.SliceSet.data_category"><code class="docutils literal notranslate"><span class="pre">SliceSet.data_category</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.SliceSet.data_scales"><code class="docutils literal notranslate"><span class="pre">SliceSet.data_scales</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.SliceSet.__getstate__"><code class="docutils literal notranslate"><span class="pre">SliceSet.__getstate__()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.SliceSet.setup_figure"><code class="docutils literal notranslate"><span class="pre">SliceSet.setup_figure()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.SliceSet.add_simulation_data"><code class="docutils literal notranslate"><span class="pre">SliceSet.add_simulation_data()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.SliceSet.get_artists"><code class="docutils literal notranslate"><span class="pre">SliceSet.get_artists()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.ErrorGraph"><code class="docutils literal notranslate"><span class="pre">ErrorGraph</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.ErrorGraph.datasets"><code class="docutils literal notranslate"><span class="pre">ErrorGraph.datasets</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.ErrorGraph.data_category"><code class="docutils literal notranslate"><span class="pre">ErrorGraph.data_category</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.ErrorGraph.data_scales"><code class="docutils literal notranslate"><span class="pre">ErrorGraph.data_scales</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.ErrorGraph.setup_figure"><code class="docutils literal notranslate"><span class="pre">ErrorGraph.setup_figure()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.ErrorGraph.add_simulation_data"><code class="docutils literal notranslate"><span class="pre">ErrorGraph.add_simulation_data()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.ErrorGraph.get_artists"><code class="docutils literal notranslate"><span class="pre">ErrorGraph.get_artists()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.CurrentPlot"><code class="docutils literal notranslate"><span class="pre">CurrentPlot</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.CurrentPlot.datasets"><code class="docutils literal notranslate"><span class="pre">CurrentPlot.datasets</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.CurrentPlot.data_category"><code class="docutils literal notranslate"><span class="pre">CurrentPlot.data_category</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.CurrentPlot.data_scales"><code class="docutils literal notranslate"><span class="pre">CurrentPlot.data_scales</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.CurrentPlot.add_simulation_data"><code class="docutils literal notranslate"><span class="pre">CurrentPlot.add_simulation_data()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.CurrentPlot.get_artists"><code class="docutils literal notranslate"><span class="pre">CurrentPlot.get_artists()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.ScaleRange"><code class="docutils literal notranslate"><span class="pre">ScaleRange</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.ScaleRange.update"><code class="docutils literal notranslate"><span class="pre">ScaleRange.update()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.ScaleRange.get"><code class="docutils literal notranslate"><span class="pre">ScaleRange.get()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.hideBorders"><code class="docutils literal notranslate"><span class="pre">hideBorders()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.SingleSlice"><code class="docutils literal notranslate"><span class="pre">SingleSlice</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.SingleSlice.datasets"><code class="docutils literal notranslate"><span class="pre">SingleSlice.datasets</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.SingleSlice.data_category"><code class="docutils literal notranslate"><span class="pre">SingleSlice.data_category</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.SingleSlice.data_scales"><code class="docutils literal notranslate"><span class="pre">SingleSlice.data_scales</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.SingleSlice.copy"><code class="docutils literal notranslate"><span class="pre">SingleSlice.copy()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.SingleSlice.setup_figure"><code class="docutils literal notranslate"><span class="pre">SingleSlice.setup_figure()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.SingleSlice.get_artists"><code class="docutils literal notranslate"><span class="pre">SingleSlice.get_artists()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.SingleSlice.add_simulation_data"><code class="docutils literal notranslate"><span class="pre">SingleSlice.add_simulation_data()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.SingleSlice.animate_study"><code class="docutils literal notranslate"><span class="pre">SingleSlice.animate_study()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.SingleSlice.solobar"><code class="docutils literal notranslate"><span class="pre">SingleSlice.solobar()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.makeSoloColorbar"><code class="docutils literal notranslate"><span class="pre">makeSoloColorbar()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.LogError"><code class="docutils literal notranslate"><span class="pre">LogError</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.LogError.datasets"><code class="docutils literal notranslate"><span class="pre">LogError.datasets</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.LogError.data_category"><code class="docutils literal notranslate"><span class="pre">LogError.data_category</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.LogError.data_scales"><code class="docutils literal notranslate"><span class="pre">LogError.data_scales</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.LogError.add_simulation_data"><code class="docutils literal notranslate"><span class="pre">LogError.add_simulation_data()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.LogError.get_artists"><code class="docutils literal notranslate"><span class="pre">LogError.get_artists()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.PVScene"><code class="docutils literal notranslate"><span class="pre">PVScene</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.PVScene.setTime"><code class="docutils literal notranslate"><span class="pre">PVScene.setTime()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.PVScene.setup"><code class="docutils literal notranslate"><span class="pre">PVScene.setup()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.PVScene.planeview"><code class="docutils literal notranslate"><span class="pre">PVScene.planeview()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.PVScene.clear"><code class="docutils literal notranslate"><span class="pre">PVScene.clear()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.PVScene.close"><code class="docutils literal notranslate"><span class="pre">PVScene.close()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.PVScene.add_symlog"><code class="docutils literal notranslate"><span class="pre">PVScene.add_symlog()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.PVScene.show_edges"><code class="docutils literal notranslate"><span class="pre">PVScene.show_edges()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.PVScene.add_mesh"><code class="docutils literal notranslate"><span class="pre">PVScene.add_mesh()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.PVScene.save_graphic"><code class="docutils literal notranslate"><span class="pre">PVScene.save_graphic()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.Symlogizer"><code class="docutils literal notranslate"><span class="pre">Symlogizer</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.visualizers.Symlogizer.change_data"><code class="docutils literal notranslate"><span class="pre">Symlogizer.change_data()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../../../_sources/autoapi/xcell/visualizers/index.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2022, CBC Girard.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.5.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

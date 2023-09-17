@@ -1,0 +1,1086 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-theme="auto">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>xcell.meshes &#8212; xcell  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "auto";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/xcell.css?v=bd5ed93c" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script src="../../../_static/documentation_options.js?v=8a448e45"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'autoapi/xcell/meshes/index';</script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="auto">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/logo.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../../../_static/logo.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+    <p class="title logo__title">xcell</p>
+  
+</a></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../intro.html">
+                        Introduction
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../auto_examples/index.html">
+                        Example applications
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../intro.html">
+                        Introduction
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../../auto_examples/index.html">
+                        Example applications
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../AAnimation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.AAnimation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_version/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell._version</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../colors/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.colors</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dummy/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.dummy</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elements/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.elements</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fem/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.fem</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../geometry/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.geometry</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../io/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.io</span></code></a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.meshes</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../misc/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.misc</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nrnutil/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.nrnutil</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../signals/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.signals</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../util/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.util</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../visualizers/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.visualizers</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../xCell/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.xCell</span></code></a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.meshes</span></code></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="module-xcell.meshes">
+<span id="xcell-meshes"></span><h1><a class="reference internal" href="#module-xcell.meshes" title="xcell.meshes"><code class="xref py py-mod docutils literal notranslate"><span class="pre">xcell.meshes</span></code></a><a class="headerlink" href="#module-xcell.meshes" title="Link to this heading">#</a></h1>
+<p>Mesh topology</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">#</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading">#</a></h3>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.meshes.Mesh" title="xcell.meshes.Mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mesh</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#xcell.meshes.Octree" title="xcell.meshes.Octree"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Octree</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#xcell.meshes.Octant" title="xcell.meshes.Octant"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Octant</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="xcell.meshes.Mesh">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.meshes.</span></span><span class="sig-name descname"><span class="pre">Mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bbox</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Admittance'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Mesh" title="Link to this definition">#</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Mesh.__getstate__">
+<span class="sig-name descname"><span class="pre">__getstate__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Mesh.__getstate__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Mesh.__setstate__">
+<span class="sig-name descname"><span class="pre">__setstate__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Mesh.__setstate__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Mesh.get_containing_element">
+<span class="sig-name descname"><span class="pre">get_containing_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Mesh.get_containing_element" title="Link to this definition">#</a></dt>
+<dd><p>Get element containing specified point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>coords</strong> (<em>float</em><em>[</em><em>:</em><em>]</em>) – Cartesian coordinates of point.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – Error if no element contains the point.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>elem</strong> – Containing element.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>xcell.Element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Mesh.finalize">
+<span class="sig-name descname"><span class="pre">finalize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Mesh.finalize" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Mesh.add_element">
+<span class="sig-name descname"><span class="pre">add_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">origin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">span</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Mesh.add_element" title="Link to this definition">#</a></dt>
+<dd><p>Insert element into the mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>origin</strong> (<em>float</em><em>[</em><em>:</em><em>]</em>) – Cartesian coords of element’s origin.</p></li>
+<li><p><strong>extents</strong> (<em>float</em><em>[</em><em>:</em><em>]</em>) – Length of edges in x,y,z.</p></li>
+<li><p><strong>sigma</strong> (<em>float</em>) – Conductivity of element.</p></li>
+<li><p><strong>nodeIndices</strong> (<em>int64</em><em>[</em><em>:</em><em>]</em>) – Numbering of element nodes according to global mesh.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Mesh.getConductances">
+<span class="sig-name descname"><span class="pre">getConductances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Mesh.getConductances" title="Link to this definition">#</a></dt>
+<dd><p>Get the discrete conductances from every element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>elements</strong> (list of <cite>~xcell.mesh.Octant</cite>, optional) – DESCRIPTION. The default is None, which uses all in mesh.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>edge_indices</strong> (<em>int64[:,:]</em>) – List of node pairs spanned by each conductance.</p></li>
+<li><p><strong>conductances</strong> (<em>float</em>) – Conductance in siemens.</p></li>
+<li><p><strong>transforms</strong> (<em>list of ints</em>) – Substitutions for graph-dual meshes.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Mesh.get_min_l0">
+<span class="sig-name descname"><span class="pre">get_min_l0</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Mesh.get_min_l0" title="Link to this definition">#</a></dt>
+<dd><p>Get the smallest edge length in mesh</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>min_l0</strong> – smallest edge length.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Mesh.get_boundary_nodes">
+<span class="sig-name descname"><span class="pre">get_boundary_nodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Mesh.get_boundary_nodes" title="Link to this definition">#</a></dt>
+<dd><p>Get the indices of nodes on the domain boundary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>global_indices</strong> – Indices of current mesh nodes at periphery.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int[:]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Mesh.get_intersecting_elements">
+<span class="sig-name descname"><span class="pre">get_intersecting_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinate</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Mesh.get_intersecting_elements" title="Link to this definition">#</a></dt>
+<dd><p>Find elements intersected by a cartesian plane.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>int</em>) – Normal of intersecting plane (0-&gt;x, 1-&gt;y,2-&gt;z).</p></li>
+<li><p><strong>coordinate</strong> (<em>float</em>) – Coordinate of plane alonx normal axis.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>elements</strong> – Elements intersected by the plane.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of <cite>~xcell.meshes.Octant</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="xcell.meshes.Octree">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.meshes.</span></span><span class="sig-name descname"><span class="pre">Octree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounding_box</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Admittance'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octree" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#xcell.meshes.Mesh" title="xcell.meshes.Mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mesh</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octree.get_containing_element">
+<span class="sig-name descname"><span class="pre">get_containing_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octree.get_containing_element" title="Link to this definition">#</a></dt>
+<dd><p>Get element containing specified point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>coords</strong> (<em>float</em><em>[</em><em>:</em><em>]</em>) – Cartesian coordinates of point.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – Error if no element contains the point.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>elem</strong> – Containing element.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>xcell.Element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octree.get_intersecting_elements">
+<span class="sig-name descname"><span class="pre">get_intersecting_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinate</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octree.get_intersecting_elements" title="Link to this definition">#</a></dt>
+<dd><p>Find elements intersected by a cartesian plane.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>int</em>) – Normal of intersecting plane (0-&gt;x, 1-&gt;y,2-&gt;z).</p></li>
+<li><p><strong>coordinate</strong> (<em>float</em>) – Coordinate of plane alonx normal axis.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>elements</strong> – Elements intersected by the plane.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of <cite>~xcell.meshes.Octant</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octree.refine_by_metric">
+<span class="sig-name descname"><span class="pre">refine_by_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_l0_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_pts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_l0_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coarsen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octree.refine_by_metric" title="Link to this definition">#</a></dt>
+<dd><p>Recursively splits elements until l0_function evaluated at the center
+of each element is greater than that element’s l0’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>min_l0_function</strong> (<em>function</em>) – Function returning a scalar for each input cartesian coordinate.</p></li>
+<li><p><strong>ref_pts</strong> (<em>float</em><em>[</em><em>:</em><em>,</em><em>3</em><em>]</em>) – Cartesian coordinates where distance is evaluated from.</p></li>
+<li><p><strong>max_l0_function</strong> (<em>function</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Function giving maximum l0 for coarsening.
+The default is None, which uses min_l0_function.</p></li>
+<li><p><strong>coefs</strong> (<em>float</em><em>[</em><em>:</em><em>]</em><em>, </em><em>optional</em>) – Factor multiplied each candidate l0. The default is None.</p></li>
+<li><p><strong>coarsen</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to prune elements larger than target l0. The default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>changed</strong> – Adaptation resulted in new topology</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octree.finalize">
+<span class="sig-name descname"><span class="pre">finalize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octree.finalize" title="Link to this definition">#</a></dt>
+<dd><p>Convert terminal octants to mesh elements, mapping sparse to dense numbering.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octree.print_structure">
+<span class="sig-name descname"><span class="pre">print_structure</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octree.print_structure" title="Link to this definition">#</a></dt>
+<dd><p>Debug tool to print structure of tree</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octree.octantByList">
+<span class="sig-name descname"><span class="pre">octantByList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indexList</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">octant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octree.octantByList" title="Link to this definition">#</a></dt>
+<dd><p>Select an octant by recursing through a list of indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>indexList</strong> (<em>int64</em><em>[</em><em>]</em>) – Octant identifier, where i=indexList[n] specifies child i of octant n</p></li>
+<li><p><strong>octant</strong> (<a class="reference internal" href="#xcell.meshes.Octant" title="xcell.meshes.Octant"><em>Octant</em></a><em>, </em><em>optional</em>) – Used internally to recurse. The default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The octant object specified.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#xcell.meshes.Octant" title="xcell.meshes.Octant">Octant</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octree.countelements">
+<span class="sig-name descname"><span class="pre">countelements</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octree.countelements" title="Link to this definition">#</a></dt>
+<dd><p>Get number of terminal elements in tree.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of leaf elements.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octree.get_coords_recursively">
+<span class="sig-name descname"><span class="pre">get_coords_recursively</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octree.get_coords_recursively" title="Link to this definition">#</a></dt>
+<dd><p>Determine coordinates of mesh nodes.</p>
+<p>Recurses through <cite>Octant.get_coords_recursively</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>coords</strong> – Cartesian coordinates of each mesh node.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>2d float array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octree.get_boundary_nodes">
+<span class="sig-name descname"><span class="pre">get_boundary_nodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octree.get_boundary_nodes" title="Link to this definition">#</a></dt>
+<dd><p>Get the indices of nodes on the domain boundary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>global_indices</strong> – Indices of current mesh nodes at periphery.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int[:]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octree.get_element_adjacencies">
+<span class="sig-name descname"><span class="pre">get_element_adjacencies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octree.get_element_adjacencies" title="Link to this definition">#</a></dt>
+<dd><p>Get the neighboring elements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>adjacencies</strong> – Adjacent elements in order of (+x,-x, +y,-y, +z,-z).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of elements</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="xcell.meshes.Octant">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xcell.meshes.</span></span><span class="sig-name descname"><span class="pre">Octant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">origin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">span</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">np.ones(3)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oXYZ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">np.zeros(3,</span> <span class="pre">dtype=np.int32)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant" title="Link to this definition">#</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.__recreateTree">
+<span class="sig-name descname"><span class="pre">__recreateTree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.__recreateTree" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.countelements">
+<span class="sig-name descname"><span class="pre">countelements</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.countelements" title="Link to this definition">#</a></dt>
+<dd><p>Return the number of leaf elements contained within octant.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of leaf elements within.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.split">
+<span class="sig-name descname"><span class="pre">split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">division</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">np.array([0.5,</span> <span class="pre">0.5,</span> <span class="pre">0.5])</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.split" title="Link to this definition">#</a></dt>
+<dd><p>Split element into its child octants.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>division</strong> (<em>float</em><em>[</em><em>3</em><em>]</em><em>, </em><em>optional</em>) – Fraction of division in x,y,z directions. The default is np.array([0.5, 0.5, 0.5]).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.get_coords_recursively">
+<span class="sig-name descname"><span class="pre">get_coords_recursively</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">asDual</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.get_coords_recursively" title="Link to this definition">#</a></dt>
+<dd><p>Get the coordinates of the mesh within the element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>asDual</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to return the mesh-dual nodes instead of vertices. The default is False.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>indices</strong> – Indices of node according to universal numbering.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.refine_by_metric">
+<span class="sig-name descname"><span class="pre">refine_by_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">l0_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_pts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.refine_by_metric" title="Link to this definition">#</a></dt>
+<dd><p>Recursively splits elements until l0_function evaluated at the center
+of each element is greater than that element’s l0’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>min_l0_function</strong> (<em>function</em>) – Function returning a scalar for each input cartesian coordinate.</p></li>
+<li><p><strong>ref_pts</strong> (<em>float</em><em>[</em><em>:</em><em>,</em><em>3</em><em>]</em>) – Cartesian coordinates where distance is evaluated from.</p></li>
+<li><p><strong>max_depth</strong> (<em>int</em>) – Maximum depth of splitting permitted</p></li>
+<li><p><strong>coefs</strong> (<em>float</em><em>[</em><em>:</em><em>]</em><em>, </em><em>optional</em>) – Factor multiplied each candidate l0. The default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>changed</strong> – Adaptation resulted in new topology</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.coarsen_by_metric">
+<span class="sig-name descname"><span class="pre">coarsen_by_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_pts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.coarsen_by_metric" title="Link to this definition">#</a></dt>
+<dd><p>Delete children if element and all children are smaller than target.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metric</strong> (<em>function</em>) – Function returning a scalar for each input cartesian coordinate.</p></li>
+<li><p><strong>ref_pts</strong> (<em>float</em><em>[</em><em>:</em><em>,</em><em>3</em><em>]</em>) – Cartesian coordinates where distance is evaluated from.</p></li>
+<li><p><strong>max_depth</strong> (<em>int</em>) – Maximum depth of splitting.</p></li>
+<li><p><strong>coefs</strong> (<em>float</em><em>[</em><em>:</em><em>]</em>) – Factor multiplied each candidate l0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>changed</strong> (<em>bool</em>) – Whether mesh topology was altered.</p></li>
+<li><p><strong>undersized</strong> (<em>bool</em>) – Whether element is smaller than all targets.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.print_structure">
+<span class="sig-name descname"><span class="pre">print_structure</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.print_structure" title="Link to this definition">#</a></dt>
+<dd><p>Print out octree structure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.is_terminal">
+<span class="sig-name descname"><span class="pre">is_terminal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.is_terminal" title="Link to this definition">#</a></dt>
+<dd><p>Determine if element is terminal (has no children)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>terminal</strong> – True if element has no children.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.intersects_plane">
+<span class="sig-name descname"><span class="pre">intersects_plane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">normal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coord</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.intersects_plane" title="Link to this definition">#</a></dt>
+<dd><p>Calculate whether plane intersects element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>normal</strong> (<em>int</em><em> or </em><em>bool</em><em>[</em><em>3</em><em>]</em>) – Which axis (x,y,z) contains the plane normal.</p></li>
+<li><p><strong>coord</strong> (<em>float</em>) – Coordinate of plane along its normal.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether plane intersects element</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.get_terminal_octants">
+<span class="sig-name descname"><span class="pre">get_terminal_octants</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.get_terminal_octants" title="Link to this definition">#</a></dt>
+<dd><p>Get all childless octants.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Childless octants (the actual elements of the mesh)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of Octants</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant._calculate_indices">
+<span class="sig-name descname"><span class="pre">_calculate_indices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant._calculate_indices" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the universal indices of the element’s nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.get_containing_element">
+<span class="sig-name descname"><span class="pre">get_containing_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.get_containing_element" title="Link to this definition">#</a></dt>
+<dd><p>Find the element that contains the specified point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>coords</strong> (<em>float</em><em>[</em><em>3</em><em>]</em>) – Cartesian coordinates of test point.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Element containing point.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#xcell.meshes.Octant" title="xcell.meshes.Octant">xcell.meshes.Octant</a> or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.get_intersecting_elements">
+<span class="sig-name descname"><span class="pre">get_intersecting_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coord</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.get_intersecting_elements" title="Link to this definition">#</a></dt>
+<dd><p>Find elements intersected by a cartesian plane.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>int</em>) – Normal of intersecting plane (0-&gt;x, 1-&gt;y,2-&gt;z).</p></li>
+<li><p><strong>coord</strong> (<em>float</em>) – Coordinate of plane alonx normal axis.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>elements</strong> – Elements intersected by the plane.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of <cite>~xcell.meshes.Octant</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.interpolate_within">
+<span class="sig-name descname"><span class="pre">interpolate_within</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.interpolate_within" title="Link to this definition">#</a></dt>
+<dd><p>Interpolate values within the element from specified vertices or face nodes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coordinates</strong> (<em>float</em><em>[</em><em>:</em><em>,</em><em>3</em><em>]</em>) – Cartesian coordinates to interpolate at (in global coordinate system).</p></li>
+<li><p><strong>values</strong> (<em>float</em><em>[</em><em>8</em><em>] or </em><em>float</em><em>[</em><em>7</em><em>]</em>) – Array of values at vertices (n=8) or faces (n=7).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>interp</strong> – Interpolated values at the specified points.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float[:]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.get_universal_vals">
+<span class="sig-name descname"><span class="pre">get_universal_vals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">known_values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.get_universal_vals" title="Link to this definition">#</a></dt>
+<dd><p>Get the values at all face and vertex nodes of the element,
+interpolating from the supplied face or vertex values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>known_values</strong> (<em>float</em><em>[</em><em>7</em><em>] or </em><em>float</em><em>[</em><em>8</em><em>]</em>) – Values at face (n=7) or vertices (n=8) of element</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>all_values</strong> (<em>float[15]</em>) – Values at all universal points</p></li>
+<li><p><strong>all_indices</strong> (<em>uint64[15]</em>) – Global indices of each point</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="xcell.meshes.Octant.get_planar_values">
+<span class="sig-name descname"><span class="pre">get_planar_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">global_values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coord</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#xcell.meshes.Octant.get_planar_values" title="Link to this definition">#</a></dt>
+<dd><p>Interpolate values where a plane intersects the element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>global_values</strong> (<em>float</em><em>[</em><em>7</em><em>] or </em><em>float</em><em>[</em><em>8</em><em>]</em>) – Values at faces (n=7) or vertices (n=8) of element</p></li>
+<li><p><strong>axis</strong> (<em>int</em><em> or </em><em>bool</em><em>[</em><em>3</em><em>]</em><em>, </em><em>optional</em>) – Which of (x,y,z) is the plane’s normal. Defaults to 2 (z)</p></li>
+<li><p><strong>coord</strong> (<em>float</em><em>, </em><em>optional</em>) – Coordinate of plane along its normal. Defaults to 0.0</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Interpolated values at corners of plane-element intersection.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float[4]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Mesh"><code class="docutils literal notranslate"><span class="pre">Mesh</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Mesh.__getstate__"><code class="docutils literal notranslate"><span class="pre">Mesh.__getstate__()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Mesh.__setstate__"><code class="docutils literal notranslate"><span class="pre">Mesh.__setstate__()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Mesh.get_containing_element"><code class="docutils literal notranslate"><span class="pre">Mesh.get_containing_element()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Mesh.finalize"><code class="docutils literal notranslate"><span class="pre">Mesh.finalize()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Mesh.add_element"><code class="docutils literal notranslate"><span class="pre">Mesh.add_element()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Mesh.getConductances"><code class="docutils literal notranslate"><span class="pre">Mesh.getConductances()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Mesh.get_min_l0"><code class="docutils literal notranslate"><span class="pre">Mesh.get_min_l0()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Mesh.get_boundary_nodes"><code class="docutils literal notranslate"><span class="pre">Mesh.get_boundary_nodes()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Mesh.get_intersecting_elements"><code class="docutils literal notranslate"><span class="pre">Mesh.get_intersecting_elements()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octree"><code class="docutils literal notranslate"><span class="pre">Octree</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octree.get_containing_element"><code class="docutils literal notranslate"><span class="pre">Octree.get_containing_element()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octree.get_intersecting_elements"><code class="docutils literal notranslate"><span class="pre">Octree.get_intersecting_elements()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octree.refine_by_metric"><code class="docutils literal notranslate"><span class="pre">Octree.refine_by_metric()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octree.finalize"><code class="docutils literal notranslate"><span class="pre">Octree.finalize()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octree.print_structure"><code class="docutils literal notranslate"><span class="pre">Octree.print_structure()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octree.octantByList"><code class="docutils literal notranslate"><span class="pre">Octree.octantByList()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octree.countelements"><code class="docutils literal notranslate"><span class="pre">Octree.countelements()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octree.get_coords_recursively"><code class="docutils literal notranslate"><span class="pre">Octree.get_coords_recursively()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octree.get_boundary_nodes"><code class="docutils literal notranslate"><span class="pre">Octree.get_boundary_nodes()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octree.get_element_adjacencies"><code class="docutils literal notranslate"><span class="pre">Octree.get_element_adjacencies()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octant"><code class="docutils literal notranslate"><span class="pre">Octant</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octant.__recreateTree"><code class="docutils literal notranslate"><span class="pre">Octant.__recreateTree()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octant.countelements"><code class="docutils literal notranslate"><span class="pre">Octant.countelements()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octant.split"><code class="docutils literal notranslate"><span class="pre">Octant.split()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octant.get_coords_recursively"><code class="docutils literal notranslate"><span class="pre">Octant.get_coords_recursively()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octant.refine_by_metric"><code class="docutils literal notranslate"><span class="pre">Octant.refine_by_metric()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octant.coarsen_by_metric"><code class="docutils literal notranslate"><span class="pre">Octant.coarsen_by_metric()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octant.print_structure"><code class="docutils literal notranslate"><span class="pre">Octant.print_structure()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octant.is_terminal"><code class="docutils literal notranslate"><span class="pre">Octant.is_terminal()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octant.intersects_plane"><code class="docutils literal notranslate"><span class="pre">Octant.intersects_plane()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octant.get_terminal_octants"><code class="docutils literal notranslate"><span class="pre">Octant.get_terminal_octants()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octant._calculate_indices"><code class="docutils literal notranslate"><span class="pre">Octant._calculate_indices()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octant.get_containing_element"><code class="docutils literal notranslate"><span class="pre">Octant.get_containing_element()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octant.get_intersecting_elements"><code class="docutils literal notranslate"><span class="pre">Octant.get_intersecting_elements()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octant.interpolate_within"><code class="docutils literal notranslate"><span class="pre">Octant.interpolate_within()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octant.get_universal_vals"><code class="docutils literal notranslate"><span class="pre">Octant.get_universal_vals()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#xcell.meshes.Octant.get_planar_values"><code class="docutils literal notranslate"><span class="pre">Octant.get_planar_values()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../../../_sources/autoapi/xcell/meshes/index.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2022, CBC Girard.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.5.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

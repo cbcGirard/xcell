@@ -1,0 +1,138 @@
+:py:mod:`xcell.AAnimation`
+==========================
+
+.. py:module:: xcell.AAnimation
+
+.. autoapi-nested-parse::
+
+   Animator tweaks to save intermediated frames
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   xcell.AAnimation.AAnimation
+   xcell.AAnimation.FWriter
+
+
+
+
+.. py:class:: AAnimation(fig, artists, *args, **kwargs)
+
+   Bases: :py:obj:`matplotlib.animation.ArtistAnimation`
+
+   Animation using a fixed set of `.Artist` objects.
+
+   Before creating an instance, all plotting should have taken place
+   and the relevant artists saved.
+
+   .. note::
+
+       You must store the created Animation in a variable that lives as long
+       as the animation should run. Otherwise, the Animation object will be
+       garbage-collected and the animation stops.
+
+   :param fig: The figure object used to get needed events, such as draw or resize.
+   :type fig: `~matplotlib.figure.Figure`
+   :param artists: Each list entry is a collection of `.Artist` objects that are made
+                   visible on the corresponding frame.  Other artists are made invisible.
+   :type artists: list
+   :param interval: Delay between frames in milliseconds.
+   :type interval: int, default: 200
+   :param repeat_delay: The delay in milliseconds between consecutive animation runs, if
+                        *repeat* is True.
+   :type repeat_delay: int, default: 0
+   :param repeat: Whether the animation repeats when the sequence of frames is completed.
+   :type repeat: bool, default: True
+   :param blit: Whether blitting is used to optimize drawing.
+   :type blit: bool, default: False
+
+   .. py:method:: save(filename, writer=None, fps=None, dpi=None, codec=None, bitrate=None, extra_args=None, metadata=None, extra_anim=None, savefig_kwargs=None, *, progress_callback=None, vector_frames=[], **writerKwargs)
+
+      Save the animation as a movie file by drawing every frame.
+
+      :param filename: The output filename, e.g., :file:`mymovie.mp4`.
+      :type filename: str
+      :param writer: A `MovieWriter` instance to use or a key that identifies a
+                     class to use, such as 'ffmpeg'.
+      :type writer: `MovieWriter` or str, default: :rc:`animation.writer`
+      :param fps: Movie frame rate (per second).  If not set, the frame rate from the
+                  animation's frame interval.
+      :type fps: int, optional
+      :param dpi: Controls the dots per inch for the movie frames.  Together with
+                  the figure's size in inches, this controls the size of the movie.
+      :type dpi: float, default: :rc:`savefig.dpi`
+      :param codec: The video codec to use.  Not all codecs are supported by a given
+                    `MovieWriter`.
+      :type codec: str, default: :rc:`animation.codec`.
+      :param bitrate: The bitrate of the movie, in kilobits per second.  Higher values
+                      means higher quality movies, but increase the file size.  A value
+                      of -1 lets the underlying movie encoder select the bitrate.
+      :type bitrate: int, default: :rc:`animation.bitrate`
+      :param extra_args: Extra command-line arguments passed to the underlying movie
+                         encoder.  The default, None, means to use
+                         :rc:`animation.[name-of-encoder]_args` for the builtin writers.
+      :type extra_args: list of str or None, optional
+      :param metadata: Dictionary of keys and values for metadata to include in
+                       the output file. Some keys that may be of use include:
+                       title, artist, genre, subject, copyright, srcform, comment.
+      :type metadata: dict[str, str], default: {}
+      :param extra_anim: Additional `Animation` objects that should be included
+                         in the saved movie file. These need to be from the same
+                         `matplotlib.figure.Figure` instance. Also, animation frames will
+                         just be simply combined, so there should be a 1:1 correspondence
+                         between the frames from the different animations.
+      :type extra_anim: list, default: []
+      :param savefig_kwargs: Keyword arguments passed to each `~.Figure.savefig` call used to
+                             save the individual frames.
+      :type savefig_kwargs: dict, default: {}
+      :param progress_callback: A callback function that will be called for every frame to notify
+                                the saving progress. It must have the signature ::
+
+                                    def func(current_frame: int, total_frames: int) -> Any
+
+                                where *current_frame* is the current frame number and
+                                *total_frames* is the total number of frames to be saved.
+                                *total_frames* is set to None, if the total number of frames can
+                                not be determined. Return values may exist but are ignored.
+
+                                Example code to write the progress to stdout::
+
+                                    progress_callback =                    lambda i, n: print(f'Saving frame {i} of {n}')
+      :type progress_callback: function, optional
+
+      .. rubric:: Notes
+
+      *fps*, *codec*, *bitrate*, *extra_args* and *metadata* are used to
+      construct a `.MovieWriter` instance and can only be passed if
+      *writer* is a string.  If they are passed as non-*None* and *writer*
+      is a `.MovieWriter`, a `RuntimeError` will be raised.
+
+      Mostly copied from canonical "save" method of ArtistAnimation.
+
+
+
+.. py:class:: FWriter(*args, **kwargs)
+
+   Bases: :py:obj:`matplotlib.animation.FFMpegFileWriter`
+
+   File-based ffmpeg writer.
+
+   Frames are written to temporary files on disk and then stitched
+   together at the end.
+
+   .. py:method:: grab_frame(**savefig_kwargs)
+
+      Grab the image information from the figure and save as a movie frame.
+
+      All keyword arguments in *savefig_kwargs* are passed on to the
+      `~.Figure.savefig` call that saves the figure.
+
+
+
